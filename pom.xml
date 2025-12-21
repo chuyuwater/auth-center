@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <groupId>com.hbcy</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+        <relativePath/>
+    </parent>
+    <packaging>pom</packaging>
+
+    <modelVersion>4.0.0</modelVersion>
+    <modules>
+        <module>sdk</module>
+        <module>api</module>
+        <module>intgr</module>
+    </modules>
+
+    <groupId>com.hbcy.authcenter</groupId>
+    <artifactId>authcenter</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <name>auth-center</name>
+    <description>认证中心</description>
+
+    <properties>
+        <java.version>17</java.version>
+    </properties>
+
+    <repositories>
+        <repository>
+            <id>maven-nexus</id>
+            <url>https://dev.chuyuwater.cn:32002/repository/maven-public/</url>
+        </repository>
+    </repositories>
+    <distributionManagement>
+        <repository>
+            <id>maven-releases</id>
+            <url>https://dev.chuyuwater.cn:32002/repository/maven-releases/</url>
+            <uniqueVersion>true</uniqueVersion>
+        </repository>
+        <snapshotRepository>
+            <id>maven-snapshots</id>
+            <url>https://dev.chuyuwater.cn:32002/repository/maven-snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.hbcy.common</groupId>
+                <artifactId>web</artifactId>
+                <version>1.0.0-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>com.hbcy.common</groupId>
+                <artifactId>redis</artifactId>
+                <version>1.0.0-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>com.hbcy.common</groupId>
+                <artifactId>feign</artifactId>
+                <version>1.0.0-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>com.hbcy.common</groupId>
+                <artifactId>kafka</artifactId>
+                <version>1.0.0-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>cn.dev33</groupId>
+                <artifactId>sa-token-spring-boot3-starter</artifactId>
+                <version>1.44.0</version>
+            </dependency>
+            <dependency>
+                <groupId>cn.dev33</groupId>
+                <artifactId>sa-token-redis-jackson</artifactId>
+                <version>1.44.0</version>
+            </dependency>
+            <dependency>
+                <groupId>com.alibaba.cloud</groupId>
+                <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
+            </dependency>
+            <dependency>
+                <groupId>com.alibaba.cloud</groupId>
+                <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-starter-loadbalancer</artifactId>
+            </dependency>
+            <dependency>
+                <groupId>com.oceanbase</groupId>
+                <artifactId>oceanbase-client</artifactId>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-test</artifactId>
+                <scope>test</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
