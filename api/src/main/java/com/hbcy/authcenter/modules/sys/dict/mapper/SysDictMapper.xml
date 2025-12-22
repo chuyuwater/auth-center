@@ -17,4 +17,18 @@
     <!--@mbg.generated-->
     id, feat_code, value_str, value_cn, parent_id, show_order, create_time, update_time
   </sql>
+
+  <select id="selectChildrenRecursively" resultMap="BaseResultMap">
+    WITH RECURSIVE recursive_dict AS (
+      SELECT <include refid="Base_Column_List" />
+      FROM sys_dict
+      WHERE parent_id = #{parentId}
+      UNION ALL
+      SELECT sd.*
+      FROM sys_dict sd
+      INNER JOIN recursive_dict rd ON sd.parent_id = rd.id
+    )
+    SELECT <include refid="Base_Column_List" />
+    FROM recursive_dict;
+  </select>
 </mapper>
