@@ -67,6 +67,11 @@
             <groupId>com.oceanbase</groupId>
             <artifactId>oceanbase-client</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.pig4cloud.plugin</groupId>
+            <artifactId>oss-spring-boot-starter</artifactId>
+            <version>3.1.2</version>
+        </dependency>
     </dependencies>
 
     <build>
