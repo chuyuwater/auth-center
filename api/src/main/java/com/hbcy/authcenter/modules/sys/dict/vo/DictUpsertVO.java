@@ -9,7 +9,7 @@ import org.hibernate.validator.constraints.Length;
  * @date 2025-12-22 13:45
  */
 @Data
-public class CreateOrUpdateSysDictVO {
+public class DictUpsertVO {
     /**
      * 字典key
      */

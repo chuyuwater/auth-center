@@ -4,8 +4,8 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hbcy.authcenter.modules.sys.dict.dao.SysDictMapper;
 import com.hbcy.authcenter.modules.sys.dict.model.SysDict;
-import com.hbcy.authcenter.modules.sys.dict.vo.CreateOrUpdateSysDictVO;
 import com.hbcy.authcenter.modules.sys.dict.vo.DictQueryVO;
+import com.hbcy.authcenter.modules.sys.dict.vo.DictUpsertVO;
 import com.hbcy.common.base.error.ClientError;
 import com.hbcy.common.base.error.ParamError;
 import com.hbcy.common.base.tree.TreeNode;
@@ -35,7 +35,7 @@ public class SysDictService extends ServiceImpl<SysDictMapper, SysDict> {
                     @CacheEvict(value = "@5m", key = "'authcenter:sys:dict:valueMap:' + #vo.featCode")
             }
     )
-    public SysDict createSysDict(CreateOrUpdateSysDictVO vo) {
+    public SysDict createSysDict(DictUpsertVO vo) {
         checkExist(vo.getParentId());
         SysDict sysDict = new SysDict();
         BeanUtils.copyProperties(vo, sysDict);
@@ -54,7 +54,7 @@ public class SysDictService extends ServiceImpl<SysDictMapper, SysDict> {
             }
     )
     @Transactional
-    public SysDict updateSysDict(String id, CreateOrUpdateSysDictVO vo) {
+    public SysDict updateSysDict(String id, DictUpsertVO vo) {
         SysDict sysDict = this.getById(id);
         if (sysDict == null) {
             throw new ClientError("指定字典项不存在");
@@ -85,6 +85,13 @@ public class SysDictService extends ServiceImpl<SysDictMapper, SysDict> {
                 throw new ClientError("父级字典项不存在");
             }
         }
+    }
+
+    public boolean checkExist(String featCode, String valueStr) {
+        SysDict one = this.getOne(new QueryWrapper<SysDict>()
+                .eq(SysDict.COL_FEAT_CODE, featCode)
+                .eq(SysDict.COL_VALUE_STR, valueStr));
+        return one != null;
     }
 
 

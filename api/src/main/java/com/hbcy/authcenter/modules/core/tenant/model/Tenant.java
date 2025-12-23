@@ -1,12 +1,10 @@
 package com.hbcy.authcenter.modules.core.tenant.model;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
-import java.time.LocalDateTime;
+import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
 
 /**
  * @author 姚泰然
@@ -61,7 +59,8 @@ public class Tenant {
     /**
      * 删除时间戳标记
      */
-    @TableField(value = "delete_time")
+    @TableLogic(value = "0", delval = "-1")
+    @TableField(value = "delete_time", fill = FieldFill.UPDATE)
     private Long deleteTime;
 
     /**

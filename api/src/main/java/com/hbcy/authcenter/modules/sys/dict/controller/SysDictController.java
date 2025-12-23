@@ -2,7 +2,7 @@ package com.hbcy.authcenter.modules.sys.dict.controller;
 
 import com.hbcy.authcenter.modules.sys.dict.model.SysDict;
 import com.hbcy.authcenter.modules.sys.dict.service.SysDictService;
-import com.hbcy.authcenter.modules.sys.dict.vo.CreateOrUpdateSysDictVO;
+import com.hbcy.authcenter.modules.sys.dict.vo.DictUpsertVO;
 import com.hbcy.authcenter.modules.sys.dict.vo.DictQueryVO;
 import com.hbcy.common.base.error.ParamError;
 import com.hbcy.common.base.tree.TreeNode;
@@ -29,13 +29,13 @@ public class SysDictController {
     private SysDictService sysDictService;
 
     @PostMapping
-    public SysDict createSysDict(@Valid @RequestBody CreateOrUpdateSysDictVO vo) {
+    public SysDict createSysDict(@Valid @RequestBody DictUpsertVO vo) {
         return sysDictService.createSysDict(vo);
     }
 
     @PutMapping("/{id}")
     public SysDict updateSysDict(@NotBlank(message = "ID不能为空") @PathVariable String id,
-                                 @Valid @RequestBody CreateOrUpdateSysDictVO vo) {
+                                 @Valid @RequestBody DictUpsertVO vo) {
         return sysDictService.updateSysDict(id, vo);
     }
 

@@ -8,8 +8,17 @@ import lombok.Data;
  */
 @Data
 public class DictQueryVO {
+    /**
+     * 父节点Id（与其他条件二选一）
+     */
     private String parentId;
 
+    /**
+     * 父节点字典键
+     */
     private String featCode;
+    /**
+     * 父节点字典值
+     */
     private String valueStr;
 }
