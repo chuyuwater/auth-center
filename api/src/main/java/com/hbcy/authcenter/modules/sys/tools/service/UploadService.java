@@ -8,6 +8,7 @@ import com.hbcy.common.base.uploader.UploadResultDTO;
 import com.pig4cloud.plugin.oss.OssProperties;
 import com.pig4cloud.plugin.oss.service.OssTemplate;
 import jakarta.annotation.Resource;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
@@ -41,7 +42,9 @@ public class UploadService {
             UploadResultDTO dto = new UploadResultDTO();
             dto.setFileName(uploadName);
             dto.setUrl(ossProperties.getEndpoint() + "/" + ossProperties.getBucketName() + "/" + uploadName);
-            dto.setExternalUrl(ossProperties.getCustomDomain() + "/" + ossProperties.getBucketName() + "/" + uploadName);
+            if (StringUtils.isNotBlank(ossProperties.getCustomDomain())) {
+                dto.setExternalUrl(ossProperties.getCustomDomain() + "/" + ossProperties.getBucketName() + "/" + uploadName);
+            }
             return dto;
         } catch (IOException e) {
             throw new ServerError("fail to upload");
