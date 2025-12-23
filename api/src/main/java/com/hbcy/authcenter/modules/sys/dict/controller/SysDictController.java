@@ -41,7 +41,7 @@ public class SysDictController {
 
     @DeleteMapping("/{id}")
     public void deleteSysDict(@NotBlank(message = "ID不能为空") @PathVariable String id) {
-        SysDict dict = sysDictService.getSysDictById(id);
+        SysDict dict = sysDictService.getById(id);
         if (dict == null) {
             return;
         }
@@ -50,7 +50,7 @@ public class SysDictController {
 
     @GetMapping("/{id}")
     public SysDict getSysDictById(@NotBlank(message = "ID不能为空") @PathVariable String id) {
-        return sysDictService.getSysDictById(id);
+        return sysDictService.getById(id);
     }
 
     @GetMapping("/list")
@@ -75,9 +75,6 @@ public class SysDictController {
 
     @GetMapping("/children/tree")
     public TreeNode<SysDict> getChildrenAsTree(DictQueryVO vo) {
-        if (StringUtils.isBlank(vo.getParentId()) && (StringUtils.isBlank(vo.getFeatCode()) || StringUtils.isBlank(vo.getValueStr()))) {
-            throw new ParamError("请传入parentId或featCode+valueStr");
-        }
         return sysDictService.getChildrenAsTree(vo);
     }
 }

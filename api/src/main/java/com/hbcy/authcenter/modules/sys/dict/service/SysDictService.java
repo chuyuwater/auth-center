@@ -18,6 +18,7 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -35,6 +36,7 @@ public class SysDictService extends ServiceImpl<SysDictMapper, SysDict> {
             }
     )
     public SysDict createSysDict(CreateOrUpdateSysDictVO vo) {
+        checkExist(vo.getParentId());
         SysDict sysDict = new SysDict();
         BeanUtils.copyProperties(vo, sysDict);
         try {
@@ -76,9 +78,15 @@ public class SysDictService extends ServiceImpl<SysDictMapper, SysDict> {
         this.removeById(id);
     }
 
-    public SysDict getSysDictById(String id) {
-        return this.getById(id);
+    private void checkExist(String parentId) {
+        if (StringUtils.isNotBlank(parentId)) {
+            SysDict parent = getById(parentId);
+            if (parent == null) {
+                throw new ClientError("父级字典项不存在");
+            }
+        }
     }
+
 
     @Cacheable(value = "@5m", key = "'authcenter:sys:dict:list:' + #featCode")
     public List<SysDict> getSysDictsByFeatCode(String featCode) {
@@ -111,7 +119,7 @@ public class SysDictService extends ServiceImpl<SysDictMapper, SysDict> {
         List<SysDict> list = null;
         SysDict root;
         if (StringUtils.isNotBlank(vo.getParentId())) {
-            root = getSysDictById(vo.getParentId());
+            root = getById(vo.getParentId());
             list = getChildrenRecursively(vo.getParentId());
         } else if (StringUtils.isNotBlank(vo.getFeatCode()) && StringUtils.isNotBlank(vo.getValueStr())) {
             root = this.getOne(new QueryWrapper<SysDict>()
@@ -124,19 +132,27 @@ public class SysDictService extends ServiceImpl<SysDictMapper, SysDict> {
         if (root == null) {
             throw new ParamError("specified parent not exist");
         }
+        Map<String, List<SysDict>> childrenMap = list.stream()
+                .collect(Collectors.groupingBy(
+                        SysDict::getParentId,
+                        Collectors.collectingAndThen(
+                                Collectors.toList(),
+                                l -> {
+                                    l.sort(Comparator.comparingInt(SysDict::getShowOrder));
+                                    return l;
+                                }
+                        )
+                ));
         TreeNode<SysDict> tree = new TreeNode<>(root);
-        buildTree(tree, list);
+        buildTree(tree, childrenMap);
         return tree;
     }
 
-    private void buildTree(TreeNode<SysDict> current, List<SysDict> all) {
-        for (SysDict d : all) {
-            if (d.getParentId().equals(current.getData().getId())) {
-                TreeNode<SysDict> node = new TreeNode<>(d);
-                current.addChild(node);
-                buildTree(node, all);
-            }
+    private void buildTree(TreeNode<SysDict> current, Map<String, List<SysDict>> childrenMap) {
+        for (SysDict d : childrenMap.get(current.getData().getId())) {
+            TreeNode<SysDict> node = new TreeNode<>(d);
+            current.addChild(node);
+            buildTree(node, childrenMap);
         }
     }
-
 }
