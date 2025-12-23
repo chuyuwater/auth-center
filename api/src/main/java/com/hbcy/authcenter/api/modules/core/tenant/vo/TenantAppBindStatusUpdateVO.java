@@ -1,0 +1,23 @@
+package com.hbcy.authcenter.api.modules.core.tenant.vo;
+
+import jakarta.validation.constraints.NotBlank;
+import lombok.Data;
+import org.hibernate.validator.constraints.Range;
+
+/**
+ * @author 姚泰然
+ * @date 2025-12-23 17:37
+ */
+@Data
+public class TenantAppBindStatusUpdateVO {
+    /**
+     * 绑定关系ID
+     */
+    @NotBlank(message = "绑定关系ID不能为空")
+    private String bindingId;
+    /**
+     * 是否禁用，0-未禁用，1-已禁用
+     */
+    @Range(min = 0, max = 1, message = "禁用状态只能为0或1")
+    private Integer forbidden = 0;
+}

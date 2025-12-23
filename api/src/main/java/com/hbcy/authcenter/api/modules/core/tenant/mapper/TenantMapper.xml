@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.hbcy.authcenter.modules.core.tenant.dao.TenantMapper">
-    <resultMap id="BaseResultMap" type="com.hbcy.authcenter.modules.core.tenant.model.Tenant">
+<mapper namespace="com.hbcy.authcenter.api.modules.core.tenant.dao.TenantMapper">
+    <resultMap id="BaseResultMap" type="com.hbcy.authcenter.api.modules.core.tenant.model.Tenant">
         <!--@mbg.generated-->
         <!--@Table tenant-->
         <id column="id" jdbcType="VARCHAR" property="id"/>
