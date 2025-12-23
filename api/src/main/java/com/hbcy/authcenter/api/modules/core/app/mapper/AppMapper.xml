@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hbcy.authcenter.api.modules.core.app.dao.AppMapper">
+  <resultMap id="BaseResultMap" type="com.hbcy.authcenter.api.modules.core.app.model.App">
+    <!--@mbg.generated-->
+    <!--@Table app-->
+    <id column="id" jdbcType="VARCHAR" property="id" />
+    <result column="name_cn" jdbcType="VARCHAR" property="nameCn" />
+    <result column="memo" jdbcType="VARCHAR" property="memo" />
+    <result column="show_order" jdbcType="INTEGER" property="showOrder" />
+    <result column="icon" jdbcType="VARCHAR" property="icon" />
+    <result column="forbidden" jdbcType="TINYINT" property="forbidden" />
+    <result column="sub_dom" jdbcType="TINYINT" property="subDom" />
+    <result column="obj_dom" jdbcType="VARCHAR" property="objDom" />
+    <result column="binding_tenant" jdbcType="VARCHAR" property="bindingTenant" />
+    <result column="delete_time" jdbcType="BIGINT" property="deleteTime" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+    <result column="create_user" jdbcType="CHAR" property="createUser" />
+    <result column="update_user" jdbcType="CHAR" property="updateUser" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+    id, name_cn, memo, show_order, icon, forbidden, sub_dom, obj_dom, binding_tenant, 
+    delete_time, create_time, update_time, create_user, update_user
+  </sql>
+</mapper>
