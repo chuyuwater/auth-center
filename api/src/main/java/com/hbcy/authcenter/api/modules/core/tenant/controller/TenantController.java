@@ -1,10 +1,10 @@
-package com.hbcy.authcenter.modules.core.tenant.controller;
+package com.hbcy.authcenter.api.modules.core.tenant.controller;
 
-import com.hbcy.authcenter.modules.core.tenant.model.Tenant;
-import com.hbcy.authcenter.modules.core.tenant.service.TenantService;
-import com.hbcy.authcenter.modules.core.tenant.vo.TenantForbiddenVO;
-import com.hbcy.authcenter.modules.core.tenant.vo.TenantQueryVO;
-import com.hbcy.authcenter.modules.core.tenant.vo.TenantUpsertVO;
+import com.hbcy.authcenter.api.modules.core.tenant.model.Tenant;
+import com.hbcy.authcenter.api.modules.core.tenant.service.TenantService;
+import com.hbcy.authcenter.api.modules.core.tenant.vo.TenantForbiddenVO;
+import com.hbcy.authcenter.api.modules.core.tenant.vo.TenantQueryVO;
+import com.hbcy.authcenter.api.modules.core.tenant.vo.TenantUpsertVO;
 import com.hbcy.common.db.model.PageResp;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;

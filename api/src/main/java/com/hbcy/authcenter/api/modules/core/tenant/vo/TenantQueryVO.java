@@ -1,4 +1,4 @@
-package com.hbcy.authcenter.modules.core.tenant.vo;
+package com.hbcy.authcenter.api.modules.core.tenant.vo;
 
 import com.hbcy.common.db.model.PageVO;
 import lombok.Data;

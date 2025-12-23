@@ -1,4 +1,4 @@
-package com.hbcy.authcenter.modules.sys.dict.vo;
+package com.hbcy.authcenter.api.modules.sys.dict.vo;
 
 import lombok.Data;
 

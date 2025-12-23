@@ -1,4 +1,4 @@
-package com.hbcy.authcenter.modules.sys.dict.service;
+package com.hbcy.authcenter.api.modules.sys.dict.service;
 
 import com.hbcy.common.db.convertor.IDictService;
 import jakarta.annotation.Resource;

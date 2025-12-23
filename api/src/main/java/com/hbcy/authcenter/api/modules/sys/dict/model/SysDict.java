@@ -1,4 +1,4 @@
-package com.hbcy.authcenter.modules.sys.dict.model;
+package com.hbcy.authcenter.api.modules.sys.dict.model;
 
 import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;

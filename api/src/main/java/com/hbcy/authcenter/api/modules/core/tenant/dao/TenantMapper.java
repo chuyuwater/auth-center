@@ -1,7 +1,7 @@
-package com.hbcy.authcenter.modules.core.tenant.dao;
+package com.hbcy.authcenter.api.modules.core.tenant.dao;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.hbcy.authcenter.modules.core.tenant.model.Tenant;
+import com.hbcy.authcenter.api.modules.core.tenant.model.Tenant;
 
 /**
  * @author 姚泰然

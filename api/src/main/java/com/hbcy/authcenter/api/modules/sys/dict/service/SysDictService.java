@@ -1,11 +1,11 @@
-package com.hbcy.authcenter.modules.sys.dict.service;
+package com.hbcy.authcenter.api.modules.sys.dict.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.hbcy.authcenter.modules.sys.dict.dao.SysDictMapper;
-import com.hbcy.authcenter.modules.sys.dict.model.SysDict;
-import com.hbcy.authcenter.modules.sys.dict.vo.DictQueryVO;
-import com.hbcy.authcenter.modules.sys.dict.vo.DictUpsertVO;
+import com.hbcy.authcenter.api.modules.sys.dict.dao.SysDictMapper;
+import com.hbcy.authcenter.api.modules.sys.dict.model.SysDict;
+import com.hbcy.authcenter.api.modules.sys.dict.vo.DictQueryVO;
+import com.hbcy.authcenter.api.modules.sys.dict.vo.DictUpsertVO;
 import com.hbcy.common.base.error.ClientError;
 import com.hbcy.common.base.error.ParamError;
 import com.hbcy.common.base.tree.TreeNode;

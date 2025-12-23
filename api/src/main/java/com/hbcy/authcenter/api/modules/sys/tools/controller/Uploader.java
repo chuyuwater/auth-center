@@ -1,6 +1,6 @@
-package com.hbcy.authcenter.modules.sys.tools.controller;
+package com.hbcy.authcenter.api.modules.sys.tools.controller;
 
-import com.hbcy.authcenter.modules.sys.tools.service.UploadService;
+import com.hbcy.authcenter.api.modules.sys.tools.service.UploadService;
 import com.hbcy.common.base.uploader.UploadResultDTO;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.PostMapping;

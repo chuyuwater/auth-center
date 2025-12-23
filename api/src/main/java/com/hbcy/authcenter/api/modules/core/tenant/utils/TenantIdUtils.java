@@ -1,4 +1,4 @@
-package com.hbcy.authcenter.modules.core.tenant.utils;
+package com.hbcy.authcenter.api.modules.core.tenant.utils;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;

@@ -1,7 +1,7 @@
-package com.hbcy.authcenter.modules.sys.dict.dao;
+package com.hbcy.authcenter.api.modules.sys.dict.dao;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.hbcy.authcenter.modules.sys.dict.model.SysDict;
+import com.hbcy.authcenter.api.modules.sys.dict.model.SysDict;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;

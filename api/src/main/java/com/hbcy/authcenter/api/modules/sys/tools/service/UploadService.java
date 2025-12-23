@@ -1,4 +1,4 @@
-package com.hbcy.authcenter.modules.sys.tools.service;
+package com.hbcy.authcenter.api.modules.sys.tools.service;
 
 import cn.hutool.core.io.file.FileNameUtil;
 import com.github.f4b6a3.ulid.UlidCreator;

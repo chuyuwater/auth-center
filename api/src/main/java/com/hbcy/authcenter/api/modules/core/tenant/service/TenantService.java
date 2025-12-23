@@ -1,14 +1,14 @@
-package com.hbcy.authcenter.modules.core.tenant.service;
+package com.hbcy.authcenter.api.modules.core.tenant.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.hbcy.authcenter.modules.core.tenant.dao.TenantMapper;
-import com.hbcy.authcenter.modules.core.tenant.model.Tenant;
-import com.hbcy.authcenter.modules.core.tenant.utils.TenantIdUtils;
-import com.hbcy.authcenter.modules.core.tenant.vo.TenantForbiddenVO;
-import com.hbcy.authcenter.modules.core.tenant.vo.TenantQueryVO;
-import com.hbcy.authcenter.modules.core.tenant.vo.TenantUpsertVO;
+import com.hbcy.authcenter.api.modules.core.tenant.dao.TenantMapper;
+import com.hbcy.authcenter.api.modules.core.tenant.model.Tenant;
+import com.hbcy.authcenter.api.modules.core.tenant.utils.TenantIdUtils;
+import com.hbcy.authcenter.api.modules.core.tenant.vo.TenantForbiddenVO;
+import com.hbcy.authcenter.api.modules.core.tenant.vo.TenantQueryVO;
+import com.hbcy.authcenter.api.modules.core.tenant.vo.TenantUpsertVO;
 import com.hbcy.authcenter.sdk.utils.UserContextUtils;
 import com.hbcy.common.base.error.ParamError;
 import com.hbcy.common.db.model.PageResp;

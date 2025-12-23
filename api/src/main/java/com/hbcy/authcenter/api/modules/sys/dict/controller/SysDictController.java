@@ -1,9 +1,9 @@
-package com.hbcy.authcenter.modules.sys.dict.controller;
+package com.hbcy.authcenter.api.modules.sys.dict.controller;
 
-import com.hbcy.authcenter.modules.sys.dict.model.SysDict;
-import com.hbcy.authcenter.modules.sys.dict.service.SysDictService;
-import com.hbcy.authcenter.modules.sys.dict.vo.DictUpsertVO;
-import com.hbcy.authcenter.modules.sys.dict.vo.DictQueryVO;
+import com.hbcy.authcenter.api.modules.sys.dict.model.SysDict;
+import com.hbcy.authcenter.api.modules.sys.dict.service.SysDictService;
+import com.hbcy.authcenter.api.modules.sys.dict.vo.DictQueryVO;
+import com.hbcy.authcenter.api.modules.sys.dict.vo.DictUpsertVO;
 import com.hbcy.common.base.error.ParamError;
 import com.hbcy.common.base.tree.TreeNode;
 import jakarta.annotation.Resource;
