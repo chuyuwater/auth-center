@@ -9,7 +9,7 @@ import org.hibernate.validator.constraints.Range;
  * @date 2025-12-23 17:37
  */
 @Data
-public class TenantAppBindStatusUpdateVO {
+public class TenantAppGrantStatusUpdateVO {
     /**
      * 绑定关系ID
      */

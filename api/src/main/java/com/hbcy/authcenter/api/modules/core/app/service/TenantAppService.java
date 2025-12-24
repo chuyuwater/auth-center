@@ -10,7 +10,7 @@ import com.hbcy.authcenter.api.modules.core.app.model.TenantApp;
 import com.hbcy.authcenter.api.modules.core.app.vo.BindOrgTreeVO;
 import com.hbcy.authcenter.api.modules.core.tenant.dao.TenantMapper;
 import com.hbcy.authcenter.api.modules.core.tenant.model.Tenant;
-import com.hbcy.authcenter.api.modules.core.tenant.vo.TenantAppBindStatusUpdateVO;
+import com.hbcy.authcenter.api.modules.core.tenant.vo.TenantAppGrantStatusUpdateVO;
 import com.hbcy.authcenter.sdk.utils.UserContextUtils;
 import com.hbcy.common.base.error.ParamError;
 import jakarta.annotation.Resource;
@@ -79,7 +79,7 @@ public class TenantAppService extends ServiceImpl<TenantAppMapper, TenantApp> {
     /**
      * 切换授权状态
      */
-    public void switchBindingStatus(TenantAppBindStatusUpdateVO vo) {
+    public void switchGrantStatus(TenantAppGrantStatusUpdateVO vo) {
         TenantApp binding = getById(vo.getBindingId());
         if (StringUtils.isBlank(binding.getAppId())) {
             throw new ParamError("授权关系不存在");
@@ -109,7 +109,7 @@ public class TenantAppService extends ServiceImpl<TenantAppMapper, TenantApp> {
     /**
      * 查看租户已授权的应用列表
      */
-    public List<AppCardDTO> listBindApps(String tenantId) {
+    public List<AppCardDTO> listGrantApps(String tenantId) {
         return baseMapper.listBindApps(tenantId);
     }
 

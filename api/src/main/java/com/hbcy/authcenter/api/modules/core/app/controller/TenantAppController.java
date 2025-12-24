@@ -1,7 +1,16 @@
 package com.hbcy.authcenter.api.modules.core.app.controller;
 
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import com.hbcy.authcenter.api.modules.core.app.dto.AppCardDTO;
+import com.hbcy.authcenter.api.modules.core.app.service.TenantAppService;
+import com.hbcy.authcenter.api.modules.core.app.vo.BindOrgTreeVO;
+import com.hbcy.authcenter.api.modules.core.tenant.vo.TenantAppGrantStatusUpdateVO;
+import com.hbcy.authcenter.api.modules.core.tenant.vo.TenantAppGrantVO;
+import jakarta.annotation.Resource;
+import jakarta.validation.Valid;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * 应用授权
@@ -10,7 +19,52 @@ import org.springframework.web.bind.annotation.RestController;
  * @date 2025-12-23 17:19
  */
 @RestController
-@RequestMapping("api/portal/v1/core/app-grant")
+@RequestMapping("api/portal/v1/grant/app")
+@Validated
 public class TenantAppController {
-    
+
+    @Resource
+    private TenantAppService tenantAppService;
+
+    /**
+     * 创建租户绑定应用
+     *
+     * @param vo 绑定信息
+     */
+    @PostMapping
+    public void create(@RequestBody @Valid TenantAppGrantVO vo) {
+        tenantAppService.createBinding(vo.getTenantId(), vo.getAppId());
+    }
+
+    /**
+     * 切换授权状态
+     *
+     * @param vo 状态信息
+     */
+    @PostMapping("/switch")
+    public void switchStatus(@RequestBody @Valid TenantAppGrantStatusUpdateVO vo) {
+        tenantAppService.switchGrantStatus(vo);
+    }
+
+
+    /**
+     * 查看租户已授权的应用列表（含禁用状态）
+     *
+     * @param tenantId 租户id
+     * @return 应用列表
+     */
+    @GetMapping("")
+    public List<AppCardDTO> listGrantApps(@RequestParam String tenantId) {
+        return tenantAppService.listGrantApps(tenantId);
+    }
+
+    /**
+     * 租户为应用绑定组织树
+     *
+     * @param vo 绑定信息
+     */
+    @PostMapping("/orgTree")
+    public void bindOrgTree(@Valid @RequestBody BindOrgTreeVO vo) {
+        //todo
+    }
 }
