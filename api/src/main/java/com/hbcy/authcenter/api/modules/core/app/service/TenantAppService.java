@@ -1,10 +1,13 @@
 package com.hbcy.authcenter.api.modules.core.app.service;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hbcy.authcenter.api.modules.core.app.dao.AppMapper;
 import com.hbcy.authcenter.api.modules.core.app.dao.TenantAppMapper;
+import com.hbcy.authcenter.api.modules.core.app.dto.AppCardDTO;
 import com.hbcy.authcenter.api.modules.core.app.model.App;
 import com.hbcy.authcenter.api.modules.core.app.model.TenantApp;
+import com.hbcy.authcenter.api.modules.core.app.vo.BindOrgTreeVO;
 import com.hbcy.authcenter.api.modules.core.tenant.dao.TenantMapper;
 import com.hbcy.authcenter.api.modules.core.tenant.model.Tenant;
 import com.hbcy.authcenter.api.modules.core.tenant.vo.TenantAppBindStatusUpdateVO;
@@ -14,6 +17,10 @@ import jakarta.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 租户绑定应用
@@ -34,6 +41,7 @@ public class TenantAppService extends ServiceImpl<TenantAppMapper, TenantApp> {
      * @param tenantId 租户id
      * @param appId    应用id
      */
+    @Transactional(rollbackFor = Exception.class)
     public void createBinding(String tenantId, String appId) {
         App app = appMapper.selectById(appId);
         Tenant tenant = tenantMapper.selectById(tenantId);
@@ -46,8 +54,14 @@ public class TenantAppService extends ServiceImpl<TenantAppMapper, TenantApp> {
         if (tenant.getForbidden() == 1) {
             throw new ParamError("租户已被禁用");
         }
-        if (StringUtils.isNotBlank(app.getBindingTenant()) && !app.getBindingTenant().equals(tenantId)) {
-            throw new ParamError("应用已绑定其他租户，不可修改");
+        String currentBinding = app.getBindingTenant();
+        if (App.BINDING_PLACEHOLDER.equals(currentBinding)) {
+            //单租户应用绑定租户
+            app.setBindingTenant(tenantId);
+            app.setUpdateUser(UserContextUtils.getUserId());
+            appMapper.updateById(app);
+        } else if (!"".equals(currentBinding) && !tenantId.equals(currentBinding)) {
+            throw new ParamError("单租户应用已绑定其他租户");
         }
         TenantApp tenantApp = new TenantApp();
         tenantApp.setTenantId(tenantId);
@@ -58,17 +72,17 @@ public class TenantAppService extends ServiceImpl<TenantAppMapper, TenantApp> {
         try {
             save(tenantApp);
         } catch (DuplicateKeyException e) {
-            throw new ParamError("租户已绑定该应用");
+            throw new ParamError("租户已授权该应用");
         }
     }
 
     /**
-     * 切换绑定状态
+     * 切换授权状态
      */
     public void switchBindingStatus(TenantAppBindStatusUpdateVO vo) {
         TenantApp binding = getById(vo.getBindingId());
         if (StringUtils.isBlank(binding.getAppId())) {
-            throw new ParamError("绑定关系不存在");
+            throw new ParamError("授权关系不存在");
         }
         if (binding.getForbidden().equals(vo.getForbidden())) {
             return;
@@ -76,5 +90,33 @@ public class TenantAppService extends ServiceImpl<TenantAppMapper, TenantApp> {
         binding.setForbidden(vo.getForbidden());
         binding.setUpdateUser(UserContextUtils.getUserId());
         this.updateById(binding);
+    }
+
+    /**
+     * 租户已授权的应用ID清单
+     * 不含被禁用的
+     *
+     * @param tenantId 租户id
+     * @return 应用id列表
+     */
+    public List<String> listBindAppIds(String tenantId) {
+        return baseMapper.selectList(new QueryWrapper<TenantApp>()
+                        .eq(TenantApp.COL_TENANT_ID, tenantId)
+                        .eq(TenantApp.COL_FORBIDDEN, 0))
+                .stream().map(TenantApp::getAppId).collect(Collectors.toList());
+    }
+
+    /**
+     * 查看租户已授权的应用列表
+     */
+    public List<AppCardDTO> listBindApps(String tenantId) {
+        return baseMapper.listBindApps(tenantId);
+    }
+
+    /**
+     * 租户为应用绑定组织树
+     */
+    public void bindingOrgTree(BindOrgTreeVO vo) {
+        //TODO: 需要等用户、组织相关功能完成后再添加。注意组织树一旦绑定就不可以修改了
     }
 }

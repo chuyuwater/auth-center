@@ -29,10 +29,13 @@ import java.util.stream.Collectors;
  */
 @Service
 public class SysDictService extends ServiceImpl<SysDictMapper, SysDict> {
+    //缓存有效期
+    private static final String CACHE_NAME = "@5m";
+
     @Caching(
             evict = {
-                    @CacheEvict(value = "@5m", key = "'authcenter:sys:dict:list:' + #vo.featCode"),
-                    @CacheEvict(value = "@5m", key = "'authcenter:sys:dict:valueMap:' + #vo.featCode")
+                    @CacheEvict(value = CACHE_NAME, key = "'authcenter:sys:dict:list:' + #vo.featCode"),
+                    @CacheEvict(value = CACHE_NAME, key = "'authcenter:sys:dict:valueMap:' + #vo.featCode")
             }
     )
     public SysDict createSysDict(DictUpsertVO vo) {
@@ -49,8 +52,8 @@ public class SysDictService extends ServiceImpl<SysDictMapper, SysDict> {
 
     @Caching(
             evict = {
-                    @CacheEvict(value = "@5m", key = "'authcenter:sys:dict:list:' + #vo.featCode"),
-                    @CacheEvict(value = "@5m", key = "'authcenter:sys:dict:valueMap:' + #vo.featCode")
+                    @CacheEvict(value = CACHE_NAME, key = "'authcenter:sys:dict:list:' + #vo.featCode"),
+                    @CacheEvict(value = CACHE_NAME, key = "'authcenter:sys:dict:valueMap:' + #vo.featCode")
             }
     )
     @Transactional
@@ -70,8 +73,8 @@ public class SysDictService extends ServiceImpl<SysDictMapper, SysDict> {
 
     @Caching(
             evict = {
-                    @CacheEvict(value = "@5m", key = "'authcenter:sys:dict:list:' + #featCode"),
-                    @CacheEvict(value = "@5m", key = "'authcenter:sys:dict:valueMap:' + #featCode")
+                    @CacheEvict(value = CACHE_NAME, key = "'authcenter:sys:dict:list:' + #featCode"),
+                    @CacheEvict(value = CACHE_NAME, key = "'authcenter:sys:dict:valueMap:' + #featCode")
             }
     )
     public void deleteSysDict(String featCode, String id) {
@@ -95,14 +98,14 @@ public class SysDictService extends ServiceImpl<SysDictMapper, SysDict> {
     }
 
 
-    @Cacheable(value = "@5m", key = "'authcenter:sys:dict:list:' + #featCode")
+    @Cacheable(value = CACHE_NAME, key = "'authcenter:sys:dict:list:' + #featCode")
     public List<SysDict> getSysDictsByFeatCode(String featCode) {
         return this.list(new QueryWrapper<SysDict>()
                 .eq(SysDict.COL_FEAT_CODE, featCode)
                 .orderByAsc(SysDict.COL_SHOW_ORDER));
     }
 
-    @Cacheable(value = "@5m", key = "'authcenter:sys:dict:valueMap:' + #featCode")
+    @Cacheable(value = CACHE_NAME, key = "'authcenter:sys:dict:valueMap:' + #featCode")
     public Map<String, String> getDictValueMapByFeatCode(String featCode) {
         List<SysDict> list = this.list(new QueryWrapper<SysDict>().eq(SysDict.COL_FEAT_CODE, featCode));
         return list.stream().collect(Collectors.toMap(SysDict::getValueStr, SysDict::getValueCn));

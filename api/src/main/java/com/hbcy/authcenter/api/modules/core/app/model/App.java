@@ -28,6 +28,7 @@ public class App {
     public static final String COL_UPDATE_TIME = "update_time";
     public static final String COL_CREATE_USER = "create_user";
     public static final String COL_UPDATE_USER = "update_user";
+    public static final String BINDING_PLACEHOLDER = "-";
     /**
      * 应用英文标识
      */
@@ -69,7 +70,7 @@ public class App {
     @TableField(value = "obj_dom")
     private String objDom;
     /**
-     * 绑定租户，为空标识多租户应用，单租户应用一旦绑定租户，不可再更改
+     * 空：多租户应用，"-": 单租户应用尚未绑定租户，其他：单租户应用绑定的租户id
      */
     @TableField(value = "binding_tenant")
     private String bindingTenant;
