@@ -17,6 +17,11 @@ public class TenantUpsertVO {
     @Length(max = 20, message = "租户名称长度必须在1到20之间")
     @NotBlank(message = "租户名称不能为空")
     private String nameCn;
+
+    @Length(max = 10, message = "租户简称长度不能超过10")
+    @NotBlank(message = "租户简称不能为空")
+    private String nameShort;
+
     /**
      * logo的url
      */

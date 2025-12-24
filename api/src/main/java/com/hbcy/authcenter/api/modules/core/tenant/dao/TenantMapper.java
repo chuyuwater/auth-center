@@ -5,7 +5,7 @@ import com.hbcy.authcenter.api.modules.core.tenant.model.Tenant;
 
 /**
  * @author 姚泰然
- * @date 2025-12-23 09:49
+ * @date 2025-12-24 16:21
  */
 public interface TenantMapper extends BaseMapper<Tenant> {
 }

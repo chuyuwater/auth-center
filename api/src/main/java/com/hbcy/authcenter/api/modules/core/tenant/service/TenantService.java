@@ -87,7 +87,11 @@ public class TenantService extends ServiceImpl<TenantMapper, Tenant> {
         Page<Tenant> dbPage = vo.getDbPage();
         Page<Tenant> resp = baseMapper.selectPage(dbPage, new QueryWrapper<Tenant>()
                 .eq(vo.getForbidden() != null, Tenant.COL_FORBIDDEN, vo.getForbidden())
-                .like(StringUtils.isNotBlank(vo.getNameCn()), Tenant.COL_NAME_CN, vo.getNameCn()));
+                .or(StringUtils.isNotBlank(vo.getName()))
+                //模糊查询，租户数量不会多，无需考虑优化
+                .like(Tenant.COL_NAME_CN, vo.getName())
+                .like(Tenant.COL_NAME_SHORT, vo.getName())
+        );
         return new PageResp<>(resp);
     }
 

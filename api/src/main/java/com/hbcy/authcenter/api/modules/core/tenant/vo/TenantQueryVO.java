@@ -14,7 +14,7 @@ public class TenantQueryVO extends PageVO {
     /**
      * 租户名称，模糊查询
      */
-    private String nameCn;
+    private String name;
     /**
      * 租户状态，0-正常，1-禁用
      */

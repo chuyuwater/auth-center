@@ -1,0 +1,74 @@
+package com.hbcy.authcenter.api.modules.core.app.service;
+
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.hbcy.authcenter.api.modules.core.app.dao.ResourcePermMapper;
+import com.hbcy.authcenter.api.modules.core.app.dao.ResourceTreeMapper;
+import com.hbcy.authcenter.api.modules.core.app.model.ResourcePerm;
+import com.hbcy.authcenter.api.modules.core.app.model.ResourceTree;
+import com.hbcy.authcenter.api.modules.core.app.vo.ResourcePermCreateVO;
+import com.hbcy.authcenter.api.modules.core.app.vo.ResourcePermQueryVO;
+import com.hbcy.authcenter.api.modules.core.app.vo.ResourcePermUpdateVO;
+import com.hbcy.authcenter.sdk.utils.UserContextUtils;
+import com.hbcy.common.base.error.ParamError;
+import jakarta.annotation.Resource;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
+import org.springframework.dao.DuplicateKeyException;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+/**
+ * 资源权限相关业务逻辑
+ *
+ * @author 姚泰然
+ * @date 2025-12-24
+ */
+@Service
+public class ResourcePermService extends ServiceImpl<ResourcePermMapper, ResourcePerm> {
+    @Resource
+    private ResourceTreeMapper resourceTreeMapper;
+
+    public ResourcePerm create(ResourcePermCreateVO vo) {
+        ResourceTree tree = resourceTreeMapper.selectById(vo.getResId());
+        if (tree == null) {
+            throw new ParamError("关联的菜单资源不存在");
+        }
+        ResourcePerm entity = new ResourcePerm();
+        BeanUtils.copyProperties(vo, entity);
+        entity.setAppId(tree.getAppId());
+        entity.setCreateUser(UserContextUtils.getUserId());
+        entity.setUpdateUser(UserContextUtils.getUserId());
+        try {
+            save(entity);
+        } catch (DuplicateKeyException e) {
+            throw new ParamError("API路径和方法组合已存在");
+        }
+        return entity;
+    }
+
+    public ResourcePerm update(ResourcePermUpdateVO vo, String id) {
+        ResourcePerm entity = getById(id);
+        if (entity == null) {
+            throw new ParamError("指定权限不存在");
+        }
+        BeanUtils.copyProperties(vo, entity);
+        entity.setUpdateUser(UserContextUtils.getUserId());
+        updateById(entity);
+        return entity;
+    }
+
+    public List<ResourcePerm> list(ResourcePermQueryVO vo) {
+        return baseMapper.selectList(new QueryWrapper<ResourcePerm>()
+                .likeRight(StringUtils.isNotBlank(vo.getPermCode()), ResourcePerm.COL_PERM_CODE, vo.getPermCode())
+                .eq(StringUtils.isNotBlank(vo.getResId()), ResourcePerm.COL_RES_ID, vo.getResId())
+                .eq(StringUtils.isNotBlank(vo.getAppId()), ResourcePerm.COL_APP_ID, vo.getAppId())
+                .orderByAsc(ResourcePerm.COL_API_METHOD));
+    }
+
+    public void delete(String id) {
+        removeById(id);
+        //TODO: 删除关联的授权
+    }
+}
