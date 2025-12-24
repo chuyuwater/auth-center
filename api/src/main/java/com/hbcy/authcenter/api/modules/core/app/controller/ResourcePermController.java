@@ -26,26 +26,56 @@ public class ResourcePermController {
     @Resource
     private ResourcePermService resourcePermService;
 
+    /**
+     * 查询资源权限列表
+     *
+     * @param vo 查询条件
+     * @return 权限列表
+     */
     @GetMapping
     public List<ResourcePerm> list(@RequestBody @Valid ResourcePermQueryVO vo) {
         return resourcePermService.list(vo);
     }
 
+    /**
+     * 根据ID获取权限详情
+     *
+     * @param id 权限ID
+     * @return 权限信息
+     */
     @GetMapping("/{id}")
     public ResourcePerm getById(@PathVariable String id) {
         return resourcePermService.getById(id);
     }
 
+    /**
+     * 创建资源权限点
+     *
+     * @param vo 权限信息
+     * @return 创建后的权限信息
+     */
     @PostMapping
     public ResourcePerm create(@RequestBody @Valid ResourcePermCreateVO vo) {
         return resourcePermService.create(vo);
     }
 
+    /**
+     * 更新资源权限点
+     *
+     * @param id 权限ID
+     * @param vo 更新信息
+     * @return 更新后的权限信息
+     */
     @PutMapping("/{id}")
     public ResourcePerm update(@PathVariable String id, @RequestBody @Valid ResourcePermUpdateVO vo) {
         return resourcePermService.update(vo, id);
     }
 
+    /**
+     * 删除资源权限点
+     *
+     * @param id 权限ID
+     */
     @DeleteMapping("/{id}")
     public void delete(@PathVariable String id) {
         resourcePermService.delete(id);

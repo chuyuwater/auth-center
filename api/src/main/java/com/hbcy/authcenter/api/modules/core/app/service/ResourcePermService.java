@@ -30,6 +30,12 @@ public class ResourcePermService extends ServiceImpl<ResourcePermMapper, Resourc
     @Resource
     private ResourceTreeMapper resourceTreeMapper;
 
+    /**
+     * 创建资源权限点
+     *
+     * @param vo 权限信息
+     * @return 创建后的权限信息
+     */
     public ResourcePerm create(ResourcePermCreateVO vo) {
         ResourceTree tree = resourceTreeMapper.selectById(vo.getResId());
         if (tree == null) {
@@ -48,6 +54,13 @@ public class ResourcePermService extends ServiceImpl<ResourcePermMapper, Resourc
         return entity;
     }
 
+    /**
+     * 更新资源权限点
+     *
+     * @param vo 更新信息
+     * @param id 权限ID
+     * @return 更新后的权限信息
+     */
     public ResourcePerm update(ResourcePermUpdateVO vo, String id) {
         ResourcePerm entity = getById(id);
         if (entity == null) {
@@ -59,6 +72,12 @@ public class ResourcePermService extends ServiceImpl<ResourcePermMapper, Resourc
         return entity;
     }
 
+    /**
+     * 查询资源权限列表
+     *
+     * @param vo 查询条件
+     * @return 权限列表
+     */
     public List<ResourcePerm> list(ResourcePermQueryVO vo) {
         return baseMapper.selectList(new QueryWrapper<ResourcePerm>()
                 .likeRight(StringUtils.isNotBlank(vo.getPermCode()), ResourcePerm.COL_PERM_CODE, vo.getPermCode())
@@ -67,6 +86,11 @@ public class ResourcePermService extends ServiceImpl<ResourcePermMapper, Resourc
                 .orderByAsc(ResourcePerm.COL_API_METHOD));
     }
 
+    /**
+     * 删除资源权限点
+     *
+     * @param id 权限ID
+     */
     public void delete(String id) {
         removeById(id);
         //TODO: 删除关联的授权

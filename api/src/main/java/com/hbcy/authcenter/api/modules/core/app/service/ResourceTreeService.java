@@ -58,6 +58,12 @@ public class ResourceTreeService extends ServiceImpl<ResourceTreeMapper, Resourc
         return null;
     }
 
+    /**
+     * 创建资源节点（菜单）
+     *
+     * @param vo 节点信息
+     * @return 创建后的节点信息
+     */
     public ResourceTree create(ResourceTreeCreateVO vo) {
         ResourceTree parent = checkParentId(vo.getAppId(), vo.getParentId());
 
@@ -76,6 +82,13 @@ public class ResourceTreeService extends ServiceImpl<ResourceTreeMapper, Resourc
         return entity;
     }
 
+    /**
+     * 更新资源节点（菜单）
+     *
+     * @param vo 更新信息
+     * @param id 节点ID
+     * @return 更新后的节点信息
+     */
     public ResourceTree update(ResourceTreeUpdateVO vo, String id) {
         ResourceTree entity = getById(id);
         if (entity == null) {
