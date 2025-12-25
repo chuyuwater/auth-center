@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 
 /**
  * @author 姚泰然
- * @date 2025-12-25 10:59
+ * @date 2025-12-25 17:50
  */
 @Data
 @NoArgsConstructor
@@ -23,7 +23,6 @@ public class OrgUser {
     public static final String COL_UPDATE_USER = "update_user";
     public static final String COL_CREATE_TIME = "create_time";
     public static final String COL_UPDATE_TIME = "update_time";
-    
     @TableId(value = "id", type = IdType.ASSIGN_UUID)
     private String id;
     /**

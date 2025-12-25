@@ -5,7 +5,7 @@ import com.hbcy.authcenter.api.modules.core.org.model.OrgUser;
 
 /**
  * @author 姚泰然
- * @date 2025-12-25 10:59
+ * @date 2025-12-25 17:50
  */
 public interface OrgUserMapper extends BaseMapper<OrgUser> {
 }
