@@ -1,5 +1,6 @@
 package com.hbcy.authcenter.api.modules.core.app.controller;
 
+import com.hbcy.authcenter.api.common.pojo.NodeMoveVO;
 import com.hbcy.authcenter.api.modules.core.app.dto.ResTreeDTO;
 import com.hbcy.authcenter.api.modules.core.app.model.ResourceTree;
 import com.hbcy.authcenter.api.modules.core.app.service.ResourceTreeService;
@@ -69,6 +70,16 @@ public class ResourceTreeController {
     @PutMapping("/{id}")
     public ResourceTree update(@PathVariable String id, @RequestBody @Valid ResourceTreeUpdateVO vo) {
         return resourceTreeService.update(vo, id);
+    }
+
+    /**
+     * 拖动节点
+     *
+     * @param vo 移动详情
+     */
+    @PostMapping("/move")
+    public void move(@RequestBody @Valid NodeMoveVO vo) {
+        resourceTreeService.move(vo);
     }
 
     /**

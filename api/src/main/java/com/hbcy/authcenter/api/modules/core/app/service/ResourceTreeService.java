@@ -2,6 +2,9 @@ package com.hbcy.authcenter.api.modules.core.app.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.github.f4b6a3.ulid.UlidCreator;
+import com.hbcy.authcenter.api.common.constants.G;
+import com.hbcy.authcenter.api.common.pojo.NodeMoveVO;
 import com.hbcy.authcenter.api.modules.core.app.dao.AppMapper;
 import com.hbcy.authcenter.api.modules.core.app.dao.ResourcePermMapper;
 import com.hbcy.authcenter.api.modules.core.app.dao.ResourceTreeMapper;
@@ -17,6 +20,7 @@ import com.hbcy.common.base.error.ParamError;
 import com.hbcy.common.base.log.JsonLogUtils;
 import com.hbcy.common.base.tree.TreeNode;
 import jakarta.annotation.Resource;
+import jakarta.validation.Valid;
 import net.logstash.logback.argument.StructuredArguments;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -64,18 +68,19 @@ public class ResourceTreeService extends ServiceImpl<ResourceTreeMapper, Resourc
      * @param vo 节点信息
      * @return 创建后的节点信息
      */
+    @Transactional(rollbackFor = Exception.class)
     public ResourceTree create(ResourceTreeCreateVO vo) {
         ResourceTree parent = checkParentId(vo.getAppId(), vo.getParentId());
-
         ResourceTree entity = new ResourceTree();
         BeanUtils.copyProperties(vo, entity);
+        entity.setId(UlidCreator.getUlid().toString());
         entity.setCreateUser(UserContextUtils.getUserId());
         entity.setUpdateUser(UserContextUtils.getUserId());
         if (parent != null) {
-            entity.setIdPath(parent.getIdPath() + "," + entity.getId());
+            entity.setIdPath(parent.getIdPath() + G.ID_PATH_SPLITTER + entity.getId());
         }
         try {
-            save(entity);
+            baseMapper.append(entity);
         } catch (DuplicateKeyException e) {
             throw new ParamError("同一应用下自定义菜单ID不能重复");
         }
@@ -89,6 +94,7 @@ public class ResourceTreeService extends ServiceImpl<ResourceTreeMapper, Resourc
      * @param id 节点ID
      * @return 更新后的节点信息
      */
+    @Transactional(rollbackFor = Exception.class)
     public ResourceTree update(ResourceTreeUpdateVO vo, String id) {
         ResourceTree entity = getById(id);
         if (entity == null) {
@@ -100,7 +106,6 @@ public class ResourceTreeService extends ServiceImpl<ResourceTreeMapper, Resourc
             updateById(entity);
         } catch (DuplicateKeyException e) {
             throw new ParamError("同一应用下自定义菜单ID不能重复");
-
         }
         return entity;
     }
@@ -123,7 +128,7 @@ public class ResourceTreeService extends ServiceImpl<ResourceTreeMapper, Resourc
         } else {
             root.setData(new ResTreeDTO());
         }
-        List<ResourceTree> resourceTrees = baseMapper.listChildrenRecursively(vo.getAppId(), vo.getParentId());
+        List<ResourceTree> resourceTrees = listResTree(vo);
         List<ResourcePerm> resourcePerms = new ArrayList<>();
         if (vo.isWithPerm()) {
             List<String> ids = resourceTrees.stream().map(ResourceTree::getId).toList();
@@ -168,7 +173,15 @@ public class ResourceTreeService extends ServiceImpl<ResourceTreeMapper, Resourc
      * @return 列表结果
      */
     public List<ResourceTree> listResTree(ResourceTreeQueryVO vo) {
-        return baseMapper.listChildrenRecursively(vo.getAppId(), vo.getParentId());
+        String idPath = "";
+        if (StringUtils.isNotBlank(vo.getParentId())) {
+            ResourceTree tree = getById(vo.getParentId());
+            if (tree == null) {
+                throw new ParamError("父节点不存在");
+            }
+            idPath = tree.getIdPath() + G.ID_PATH_SPLITTER;
+        }
+        return baseMapper.listChildrenRecursively(vo.getAppId(), idPath);
     }
 
     /**
@@ -193,5 +206,58 @@ public class ResourceTreeService extends ServiceImpl<ResourceTreeMapper, Resourc
                 StructuredArguments.kv("permIds", permIds),
                 StructuredArguments.kv("resIds", resIds));
         //TODO：删除对应功能的授权
+    }
+
+    /**
+     * 移动资源节点
+     *
+     * @param vo 移动详情
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void move(@Valid NodeMoveVO vo) {
+        ResourceTree node = getById(vo.getNodeId());
+        if (node == null) {
+            throw new ParamError("节点不存在");
+        }
+        ResourceTree parentNode = null;
+        ResourceTree prevNode = null;
+        if (StringUtils.isNotBlank(vo.getParentId())) {
+            parentNode = getById(vo.getParentId());
+            if (parentNode == null) {
+                throw new ParamError("父节点不存在");
+            }
+            if (!parentNode.getAppId().equals(node.getAppId())) {
+                throw new ParamError("当前节点和父节点属于不同的应用");
+            }
+        }
+        if (StringUtils.isNotBlank(vo.getPrevId())) {
+            prevNode = getById(vo.getPrevId());
+            if (prevNode == null) {
+                throw new ParamError("前一个节点不存在");
+            }
+            if (!prevNode.getParentId().equals(vo.getParentId())) {
+                throw new ParamError("前一个节点和当前节点不属于同一个父节点");
+            }
+        }
+        if (!vo.getParentId().equals(node.getParentId())) {
+            //父节点被移动，意味着当前节点及其下级节点的id_path需要更新
+            String oldPath = node.getIdPath();
+            String newPath = parentNode == null ? node.getId() : parentNode.getIdPath()
+                    + G.ID_PATH_SPLITTER + node.getId();
+            baseMapper.updateIdPath(node.getAppId(), oldPath, newPath);
+        }
+        //检查前节点，修改被移动节点及其之后节点的show_order
+        int targetIdx = 0;
+        if (prevNode != null) {
+            targetIdx = prevNode.getShowOrder() + 1;
+        }
+        baseMapper.updateShowOrder(node.getAppId(), vo.getParentId(), targetIdx);
+
+        //最后，修改目标节点自身数据
+        ResourceTree toUpdate = new ResourceTree();
+        toUpdate.setId(vo.getNodeId());
+        toUpdate.setParentId(vo.getParentId());
+        toUpdate.setShowOrder(targetIdx);
+        updateById(toUpdate);
     }
 }

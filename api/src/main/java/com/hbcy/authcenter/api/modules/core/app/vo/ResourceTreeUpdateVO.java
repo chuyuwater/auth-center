@@ -1,6 +1,5 @@
 package com.hbcy.authcenter.api.modules.core.app.vo;
 
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import org.hibernate.validator.constraints.Length;
@@ -20,9 +19,6 @@ public class ResourceTreeUpdateVO {
     @Length(max = 50, message = "自定义菜单ID长度不能超过50")
     private String customId;
 
-    @Length(max = 26, message = "父节点ID长度不能超过26")
-    private String parentId = "";
-
     @Range(min = 0, max = 2, message = "客户端类型只能为0-2")
     private Integer clientType = 0;
 
@@ -31,9 +27,6 @@ public class ResourceTreeUpdateVO {
 
     @Length(max = 255, message = "路由地址长度不能超过255")
     private String routeLink;
-
-    @Min(value = 0, message = "显示顺序不能小于0")
-    private Integer showOrder = 0;
 
     @Range(min = 0, max = 1, message = "是否隐藏只能为0或1")
     private Integer hidden = 0;

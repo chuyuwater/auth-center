@@ -15,4 +15,10 @@ public class ResourceTreeCreateVO extends ResourceTreeUpdateVO {
     @NotBlank(message = "应用ID不能为空")
     @Length(max = 50, message = "应用ID长度不能超过50")
     private String appId;
+
+    /**
+     * 父节点。
+     * 创建时，节点固定在同级末尾。
+     */
+    private String parentId = "";
 }
