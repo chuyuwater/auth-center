@@ -22,8 +22,21 @@
     </resultMap>
     <sql id="Base_Column_List">
         <!--@mbg.generated-->
-        id, node_name, short_name, node_type, exist_type, node_category, parent_id, id_path,
-        show_order, tenant_id, delete_time, create_time, update_time, create_user, update_user
+        id,
+        node_name,
+        short_name,
+        node_type,
+        exist_type,
+        node_category,
+        parent_id,
+        id_path,
+        show_order,
+        tenant_id,
+        delete_time,
+        create_time,
+        update_time,
+        create_user,
+        update_user
     </sql>
 
     <select id="listChildrenRecursively" resultMap="BaseResultMap">
@@ -34,6 +47,18 @@
             tenant_id = #{tenantId}
             and id_path like concat(#{parentIdPath}, '%')
             and delete_time = 0
+            <if test="vo != null">
+                <if test="vo.nodeType != null">
+                    and node_type = #{vo.nodeType}
+                </if>
+                <if test="vo.nodeCategory != null">
+                    and node_category = #{vo.nodeCategory}
+                </if>
+                <if test="vo.name != null">
+                    and (node_name like concat('%', #{vo.name}, '%')
+                    or short_name like concat('%', #{vo.name}, '%'))
+                </if>
+            </if>
         </where>
     </select>
 
@@ -59,7 +84,7 @@
         set id_path = replace(id_path, #{oldPath}, #{newPath})
         where tenant_id = #{tenantId}
         and id_path like concat(#{oldPath}, '%')
-        and delete_time =0
+        and delete_time = 0
     </update>
 
     <update id="updateShowOrder">
@@ -72,7 +97,8 @@
     </update>
 
     <select id="selectMaxId" resultType="java.lang.String">
-        select max(id) from org_tree
-        where parent_id= #{parentId}
+        select max(id)
+        from org_tree
+        where parent_id = #{parentId}
     </select>
 </mapper>

@@ -11,7 +11,6 @@ import com.hbcy.authcenter.api.modules.core.org.dao.OrgTreeMapper;
 import com.hbcy.authcenter.api.modules.core.org.dao.OrgUserMapper;
 import com.hbcy.authcenter.api.modules.core.org.model.OrgTree;
 import com.hbcy.authcenter.api.modules.core.org.model.OrgUser;
-import com.hbcy.authcenter.api.modules.core.org.vo.OrgChildrenQueryVO;
 import com.hbcy.authcenter.api.modules.core.org.vo.OrgTreeCreateVO;
 import com.hbcy.authcenter.api.modules.core.org.vo.OrgTreeQueryVO;
 import com.hbcy.authcenter.api.modules.core.org.vo.OrgTreeUpdateVO;
@@ -221,7 +220,8 @@ public class OrgTreeService extends ServiceImpl<OrgTreeMapper, OrgTree> {
         TreeNode<OrgTree> root = new TreeNode<>(rootData);
 
         List<OrgTree> orgTrees = baseMapper.listChildrenRecursively(
-                tenantId, rootData.getIdPath() + G.ID_PATH_SPLITTER);
+                tenantId, rootData.getIdPath() + G.ID_PATH_SPLITTER, vo
+        );
         Map<String, List<OrgTree>> childrenMap = orgTrees.stream()
                 .collect(Collectors.groupingBy(node ->
                                 StringUtils.isBlank(node.getParentId()) ? "" : node.getParentId(),
@@ -257,7 +257,7 @@ public class OrgTreeService extends ServiceImpl<OrgTreeMapper, OrgTree> {
     /**
      * 查询组织下级节点
      */
-    public List<OrgTree> listDirectChildren(OrgChildrenQueryVO vo) {
+    public List<OrgTree> listDirectChildren(OrgTreeQueryVO vo) {
         if (StringUtils.isBlank(vo.getParentId())) {
             vo.setParentId(tenantRootId());
         } else {
@@ -266,7 +266,12 @@ public class OrgTreeService extends ServiceImpl<OrgTreeMapper, OrgTree> {
         return baseMapper.selectList(new QueryWrapper<OrgTree>()
                 .eq(OrgTree.COL_PARENT_ID, vo.getParentId())
                 .eq(OrgTree.COL_TENANT_ID, UserContextUtils.getTenantId())
-                .eq(vo.getNodeType() != null, OrgTree.COL_NODE_TYPE, vo.getNodeType().getValue()));
+                .eq(vo.getNodeType() != null, OrgTree.COL_NODE_TYPE, vo.getNodeType())
+                .eq(vo.getNodeCategory() != null, OrgTree.COL_NODE_CATEGORY, vo.getNodeCategory())
+                .or(StringUtils.isNotBlank(vo.getName()))
+                .like(OrgTree.COL_NODE_NAME, vo.getName())
+                .like(OrgTree.COL_SHORT_NAME, vo.getName())
+        );
     }
 
     /**
@@ -292,7 +297,7 @@ public class OrgTreeService extends ServiceImpl<OrgTreeMapper, OrgTree> {
         if (count > 0) {
             throw new PermissionError("该节点下存在用户，无法删除");
         }
-        List<OrgTree> related = baseMapper.listChildrenRecursively(node.getTenantId(), node.getId());
+        List<OrgTree> related = baseMapper.listChildrenRecursively(node.getTenantId(), node.getIdPath(), null);
         Set<String> ids = related.stream().map(OrgTree::getId).collect(Collectors.toSet());
         ids.add(id);
         baseMapper.deleteByIds(ids);

@@ -3,7 +3,6 @@ package com.hbcy.authcenter.api.modules.core.org.controller;
 import com.hbcy.authcenter.api.common.pojo.NodeMoveVO;
 import com.hbcy.authcenter.api.modules.core.org.model.OrgTree;
 import com.hbcy.authcenter.api.modules.core.org.service.OrgTreeService;
-import com.hbcy.authcenter.api.modules.core.org.vo.OrgChildrenQueryVO;
 import com.hbcy.authcenter.api.modules.core.org.vo.OrgTreeCreateVO;
 import com.hbcy.authcenter.api.modules.core.org.vo.OrgTreeQueryVO;
 import com.hbcy.authcenter.api.modules.core.org.vo.OrgTreeUpdateVO;
@@ -52,7 +51,7 @@ public class OrgTreeController {
     }
 
     @GetMapping("/direct")
-    public List<OrgTree> getDirectChildren(@Valid OrgChildrenQueryVO vo) {
+    public List<OrgTree> getDirectChildren(@Valid OrgTreeQueryVO vo) {
         return orgTreeService.listDirectChildren(vo);
     }
 
