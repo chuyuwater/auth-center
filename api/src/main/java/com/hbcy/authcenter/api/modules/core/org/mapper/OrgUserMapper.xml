@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hbcy.authcenter.api.modules.core.org.dao.OrgUserMapper">
+  <resultMap id="BaseResultMap" type="com.hbcy.authcenter.api.modules.core.org.model.OrgUser">
+    <!--@mbg.generated-->
+    <!--@Table org_user-->
+    <id column="id" jdbcType="CHAR" property="id" />
+    <result column="user_id" jdbcType="CHAR" property="userId" />
+    <result column="org_id" jdbcType="VARCHAR" property="orgId" />
+    <result column="dept_id" jdbcType="VARCHAR" property="deptId" />
+    <result column="tenant_id" jdbcType="VARCHAR" property="tenantId" />
+    <result column="create_user" jdbcType="CHAR" property="createUser" />
+    <result column="update_user" jdbcType="CHAR" property="updateUser" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+    id, user_id, org_id, dept_id, tenant_id, create_user, update_user, create_time, update_time
+  </sql>
+</mapper>
