@@ -50,6 +50,7 @@ public class TenantService extends ServiceImpl<TenantMapper, Tenant> {
         } catch (DuplicateKeyException e) {
             throw new ParamError("请重试");
         }
+        //TODO: 初始化组织树虚拟根节点
         return tenant;
     }
 

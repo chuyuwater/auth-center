@@ -26,8 +26,10 @@ public class HeaderContextFilter extends OncePerRequestFilter {
             Map<String, String> headers = new HashMap<>();
             headers.put(AuthConstants.HEADER_USER_ID, request.getHeader(AuthConstants.HEADER_USER_ID));
             headers.put(AuthConstants.HEADER_APP_ID, request.getHeader(AuthConstants.HEADER_APP_ID));
+            headers.put(AuthConstants.HEADER_TENANT_ID, request.getHeader(AuthConstants.HEADER_TENANT_ID));
             MDC.put("appId", request.getHeader(AuthConstants.HEADER_APP_ID));
             MDC.put("userId", request.getHeader(AuthConstants.HEADER_USER_ID));
+            MDC.put("tenantId", request.getHeader(AuthConstants.HEADER_TENANT_ID));
             if (request.getHeader(AuthConstants.HEADER_TRACE_ID) != null) {
                 headers.put(AuthConstants.HEADER_TRACE_ID, request.getHeader(AuthConstants.HEADER_TRACE_ID));
                 //注入traceId到上下文

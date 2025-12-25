@@ -16,6 +16,7 @@ import java.util.Map;
 public class AuthConstants {
     public static final String HEADER_USER_ID = "X-USER-ID";
     public static final String HEADER_APP_ID = "X-APP-ID";
+    public static final String HEADER_TENANT_ID = "X-TENANT-ID";
     //手动trace标记（如不使用OpenTelemetry）
     public static final String HEADER_TRACE_ID = "X-TRACE-ID";
     public static final String HEADER_SUB_DOMAIN = "X-SUB-DOMAIN";
