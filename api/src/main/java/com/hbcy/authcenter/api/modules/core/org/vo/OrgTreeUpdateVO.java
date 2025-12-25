@@ -23,6 +23,9 @@ public class OrgTreeUpdateVO {
     @Length(max = 12, message = "简称长度不能超过12")
     private String shortName;
 
+    @Length(max = 200, message = "说明长度不能超过200")
+    private String memo;
+
     /**
      * 组织类型，字典维护，默认公司
      */

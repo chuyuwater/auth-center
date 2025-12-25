@@ -9,7 +9,7 @@ import java.util.List;
 
 /**
  * @author 姚泰然
- * @date 2025-12-25 15:40
+ * @date 2025-12-25 17:47
  */
 public interface OrgTreeMapper extends BaseMapper<OrgTree> {
     /**

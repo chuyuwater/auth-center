@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 
 /**
  * @author 姚泰然
- * @date 2025-12-25 15:40
+ * @date 2025-12-25 17:47
  */
 @Data
 @NoArgsConstructor
@@ -21,6 +21,7 @@ public class OrgTree {
     public static final String COL_ID = "id";
     public static final String COL_NODE_NAME = "node_name";
     public static final String COL_SHORT_NAME = "short_name";
+    public static final String COL_MEMO = "memo";
     public static final String COL_NODE_TYPE = "node_type";
     public static final String COL_EXIST_TYPE = "exist_type";
     public static final String COL_NODE_CATEGORY = "node_category";
@@ -48,6 +49,11 @@ public class OrgTree {
      */
     @TableField(value = "short_name")
     private String shortName;
+    /**
+     * 说明
+     */
+    @TableField(value = "memo")
+    private String memo;
     /**
      * 节点类型，0-组织，1-部门
      */
