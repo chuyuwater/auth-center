@@ -13,8 +13,8 @@ public class TenantAppGrantStatusUpdateVO {
     /**
      * 绑定关系ID
      */
-    @NotBlank(message = "绑定关系ID不能为空")
-    private String bindingId;
+    @NotBlank(message = "授权ID不能为空")
+    private String grantId;
     /**
      * 是否禁用，0-未禁用，1-已禁用
      */

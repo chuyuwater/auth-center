@@ -6,7 +6,7 @@
     <!--@Table tenant-->
     <id column="id" jdbcType="VARCHAR" property="id" />
     <result column="name_cn" jdbcType="VARCHAR" property="nameCn" />
-    <result column="name_short" jdbcType="VARCHAR" property="nameShort" />
+    <result column="short_name" jdbcType="VARCHAR" property="shortName" />
     <result column="logo" jdbcType="VARCHAR" property="logo" />
     <result column="memo" jdbcType="VARCHAR" property="memo" />
     <result column="forbidden" jdbcType="TINYINT" property="forbidden" />
@@ -20,7 +20,7 @@
   </resultMap>
   <sql id="Base_Column_List">
     <!--@mbg.generated-->
-    id, name_cn, name_short, logo, memo, forbidden, contact_user, contact_phone, delete_time, 
+    id, name_cn, short_name, logo, memo, forbidden, contact_user, contact_phone, delete_time, 
     create_user, update_user, create_time, update_time
   </sql>
 </mapper>

@@ -1,100 +1,96 @@
 package com.hbcy.authcenter.api.modules.core.org.model;
 
-import com.baomidou.mybatisplus.annotation.FieldFill;
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
-import java.time.LocalDateTime;
+import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 /**
  * @author 姚泰然
- * @date 2025-12-25 10:59
+ * @date 2025-12-25 15:40
  */
 @Data
 @NoArgsConstructor
 @TableName(value = "org_tree")
 public class OrgTree {
+    public static final String ORG_ID_TEMPLATE = "%s-ORG-%06d";
+    public static final String DEPT_ID_TEMPLATE = "%s-DEPT-%06d";
+    public static final int EXIST_TYPE_ENTITY = 0;
+    public static final int EXIST_TYPE_VIRTUAL = 1;
+    public static final String COL_ID = "id";
+    public static final String COL_NODE_NAME = "node_name";
+    public static final String COL_SHORT_NAME = "short_name";
+    public static final String COL_NODE_TYPE = "node_type";
+    public static final String COL_EXIST_TYPE = "exist_type";
+    public static final String COL_NODE_CATEGORY = "node_category";
+    public static final String COL_PARENT_ID = "parent_id";
+    public static final String COL_ID_PATH = "id_path";
+    public static final String COL_SHOW_ORDER = "show_order";
+    public static final String COL_TENANT_ID = "tenant_id";
+    public static final String COL_DELETE_TIME = "delete_time";
+    public static final String COL_CREATE_TIME = "create_time";
+    public static final String COL_UPDATE_TIME = "update_time";
+    public static final String COL_CREATE_USER = "create_user";
+    public static final String COL_UPDATE_USER = "update_user";
     /**
      * 组织/部门id，算法生成
      */
-    @TableId(value = "id", type = IdType.ASSIGN_UUID)
+    @TableId(value = "id", type = IdType.INPUT)
     private String id;
-
     /**
      * 节点名
      */
     @TableField(value = "node_name")
     private String nodeName;
-
     /**
-     * 节点类型，0-虚拟节点，1-组织，2-部门
+     * 简称
+     */
+    @TableField(value = "short_name")
+    private String shortName;
+    /**
+     * 节点类型，0-组织，1-部门
      */
     @TableField(value = "node_type")
     private Integer nodeType;
-
     /**
-     * 类别，组织：0-公司，1-分公司，2-子公司，3-项目部
+     * 存在形式：0-实体，1-虚拟
+     */
+    @TableField(value = "exist_type")
+    private Integer existType;
+    /**
+     * 类别，组织：0-项目部，1-公司，2-分公司，3-子公司
      */
     @TableField(value = "node_category")
     private Integer nodeCategory;
-
     /**
      * 父节点id
      */
     @TableField(value = "parent_id")
     private String parentId;
-
     /**
      * 全路径，方便查询
      */
     @TableField(value = "id_path")
     private String idPath;
-
     @TableField(value = "show_order")
     private Integer showOrder;
-
     /**
      * 租户id
      */
     @TableField(value = "tenant_id")
     private String tenantId;
-
-    @TableField(value = "create_time",fill = FieldFill.INSERT)
+    /**
+     * 逻辑删除
+     */
+    @TableField(value = "delete_time")
+    private @TableLogic(value = "0", delval = "-1") Long deleteTime;
+    @TableField(value = "create_time", fill = FieldFill.INSERT)
     private LocalDateTime createTime;
-
-    @TableField(value = "update_time",fill = FieldFill.INSERT_UPDATE)
+    @TableField(value = "update_time", fill = FieldFill.INSERT_UPDATE)
     private LocalDateTime updateTime;
-
     @TableField(value = "create_user")
     private String createUser;
-
     @TableField(value = "update_user")
     private String updateUser;
-
-    public static final String COL_ID = "id";
-
-    public static final String COL_NODE_NAME = "node_name";
-
-    public static final String COL_NODE_TYPE = "node_type";
-
-    public static final String COL_NODE_CATEGORY = "node_category";
-
-    public static final String COL_PARENT_ID = "parent_id";
-
-    public static final String COL_ID_PATH = "id_path";
-
-    public static final String COL_SHOW_ORDER = "show_order";
-
-    public static final String COL_TENANT_ID = "tenant_id";
-
-    public static final String COL_CREATE_TIME = "create_time";
-
-    public static final String COL_UPDATE_TIME = "update_time";
-
-    public static final String COL_CREATE_USER = "create_user";
-
-    public static final String COL_UPDATE_USER = "update_user";
 }

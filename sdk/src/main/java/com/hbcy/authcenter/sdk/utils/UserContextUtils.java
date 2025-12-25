@@ -49,6 +49,10 @@ public class UserContextUtils {
         return getHeader(AuthConstants.HEADER_APP_ID);
     }
 
+    public static String getTenantId() {
+        return getHeader(AuthConstants.HEADER_TENANT_ID);
+    }
+
     public static String getTraceId() {
         return getHeader(AuthConstants.HEADER_TRACE_ID);
     }

@@ -80,16 +80,16 @@ public class TenantAppService extends ServiceImpl<TenantAppMapper, TenantApp> {
      * 切换授权状态
      */
     public void switchGrantStatus(TenantAppGrantStatusUpdateVO vo) {
-        TenantApp binding = getById(vo.getBindingId());
-        if (StringUtils.isBlank(binding.getAppId())) {
+        TenantApp grant = getById(vo.getGrantId());
+        if (StringUtils.isBlank(grant.getAppId())) {
             throw new ParamError("授权关系不存在");
         }
-        if (binding.getForbidden().equals(vo.getForbidden())) {
+        if (grant.getForbidden().equals(vo.getForbidden())) {
             return;
         }
-        binding.setForbidden(vo.getForbidden());
-        binding.setUpdateUser(UserContextUtils.getUserId());
-        this.updateById(binding);
+        grant.setForbidden(vo.getForbidden());
+        grant.setUpdateUser(UserContextUtils.getUserId());
+        this.updateById(grant);
     }
 
     /**

@@ -3,6 +3,9 @@ package com.hbcy.authcenter.api.modules.core.tenant.service;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.hbcy.authcenter.api.common.constants.G;
+import com.hbcy.authcenter.api.modules.core.org.dao.OrgTreeMapper;
+import com.hbcy.authcenter.api.modules.core.org.model.OrgTree;
 import com.hbcy.authcenter.api.modules.core.tenant.dao.TenantMapper;
 import com.hbcy.authcenter.api.modules.core.tenant.model.Tenant;
 import com.hbcy.authcenter.api.modules.core.tenant.utils.TenantIdUtils;
@@ -18,6 +21,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author 姚泰然
@@ -30,6 +34,9 @@ public class TenantService extends ServiceImpl<TenantMapper, Tenant> {
     @Resource
     private RedisIdGenerator redisIdGenerator;
 
+    @Resource
+    private OrgTreeMapper orgTreeMapper;
+
     private void checkExist(String nameCn) {
         Tenant one = this.getOne(new QueryWrapper<Tenant>().eq(Tenant.COL_NAME_CN, nameCn), false);
         if (one != null) {
@@ -37,8 +44,10 @@ public class TenantService extends ServiceImpl<TenantMapper, Tenant> {
         }
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public Tenant create(TenantUpsertVO vo) {
         checkExist(vo.getNameCn());
+        //租户不能被物理删除，所以用count就行
         String calcedId = redisIdGenerator.generateId(TENANT_KEY, this::count, TenantIdUtils::convertToTitle);
         Tenant tenant = new Tenant();
         tenant.setId(calcedId);
@@ -50,7 +59,29 @@ public class TenantService extends ServiceImpl<TenantMapper, Tenant> {
         } catch (DuplicateKeyException e) {
             throw new ParamError("请重试");
         }
-        //TODO: 初始化组织树虚拟根节点
+        //初始化组织树虚拟根节点
+        OrgTree root = new OrgTree();
+        root.setId(OrgTree.ORG_ID_TEMPLATE.formatted(tenant.getId(), 0));
+        root.setNodeName("根组织");
+        root.setCreateUser(UserContextUtils.getUserId());
+        root.setUpdateUser(UserContextUtils.getUserId());
+        root.setIdPath(root.getId());
+        root.setTenantId(tenant.getId());
+        //租户名字作为真正的根节点(默认组织树，行政组织）
+        OrgTree current = new OrgTree();
+        current.setId(OrgTree.ORG_ID_TEMPLATE.formatted(tenant.getId(), 1));
+        current.setNodeName(tenant.getNameCn());
+        current.setShortName(tenant.getShortName());
+        current.setParentId(root.getId());
+        current.setCreateUser(UserContextUtils.getUserId());
+        current.setUpdateUser(UserContextUtils.getUserId());
+        current.setIdPath(root.getId() + G.ID_PATH_SPLITTER + current.getId());
+        try {
+            orgTreeMapper.append(root);
+            orgTreeMapper.append(current);
+        } catch (DuplicateKeyException e) {
+            throw new ParamError("请重试");
+        }
         return tenant;
     }
 
@@ -91,7 +122,7 @@ public class TenantService extends ServiceImpl<TenantMapper, Tenant> {
                 .or(StringUtils.isNotBlank(vo.getName()))
                 //模糊查询，租户数量不会多，无需考虑优化
                 .like(Tenant.COL_NAME_CN, vo.getName())
-                .like(Tenant.COL_NAME_SHORT, vo.getName())
+                .like(Tenant.COL_SHORT_NAME, vo.getName())
         );
         return new PageResp<>(resp);
     }
