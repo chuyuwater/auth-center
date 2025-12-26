@@ -3,6 +3,7 @@ package com.hbcy.authcenter.api.modules.core.org.service;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.common.base.Splitter;
+import com.hbcy.authcenter.api.common.bean.NameCacheService;
 import com.hbcy.authcenter.api.common.bean.NodeMoveVO;
 import com.hbcy.authcenter.api.common.constants.G;
 import com.hbcy.authcenter.api.common.enums.OrgNodeCategoryEnum;
@@ -66,6 +67,8 @@ public class OrgTreeService extends ServiceImpl<OrgTreeMapper, OrgTree> {
             )
     );
     @Resource
+    private NameCacheService nameCacheService;
+    @Resource
     private StringRedisTemplate stringRedisTemplate;
     @Resource
     private RedisIdGenerator redisIdGenerator;
@@ -78,7 +81,7 @@ public class OrgTreeService extends ServiceImpl<OrgTreeMapper, OrgTree> {
      * @param idPath 节点全路径
      * @return 组织id
      */
-    private static String findDeptDirectOrg(String idPath) {
+    public static String findDeptDirectOrg(String idPath) {
         //用'-'分割之后，倒序查找含有"ORG"的部分
         List<String> parts = Splitter.on("-").splitToList(idPath);
         for (int i = parts.size() - 1; i >= 0; i--) {
@@ -242,6 +245,11 @@ public class OrgTreeService extends ServiceImpl<OrgTreeMapper, OrgTree> {
         List<OrgTree> orgTrees = baseMapper.listChildrenRecursively(
                 tenantId, rootData.getIdPath() + G.ID_PATH_SPLITTER, vo
         );
+        //fill user
+        Set<String> userIds = orgTrees.stream().map(OrgTree::getCreateUser).collect(Collectors.toSet());
+        Map<String, String> userNameMap = nameCacheService.getUserNameMap(userIds);
+        orgTrees.forEach(t -> t.setCreateUserName(userNameMap.get(t.getCreateUser())));
+
         Map<String, List<OrgTree>> childrenMap = orgTrees.stream()
                 .collect(Collectors.groupingBy(node ->
                                 StringUtils.isBlank(node.getParentId()) ? "" : node.getParentId(),
@@ -291,6 +299,7 @@ public class OrgTreeService extends ServiceImpl<OrgTreeMapper, OrgTree> {
                 .or(StringUtils.isNotBlank(vo.getName()))
                 .like(OrgTree.COL_NODE_NAME, vo.getName())
                 .like(OrgTree.COL_SHORT_NAME, vo.getName())
+                .orderByAsc(OrgTree.COL_SHOW_ORDER)
         );
     }
 

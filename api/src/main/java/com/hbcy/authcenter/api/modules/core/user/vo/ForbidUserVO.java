@@ -19,5 +19,5 @@ public class ForbidUserVO {
     /**
      * 封禁或者解封
      */
-    private boolean forbid = false;
+    private int forbidden = 0;
 }

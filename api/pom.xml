@@ -77,6 +77,11 @@
             <artifactId>oss-spring-boot-starter</artifactId>
             <version>3.1.2</version>
         </dependency>
+        <dependency>
+            <groupId>com.hbcy.common</groupId>
+            <artifactId>common-base</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
+        </dependency>
     </dependencies>
 
     <build>

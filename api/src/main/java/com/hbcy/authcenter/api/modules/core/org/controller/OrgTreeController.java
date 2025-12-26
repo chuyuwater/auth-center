@@ -7,6 +7,7 @@ import com.hbcy.authcenter.api.modules.core.org.vo.OrgTreeCreateVO;
 import com.hbcy.authcenter.api.modules.core.org.vo.OrgTreeQueryVO;
 import com.hbcy.authcenter.api.modules.core.org.vo.OrgTreeUpdateVO;
 import com.hbcy.common.base.tree.TreeNode;
+import com.hbcy.common.web.bean.NameFill;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import org.springframework.validation.annotation.Validated;
@@ -35,6 +36,7 @@ public class OrgTreeController {
      * @return 节点信息
      */
     @GetMapping("/{id}")
+    @NameFill
     public OrgTree getById(@PathVariable String id) {
         return orgTreeService.getById(id);
     }
@@ -51,6 +53,7 @@ public class OrgTreeController {
     }
 
     @GetMapping("/direct")
+    @NameFill
     public List<OrgTree> getDirectChildren(@Valid OrgTreeQueryVO vo) {
         return orgTreeService.listDirectChildren(vo);
     }

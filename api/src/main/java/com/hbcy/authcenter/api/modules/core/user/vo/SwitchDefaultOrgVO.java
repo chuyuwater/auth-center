@@ -17,8 +17,7 @@ public class SwitchDefaultOrgVO {
     @NotBlank(message = "组织id不能为空")
     private String orgId;
     /**
-     * 用户id
+     * 用户id，用户自己切换不需要传
      */
-    @NotBlank(message = "用户id不能为空")
     private String userId;
 }

@@ -17,5 +17,5 @@ public class CreateUserVO extends UpdateUserVO {
      * 创建时归属组织，即为其默认主职组织
      */
     @NotBlank(message = "归属组织不能为空")
-    private String orgId;
+    private String nodeId;
 }
