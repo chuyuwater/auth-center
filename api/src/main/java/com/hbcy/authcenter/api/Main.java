@@ -1,4 +1,4 @@
-package com.hbcy.authcenter;
+package com.hbcy.authcenter.api;
 
 /**
  * @author 姚泰然

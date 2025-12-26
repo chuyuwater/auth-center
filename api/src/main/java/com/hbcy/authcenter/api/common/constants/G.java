@@ -13,4 +13,6 @@ public class G {
      * 数据库里面树结构id全路径的分隔符
      */
     public static final String ID_PATH_SPLITTER = "/";
+
+    public static final String PHONE_PATTERN = "^(?:\\+?86)?1[3-9]\\d{9}$";
 }

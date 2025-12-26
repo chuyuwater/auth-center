@@ -14,11 +14,11 @@ import com.hbcy.authcenter.api.modules.core.tenant.vo.TenantQueryVO;
 import com.hbcy.authcenter.api.modules.core.tenant.vo.TenantUpsertVO;
 import com.hbcy.authcenter.sdk.utils.UserContextUtils;
 import com.hbcy.common.base.error.ParamError;
+import com.hbcy.common.base.util.BeanCopyUtils;
 import com.hbcy.common.db.model.PageResp;
 import com.hbcy.common.redis.RedisIdGenerator;
 import jakarta.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.BeanUtils;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,7 +51,7 @@ public class TenantService extends ServiceImpl<TenantMapper, Tenant> {
         String calcedId = redisIdGenerator.generateId(TENANT_KEY, this::count, TenantIdUtils::convertToTitle);
         Tenant tenant = new Tenant();
         tenant.setId(calcedId);
-        BeanUtils.copyProperties(vo, tenant);
+        BeanCopyUtils.copy(vo, tenant);
         tenant.setCreateUser(UserContextUtils.getUserId());
         tenant.setUpdateUser(UserContextUtils.getUserId());
         try {
@@ -90,7 +90,7 @@ public class TenantService extends ServiceImpl<TenantMapper, Tenant> {
         if (tenant == null) {
             throw new ParamError("指定租户不存在");
         }
-        BeanUtils.copyProperties(vo, tenant);
+        BeanCopyUtils.copy(vo, tenant);
         tenant.setUpdateUser(UserContextUtils.getUserId());
         try {
             this.updateById(tenant);

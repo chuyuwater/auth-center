@@ -5,7 +5,7 @@ import com.hbcy.authcenter.api.modules.core.user.model.User;
 
 /**
  * @author 姚泰然
- * @date 2025-12-25 10:56
+ * @date 2025-12-26 08:54
  */
 public interface UserMapper extends BaseMapper<User> {
 }

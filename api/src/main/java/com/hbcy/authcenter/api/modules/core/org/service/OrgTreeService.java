@@ -18,11 +18,11 @@ import com.hbcy.authcenter.sdk.utils.UserContextUtils;
 import com.hbcy.common.base.error.ParamError;
 import com.hbcy.common.base.error.PermissionError;
 import com.hbcy.common.base.tree.TreeNode;
+import com.hbcy.common.base.util.BeanCopyUtils;
 import com.hbcy.common.redis.RedisIdGenerator;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.BeanUtils;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -140,7 +140,7 @@ public class OrgTreeService extends ServiceImpl<OrgTreeMapper, OrgTree> {
         String parentIdPath = parent == null ? parentId : parent.getIdPath();
 
         OrgTree entity = new OrgTree();
-        BeanUtils.copyProperties(vo, entity);
+        BeanCopyUtils.copy(vo, entity);
         checkLevelAllow(entity, parent);
         final boolean isDept = OrgNodeTypeEnum.DEPT.getValue().equals(vo.getNodeType());
         String id = redisIdGenerator.generateId(BIZ_KEY.formatted(tenantId, vo.getNodeType()), () -> {
@@ -191,7 +191,7 @@ public class OrgTreeService extends ServiceImpl<OrgTreeMapper, OrgTree> {
             throw new PermissionError("禁止更新根节点");
         }
         OrgTree parent = getById(entity.getParentId());
-        BeanUtils.copyProperties(vo, entity);
+        BeanCopyUtils.copy(vo, entity);
         checkLevelAllow(entity, parent);
 
         entity.setUpdateUser(UserContextUtils.getUserId());

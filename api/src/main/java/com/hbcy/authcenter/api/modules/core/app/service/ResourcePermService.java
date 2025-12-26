@@ -11,9 +11,9 @@ import com.hbcy.authcenter.api.modules.core.app.vo.ResourcePermQueryVO;
 import com.hbcy.authcenter.api.modules.core.app.vo.ResourcePermUpdateVO;
 import com.hbcy.authcenter.sdk.utils.UserContextUtils;
 import com.hbcy.common.base.error.ParamError;
+import com.hbcy.common.base.util.BeanCopyUtils;
 import jakarta.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.BeanUtils;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
@@ -42,7 +42,7 @@ public class ResourcePermService extends ServiceImpl<ResourcePermMapper, Resourc
             throw new ParamError("关联的菜单资源不存在");
         }
         ResourcePerm entity = new ResourcePerm();
-        BeanUtils.copyProperties(vo, entity);
+        BeanCopyUtils.copy(vo, entity);
         entity.setAppId(tree.getAppId());
         entity.setCreateUser(UserContextUtils.getUserId());
         entity.setUpdateUser(UserContextUtils.getUserId());
@@ -66,7 +66,7 @@ public class ResourcePermService extends ServiceImpl<ResourcePermMapper, Resourc
         if (entity == null) {
             throw new ParamError("指定权限不存在");
         }
-        BeanUtils.copyProperties(vo, entity);
+        BeanCopyUtils.copy(vo, entity);
         entity.setUpdateUser(UserContextUtils.getUserId());
         updateById(entity);
         return entity;

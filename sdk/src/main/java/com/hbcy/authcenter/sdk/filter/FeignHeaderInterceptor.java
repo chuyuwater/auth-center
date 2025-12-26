@@ -1,6 +1,7 @@
 package com.hbcy.authcenter.sdk.filter;
 
 import com.hbcy.authcenter.sdk.annotation.EnableHeaderPassthrough;
+import com.hbcy.authcenter.sdk.constants.AuthConstants;
 import com.hbcy.authcenter.sdk.utils.UserContextUtils;
 import feign.RequestInterceptor;
 import feign.RequestTemplate;
@@ -30,6 +31,8 @@ public class FeignHeaderInterceptor implements RequestInterceptor {
                 headers.forEach((key, value) -> {
                     if (value != null) template.header(key, value);
                 });
+                //标记SDK版本
+                headers.put(AuthConstants.HEADER_SDK_VERSION, AuthConstants.SDK_VERSION);
             }
         }
     }

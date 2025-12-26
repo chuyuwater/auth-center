@@ -19,11 +19,11 @@ import com.hbcy.authcenter.sdk.utils.UserContextUtils;
 import com.hbcy.common.base.error.ParamError;
 import com.hbcy.common.base.log.JsonLogUtils;
 import com.hbcy.common.base.tree.TreeNode;
+import com.hbcy.common.base.util.BeanCopyUtils;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import net.logstash.logback.argument.StructuredArguments;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.BeanUtils;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -72,7 +72,7 @@ public class ResourceTreeService extends ServiceImpl<ResourceTreeMapper, Resourc
     public ResourceTree create(ResourceTreeCreateVO vo) {
         ResourceTree parent = checkParentId(vo.getAppId(), vo.getParentId());
         ResourceTree entity = new ResourceTree();
-        BeanUtils.copyProperties(vo, entity);
+        BeanCopyUtils.copy(vo, entity);
         entity.setId(UlidCreator.getUlid().toString());
         entity.setCreateUser(UserContextUtils.getUserId());
         entity.setUpdateUser(UserContextUtils.getUserId());
@@ -100,7 +100,7 @@ public class ResourceTreeService extends ServiceImpl<ResourceTreeMapper, Resourc
         if (entity == null) {
             throw new ParamError("指定节点不存在");
         }
-        BeanUtils.copyProperties(vo, entity);
+        BeanCopyUtils.copy(vo, entity);
         entity.setUpdateUser(UserContextUtils.getUserId());
         try {
             updateById(entity);

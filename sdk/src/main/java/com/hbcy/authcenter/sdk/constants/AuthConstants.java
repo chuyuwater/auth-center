@@ -14,6 +14,9 @@ import java.util.Map;
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class AuthConstants {
+    public static final String HEADER_SDK_VERSION = "X-SDK-VERSION";
+    public static final String SDK_VERSION = "1.0";
+
     public static final String HEADER_USER_ID = "X-USER-ID";
     public static final String HEADER_APP_ID = "X-APP-ID";
     public static final String HEADER_TENANT_ID = "X-TENANT-ID";

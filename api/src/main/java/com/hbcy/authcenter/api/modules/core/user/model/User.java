@@ -1,148 +1,114 @@
 package com.hbcy.authcenter.api.modules.core.user.model;
 
-import com.baomidou.mybatisplus.annotation.FieldFill;
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
-import java.time.LocalDateTime;
+import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 /**
  * @author 姚泰然
- * @date 2025-12-25 10:56
+ * @date 2025-12-26 08:54
  */
 @Data
 @NoArgsConstructor
 @TableName(value = "sys_user")
 public class User {
+    public static final String COL_ID = "id";
+    public static final String COL_PHONE = "phone";
+    public static final String COL_ACCOUNT = "account";
+    public static final String COL_REAL_NAME = "real_name";
+    public static final String COL_PASSWD = "passwd";
+    public static final String COL_EMAIL = "email";
+    public static final String COL_AVATAR = "avatar";
+    public static final String COL_FORBIDDEN = "forbidden";
+    public static final String COL_WECOM_ID = "wecom_id";
+    public static final String COL_SRC_TYPE = "src_type";
+    public static final String COL_SRC_ID = "src_id";
+    public static final String COL_PASSWD_EXPIRE = "passwd_expire";
+    public static final String COL_TENANT_ID = "tenant_id";
+    public static final String COL_DEFAULT_ORG = "default_org";
+    public static final String COL_DELETE_TIME = "delete_time";
+    public static final String COL_CREATE_TIME = "create_time";
+    public static final String COL_UPDATE_TIME = "update_time";
+    public static final String COL_CREATE_USER = "create_user";
+    public static final String COL_UPDATE_USER = "update_user";
     /**
      * 用户id
      */
     @TableId(value = "id", type = IdType.ASSIGN_UUID)
     private String id;
-
     /**
      * 手机号
      */
     @TableField(value = "phone")
     private String phone;
-
     /**
      * 登录账号
      */
     @TableField(value = "account")
     private String account;
-
     /**
      * 姓名
      */
     @TableField(value = "real_name")
     private String realName;
-
     /**
      * bcrypt加密的密码
      */
     @TableField(value = "passwd")
     private String passwd;
-
     /**
      * 邮箱
      */
     @TableField(value = "email")
     private String email;
-
     /**
      * 头像
      */
     @TableField(value = "avatar")
     private String avatar;
-
     @TableField(value = "forbidden")
     private Integer forbidden;
-
     /**
      * 企业微信id
      */
     @TableField(value = "wecom_id")
     private String wecomId;
-
     /**
      * 账号来源，0-自建，1-OA同步
      */
     @TableField(value = "src_type")
     private Integer srcType;
-
     /**
      * 源系统id
      */
     @TableField(value = "src_id")
     private String srcId;
-
     /**
      * 密码过期时间，null标识永不过期
      */
     @TableField(value = "passwd_expire")
     private LocalDateTime passwdExpire;
-
     /**
      * 账号所属租户
      */
     @TableField(value = "tenant_id")
     private String tenantId;
-
     /**
      * 主职组织
      */
     @TableField(value = "default_org")
     private String defaultOrg;
-
+    @TableField(value = "delete_time", fill = FieldFill.UPDATE)
+    @TableLogic(value = "0", delval = "-1")
+    private Long deleteTime;
     @TableField(value = "create_time", fill = FieldFill.INSERT)
     private LocalDateTime createTime;
-
     @TableField(value = "update_time", fill = FieldFill.INSERT_UPDATE)
     private LocalDateTime updateTime;
-
     @TableField(value = "create_user")
     private String createUser;
-
     @TableField(value = "update_user")
     private String updateUser;
-
-    public static final String COL_ID = "id";
-
-    public static final String COL_PHONE = "phone";
-
-    public static final String COL_ACCOUNT = "account";
-
-    public static final String COL_REAL_NAME = "real_name";
-
-    public static final String COL_PASSWD = "passwd";
-
-    public static final String COL_EMAIL = "email";
-
-    public static final String COL_AVATAR = "avatar";
-
-    public static final String COL_FORBIDDEN = "forbidden";
-
-    public static final String COL_WECOM_ID = "wecom_id";
-
-    public static final String COL_SRC_TYPE = "src_type";
-
-    public static final String COL_SRC_ID = "src_id";
-
-    public static final String COL_PASSWD_EXPIRE = "passwd_expire";
-
-    public static final String COL_TENANT_ID = "tenant_id";
-
-    public static final String COL_DEFAULT_ORG = "default_org";
-
-    public static final String COL_CREATE_TIME = "create_time";
-
-    public static final String COL_UPDATE_TIME = "update_time";
-
-    public static final String COL_CREATE_USER = "create_user";
-
-    public static final String COL_UPDATE_USER = "update_user";
 }

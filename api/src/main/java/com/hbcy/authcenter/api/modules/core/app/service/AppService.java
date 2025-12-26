@@ -11,10 +11,10 @@ import com.hbcy.authcenter.api.modules.core.app.vo.AppQueryVO;
 import com.hbcy.authcenter.api.modules.core.app.vo.AppUpdateVO;
 import com.hbcy.authcenter.sdk.utils.UserContextUtils;
 import com.hbcy.common.base.error.ParamError;
+import com.hbcy.common.base.util.BeanCopyUtils;
 import com.hbcy.common.db.model.PageResp;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
-import org.springframework.beans.BeanUtils;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
@@ -41,7 +41,7 @@ public class AppService extends ServiceImpl<AppMapper, App> {
         checkNameExist(vo.getNameCn());
 
         App app = new App();
-        BeanUtils.copyProperties(vo, app);
+        BeanCopyUtils.copy(vo, app);
         app.setCreateUser(UserContextUtils.getUserId());
         app.setUpdateUser(UserContextUtils.getUserId());
         try {
@@ -62,7 +62,7 @@ public class AppService extends ServiceImpl<AppMapper, App> {
             checkNameExist(vo.getNameCn());
         }
 
-        BeanUtils.copyProperties(vo, app);
+        BeanCopyUtils.copy(vo, app);
         app.setUpdateUser(UserContextUtils.getUserId());
         try {
             this.updateById(app);

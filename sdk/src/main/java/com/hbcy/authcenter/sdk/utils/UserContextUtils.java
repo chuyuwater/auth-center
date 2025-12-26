@@ -4,6 +4,7 @@ import com.alibaba.ttl.TransmittableThreadLocal;
 import com.hbcy.authcenter.sdk.constants.AuthConstants;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Map;
 
@@ -55,6 +56,17 @@ public class UserContextUtils {
 
     public static String getTraceId() {
         return getHeader(AuthConstants.HEADER_TRACE_ID);
+    }
+
+    public static String getSdkVersion() {
+        return getHeader(AuthConstants.HEADER_SDK_VERSION);
+    }
+
+    /**
+     * 请求是否来自SDK
+     */
+    public static boolean isSdkReq() {
+        return StringUtils.isBlank(getSdkVersion());
     }
 
     public static void clear() {

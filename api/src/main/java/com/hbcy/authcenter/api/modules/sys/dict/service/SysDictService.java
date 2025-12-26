@@ -9,8 +9,8 @@ import com.hbcy.authcenter.api.modules.sys.dict.vo.DictUpsertVO;
 import com.hbcy.common.base.error.ClientError;
 import com.hbcy.common.base.error.ParamError;
 import com.hbcy.common.base.tree.TreeNode;
+import com.hbcy.common.base.util.BeanCopyUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.BeanUtils;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
@@ -41,7 +41,7 @@ public class SysDictService extends ServiceImpl<SysDictMapper, SysDict> {
     public SysDict createSysDict(DictUpsertVO vo) {
         checkExist(vo.getParentId());
         SysDict sysDict = new SysDict();
-        BeanUtils.copyProperties(vo, sysDict);
+        BeanCopyUtils.copy(vo, sysDict);
         try {
             this.save(sysDict);
         } catch (DuplicateKeyException e) {
@@ -62,7 +62,7 @@ public class SysDictService extends ServiceImpl<SysDictMapper, SysDict> {
         if (sysDict == null) {
             throw new ClientError("指定字典项不存在");
         }
-        BeanUtils.copyProperties(vo, sysDict);
+        BeanCopyUtils.copy(vo, sysDict);
         try {
             this.updateById(sysDict);
         } catch (DuplicateKeyException e) {
