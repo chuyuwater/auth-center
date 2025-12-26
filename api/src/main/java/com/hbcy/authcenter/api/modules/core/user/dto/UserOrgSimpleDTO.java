@@ -20,6 +20,10 @@ public class UserOrgSimpleDTO {
      */
     private String namePath;
     /**
+     * 组织类别
+     */
+    private String category;
+    /**
      * 是否主职
      */
     private boolean main;
