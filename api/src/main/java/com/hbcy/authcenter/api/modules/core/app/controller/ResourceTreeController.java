@@ -1,6 +1,6 @@
 package com.hbcy.authcenter.api.modules.core.app.controller;
 
-import com.hbcy.authcenter.api.common.pojo.NodeMoveVO;
+import com.hbcy.authcenter.api.common.bean.NodeMoveVO;
 import com.hbcy.authcenter.api.modules.core.app.dto.ResTreeDTO;
 import com.hbcy.authcenter.api.modules.core.app.model.ResourceTree;
 import com.hbcy.authcenter.api.modules.core.app.service.ResourceTreeService;

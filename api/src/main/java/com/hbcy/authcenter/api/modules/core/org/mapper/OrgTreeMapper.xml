@@ -90,4 +90,10 @@
         from org_tree
         where parent_id = #{parentId} and node_type= #{nodeType}
     </select>
+
+    <select id="selectNameById" resultType="java.lang.String">
+        select node_name
+        from org_tree
+        where id = #{userId}
+    </select>
 </mapper>

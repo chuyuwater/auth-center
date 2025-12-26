@@ -3,10 +3,10 @@ package com.hbcy.authcenter.api.modules.core.org.service;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.common.base.Splitter;
+import com.hbcy.authcenter.api.common.bean.NodeMoveVO;
 import com.hbcy.authcenter.api.common.constants.G;
 import com.hbcy.authcenter.api.common.enums.OrgNodeCategoryEnum;
 import com.hbcy.authcenter.api.common.enums.OrgNodeTypeEnum;
-import com.hbcy.authcenter.api.common.pojo.NodeMoveVO;
 import com.hbcy.authcenter.api.modules.core.org.dao.OrgTreeMapper;
 import com.hbcy.authcenter.api.modules.core.org.model.OrgTree;
 import com.hbcy.authcenter.api.modules.core.org.vo.OrgTreeCreateVO;
@@ -24,6 +24,7 @@ import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,6 +40,7 @@ import java.util.stream.Collectors;
 @Service
 public class OrgTreeService extends ServiceImpl<OrgTreeMapper, OrgTree> {
     public static final String BIZ_KEY = "portal:orgtree:tenant:%s:%d";
+    public static final String ORG_NAME_CACHE = "portal:orgtree:name:%s";
     /**
      * 节点类型规则
      */
@@ -64,6 +66,8 @@ public class OrgTreeService extends ServiceImpl<OrgTreeMapper, OrgTree> {
             )
     );
     @Resource
+    private StringRedisTemplate stringRedisTemplate;
+    @Resource
     private RedisIdGenerator redisIdGenerator;
     @Resource
     private UserOrgMapper userOrgMapper;
@@ -84,6 +88,26 @@ public class OrgTreeService extends ServiceImpl<OrgTreeMapper, OrgTree> {
             }
         }
         return null;
+    }
+
+    public String getName(String userId) {
+        Object s = stringRedisTemplate.opsForHash().get(ORG_NAME_CACHE, userId);
+        if (s == null) {
+            String name = baseMapper.selectNameById(userId);
+            if (name != null) {
+                stringRedisTemplate.opsForHash().put(ORG_NAME_CACHE, userId, name);
+            }
+            return name;
+        }
+        return s.toString();
+    }
+
+    private void cleanNameCache(String userId) {
+        stringRedisTemplate.opsForHash().delete(ORG_NAME_CACHE, userId);
+    }
+
+    private void cleanNameCache(List<String> userIds) {
+        stringRedisTemplate.opsForHash().delete(ORG_NAME_CACHE, userIds.toArray());
     }
 
     private OrgTree checkParentId(String tenantId, String parentId) {
@@ -190,6 +214,7 @@ public class OrgTreeService extends ServiceImpl<OrgTreeMapper, OrgTree> {
         if (root.equals(entity.getId())) {
             throw new PermissionError("禁止更新根节点");
         }
+        boolean cleanCache = !vo.getNodeName().equals(entity.getNodeName());
         OrgTree parent = getById(entity.getParentId());
         BeanCopyUtils.copy(vo, entity);
         checkLevelAllow(entity, parent);
@@ -199,6 +224,9 @@ public class OrgTreeService extends ServiceImpl<OrgTreeMapper, OrgTree> {
             updateById(entity);
         } catch (DuplicateKeyException e) {
             throw new ParamError("同一层级的名称、简称均不能重复");
+        }
+        if (cleanCache) {
+            cleanNameCache(entity.getId());
         }
         return entity;
     }

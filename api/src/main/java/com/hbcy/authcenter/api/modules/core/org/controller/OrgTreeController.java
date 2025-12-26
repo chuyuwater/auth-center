@@ -1,6 +1,6 @@
 package com.hbcy.authcenter.api.modules.core.org.controller;
 
-import com.hbcy.authcenter.api.common.pojo.NodeMoveVO;
+import com.hbcy.authcenter.api.common.bean.NodeMoveVO;
 import com.hbcy.authcenter.api.modules.core.org.model.OrgTree;
 import com.hbcy.authcenter.api.modules.core.org.service.OrgTreeService;
 import com.hbcy.authcenter.api.modules.core.org.vo.OrgTreeCreateVO;

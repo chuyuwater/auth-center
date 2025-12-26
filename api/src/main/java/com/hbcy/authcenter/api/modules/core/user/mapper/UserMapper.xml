@@ -1,33 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.hbcy.authcenter.api.modules.core.user.dao.UserMapper">
-  <resultMap id="BaseResultMap" type="com.hbcy.authcenter.api.modules.core.user.model.User">
-    <!--@mbg.generated-->
-    <!--@Table sys_user-->
-    <id column="id" jdbcType="CHAR" property="id" />
-    <result column="phone" jdbcType="VARCHAR" property="phone" />
-    <result column="account" jdbcType="VARCHAR" property="account" />
-    <result column="real_name" jdbcType="VARCHAR" property="realName" />
-    <result column="passwd" jdbcType="VARCHAR" property="passwd" />
-    <result column="email" jdbcType="VARCHAR" property="email" />
-    <result column="avatar" jdbcType="VARCHAR" property="avatar" />
-    <result column="forbidden" jdbcType="TINYINT" property="forbidden" />
-    <result column="wecom_id" jdbcType="VARCHAR" property="wecomId" />
-    <result column="src_type" jdbcType="TINYINT" property="srcType" />
-    <result column="src_id" jdbcType="VARCHAR" property="srcId" />
-    <result column="passwd_expire" jdbcType="TIMESTAMP" property="passwdExpire" />
-    <result column="tenant_id" jdbcType="VARCHAR" property="tenantId" />
-    <result column="default_org" jdbcType="VARCHAR" property="defaultOrg" />
-    <result column="delete_time" jdbcType="BIGINT" property="deleteTime" />
-    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
-    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
-    <result column="create_user" jdbcType="CHAR" property="createUser" />
-    <result column="update_user" jdbcType="CHAR" property="updateUser" />
-  </resultMap>
-  <sql id="Base_Column_List">
-    <!--@mbg.generated-->
-    id, phone, account, real_name, passwd, email, avatar, forbidden, wecom_id, src_type, 
-    src_id, passwd_expire, tenant_id, default_org, delete_time, create_time, update_time, 
-    create_user, update_user
-  </sql>
+    <resultMap id="BaseResultMap" type="com.hbcy.authcenter.api.modules.core.user.model.User">
+        <!--@mbg.generated-->
+        <!--@Table sys_user-->
+        <id column="id" jdbcType="CHAR" property="id"/>
+        <result column="phone" jdbcType="VARCHAR" property="phone"/>
+        <result column="account" jdbcType="VARCHAR" property="account"/>
+        <result column="real_name" jdbcType="VARCHAR" property="realName"/>
+        <result column="passwd" jdbcType="VARCHAR" property="passwd"/>
+        <result column="email" jdbcType="VARCHAR" property="email"/>
+        <result column="avatar" jdbcType="VARCHAR" property="avatar"/>
+        <result column="forbidden" jdbcType="TINYINT" property="forbidden"/>
+        <result column="wecom_id" jdbcType="VARCHAR" property="wecomId"/>
+        <result column="src_type" jdbcType="TINYINT" property="srcType"/>
+        <result column="src_id" jdbcType="VARCHAR" property="srcId"/>
+        <result column="passwd_expire" jdbcType="TIMESTAMP" property="passwdExpire"/>
+        <result column="tenant_id" jdbcType="VARCHAR" property="tenantId"/>
+        <result column="default_org" jdbcType="VARCHAR" property="defaultOrg"/>
+        <result column="delete_time" jdbcType="BIGINT" property="deleteTime"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+        <result column="create_user" jdbcType="CHAR" property="createUser"/>
+        <result column="update_user" jdbcType="CHAR" property="updateUser"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        <!--@mbg.generated-->
+        id, phone, account, real_name, passwd, email, avatar, forbidden, wecom_id, src_type,
+        src_id, passwd_expire, tenant_id, default_org, delete_time, create_time, update_time,
+        create_user, update_user
+    </sql>
+
+    <select id="selectNameById" resultType="java.lang.String">
+        select real_name from sys_user where id= #{userId}
+    </select>
 </mapper>

@@ -1,4 +1,4 @@
-package com.hbcy.authcenter.api.common.pojo;
+package com.hbcy.authcenter.api.common.bean;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;

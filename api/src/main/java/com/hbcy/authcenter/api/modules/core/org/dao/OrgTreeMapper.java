@@ -54,4 +54,6 @@ public interface OrgTreeMapper extends BaseMapper<OrgTree> {
      * @param parentId 父节点
      */
     String selectMaxId(@Param("parentId") String parentId, @Param("nodeType") Integer nodeType);
+
+    String selectNameById(@Param("userId") String userId);
 }
