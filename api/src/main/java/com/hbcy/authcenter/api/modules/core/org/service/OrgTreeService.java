@@ -8,12 +8,12 @@ import com.hbcy.authcenter.api.common.enums.OrgNodeCategoryEnum;
 import com.hbcy.authcenter.api.common.enums.OrgNodeTypeEnum;
 import com.hbcy.authcenter.api.common.pojo.NodeMoveVO;
 import com.hbcy.authcenter.api.modules.core.org.dao.OrgTreeMapper;
-import com.hbcy.authcenter.api.modules.core.org.dao.OrgUserMapper;
 import com.hbcy.authcenter.api.modules.core.org.model.OrgTree;
-import com.hbcy.authcenter.api.modules.core.org.model.OrgUser;
 import com.hbcy.authcenter.api.modules.core.org.vo.OrgTreeCreateVO;
 import com.hbcy.authcenter.api.modules.core.org.vo.OrgTreeQueryVO;
 import com.hbcy.authcenter.api.modules.core.org.vo.OrgTreeUpdateVO;
+import com.hbcy.authcenter.api.modules.core.user.dao.UserOrgMapper;
+import com.hbcy.authcenter.api.modules.core.user.model.UserOrg;
 import com.hbcy.authcenter.sdk.utils.UserContextUtils;
 import com.hbcy.common.base.error.ParamError;
 import com.hbcy.common.base.error.PermissionError;
@@ -23,6 +23,7 @@ import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -65,7 +66,7 @@ public class OrgTreeService extends ServiceImpl<OrgTreeMapper, OrgTree> {
     @Resource
     private RedisIdGenerator redisIdGenerator;
     @Resource
-    private OrgUserMapper orgUserMapper;
+    private UserOrgMapper userOrgMapper;
 
     /**
      * 根据idPath找到部门最近的组织
@@ -161,7 +162,11 @@ public class OrgTreeService extends ServiceImpl<OrgTreeMapper, OrgTree> {
         entity.setCreateUser(UserContextUtils.getUserId());
         entity.setUpdateUser(UserContextUtils.getUserId());
         entity.setIdPath(parentIdPath + G.ID_PATH_SPLITTER + entity.getId());
-        baseMapper.append(entity);
+        try {
+            baseMapper.append(entity);
+        } catch (DuplicateKeyException e) {
+            throw new ParamError("同一层级的名称、简称均不能重复");
+        }
         return entity;
     }
 
@@ -190,7 +195,11 @@ public class OrgTreeService extends ServiceImpl<OrgTreeMapper, OrgTree> {
         checkLevelAllow(entity, parent);
 
         entity.setUpdateUser(UserContextUtils.getUserId());
-        updateById(entity);
+        try {
+            updateById(entity);
+        } catch (DuplicateKeyException e) {
+            throw new ParamError("同一层级的名称、简称均不能重复");
+        }
         return entity;
     }
 
@@ -285,13 +294,15 @@ public class OrgTreeService extends ServiceImpl<OrgTreeMapper, OrgTree> {
         if (node.getId().equals(tenantRootId())) {
             throw new PermissionError("不能删除根节点");
         }
-        Long count = orgUserMapper.selectCount(new QueryWrapper<OrgUser>()
-                .eq(OrgUser.COL_TENANT_ID, node.getTenantId())
-                .eq(node.getNodeType().equals(OrgNodeTypeEnum.ORG.getValue()), OrgUser.COL_ORG_ID, node.getId())
-                .eq(node.getNodeType().equals(OrgNodeTypeEnum.DEPT.getValue()), OrgUser.COL_DEPT_ID, node.getId())
+        boolean isDept = node.getNodeType().equals(OrgNodeTypeEnum.DEPT.getValue());
+        Long count = userOrgMapper.selectCount(new QueryWrapper<UserOrg>()
+                .eq(UserOrg.COL_TENANT_ID, node.getTenantId())
+                .eq(!isDept, UserOrg.COL_ORG_ID, node.getId())
+                .eq(isDept, UserOrg.COL_DEPT_ID, node.getId())
         );
         if (count > 0) {
-            throw new PermissionError("该节点下存在用户，无法删除");
+            String tips = isDept ? "部门" : "组织";
+            throw new PermissionError("删除%s内存在用户，需要将用户移出才能删除".formatted(tips));
         }
         List<OrgTree> related = baseMapper.listChildrenRecursively(node.getTenantId(), node.getIdPath(), null);
         Set<String> ids = related.stream().map(OrgTree::getId).collect(Collectors.toSet());
