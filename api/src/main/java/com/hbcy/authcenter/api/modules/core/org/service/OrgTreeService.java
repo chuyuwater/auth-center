@@ -17,7 +17,6 @@ import com.hbcy.authcenter.api.modules.core.org.vo.OrgTreeUpdateVO;
 import com.hbcy.authcenter.sdk.utils.UserContextUtils;
 import com.hbcy.common.base.error.ParamError;
 import com.hbcy.common.base.error.PermissionError;
-import com.hbcy.common.base.error.ServerError;
 import com.hbcy.common.base.tree.TreeNode;
 import com.hbcy.common.redis.RedisIdGenerator;
 import jakarta.annotation.Resource;
@@ -38,7 +37,7 @@ import java.util.stream.Collectors;
  */
 @Service
 public class OrgTreeService extends ServiceImpl<OrgTreeMapper, OrgTree> {
-    public static final String BIZ_KEY = "portal:orgtree:";
+    public static final String BIZ_KEY = "portal:orgtree:tenant:%s:%d";
     /**
      * 节点类型规则
      */
@@ -142,19 +141,16 @@ public class OrgTreeService extends ServiceImpl<OrgTreeMapper, OrgTree> {
         OrgTree entity = new OrgTree();
         BeanUtils.copyProperties(vo, entity);
         checkLevelAllow(entity, parent);
-
-        String id = redisIdGenerator.generateId(BIZ_KEY, () -> {
-            String s = baseMapper.selectMaxId(parentId);
-            if (s == null) {
-                return 1L;
-            }
-            String[] parts = s.split("-");
-            if (parts.length < 3) {
-                throw new ServerError("id格式错误:%s", s);
-            }
-            return Long.parseLong(parts[2]) + 1;
+        final boolean isDept = OrgNodeTypeEnum.DEPT.getValue().equals(vo.getNodeType());
+        String id = redisIdGenerator.generateId(BIZ_KEY.formatted(tenantId, vo.getNodeType()), () -> {
+            Long count = baseMapper.selectCount(new QueryWrapper<OrgTree>()
+                    .eq(OrgTree.COL_TENANT_ID, tenantId)
+                    .eq(OrgTree.COL_NODE_TYPE, vo.getNodeType())
+            );
+            //由于存在虚拟根组织，组织的id是从0开始的
+            return isDept ? count + 1 : count;
         }, key -> {
-            if (OrgNodeTypeEnum.DEPT.getValue().equals(vo.getNodeType())) {
+            if (isDept) {
                 return OrgTree.ORG_ID_TEMPLATE.formatted(tenantId, key);
             } else {
                 return OrgTree.DEPT_ID_TEMPLATE.formatted(tenantId, key);

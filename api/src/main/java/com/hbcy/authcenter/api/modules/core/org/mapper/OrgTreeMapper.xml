@@ -1,36 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.hbcy.authcenter.api.modules.core.org.dao.OrgTreeMapper">
-  <resultMap id="BaseResultMap" type="com.hbcy.authcenter.api.modules.core.org.model.OrgTree">
-    <!--@mbg.generated-->
-    <!--@Table org_tree-->
-    <id column="id" jdbcType="VARCHAR" property="id" />
-    <result column="node_name" jdbcType="VARCHAR" property="nodeName" />
-    <result column="short_name" jdbcType="VARCHAR" property="shortName" />
-    <result column="memo" jdbcType="VARCHAR" property="memo" />
-    <result column="node_type" jdbcType="TINYINT" property="nodeType" />
-    <result column="exist_type" jdbcType="TINYINT" property="existType" />
-    <result column="node_category" jdbcType="TINYINT" property="nodeCategory" />
-    <result column="parent_id" jdbcType="VARCHAR" property="parentId" />
-    <result column="id_path" jdbcType="VARCHAR" property="idPath" />
-    <result column="show_order" jdbcType="INTEGER" property="showOrder" />
-    <result column="tenant_id" jdbcType="VARCHAR" property="tenantId" />
-    <result column="delete_time" jdbcType="BIGINT" property="deleteTime" />
-    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
-    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
-    <result column="create_user" jdbcType="CHAR" property="createUser" />
-    <result column="update_user" jdbcType="CHAR" property="updateUser" />
-  </resultMap>
-  <sql id="Base_Column_List">
-    <!--@mbg.generated-->
-    id, node_name, short_name, memo, node_type, exist_type, node_category, parent_id, 
-    id_path, show_order, tenant_id, delete_time, create_time, update_time, create_user, 
-    update_user
-  </sql>
+    <resultMap id="BaseResultMap" type="com.hbcy.authcenter.api.modules.core.org.model.OrgTree">
+        <!--@mbg.generated-->
+        <!--@Table org_tree-->
+        <id column="id" jdbcType="VARCHAR" property="id"/>
+        <result column="node_name" jdbcType="VARCHAR" property="nodeName"/>
+        <result column="short_name" jdbcType="VARCHAR" property="shortName"/>
+        <result column="memo" jdbcType="VARCHAR" property="memo"/>
+        <result column="node_type" jdbcType="TINYINT" property="nodeType"/>
+        <result column="exist_type" jdbcType="TINYINT" property="existType"/>
+        <result column="node_category" jdbcType="TINYINT" property="nodeCategory"/>
+        <result column="parent_id" jdbcType="VARCHAR" property="parentId"/>
+        <result column="id_path" jdbcType="VARCHAR" property="idPath"/>
+        <result column="show_order" jdbcType="INTEGER" property="showOrder"/>
+        <result column="tenant_id" jdbcType="VARCHAR" property="tenantId"/>
+        <result column="delete_time" jdbcType="BIGINT" property="deleteTime"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+        <result column="create_user" jdbcType="CHAR" property="createUser"/>
+        <result column="update_user" jdbcType="CHAR" property="updateUser"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        <!--@mbg.generated-->
+        id, node_name, short_name, memo, node_type, exist_type, node_category, parent_id,
+        id_path, show_order, tenant_id, delete_time, create_time, update_time, create_user,
+        update_user
+    </sql>
 
     <select id="listChildrenRecursively" resultMap="BaseResultMap">
         select
-        <include refid="Base_Column_List" />
+        <include refid="Base_Column_List"/>
         from org_tree
         <where>
             tenant_id = #{tenantId}
@@ -88,6 +88,6 @@
     <select id="selectMaxId" resultType="java.lang.String">
         select max(id)
         from org_tree
-        where parent_id = #{parentId}
+        where parent_id = #{parentId} and node_type= #{nodeType}
     </select>
 </mapper>
