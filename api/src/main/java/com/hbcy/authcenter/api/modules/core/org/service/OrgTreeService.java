@@ -90,18 +90,6 @@ public class OrgTreeService extends ServiceImpl<OrgTreeMapper, OrgTree> {
         return null;
     }
 
-    public String getOrgName(String orgId) {
-        Object s = stringRedisTemplate.opsForHash().get(NAME_CACHE_KEY, orgId);
-        if (s == null) {
-            String name = baseMapper.selectNameById(orgId);
-            if (name != null) {
-                stringRedisTemplate.opsForHash().put(NAME_CACHE_KEY, orgId, name);
-            }
-            return name;
-        }
-        return s.toString();
-    }
-
     private void cleanNameCache(String userId) {
         stringRedisTemplate.opsForHash().delete(NAME_CACHE_KEY, userId);
     }
@@ -348,6 +336,9 @@ public class OrgTreeService extends ServiceImpl<OrgTreeMapper, OrgTree> {
         OrgTree node = getById(vo.getNodeId());
         if (node == null) {
             throw new ParamError("节点不存在");
+        }
+        if (!node.getTenantId().equals(UserContextUtils.getTenantId())) {
+            throw new PermissionError();
         }
         OrgTree parentNode = null;
         OrgTree prevNode = null;

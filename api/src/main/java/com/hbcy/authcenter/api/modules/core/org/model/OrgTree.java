@@ -1,7 +1,9 @@
 package com.hbcy.authcenter.api.modules.core.org.model;
 
 import com.baomidou.mybatisplus.annotation.*;
+import com.hbcy.authcenter.api.common.bean.BaseEntity;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
@@ -10,10 +12,11 @@ import java.time.LocalDateTime;
  * @author 姚泰然
  * @date 2025-12-25 17:47
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
 @NoArgsConstructor
 @TableName(value = "org_tree")
-public class OrgTree {
+public class OrgTree extends BaseEntity {
     public static final String ORG_ID_TEMPLATE = "%s-ORG-%06d";
     public static final String DEPT_ID_TEMPLATE = "%s-DEPT-%06d";
     public static final int EXIST_TYPE_ENTITY = 0;

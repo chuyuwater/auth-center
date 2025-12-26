@@ -14,8 +14,9 @@ import com.hbcy.authcenter.api.modules.core.tenant.vo.TenantQueryVO;
 import com.hbcy.authcenter.api.modules.core.tenant.vo.TenantUpsertVO;
 import com.hbcy.authcenter.sdk.utils.UserContextUtils;
 import com.hbcy.common.base.error.ParamError;
+import com.hbcy.common.base.pojo.PageResp;
 import com.hbcy.common.base.util.BeanCopyUtils;
-import com.hbcy.common.db.model.PageResp;
+import com.hbcy.common.db.model.PageRespEx;
 import com.hbcy.common.redis.RedisIdGenerator;
 import jakarta.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
@@ -124,7 +125,7 @@ public class TenantService extends ServiceImpl<TenantMapper, Tenant> {
                 .like(Tenant.COL_NAME_CN, vo.getName())
                 .like(Tenant.COL_SHORT_NAME, vo.getName())
         );
-        return new PageResp<>(resp);
+        return new PageRespEx<>(resp);
     }
 
     public void delete(String id) {

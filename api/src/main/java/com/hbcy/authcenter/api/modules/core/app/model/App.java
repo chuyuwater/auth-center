@@ -1,7 +1,9 @@
 package com.hbcy.authcenter.api.modules.core.app.model;
 
 import com.baomidou.mybatisplus.annotation.*;
+import com.hbcy.authcenter.api.common.bean.BaseEntity;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
@@ -10,10 +12,11 @@ import java.time.LocalDateTime;
  * @author 姚泰然
  * @date 2025-12-23 17:10
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
 @NoArgsConstructor
 @TableName(value = "app")
-public class App {
+public class App extends BaseEntity {
     public static final String COL_ID = "id";
     public static final String COL_NAME_CN = "name_cn";
     public static final String COL_MEMO = "memo";

@@ -8,6 +8,7 @@ import com.hbcy.authcenter.api.modules.core.app.vo.ResourceTreeCreateVO;
 import com.hbcy.authcenter.api.modules.core.app.vo.ResourceTreeQueryVO;
 import com.hbcy.authcenter.api.modules.core.app.vo.ResourceTreeUpdateVO;
 import com.hbcy.common.base.tree.TreeNode;
+import com.hbcy.common.web.bean.NameFill;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import org.springframework.validation.annotation.Validated;
@@ -34,6 +35,7 @@ public class ResourceTreeController {
      * @return 节点信息
      */
     @GetMapping("/{id}")
+    @NameFill
     public ResourceTree getById(@PathVariable String id) {
         return resourceTreeService.getById(id);
     }

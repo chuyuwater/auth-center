@@ -7,6 +7,20 @@ package com.hbcy.authcenter.api.modules.core.user.dto;
  * @date 2025-12-26 14:08
  */
 public class UserOrgSimpleDTO {
-    private String orgName;
-    private String orgPath;
+    /**
+     * 组织id
+     */
+    private String id;
+    /**
+     * 全路径（id）
+     */
+    private String idPath;
+    /**
+     * 全路径（名字）
+     */
+    private String namePath;
+    /**
+     * 是否主职
+     */
+    private boolean main;
 }

@@ -11,8 +11,9 @@ import com.hbcy.authcenter.api.modules.core.app.vo.AppQueryVO;
 import com.hbcy.authcenter.api.modules.core.app.vo.AppUpdateVO;
 import com.hbcy.authcenter.sdk.utils.UserContextUtils;
 import com.hbcy.common.base.error.ParamError;
+import com.hbcy.common.base.pojo.PageResp;
 import com.hbcy.common.base.util.BeanCopyUtils;
-import com.hbcy.common.db.model.PageResp;
+import com.hbcy.common.db.model.PageRespEx;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
 import org.springframework.dao.DuplicateKeyException;
@@ -93,7 +94,7 @@ public class AppService extends ServiceImpl<AppMapper, App> {
                 .eq(vo.getForbidden() != null, App.COL_FORBIDDEN, vo.getForbidden())
                 .like(StringUtils.isNotBlank(vo.getNameCn()), App.COL_NAME_CN, vo.getNameCn())
                 .orderByAsc(App.COL_SHOW_ORDER));
-        return new PageResp<>(resp);
+        return new PageRespEx<>(resp);
     }
 
     public void delete(String id) {

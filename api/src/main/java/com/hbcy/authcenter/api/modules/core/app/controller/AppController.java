@@ -6,7 +6,8 @@ import com.hbcy.authcenter.api.modules.core.app.vo.AppCreateVO;
 import com.hbcy.authcenter.api.modules.core.app.vo.AppForbiddenVO;
 import com.hbcy.authcenter.api.modules.core.app.vo.AppQueryVO;
 import com.hbcy.authcenter.api.modules.core.app.vo.AppUpdateVO;
-import com.hbcy.common.db.model.PageResp;
+import com.hbcy.common.base.pojo.PageResp;
+import com.hbcy.common.web.bean.NameFill;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import org.springframework.validation.annotation.Validated;
@@ -33,6 +34,7 @@ public class AppController {
      * @return 应用分页列表
      */
     @GetMapping
+    @NameFill
     public PageResp<App> list(@RequestBody @Valid AppQueryVO vo) {
         return appService.list(vo);
     }
@@ -44,6 +46,7 @@ public class AppController {
      * @return 应用信息
      */
     @GetMapping("/{id}")
+    @NameFill
     public App getById(@PathVariable String id) {
         return appService.getById(id);
     }

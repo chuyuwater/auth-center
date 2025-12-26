@@ -5,6 +5,7 @@ import com.hbcy.authcenter.api.modules.core.app.service.ResourcePermService;
 import com.hbcy.authcenter.api.modules.core.app.vo.ResourcePermCreateVO;
 import com.hbcy.authcenter.api.modules.core.app.vo.ResourcePermQueryVO;
 import com.hbcy.authcenter.api.modules.core.app.vo.ResourcePermUpdateVO;
+import com.hbcy.common.web.bean.NameFill;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import org.springframework.validation.annotation.Validated;
@@ -33,6 +34,7 @@ public class ResourcePermController {
      * @return 权限列表
      */
     @GetMapping
+    @NameFill
     public List<ResourcePerm> list(@RequestBody @Valid ResourcePermQueryVO vo) {
         return resourcePermService.list(vo);
     }
@@ -44,6 +46,7 @@ public class ResourcePermController {
      * @return 权限信息
      */
     @GetMapping("/{id}")
+    @NameFill
     public ResourcePerm getById(@PathVariable String id) {
         return resourcePermService.getById(id);
     }

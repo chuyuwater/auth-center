@@ -7,6 +7,7 @@ import com.hbcy.common.base.error.ServerError;
 import com.hbcy.common.web.api.NamedId;
 import com.hbcy.common.web.bean.INameFillService;
 import jakarta.annotation.Resource;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
@@ -33,26 +34,31 @@ public class NameCacheService implements INameFillService {
 
     private Map<String, String> doQuery(Set<String> ids, String cacheKey,
                                         Function<Set<String>, List<NamedId>> queryFunc) {
-        List<Object> uids = new ArrayList<>(ids);
-        List<Object> r = stringRedisTemplate.opsForHash().multiGet(cacheKey, uids);
+        //使用kv存储，在redis集群中性能更好
+        List<String> keys = ids.stream().filter(id -> StringUtils.isNoneBlank(id) && !"0".equals(id))
+                .map(id -> cacheKey + id).toList();
+        List<String> r = stringRedisTemplate.opsForValue().multiGet(keys);
+        if (r == null) r = Collections.emptyList();
         Set<String> missed = new HashSet<>();
         Map<String, String> result = new HashMap<>();
+        result.put("0", "系统");
+        result.put("", "系统");
         for (int i = 0; i < r.size(); i++) {
             if (r.get(i) == null) {
-                missed.add(uids.get(i).toString());
+                missed.add(keys.get(i));
             } else {
-                result.put(uids.get(i).toString(), r.get(i).toString());
+                result.put(keys.get(i), r.get(i));
             }
         }
         if (!missed.isEmpty()) {
             List<NamedId> nameIds = queryFunc.apply(missed);
-            Map<String, String> toPut = new HashMap<>();
+            Map<String, String> toSet = new HashMap<>();
             for (NamedId id : nameIds) {
-                toPut.put(id.getItemId(), id.getItemName());
+                toSet.put(id.getItemId(), id.getItemName());
                 result.put(id.getItemId(), id.getItemName());
             }
-            if (!toPut.isEmpty()) {
-                stringRedisTemplate.opsForHash().putAll(cacheKey, toPut);
+            if (!toSet.isEmpty()) {
+                stringRedisTemplate.opsForValue().multiSet(toSet);
             }
         }
         return result;

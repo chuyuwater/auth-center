@@ -5,7 +5,8 @@ import com.hbcy.authcenter.api.modules.core.tenant.service.TenantService;
 import com.hbcy.authcenter.api.modules.core.tenant.vo.TenantForbiddenVO;
 import com.hbcy.authcenter.api.modules.core.tenant.vo.TenantQueryVO;
 import com.hbcy.authcenter.api.modules.core.tenant.vo.TenantUpsertVO;
-import com.hbcy.common.db.model.PageResp;
+import com.hbcy.common.base.pojo.PageResp;
+import com.hbcy.common.web.bean.NameFill;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import org.springframework.validation.annotation.Validated;
@@ -32,6 +33,7 @@ public class TenantController {
      * @return 租户分页列表
      */
     @GetMapping
+    @NameFill
     public PageResp<Tenant> list(@RequestBody @Valid TenantQueryVO vo) {
         return tenantService.list(vo);
     }
@@ -43,6 +45,7 @@ public class TenantController {
      * @return 租户信息
      */
     @GetMapping("/{id}")
+    @NameFill
     public Tenant getById(@PathVariable String id) {
         return tenantService.getById(id);
     }
