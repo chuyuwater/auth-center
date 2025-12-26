@@ -26,12 +26,42 @@
     </resultMap>
     <sql id="Base_Column_List">
         <!--@mbg.generated-->
-        id, phone, account, real_name, passwd, email, avatar, forbidden, wecom_id, src_type,
-        src_id, passwd_expire, tenant_id, default_org, delete_time, create_time, update_time,
-        create_user, update_user
+        id,
+        phone,
+        account,
+        real_name,
+        passwd,
+        email,
+        avatar,
+        forbidden,
+        wecom_id,
+        src_type,
+        src_id,
+        passwd_expire,
+        tenant_id,
+        default_org,
+        delete_time,
+        create_time,
+        update_time,
+        create_user,
+        update_user
     </sql>
 
+
+    <select id="selectNameByIds" resultType="com.hbcy.common.web.api.NamedId">
+        select id as item_id, real_name as item_name
+        from sys_user
+        <where>
+            id in
+            <foreach collection="uids" open="(" close=")" item="u" separator=",">
+                #{u}
+            </foreach>
+        </where>
+    </select>
+
     <select id="selectNameById" resultType="java.lang.String">
-        select real_name from sys_user where id= #{userId}
+        select real_name
+        from sys_user
+        where id = #{userId}
     </select>
 </mapper>

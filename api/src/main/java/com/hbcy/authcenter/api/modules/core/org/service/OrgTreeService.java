@@ -40,7 +40,7 @@ import java.util.stream.Collectors;
 @Service
 public class OrgTreeService extends ServiceImpl<OrgTreeMapper, OrgTree> {
     public static final String BIZ_KEY = "portal:orgtree:tenant:%s:%d";
-    public static final String ORG_NAME_CACHE = "portal:orgtree:name:%s";
+    public static final String NAME_CACHE_KEY = "portal:orgtree:name:%s";
     /**
      * 节点类型规则
      */
@@ -90,12 +90,12 @@ public class OrgTreeService extends ServiceImpl<OrgTreeMapper, OrgTree> {
         return null;
     }
 
-    public String getName(String userId) {
-        Object s = stringRedisTemplate.opsForHash().get(ORG_NAME_CACHE, userId);
+    public String getOrgName(String orgId) {
+        Object s = stringRedisTemplate.opsForHash().get(NAME_CACHE_KEY, orgId);
         if (s == null) {
-            String name = baseMapper.selectNameById(userId);
+            String name = baseMapper.selectNameById(orgId);
             if (name != null) {
-                stringRedisTemplate.opsForHash().put(ORG_NAME_CACHE, userId, name);
+                stringRedisTemplate.opsForHash().put(NAME_CACHE_KEY, orgId, name);
             }
             return name;
         }
@@ -103,11 +103,11 @@ public class OrgTreeService extends ServiceImpl<OrgTreeMapper, OrgTree> {
     }
 
     private void cleanNameCache(String userId) {
-        stringRedisTemplate.opsForHash().delete(ORG_NAME_CACHE, userId);
+        stringRedisTemplate.opsForHash().delete(NAME_CACHE_KEY, userId);
     }
 
-    private void cleanNameCache(List<String> userIds) {
-        stringRedisTemplate.opsForHash().delete(ORG_NAME_CACHE, userIds.toArray());
+    private void cleanNameCache(Collection<String> userIds) {
+        stringRedisTemplate.opsForHash().delete(NAME_CACHE_KEY, userIds.toArray());
     }
 
     private OrgTree checkParentId(String tenantId, String parentId) {
@@ -214,7 +214,9 @@ public class OrgTreeService extends ServiceImpl<OrgTreeMapper, OrgTree> {
         if (root.equals(entity.getId())) {
             throw new PermissionError("禁止更新根节点");
         }
-        boolean cleanCache = !vo.getNodeName().equals(entity.getNodeName());
+        if (!vo.getNodeName().equals(entity.getNodeName())) {
+            cleanNameCache(entity.getId());
+        }
         OrgTree parent = getById(entity.getParentId());
         BeanCopyUtils.copy(vo, entity);
         checkLevelAllow(entity, parent);
@@ -224,9 +226,6 @@ public class OrgTreeService extends ServiceImpl<OrgTreeMapper, OrgTree> {
             updateById(entity);
         } catch (DuplicateKeyException e) {
             throw new ParamError("同一层级的名称、简称均不能重复");
-        }
-        if (cleanCache) {
-            cleanNameCache(entity.getId());
         }
         return entity;
     }
@@ -335,6 +334,7 @@ public class OrgTreeService extends ServiceImpl<OrgTreeMapper, OrgTree> {
         List<OrgTree> related = baseMapper.listChildrenRecursively(node.getTenantId(), node.getIdPath(), null);
         Set<String> ids = related.stream().map(OrgTree::getId).collect(Collectors.toSet());
         ids.add(id);
+        cleanNameCache(ids);
         baseMapper.deleteByIds(ids);
     }
 

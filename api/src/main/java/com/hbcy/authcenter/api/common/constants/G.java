@@ -15,4 +15,8 @@ public class G {
     public static final String ID_PATH_SPLITTER = "/";
 
     public static final String PHONE_PATTERN = "^(?:\\+?86)?1[3-9]\\d{9}$";
+
+    private static final String NAME_CACHE_PREFIX = "portal:name:";
+    public static final String ORG_NAME_CACHE_KEY = NAME_CACHE_PREFIX + "org:";
+    public static final String USER_NAME_CACHE_KEY = NAME_CACHE_PREFIX + "user:";
 }

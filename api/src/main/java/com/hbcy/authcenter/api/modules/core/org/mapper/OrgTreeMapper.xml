@@ -94,6 +94,17 @@
     <select id="selectNameById" resultType="java.lang.String">
         select node_name
         from org_tree
-        where id = #{userId}
+        where id = #{orgId}
+    </select>
+
+    <select id="selectNameByIds" resultType="com.hbcy.common.web.api.NamedId">
+        select id as item_id, node_name as item_name
+        from org_tree
+        <where>
+            id in
+            <foreach collection="orgIds" open="(" close=")" separator="," item="oid">
+                #{oid}
+            </foreach>
+        </where>
     </select>
 </mapper>

@@ -3,9 +3,11 @@ package com.hbcy.authcenter.api.modules.core.org.dao;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.hbcy.authcenter.api.modules.core.org.model.OrgTree;
 import com.hbcy.authcenter.api.modules.core.org.vo.OrgTreeQueryVO;
+import com.hbcy.common.web.api.NamedId;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author 姚泰然
@@ -55,5 +57,19 @@ public interface OrgTreeMapper extends BaseMapper<OrgTree> {
      */
     String selectMaxId(@Param("parentId") String parentId, @Param("nodeType") Integer nodeType);
 
-    String selectNameById(@Param("userId") String userId);
+    /**
+     * 单节点查询名称
+     *
+     * @param orgId 组织/部门id
+     * @return 组织/部门名称
+     */
+    String selectNameById(@Param("orgId") String orgId);
+
+    /**
+     * 多节点查询名称
+     *
+     * @param orgIds 组织/部门id
+     * @return 组织/部门名称
+     */
+    List<NamedId> selectNameByIds(@Param("orgIds") Set<String> orgIds);
 }
