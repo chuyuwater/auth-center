@@ -163,7 +163,7 @@ public class OrgTreeService extends ServiceImpl<OrgTreeMapper, OrgTree> {
             Long n = baseMapper.selectCount(new QueryWrapper<OrgTree>()
                     .eq(OrgTree.COL_NODE_NAME, entity.getNodeName())
                     .eq(OrgTree.COL_TENANT_ID, tenantId)
-                    .eq(OrgTree.COL_NODE_TYPE, OrgNodeTypeEnum.ORG.getValue());
+                    .eq(OrgTree.COL_NODE_TYPE, OrgNodeTypeEnum.ORG.getValue()));
             if (n > 0) {
                 throw new ParamError("组织名不能重复");
             }

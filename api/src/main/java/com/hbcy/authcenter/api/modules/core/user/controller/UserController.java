@@ -1,15 +1,23 @@
 package com.hbcy.authcenter.api.modules.core.user.controller;
 
+import com.google.common.base.Joiner;
 import com.hbcy.authcenter.api.modules.core.user.dto.UserQueryResultDTO;
 import com.hbcy.authcenter.api.modules.core.user.service.UserService;
 import com.hbcy.authcenter.api.modules.core.user.vo.*;
+import com.hbcy.common.base.error.ParamError;
 import com.hbcy.common.base.pojo.BatchDeleteVO;
 import com.hbcy.common.base.pojo.PageResp;
 import com.hbcy.common.web.annotation.IgnoreResponseWrapper;
 import com.hbcy.common.web.bean.NameFill;
+import com.pig4cloud.plugin.excel.annotation.RequestExcel;
+import com.pig4cloud.plugin.excel.vo.ErrorMessage;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
+import org.springframework.util.CollectionUtils;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * 用户管理
@@ -77,11 +85,23 @@ public class UserController {
     @PostMapping("/export")
     @IgnoreResponseWrapper
     public void exportUser() {
-        
+
     }
 
     @PostMapping("/import")
-    public void importUser() {
+    public void importUser(@RequestExcel List<UserImportVO> vo, BindingResult bindingResult) {
+        List<ErrorMessage> errorMessageList = (List<ErrorMessage>) bindingResult.getTarget();
+        if (!CollectionUtils.isEmpty(errorMessageList)) {
+            StringBuilder sb = new StringBuilder();
+            for (ErrorMessage m : errorMessageList) {
+                sb.append("第").append(m.getLineNum()).append("行");
+                sb.append(":");
+                sb.append(Joiner.on(",").join(m.getErrors()));
+                sb.append(";");
+            }
+            throw new ParamError(sb.toString());
+        }
+        userService.batchInsert(vo);
     }
 
     /**

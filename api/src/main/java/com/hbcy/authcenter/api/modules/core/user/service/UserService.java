@@ -1,9 +1,9 @@
 package com.hbcy.authcenter.api.modules.core.user.service;
 
-import cn.hutool.core.util.RandomUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.github.f4b6a3.ulid.UlidCreator;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.hbcy.authcenter.api.common.bean.NameCacheService;
@@ -36,6 +36,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -118,9 +119,9 @@ public class UserService extends ServiceImpl<UserMapper, User> {
         }
         User user = new User();
         BeanCopyUtils.copy(vo, user);
-        // 设置默认密码
-        user.setPasswd(passwordEncoder.encode(RandomUtil.randomString(6)));
-        //TODO: 短信、邮件发送密码
+        // 默认密码为手机号后面6位
+        user.setPasswd(passwordEncoder.encode(vo.getPhone().substring(vo.getPhone().length() - 6)));
+        //TODO: 改为随机密码+短信、邮件发送密码
         user.setCreateUser(op);
         user.setUpdateUser(op);
         user.setTenantId(tenantId);
@@ -148,9 +149,11 @@ public class UserService extends ServiceImpl<UserMapper, User> {
 
     public void updateUser(String userId, UserUpdateVO vo) {
         var user = checkUser(userId);
+        if (vo.getRealName() != null && !vo.getRealName().equals(user.getRealName())) {
+            cleanNameCache(userId);
+        }
         BeanCopyUtils.copy(vo, user);
         user.setUpdateUser(UserContextUtils.getUserId());
-        cleanNameCache(userId);
         updateById(user);
     }
 
@@ -162,6 +165,7 @@ public class UserService extends ServiceImpl<UserMapper, User> {
         if (!user.getTenantId().equals(UserContextUtils.getTenantId())) {
             throw new PermissionError();
         }
+        cleanNameCache(userId);
         removeById(userId);
     }
 
@@ -217,6 +221,7 @@ public class UserService extends ServiceImpl<UserMapper, User> {
 
     public void deleteUsers(@Valid BatchDeleteVO vo) {
         var tenantId = UserContextUtils.getTenantId();
+        cleanNameCache(vo.getIds());
         remove(new QueryWrapper<User>()
                 .eq(User.COL_TENANT_ID, tenantId)
                 .in(User.COL_ID, vo.getIds()));
@@ -224,7 +229,6 @@ public class UserService extends ServiceImpl<UserMapper, User> {
 
     public UserQueryResultDTO getUser(String userId) {
         User user = checkUser(userId);
-        UserQueryResultDTO dto = BeanCopyUtils.copy(user, UserQueryResultDTO.class);
         UserQueryVO vo = new UserQueryVO();
         vo.setUserId(userId);
         PageResp<UserQueryResultDTO> resp = queryUser(vo);
@@ -295,7 +299,7 @@ public class UserService extends ServiceImpl<UserMapper, User> {
     public PageResp<UserQueryResultDTO> queryUser(UserQueryVO vo) {
         Page<UserQueryResultDTO> dbPage = vo.getDbPage();
         if (StringUtils.isNotBlank(vo.getOrgId())) {
-            //过滤了组织，先
+            //过滤了组织
             OrgTree org = orgTreeService.getById(vo.getOrgId());
             if (org == null) {
                 throw new ParamError("指定组织不存在");
@@ -306,7 +310,10 @@ public class UserService extends ServiceImpl<UserMapper, User> {
             if (!org.getTenantId().equals(UserContextUtils.getTenantId())) {
                 throw new PermissionError();
             }
-
+        }
+        if (StringUtils.isNotBlank(vo.getKeyword()) &&
+                StringUtils.isAllBlank(vo.getPhone(), vo.getEmail(), vo.getAccount(), vo.getName())) {
+            vo.setKeywordType(guessKeywordType(vo.getKeyword()));
         }
         vo.setTenantId(UserContextUtils.getTenantId());
         //首先查询满足筛选条件的人
@@ -345,5 +352,100 @@ public class UserService extends ServiceImpl<UserMapper, User> {
             record.setOrgList(orgs);
         }
         return new PageRespEx<>(page);
+    }
+
+    /**
+     * 批量导入
+     *
+     * @param dataList 列表
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void batchInsert(List<UserImportVO> dataList) {
+        String tenantId = UserContextUtils.getTenantId();
+        Set<String> orgNameSet = new HashSet<>();
+        Set<String> accountSet = new HashSet<>();
+        Set<String> phoneSet = new HashSet<>();
+        Set<String> emailSet = new HashSet<>();
+        for (UserImportVO d : dataList) {
+            //NOTE: 批量导入的时候，只能指定组织，不能指定部门
+            orgNameSet.add(d.getOrgName());
+            if (accountSet.contains(d.getAccount())) {
+                throw new ParamError("表格中存在重复的账号:%s", d.getAccount());
+            }
+            accountSet.add(d.getAccount());
+            if (phoneSet.contains(d.getPhone())) {
+                throw new ParamError("表格中存在重复的手机号:%s", d.getPhone());
+            }
+            phoneSet.add(d.getPhone());
+            if (StringUtils.isNotBlank(d.getEmail())) {
+                if (emailSet.contains(d.getEmail())) {
+                    throw new ParamError("表格中存在重复的邮箱:%s", d.getEmail());
+                }
+                emailSet.add(d.getEmail());
+            }
+        }
+        //先校验组织名
+        List<OrgTree> orgList = orgTreeService.list(new QueryWrapper<OrgTree>()
+                .eq(OrgTree.COL_TENANT_ID, tenantId)
+                .eq(OrgTree.COL_NODE_TYPE, OrgNodeTypeEnum.ORG.getValue())
+                .in(OrgTree.COL_NODE_NAME, orgNameSet));
+        if (orgList.size() != orgNameSet.size()) {
+            throw new ParamError("部分组织名错误，请检查");
+        }
+        //转成组织名和组织ID的映射表
+        var orgNameIdMap = orgList.stream().collect(
+                Collectors.toMap(OrgTree::getNodeName, OrgTree::getId));
+        //账号、手机号、邮箱都要验重
+        List<User> existUsers = baseMapper.selectList(new QueryWrapper<User>()
+                .or()
+                .in(User.COL_ACCOUNT, accountSet)
+                .in(User.COL_PHONE, phoneSet)
+                .in(User.COL_EMAIL, emailSet));
+        if (!CollectionUtils.isEmpty(existUsers)) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("以下手机号对应的用户已存在:");
+            existUsers.forEach(user -> {
+                sb.append(user.getPhone()).append(",");
+            });
+            throw new ParamError(sb.toString());
+        }
+        //数据准备
+        String createUser = UserContextUtils.getUserId();
+        List<User> users = new ArrayList<>();
+        List<UserOrg> userOrgs = new ArrayList<>();
+        LocalDateTime now = LocalDateTime.now();
+        for (UserImportVO d : dataList) {
+            User u = new User();
+            BeanCopyUtils.copy(d, u);
+            //手动生成id
+            u.setId(UlidCreator.getUlid().toString());
+            u.setDefaultOrg(orgNameIdMap.get(d.getOrgName()));
+            u.setCreateUser(createUser);
+            u.setUpdateUser(createUser);
+            u.setTenantId(tenantId);
+            u.setCreateTime(now);
+            u.setUpdateTime(now);
+            //TODO:改为随机密码+短信通知
+            u.setPasswd(passwordEncoder.encode(
+                    d.getPhone().substring(d.getPhone().length() - 6)));
+            UserOrg uo = new UserOrg();
+            uo.setId(UlidCreator.getUlid().toString());
+            uo.setUserId(u.getId());
+            uo.setOrgId(u.getDefaultOrg());
+            uo.setCreateUser(createUser);
+            uo.setUpdateUser(createUser);
+            uo.setTenantId(tenantId);
+            uo.setCreateTime(now);
+            uo.setUpdateTime(now);
+            userOrgs.add(uo);
+        }
+        try {
+            //批量插入用户
+            saveBatch(users);
+            //批量插入关联关系
+            userOrgService.saveBatch(userOrgs);
+        } catch (DuplicateKeyException e) {
+            throw new ParamError("用户数据重复，请检查");
+        }
     }
 }
