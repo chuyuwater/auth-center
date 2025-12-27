@@ -158,6 +158,16 @@ public class OrgTreeService extends ServiceImpl<OrgTreeMapper, OrgTree> {
         BeanCopyUtils.copy(vo, entity);
         checkLevelAllow(entity, parent);
         final boolean isDept = OrgNodeTypeEnum.DEPT.getValue().equals(vo.getNodeType());
+        if (!isDept) {
+            //同一租户下的组织名称不能重复，但是这里数据库没有唯一键，因此不严谨
+            Long n = baseMapper.selectCount(new QueryWrapper<OrgTree>()
+                    .eq(OrgTree.COL_NODE_NAME, entity.getNodeName())
+                    .eq(OrgTree.COL_TENANT_ID, tenantId)
+                    .eq(OrgTree.COL_NODE_TYPE, OrgNodeTypeEnum.ORG.getValue());
+            if (n > 0) {
+                throw new ParamError("组织名不能重复");
+            }
+        }
         String id = redisIdGenerator.generateId(BIZ_KEY.formatted(tenantId, vo.getNodeType()), () -> {
             Long count = baseMapper.selectCount(new QueryWrapper<OrgTree>()
                     .eq(OrgTree.COL_TENANT_ID, tenantId)

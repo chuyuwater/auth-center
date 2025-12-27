@@ -63,4 +63,15 @@ public class UserOrgService extends ServiceImpl<UserOrgMapper, UserOrg> {
     public List<UserOrgDTO> listUserOrgs(List<String> userIds) {
         return baseMapper.listUserOrgs(userIds);
     }
+
+    public void removeUserNode(String userOrgId) {
+        UserOrg userOrg = baseMapper.selectById(userOrgId);
+        if (userOrg == null) {
+            return;
+        }
+        if (!userOrg.getTenantId().equals(UserContextUtils.getTenantId())) {
+            throw new PermissionError();
+        }
+        removeById(userOrgId);
+    }
 }

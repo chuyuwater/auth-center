@@ -173,7 +173,8 @@ public class UserService extends ServiceImpl<UserMapper, User> {
     }
 
     public void adminResetPasswd(AdminResetPasswdVO vo) {
-        var user = getById(vo.getUserId());
+        var user = checkUser(vo.getUserId());
+        //TODO: 密码复杂度策略
         user.setPasswd(passwordEncoder.encode(vo.getPassword()));
         user.setUpdateUser(UserContextUtils.getUserId());
         updateById(user);
@@ -184,6 +185,7 @@ public class UserService extends ServiceImpl<UserMapper, User> {
         if (!passwordEncoder.matches(vo.getOldPasswd(), user.getPasswd())) {
             throw new ParamError("旧密码不正确");
         }
+        //TODO: 密码复杂度策略
         User toUpdate = new User();
         toUpdate.setId(user.getId());
         toUpdate.setPasswd(passwordEncoder.encode(vo.getPassword()));

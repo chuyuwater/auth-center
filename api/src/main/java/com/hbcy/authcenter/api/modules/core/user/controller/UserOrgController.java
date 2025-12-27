@@ -1,6 +1,8 @@
 package com.hbcy.authcenter.api.modules.core.user.controller;
 
+import com.hbcy.authcenter.api.modules.core.user.service.UserOrgService;
 import com.hbcy.authcenter.api.modules.core.user.vo.UserAddOrgVO;
+import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,12 +14,15 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/portal/v1/user/org")
 public class UserOrgController {
 
+    @Resource
+    private UserOrgService userOrgService;
+
     /**
      * 为用户新增组织/部门
      */
     @PostMapping("/add")
     public void addOrg(@Valid @RequestBody UserAddOrgVO vo) {
-
+        userOrgService.addUserNode(vo.getUserId(), vo.getNodeId());
     }
 
     /**
@@ -27,6 +32,6 @@ public class UserOrgController {
      */
     @DeleteMapping("/{id}")
     public void deleteUserOrg(@PathVariable String id) {
-
+        userOrgService.removeUserNode(id);
     }
 }
