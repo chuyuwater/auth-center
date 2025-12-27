@@ -23,8 +23,6 @@ public class App extends BaseEntity {
     public static final String COL_SHOW_ORDER = "show_order";
     public static final String COL_ICON = "icon";
     public static final String COL_FORBIDDEN = "forbidden";
-    public static final String COL_SUB_DOM = "sub_dom";
-    public static final String COL_OBJ_DOM = "obj_dom";
     public static final String COL_BINDING_TENANT = "binding_tenant";
     public static final String COL_DELETE_TIME = "delete_time";
     public static final String COL_CREATE_TIME = "create_time";
@@ -62,16 +60,6 @@ public class App extends BaseEntity {
      */
     @TableField(value = "forbidden")
     private Integer forbidden;
-    /**
-     * 主体域：0-全局，1-组织，2-岗位
-     */
-    @TableField(value = "sub_dom")
-    private Integer subDom;
-    /**
-     * 客体域
-     */
-    @TableField(value = "obj_dom")
-    private String objDom;
     /**
      * 空：多租户应用，"-": 单租户应用尚未绑定租户，其他：单租户应用绑定的租户id
      */
