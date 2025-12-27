@@ -12,7 +12,7 @@ import lombok.EqualsAndHashCode;
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class CreateUserVO extends UpdateUserVO {
+public class UserCreateVO extends UserUpdateVO {
     /**
      * 创建时归属组织，即为其默认主职组织
      */

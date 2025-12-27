@@ -64,4 +64,62 @@
         from sys_user
         where id = #{userId}
     </select>
+
+    <select id="queryUser" resultType="com.hbcy.authcenter.api.modules.core.user.dto.UserQueryResultDTO">
+        select u.id,
+        u.phone,
+        u.account,
+        u.real_name,
+        u.email,
+        u.avatar,
+        u.forbidden,
+        u.default_org
+        from sys_user u
+        join user_org uo on uo.user_id = u.id
+        join org_tree o on uo.org_id = o.id
+        <where>
+            <if test="vo.tenantId != null and vo.tenantId != ''">
+                uo.tenant_id = #{vo.tenantId}
+            </if>
+            <if test="vo.keywordType != null and !vo.keywordType.empty">
+                <if test="vo.keywordType.contains('EMAIL')">
+                    and u.email like concat('%', #{vo.keyword}, '%')
+                </if>
+                <if test="vo.keywordType.contains('PHONE')">
+                    and u.phone like concat(#{vo.keyword}, '%')
+                </if>
+                <if test="vo.keywordType.contains('ACCOUNT')">
+                    and u.account like concat(#{vo.keyword}, '%')
+                </if>
+                <if test="vo.keywordType.contains('NAME')">
+                    and u.real_name like concat(#{vo.keyword}, '%')
+                </if>
+            </if>
+            <if test="vo.forbidden != null">
+                and u.forbidden= #{vo.forbidden}
+            </if>
+            <if test="vo.email != null and !vo.email.blank">
+                and u.email like concat('%', #{vo.email}, '%')
+            </if>
+            <if test="vo.phone != null and !vo.phone.blank">
+                and u.phone like concat(#{vo.phone}, '%')
+            </if>
+            <if test="vo.account != null and !vo.account.blank">
+                and u.account like concat(#{vo.account}, '%')
+            </if>
+            <if test="vo.name != null and !vo.name.blank">
+                and u.real_name like concat(#{vo.name}, '%')
+            </if>
+            <if test="vo.orgId != null and vo.orgId != ''">
+                and uo.org_id = #{vo.orgId}
+            </if>
+            <if test="vo.idPathPrefix != null and vo.idPathPrefix != ''">
+                and o.id_path like concat(#{vo.idPathPrefix}, '%')
+            </if>
+            <if test="vo.userId != null and vo.userId != ''">
+                and uo.user_id = #{vo.userId}
+            </if>
+        </where>
+        order by u.real_name
+    </select>
 </mapper>

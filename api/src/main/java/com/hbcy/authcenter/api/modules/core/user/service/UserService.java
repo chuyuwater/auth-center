@@ -2,12 +2,18 @@ package com.hbcy.authcenter.api.modules.core.user.service;
 
 import cn.hutool.core.util.RandomUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.google.common.base.Joiner;
+import com.google.common.base.Splitter;
+import com.hbcy.authcenter.api.common.bean.NameCacheService;
 import com.hbcy.authcenter.api.common.constants.G;
 import com.hbcy.authcenter.api.common.enums.OrgNodeTypeEnum;
 import com.hbcy.authcenter.api.modules.core.org.model.OrgTree;
 import com.hbcy.authcenter.api.modules.core.org.service.OrgTreeService;
 import com.hbcy.authcenter.api.modules.core.user.dao.UserMapper;
+import com.hbcy.authcenter.api.modules.core.user.dto.UserOrgDTO;
+import com.hbcy.authcenter.api.modules.core.user.dto.UserQueryResultDTO;
 import com.hbcy.authcenter.api.modules.core.user.model.User;
 import com.hbcy.authcenter.api.modules.core.user.model.UserOrg;
 import com.hbcy.authcenter.api.modules.core.user.vo.*;
@@ -16,7 +22,9 @@ import com.hbcy.common.base.error.ParamError;
 import com.hbcy.common.base.error.PermissionError;
 import com.hbcy.common.base.error.ServerError;
 import com.hbcy.common.base.pojo.BatchDeleteVO;
+import com.hbcy.common.base.pojo.PageResp;
 import com.hbcy.common.base.util.BeanCopyUtils;
+import com.hbcy.common.db.model.PageRespEx;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
@@ -26,8 +34,10 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author 姚泰然
@@ -36,6 +46,7 @@ import java.util.List;
 @Service
 public class UserService extends ServiceImpl<UserMapper, User> {
 
+    private static final String ALLOWED_ACCOUNT_SYMBOLS = "_-";
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
     @Resource
     private StringRedisTemplate stringRedisTemplate;
@@ -43,6 +54,22 @@ public class UserService extends ServiceImpl<UserMapper, User> {
     private UserOrgService userOrgService;
     @Resource
     private OrgTreeService orgTreeService;
+    @Resource
+    private NameCacheService nameCacheService;
+
+    /**
+     * 辅助判断：是否是纯文字（排除掉空格和常见的各种标点符号）
+     */
+    private static boolean isPureText(String str) {
+        for (int i = 0; i < str.length(); i++) {
+            char c = str.charAt(i);
+            // 排除空格
+            if (Character.isWhitespace(c)) return false;
+            // 排除标点符号和特殊符号 (Character.isLetter 能够识别中文、日文等文字)
+            if (!Character.isLetter(c)) return false;
+        }
+        return true;
+    }
 
     private void cleanNameCache(String userId) {
         stringRedisTemplate.opsForHash().delete(G.USER_NAME_CACHE_KEY, userId);
@@ -52,8 +79,7 @@ public class UserService extends ServiceImpl<UserMapper, User> {
         stringRedisTemplate.opsForHash().delete(G.USER_NAME_CACHE_KEY, userIds.toArray());
     }
 
-
-    private void checkAnyExist(CreateUserVO vo) {
+    private void checkAnyExist(UserCreateVO vo) {
         var tenantId = UserContextUtils.getTenantId();
         Long cnt = baseMapper.selectCount(new QueryWrapper<User>()
                 .eq(User.COL_TENANT_ID, tenantId)
@@ -78,7 +104,7 @@ public class UserService extends ServiceImpl<UserMapper, User> {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public String createUser(CreateUserVO vo) {
+    public String createUser(UserCreateVO vo) {
         checkAnyExist(vo);
         String tenantId = UserContextUtils.getTenantId();
         String op = UserContextUtils.getUserId();
@@ -120,7 +146,7 @@ public class UserService extends ServiceImpl<UserMapper, User> {
         return user;
     }
 
-    public void updateUser(String userId, UpdateUserVO vo) {
+    public void updateUser(String userId, UserUpdateVO vo) {
         var user = checkUser(userId);
         BeanCopyUtils.copy(vo, user);
         user.setUpdateUser(UserContextUtils.getUserId());
@@ -139,7 +165,7 @@ public class UserService extends ServiceImpl<UserMapper, User> {
         removeById(userId);
     }
 
-    public void forbidUser(ForbidUserVO vo) {
+    public void forbidUser(UserForbidVO vo) {
         var user = checkUser(vo.getUserId());
         user.setForbidden(vo.getForbidden());
         user.setUpdateUser(UserContextUtils.getUserId());
@@ -192,5 +218,130 @@ public class UserService extends ServiceImpl<UserMapper, User> {
         remove(new QueryWrapper<User>()
                 .eq(User.COL_TENANT_ID, tenantId)
                 .in(User.COL_ID, vo.getIds()));
+    }
+
+    public UserQueryResultDTO getUser(String userId) {
+        User user = checkUser(userId);
+        UserQueryResultDTO dto = BeanCopyUtils.copy(user, UserQueryResultDTO.class);
+        UserQueryVO vo = new UserQueryVO();
+        vo.setUserId(userId);
+        PageResp<UserQueryResultDTO> resp = queryUser(vo);
+        if (resp.getTotal() == 0) {
+            return null;
+        }
+        return resp.getList().get(0);
+    }
+
+    public Set<String> guessKeywordType(String keyword) {
+        Set<String> result = new HashSet<>();
+        if (keyword == null || keyword.isEmpty()) {
+            return result;
+        }
+
+        boolean hasAt = false;
+        boolean hasDigit = false;
+        boolean hasLetter = false;
+        boolean hasSymbol = false; // 下划线等允许在账号中的符号
+        boolean hasInvalidForAccount = false; // 账号不该有的字符（如中文、空格、特殊标点）
+
+        for (int i = 0; i < keyword.length(); i++) {
+            char c = keyword.charAt(i);
+
+            if (c == '@') {
+                hasAt = true;
+            } else if (c >= '0' && c <= '9') {
+                hasDigit = true;
+            } else if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) {
+                hasLetter = true;
+            } else if (ALLOWED_ACCOUNT_SYMBOLS.indexOf(c) != -1) {
+                hasSymbol = true;
+            } else {
+                // 既不是数字字母，也不是账号允许的符号，也不是@
+                // 这通常意味着是中文、空格或其他特殊符号
+                hasInvalidForAccount = true;
+            }
+        }
+
+        // 1. EMAIL: 包含 @
+        if (hasAt) {
+            result.add("EMAIL");
+            return result;
+        }
+
+        // 2. 只有数字 (不能有符号、字母、@、或其它)
+        if (hasDigit && !hasLetter && !hasSymbol && !hasInvalidForAccount) {
+            result.add("PHONE");
+            result.add("EMAIL");
+            result.add("ACCOUNT");
+            return result;
+        }
+
+        // 3. 包含 [数字、字母、符号]
+        if (!hasInvalidForAccount && (hasDigit || hasLetter || hasSymbol)) {
+            result.add("ACCOUNT");
+            result.add("EMAIL");
+            return result;
+        }
+
+        // 4. NAME: 纯文字
+        if (isPureText(keyword)) {
+            result.add("NAME");
+        }
+        return result;
+    }
+
+    public PageResp<UserQueryResultDTO> queryUser(UserQueryVO vo) {
+        Page<UserQueryResultDTO> dbPage = vo.getDbPage();
+        if (StringUtils.isNotBlank(vo.getOrgId())) {
+            //过滤了组织，先
+            OrgTree org = orgTreeService.getById(vo.getOrgId());
+            if (org == null) {
+                throw new ParamError("指定组织不存在");
+            }
+            if (org.getNodeType().equals(OrgNodeTypeEnum.DEPT.getValue())) {
+                throw new ParamError("应指定组织而非部门");
+            }
+            if (!org.getTenantId().equals(UserContextUtils.getTenantId())) {
+                throw new PermissionError();
+            }
+
+        }
+        vo.setTenantId(UserContextUtils.getTenantId());
+        //首先查询满足筛选条件的人
+        Page<UserQueryResultDTO> page = baseMapper.queryUser(dbPage, vo);
+        if (CollectionUtils.isEmpty(page.getRecords())) {
+            return new PageResp<>();
+        }
+        List<String> userIds = page.getRecords().stream().map(UserQueryResultDTO::getId).toList();
+        //然后查询每个人的所有任职组织及其概况
+        List<UserOrgDTO> userOrgs = userOrgService.listUserOrgs(userIds);
+        //根据orgId查询orgName
+        Set<String> orgIds = new HashSet<>();
+        for (UserOrgDTO userOrg : userOrgs) {
+            orgIds.addAll(Splitter.on(G.ID_PATH_SPLITTER).splitToList(userOrg.getIdPath()));
+        }
+        Map<String, String> orgNameMap = nameCacheService.getOrgNameMap(orgIds);
+        //回填userOrg
+        for (UserOrgDTO userOrg : userOrgs) {
+            List<String> nameParts = Splitter.on(G.ID_PATH_SPLITTER).splitToList(userOrg.getIdPath()).stream()
+                    .map(k -> orgNameMap.getOrDefault(k, "")).toList();
+            userOrg.setNamePath(Joiner.on(G.ID_PATH_SPLITTER).join(nameParts));
+        }
+        //按用户分组映射
+        Map<String, List<UserOrgDTO>> userOrgMap = userOrgs.stream().collect(
+                Collectors.groupingBy(UserOrgDTO::getUserId));
+        for (UserQueryResultDTO record : page.getRecords()) {
+            List<UserOrgDTO> orgs = userOrgMap.get(record.getId());
+            if (orgs != null) {
+                for (UserOrgDTO org : orgs) {
+                    if (org.getOrgId().equals(record.getDefaultOrg())) {
+                        org.setDefaultOrg(true);
+                    }
+                }
+                orgs.sort(Comparator.comparing(UserOrgDTO::isDefaultOrg).reversed());
+            }
+            record.setOrgList(orgs);
+        }
+        return new PageRespEx<>(page);
     }
 }

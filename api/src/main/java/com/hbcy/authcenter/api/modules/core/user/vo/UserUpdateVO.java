@@ -11,7 +11,7 @@ import org.hibernate.validator.constraints.Length;
  * @date 2025-12-26 19:40
  */
 @Data
-public class UpdateUserVO {
+public class UserUpdateVO {
     /**
      * 手机号
      */
@@ -23,6 +23,7 @@ public class UpdateUserVO {
      */
     @NotBlank(message = "账号不能为空")
     @Length(min = 3, max = 50, message = "账号长度必须在3到50之间")
+    @Pattern(regexp = "^[a-zA-Z0-9_-]+$", message = "账号仅能包含数字、字母、下划线和中划线")
     private String account;
     /**
      * 姓名

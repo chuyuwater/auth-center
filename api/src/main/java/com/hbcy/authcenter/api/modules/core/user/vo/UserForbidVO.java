@@ -10,7 +10,7 @@ import lombok.Data;
  * @date 2025-12-26 09:30
  */
 @Data
-public class ForbidUserVO {
+public class UserForbidVO {
     /**
      * 用户id
      */

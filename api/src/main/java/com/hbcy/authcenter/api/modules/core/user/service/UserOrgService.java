@@ -6,6 +6,7 @@ import com.hbcy.authcenter.api.modules.core.org.dao.OrgTreeMapper;
 import com.hbcy.authcenter.api.modules.core.org.model.OrgTree;
 import com.hbcy.authcenter.api.modules.core.org.service.OrgTreeService;
 import com.hbcy.authcenter.api.modules.core.user.dao.UserOrgMapper;
+import com.hbcy.authcenter.api.modules.core.user.dto.UserOrgDTO;
 import com.hbcy.authcenter.api.modules.core.user.model.UserOrg;
 import com.hbcy.authcenter.sdk.utils.UserContextUtils;
 import com.hbcy.common.base.error.ParamError;
@@ -13,6 +14,8 @@ import com.hbcy.common.base.error.PermissionError;
 import jakarta.annotation.Resource;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
  * @author 姚泰然
@@ -55,5 +58,9 @@ public class UserOrgService extends ServiceImpl<UserOrgMapper, UserOrg> {
         } catch (DuplicateKeyException e) {
             throw new ParamError("该任职已存在");
         }
+    }
+
+    public List<UserOrgDTO> listUserOrgs(List<String> userIds) {
+        return baseMapper.listUserOrgs(userIds);
     }
 }

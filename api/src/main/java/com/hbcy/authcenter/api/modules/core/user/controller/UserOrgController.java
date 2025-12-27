@@ -27,5 +27,6 @@ public class UserOrgController {
      */
     @DeleteMapping("/{id}")
     public void deleteUserOrg(@PathVariable String id) {
+
     }
 }

@@ -1,8 +1,12 @@
 package com.hbcy.authcenter.api.modules.core.user.controller;
 
+import com.hbcy.authcenter.api.modules.core.user.dto.UserQueryResultDTO;
 import com.hbcy.authcenter.api.modules.core.user.service.UserService;
 import com.hbcy.authcenter.api.modules.core.user.vo.*;
 import com.hbcy.common.base.pojo.BatchDeleteVO;
+import com.hbcy.common.base.pojo.PageResp;
+import com.hbcy.common.web.annotation.IgnoreResponseWrapper;
+import com.hbcy.common.web.bean.NameFill;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
@@ -24,7 +28,7 @@ public class UserController {
      * 创建用户
      */
     @PostMapping
-    public String createUser(@Valid @RequestBody CreateUserVO vo) {
+    public String createUser(@Valid @RequestBody UserCreateVO vo) {
         return userService.createUser(vo);
     }
 
@@ -32,7 +36,7 @@ public class UserController {
      * 修改用户
      */
     @PutMapping("/{userId}")
-    public void updateUser(@PathVariable String userId, @Valid @RequestBody UpdateUserVO vo) {
+    public void updateUser(@PathVariable String userId, @Valid @RequestBody UserUpdateVO vo) {
         userService.updateUser(userId, vo);
     }
 
@@ -44,6 +48,40 @@ public class UserController {
     @DeleteMapping("/{userId}")
     public void deleteUser(@PathVariable String userId) {
         userService.deleteUser(userId);
+    }
+
+    /**
+     * 用户详情
+     *
+     * @param userId 用户id
+     * @return 用户及其关联的组织信息
+     */
+    @GetMapping("/{userId}")
+    @NameFill
+    public UserQueryResultDTO getUser(@PathVariable String userId) {
+        return userService.getUser(userId);
+    }
+
+    /**
+     * 搜索用户
+     *
+     * @param vo 搜索条件
+     * @return 用户及其关联的组织信息
+     */
+    @GetMapping("")
+    @NameFill
+    public PageResp<UserQueryResultDTO> listUser(UserQueryVO vo) {
+        return userService.queryUser(vo);
+    }
+
+    @PostMapping("/export")
+    @IgnoreResponseWrapper
+    public void exportUser() {
+
+    }
+
+    @PostMapping("/import")
+    public void importUser() {
     }
 
     /**
@@ -60,7 +98,7 @@ public class UserController {
      * 禁用/解禁用户
      */
     @PatchMapping("/forbidden")
-    public void forbidUser(@Valid @RequestBody ForbidUserVO vo) {
+    public void forbidUser(@Valid @RequestBody UserForbidVO vo) {
         userService.forbidUser(vo);
     }
 

@@ -1,28 +1,64 @@
 package com.hbcy.authcenter.api.modules.core.user.dto;
 
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 /**
- * 列表/详情页返回数据
+ * 考虑隐私设置，大部分情况下只显示这些信息
  *
  * @author 姚泰然
- * @date 2025-12-26 13:57
+ * @date 2025-12-26 13:45
  */
-@EqualsAndHashCode(callSuper = true)
 @Data
-public class UserDTO extends UserSimpleDTO {
-    List<UserOrgSimpleDTO> orgList;
+public class UserDTO {
+    /**
+     * 用户id
+     */
+    private String id;
+    /**
+     * 姓名
+     */
+    private String realName;
+
+    /**
+     * 头像
+     */
+    private String avatar;
+    /**
+     * 账号
+     */
+    private String account;
+    /**
+     * 手机号
+     */
     private String phone;
+    /**
+     * 邮箱
+     */
     private String email;
+    /**
+     * 主职组织id
+     */
+    private String defaultOrg;
+    /**
+     * 是否禁用
+     */
     private Integer forbidden;
+    /**
+     * 创建时间
+     */
     private LocalDateTime createTime;
+    /**
+     * 修改时间
+     */
     private LocalDateTime updateTime;
+    /**
+     * 创建人
+     */
     private String createUser;
-    private String createUserName;
+    /**
+     * 修改人
+     */
     private String updateUser;
-    private String updateUserName;
 }
