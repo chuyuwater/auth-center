@@ -12,6 +12,7 @@ import com.hbcy.authcenter.api.common.enums.OrgNodeTypeEnum;
 import com.hbcy.authcenter.api.modules.core.org.model.OrgTree;
 import com.hbcy.authcenter.api.modules.core.org.service.OrgTreeService;
 import com.hbcy.authcenter.api.modules.core.user.dao.UserMapper;
+import com.hbcy.authcenter.api.modules.core.user.dto.UserExportDTO;
 import com.hbcy.authcenter.api.modules.core.user.dto.UserOrgDTO;
 import com.hbcy.authcenter.api.modules.core.user.dto.UserQueryResultDTO;
 import com.hbcy.authcenter.api.modules.core.user.model.User;
@@ -296,8 +297,7 @@ public class UserService extends ServiceImpl<UserMapper, User> {
         return result;
     }
 
-    public PageResp<UserQueryResultDTO> queryUser(UserQueryVO vo) {
-        Page<UserQueryResultDTO> dbPage = vo.getDbPage();
+    private Page<UserQueryResultDTO> filterUsers(Page<?> page, UserQueryVO vo) {
         if (StringUtils.isNotBlank(vo.getOrgId())) {
             //过滤了组织
             OrgTree org = orgTreeService.getById(vo.getOrgId());
@@ -317,7 +317,12 @@ public class UserService extends ServiceImpl<UserMapper, User> {
         }
         vo.setTenantId(UserContextUtils.getTenantId());
         //首先查询满足筛选条件的人
-        Page<UserQueryResultDTO> page = baseMapper.queryUser(dbPage, vo);
+        return baseMapper.queryUser(page, vo);
+    }
+
+    public PageResp<UserQueryResultDTO> queryUser(UserQueryVO vo) {
+        Page<UserQueryResultDTO> dbPage = vo.getDbPage();
+        Page<UserQueryResultDTO> page = filterUsers(dbPage, vo);
         if (CollectionUtils.isEmpty(page.getRecords())) {
             return new PageResp<>();
         }
@@ -447,5 +452,27 @@ public class UserService extends ServiceImpl<UserMapper, User> {
         } catch (DuplicateKeyException e) {
             throw new ParamError("用户数据重复，请检查");
         }
+    }
+
+    public List<UserExportDTO> export(UserQueryVO vo) {
+        Page<?> dbPage = vo.getDbPage();
+        Page<UserQueryResultDTO> result = filterUsers(dbPage, vo);
+        //全量导出
+        dbPage.setSize(-1L);
+        List<UserExportDTO> users = new ArrayList<>();
+        Set<String> orgSet = new HashSet<>();
+        result.getRecords().forEach(u -> {
+            UserExportDTO copy = BeanCopyUtils.copy(u, UserExportDTO.class);
+            //先放入id
+            copy.setOrgName(u.getDefaultOrg());
+            orgSet.add(u.getDefaultOrg());
+            users.add(copy);
+        });
+        Map<String, String> orgNameMap = nameCacheService.getOrgNameMap(orgSet);
+        for (UserExportDTO user : users) {
+            //替换成名字
+            user.setOrgName(orgNameMap.get(user.getOrgName()));
+        }
+        return users;
     }
 }

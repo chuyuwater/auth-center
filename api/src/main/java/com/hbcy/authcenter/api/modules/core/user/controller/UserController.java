@@ -1,6 +1,7 @@
 package com.hbcy.authcenter.api.modules.core.user.controller;
 
 import com.google.common.base.Joiner;
+import com.hbcy.authcenter.api.modules.core.user.dto.UserExportDTO;
 import com.hbcy.authcenter.api.modules.core.user.dto.UserQueryResultDTO;
 import com.hbcy.authcenter.api.modules.core.user.service.UserService;
 import com.hbcy.authcenter.api.modules.core.user.vo.*;
@@ -10,6 +11,7 @@ import com.hbcy.common.base.pojo.PageResp;
 import com.hbcy.common.web.annotation.IgnoreResponseWrapper;
 import com.hbcy.common.web.bean.NameFill;
 import com.pig4cloud.plugin.excel.annotation.RequestExcel;
+import com.pig4cloud.plugin.excel.annotation.ResponseExcel;
 import com.pig4cloud.plugin.excel.vo.ErrorMessage;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
@@ -84,10 +86,12 @@ public class UserController {
 
     @PostMapping("/export")
     @IgnoreResponseWrapper
-    public void exportUser() {
-
+    @ResponseExcel
+    public List<UserExportDTO> exportUser(UserQueryVO vo) {
+        return userService.export(vo);
     }
 
+    @SuppressWarnings("unchecked")
     @PostMapping("/import")
     public void importUser(@RequestExcel List<UserImportVO> vo, BindingResult bindingResult) {
         List<ErrorMessage> errorMessageList = (List<ErrorMessage>) bindingResult.getTarget();

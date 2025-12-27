@@ -13,5 +13,5 @@ import lombok.EqualsAndHashCode;
 @Data
 public class UserExportDTO extends UserImportVO {
     @ExcelProperty(value = "用户ID", order = 0)
-    private String userId;
+    private String id;
 }
