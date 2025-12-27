@@ -16,7 +16,6 @@ import java.util.Map;
 public class UserContextUtils {
     // 使用 TTL 替代原生 ThreadLocal
     private static final ThreadLocal<Map<String, String>> HEADER = new TransmittableThreadLocal<>();
-    private static final ThreadLocal<Map<String, String>> DOMAIN = new TransmittableThreadLocal<>();
 
     public static Map<String, String> getHeaders() {
         return HEADER.get();
@@ -24,14 +23,6 @@ public class UserContextUtils {
 
     public static void setHeaders(Map<String, String> headers) {
         HEADER.set(headers);
-    }
-
-    public static Map<String, String> getDomains() {
-        return DOMAIN.get();
-    }
-
-    public static void setDomains(Map<String, String> domains) {
-        DOMAIN.set(domains);
     }
 
     public static String getHeader(String key) {
@@ -43,7 +34,7 @@ public class UserContextUtils {
     }
 
     public static String getUserOrg() {
-        return getDomains().getOrDefault(AuthConstants.DOMAIN_ORG_ID, "");
+        return getHeader(AuthConstants.HEADER_ORG_ID);
     }
 
     public static String getAppId() {
@@ -71,6 +62,5 @@ public class UserContextUtils {
 
     public static void clear() {
         HEADER.remove();
-        DOMAIN.remove();
     }
 }

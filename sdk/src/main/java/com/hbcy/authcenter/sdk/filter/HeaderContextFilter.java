@@ -30,24 +30,13 @@ public class HeaderContextFilter extends OncePerRequestFilter {
             MDC.put("appId", request.getHeader(AuthConstants.HEADER_APP_ID));
             MDC.put("userId", request.getHeader(AuthConstants.HEADER_USER_ID));
             MDC.put("tenantId", request.getHeader(AuthConstants.HEADER_TENANT_ID));
+            MDC.put("orgId", request.getHeader(AuthConstants.HEADER_ORG_ID));
             if (request.getHeader(AuthConstants.HEADER_TRACE_ID) != null) {
                 headers.put(AuthConstants.HEADER_TRACE_ID, request.getHeader(AuthConstants.HEADER_TRACE_ID));
                 //注入traceId到上下文
                 MDC.put("traceId", request.getHeader(AuthConstants.HEADER_TRACE_ID));
             }
-            Map<String, String> domains = new HashMap<>();
-            if (request.getHeader(AuthConstants.HEADER_OBJ_DOMAIN) != null) {
-                headers.put(AuthConstants.HEADER_OBJ_DOMAIN, request.getHeader(AuthConstants.HEADER_OBJ_DOMAIN));
-                domains.putAll(AuthConstants.parseObjDomain(request));
-                MDC.put("objDomain", request.getHeader(AuthConstants.HEADER_OBJ_DOMAIN));
-            }
-            if (request.getHeader(AuthConstants.HEADER_SUB_DOMAIN) != null) {
-                headers.put(AuthConstants.HEADER_SUB_DOMAIN, request.getHeader(AuthConstants.HEADER_SUB_DOMAIN));
-                domains.putAll(AuthConstants.parseSubDomain(request));
-                MDC.put("subDomain", request.getHeader(AuthConstants.HEADER_SUB_DOMAIN));
-            }
             UserContextUtils.setHeaders(headers);
-            UserContextUtils.setDomains(domains);
             filterChain.doFilter(request, response);
         } finally {
             UserContextUtils.clear();
