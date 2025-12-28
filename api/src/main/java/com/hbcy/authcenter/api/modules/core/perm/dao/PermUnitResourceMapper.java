@@ -12,4 +12,6 @@ import java.util.Set;
  */
 public interface PermUnitResourceMapper extends BaseMapper<PermUnitResource> {
     Set<String> listGrantedApps(@Param("unitId") String unitId);
+
+    Set<String> listGrantPermIds(@Param("unitId") String unitId);
 }

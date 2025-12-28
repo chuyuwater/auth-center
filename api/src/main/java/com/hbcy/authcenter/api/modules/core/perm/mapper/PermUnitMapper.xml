@@ -10,7 +10,6 @@
         <result column="belong_to" property="belongTo"/>
         <result column="memo" property="memo"/>
         <result column="forbidden" property="forbidden"/>
-        <result column="sys_protect" property="sysProtect"/>
         <result column="tenant_id" property="tenantId"/>
         <result column="create_user" property="createUser"/>
         <result column="update_user" property="updateUser"/>
@@ -26,7 +25,6 @@
         belong_to,
         memo,
         forbidden,
-        sys_protect,
         tenant_id,
         create_user,
         update_user,

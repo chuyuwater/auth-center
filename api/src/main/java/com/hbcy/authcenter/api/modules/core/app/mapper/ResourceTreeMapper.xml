@@ -54,6 +54,14 @@
         <where>
             app_id = #{appId}
             and id_path like concat(#{parentIdPath}, '%')
+            <if test="clientType != null">
+                <if test="clientType == 1">
+                    and client_type in (0, 1)
+                </if>
+                <if test="clientType == 2">
+                    and client_type in (0, 2)
+                </if>
+            </if>
         </where>
     </select>
 

@@ -7,7 +7,6 @@
         <id column="id" jdbcType="CHAR" property="id"/>
         <result column="app_id" jdbcType="CHAR" property="appId"/>
         <result column="res_id" jdbcType="CHAR" property="resId"/>
-        <result column="required" jdbcType="TINYINT" property="required"/>
         <result column="perm_name" jdbcType="VARCHAR" property="permName"/>
         <result column="perm_code" jdbcType="VARCHAR" property="permCode"/>
         <result column="api_method" jdbcType="TINYINT" property="apiMethod"/>
@@ -19,14 +18,24 @@
     </resultMap>
     <sql id="Base_Column_List">
         <!--@mbg.generated-->
-        id, app_id, res_id, required, perm_name, perm_code, api_method, api_path, create_time,
-        update_time, create_user, update_user
+        id,
+        app_id,
+        res_id,
+        perm_name,
+        perm_code,
+        api_method,
+        api_path,
+        create_time,
+        update_time,
+        create_user,
+        update_user
     </sql>
 
     <select id="filterAppPermIds" resultType="java.lang.String">
         select id
         from resource_perm
-        where app_id=#{appId} and id in
+        where app_id = #{appId}
+        and id in
         <foreach collection="supplyIds" open="(" close=")" separator="," item="sid">
             #{sid}
         </foreach>

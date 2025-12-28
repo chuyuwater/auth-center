@@ -20,9 +20,12 @@ public class ResourceTreeQueryVO {
      * 父节点ID
      */
     private String parentId = "";
-
     /**
      * 是否查询权限资源
      */
     private boolean withPerm = true;
+    /**
+     * 0-全端，1-pc端，2-移动端
+     */
+    private Integer clientType;
 }

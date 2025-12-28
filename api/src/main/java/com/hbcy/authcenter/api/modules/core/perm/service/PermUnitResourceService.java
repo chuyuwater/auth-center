@@ -7,6 +7,8 @@ import com.hbcy.authcenter.api.modules.core.app.dto.AppCardDTO;
 import com.hbcy.authcenter.api.modules.core.app.dto.ResPermDTO;
 import com.hbcy.authcenter.api.modules.core.app.dto.ResTreeDTO;
 import com.hbcy.authcenter.api.modules.core.app.service.ResourcePermService;
+import com.hbcy.authcenter.api.modules.core.app.service.ResourceTreeService;
+import com.hbcy.authcenter.api.modules.core.app.vo.ResourceTreeQueryVO;
 import com.hbcy.authcenter.api.modules.core.perm.dao.PermUnitMapper;
 import com.hbcy.authcenter.api.modules.core.perm.dao.PermUnitResourceMapper;
 import com.hbcy.authcenter.api.modules.core.perm.model.PermUnit;
@@ -42,6 +44,8 @@ public class PermUnitResourceService extends ServiceImpl<PermUnitResourceMapper,
     private PermUnitResourceService self;
     @Resource
     private PermUnitUserService permUnitUserService;
+    @Resource
+    private ResourceTreeService resourceTreeService;
 
     @Transactional(rollbackFor = Exception.class)
     public void addCodesToUnit(PermUnitResourceSaveVO vo) {
@@ -117,8 +121,21 @@ public class PermUnitResourceService extends ServiceImpl<PermUnitResourceMapper,
     }
 
     public List<TreeNode<ResTreeDTO>> listUnitResources(PermUnitResourceQueryVO vo) {
-
-
+        //查找权限单元已封装的权限
+        PermUnit permUnit = permUnitMapper.selectById(vo.getUnitId());
+        if (permUnit == null) {
+            return new ArrayList<>();
+        }
+        if (!permUnit.getTenantId().equals(UserContextUtils.getTenantId())) {
+            throw new PermissionError();
+        }
+        List<ResPermDTO> currentUserPerms = permUnitUserService.listPerms(vo.getAppId());
+        ResourceTreeQueryVO queryVO = new ResourceTreeQueryVO();
+        queryVO.setAppId(vo.getAppId());
+        queryVO.setWithPerm(true);
+        TreeNode<ResTreeDTO> tree = resourceTreeService.listResTreeRecursively(
+                queryVO, currentUserPerms, vo.isOnlyPacked());
+        return tree.getChildren();
     }
 }
 

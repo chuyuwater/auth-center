@@ -14,10 +14,12 @@ public interface ResourceTreeMapper extends BaseMapper<ResourceTree> {
     /**
      * @param appId        应用id
      * @param parentIdPath 父节点id
+     * @param clientType   客户端类型
      * @return 下面所有的节点
      */
-    List<ResourceTree> listChildrenRecursively(@Param("appId") String appId,
-                                               @Param("parentIdPath") String parentIdPath);
+    List<ResourceTree> listChildrenRecursively(
+            @Param("appId") String appId,
+            @Param("parentIdPath") String parentIdPath, @Param("clientType") Integer clientType);
 
     /**
      * 在同级尾部创建数据

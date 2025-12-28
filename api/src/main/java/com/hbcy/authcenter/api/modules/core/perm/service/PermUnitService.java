@@ -91,9 +91,6 @@ public class PermUnitService extends ServiceImpl<PermUnitMapper, PermUnit> {
         if (!entity.getTenantId().equals(UserContextUtils.getTenantId())) {
             throw new PermissionError();
         }
-        if (entity.getSysProtect() > 0) {
-            throw new PermissionError("系统内置角色禁止删除");
-        }
         boolean any = permUnitUserMapper.exists(new QueryWrapper<PermUnitUser>().
                 eq(PermUnitUser.COL_UNIT_ID, id));
         if (any) {

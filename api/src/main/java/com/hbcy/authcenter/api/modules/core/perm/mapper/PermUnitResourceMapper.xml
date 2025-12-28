@@ -22,4 +22,9 @@
         select distinct app_id from perm_unit_resource
         where unit_id = #{unitId}
     </select>
+
+    <select id="listGrantPermIds" resultType="java.lang.String">
+        select perm_id from perm_unit_resource
+        where unit_id= #{unitId}
+    </select>
 </mapper>

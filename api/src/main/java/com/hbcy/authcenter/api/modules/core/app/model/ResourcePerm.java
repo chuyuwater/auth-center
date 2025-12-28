@@ -20,7 +20,6 @@ public class ResourcePerm extends BaseEntity {
     public static final String COL_ID = "id";
     public static final String COL_APP_ID = "app_id";
     public static final String COL_RES_ID = "res_id";
-    public static final String COL_REQUIRED = "required";
     public static final String COL_PERM_NAME = "perm_name";
     public static final String COL_PERM_CODE = "perm_code";
     public static final String COL_API_METHOD = "api_method";
@@ -41,11 +40,6 @@ public class ResourcePerm extends BaseEntity {
      */
     @TableField(value = "res_id")
     private String resId;
-    /**
-     * 0-非必选，1-必选
-     */
-    @TableField(value = "required")
-    private Integer required;
     /**
      * 权限名称
      */

@@ -7,7 +7,6 @@ import com.google.common.base.Splitter;
 import com.hbcy.authcenter.api.common.bean.NodeMoveVO;
 import com.hbcy.authcenter.api.common.constants.G;
 import com.hbcy.authcenter.api.modules.core.app.dao.AppMapper;
-import com.hbcy.authcenter.api.modules.core.app.dao.ResourcePermMapper;
 import com.hbcy.authcenter.api.modules.core.app.dao.ResourceTreeMapper;
 import com.hbcy.authcenter.api.modules.core.app.dto.ResPermDTO;
 import com.hbcy.authcenter.api.modules.core.app.dto.ResTreeDTO;
@@ -45,7 +44,7 @@ public class ResourceTreeService extends ServiceImpl<ResourceTreeMapper, Resourc
     @Resource
     private AppMapper appMapper;
     @Resource
-    private ResourcePermMapper resourcePermMapper;
+    private ResourcePermService resourcePermService;
 
     private ResourceTree checkParentId(String appId, String parentId) {
         App app = appMapper.selectById(appId);
@@ -146,7 +145,7 @@ public class ResourceTreeService extends ServiceImpl<ResourceTreeMapper, Resourc
         List<ResourcePerm> resourcePerms = new ArrayList<>();
         if (vo.isWithPerm()) {
             List<String> ids = resourceTrees.stream().map(ResourceTree::getId).toList();
-            resourcePerms = resourcePermMapper.selectList(new QueryWrapper<ResourcePerm>()
+            resourcePerms = resourcePermService.list(new QueryWrapper<ResourcePerm>()
                     .in(ResourcePerm.COL_RES_ID, ids));
         }
 
@@ -244,7 +243,7 @@ public class ResourceTreeService extends ServiceImpl<ResourceTreeMapper, Resourc
             }
             idPath = tree.getIdPath() + G.ID_PATH_SPLITTER;
         }
-        return baseMapper.listChildrenRecursively(vo.getAppId(), idPath);
+        return baseMapper.listChildrenRecursively(vo.getAppId(), idPath, vo.getClientType());
     }
 
     /**
@@ -257,18 +256,21 @@ public class ResourceTreeService extends ServiceImpl<ResourceTreeMapper, Resourc
         if (node == null) {
             return;
         }
-        List<ResourceTree> related = baseMapper.listChildrenRecursively(node.getAppId(), node.getId());
+        List<ResourceTree> related = baseMapper.listChildrenRecursively(node.getAppId(), node.getId(), null);
         Set<String> resIds = related.stream().map(ResourceTree::getId).collect(Collectors.toSet());
         resIds.add(id);
-        Set<String> permIds = resourcePermMapper.selectList(new QueryWrapper<ResourcePerm>()
+        Set<String> permIds = resourcePermService.list(new QueryWrapper<ResourcePerm>()
                 .select(ResourcePerm.COL_ID)
-                .in(ResourcePerm.COL_RES_ID, resIds)).stream().map(ResourcePerm::getId).collect(Collectors.toSet());
+                .in(ResourcePerm.COL_RES_ID, resIds)).stream().map(
+                ResourcePerm::getId).collect(Collectors.toSet());
         baseMapper.deleteByIds(resIds);
-        resourcePermMapper.deleteByIds(permIds);
         JsonLogUtils.log("delete-res-node", StructuredArguments.kv("id", id),
                 StructuredArguments.kv("permIds", permIds),
                 StructuredArguments.kv("resIds", resIds));
-        //TODO：删除对应功能的授权
+        if (permIds.isEmpty()) {
+            return;
+        }
+        resourcePermService.delete(node.getAppId(), permIds);
     }
 
     /**

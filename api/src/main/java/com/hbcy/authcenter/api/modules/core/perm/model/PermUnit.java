@@ -33,7 +33,6 @@ public class PermUnit extends BaseEntity {
     public static final String COL_BELONG_TO = "belong_to";
     public static final String COL_MEMO = "memo";
     public static final String COL_FORBIDDEN = "forbidden";
-    public static final String COL_SYS_PROTECT = "sys_protect";
     public static final String COL_TENANT_ID = "tenant_id";
     public static final String COL_CREATE_USER = "create_user";
     public static final String COL_UPDATE_USER = "update_user";
@@ -67,11 +66,6 @@ public class PermUnit extends BaseEntity {
     private String memo;
     @TableField(value = "forbidden")
     private Integer forbidden;
-    /**
-     * 系统创建的数据，禁止删除
-     */
-    @TableField(value = "sys_protect")
-    private Integer sysProtect;
     @TableField(value = "tenant_id")
     private String tenantId;
     @TableField(value = "create_user")
