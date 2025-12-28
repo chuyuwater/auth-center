@@ -1,21 +1,105 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.hbcy.authcenter.api.modules.core.perm.dao.PermUnitUserMapper">
-  <resultMap id="BaseResultMap" type="com.hbcy.authcenter.api.modules.core.perm.model.PermUnitUser">
-    <!--@mbg.generated-->
-    <!--@Table perm_unit_user-->
-    <id column="id" property="id" />
-    <result column="unit_id" property="unitId" />
-    <result column="user_id" property="userId" />
-    <result column="org_id" property="orgId" />
-    <result column="tenant_id" property="tenantId" />
-    <result column="create_user" property="createUser" />
-    <result column="update_user" property="updateUser" />
-    <result column="create_time" property="createTime" />
-    <result column="update_time" property="updateTime" />
-  </resultMap>
-  <sql id="Base_Column_List">
-    <!--@mbg.generated-->
-    id, unit_id, user_id, org_id, tenant_id, create_user, update_user, create_time, update_time
-  </sql>
+    <resultMap id="BaseResultMap" type="com.hbcy.authcenter.api.modules.core.perm.model.PermUnitUser">
+        <!--@mbg.generated-->
+        <!--@Table perm_unit_user-->
+        <id column="id" property="id"/>
+        <result column="unit_id" property="unitId"/>
+        <result column="user_id" property="userId"/>
+        <result column="org_id" property="orgId"/>
+        <result column="tenant_id" property="tenantId"/>
+        <result column="create_user" property="createUser"/>
+        <result column="update_user" property="updateUser"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        <!--@mbg.generated-->
+        id,
+        unit_id,
+        user_id,
+        org_id,
+        tenant_id,
+        create_user,
+        update_user,
+        create_time,
+        update_time
+    </sql>
+
+    <select id="listFilteredPerms" resultType="com.hbcy.authcenter.api.modules.core.app.dto.ResPermDTO">
+        select rp.id,
+               rp.app_id,
+               rp.res_id,
+               rp.perm_name,
+               rp.perm_code,
+               rp.api_method,
+               rp.api_path
+        from perm_unit_user puu
+                 join perm_unit_resource pur on puu.unit_id = pur.unit_id
+                 join resource_perm rp
+                      on pur.perm_id = rp.id
+                 join org_tree ot on puu.org_id = ot.id
+        <where>
+            puu.user_id = #{userId}
+              and puu.tenant_id = #{tenantId}
+              and ot.id_path like concat(#{idPath}, '%')
+              and pur.app_id = #{appId}
+        </where>
+    </select>
+
+    <select id="listTenantAppMaxPerms" resultType="com.hbcy.authcenter.api.modules.core.app.dto.ResPermDTO">
+        select rp.id,
+               rp.app_id,
+               rp.res_id,
+               rp.perm_name,
+               rp.perm_code,
+               rp.api_method,
+               rp.api_path
+        from resource_perm rp
+        <where>
+            rp.id in
+            <foreach collection="permIds" open="(" close=")" item="item" separator=",">
+                #{item}
+            </foreach>
+        </where>
+    </select>
+
+    <select id="listAppPerms" resultType="com.hbcy.authcenter.api.modules.core.app.dto.ResPermDTO">
+        select rp.id,
+               rp.app_id,
+               rp.res_id,
+               rp.perm_name,
+               rp.perm_code,
+               rp.api_method,
+               rp.api_path
+        from resource_perm rp
+        where app_id = #{appId}
+    </select>
+
+    <!--    TODO：仅MySQL适用，需适配其他数据库-->
+    <insert id="insertIgnore">
+        insert ignore into perm_unit_user
+            (id, unit_id, user_id, org_id, tenant_id, create_user, update_user)
+        values
+        <foreach collection="list" item="u" separator=",">
+            (#{u.id}, #{u.unitId}, #{u.userId}, #{u.orgId},
+             #{u.tenantId}, #{u.createUser}, #{u.updateUser})
+        </foreach>
+    </insert>
+
+    <select id="listGrantUsers" resultType="com.hbcy.authcenter.api.modules.core.perm.dto.UnitUserDTO">
+        select puu.id       as grant_id,
+               puu.user_id,
+               u.account,
+               u.real_name  as user_name,
+               puu.org_id,
+               ot.node_name as org_name,
+               puu.create_time,
+               puu.create_user
+        from perm_unit_user puu
+                 join sys_user u on puu.user_id = u.id
+                 join org_tree ot on puu.org_id = ot.id
+        where puu.unit_id = #{vo.unitId}
+    </select>
 </mapper>

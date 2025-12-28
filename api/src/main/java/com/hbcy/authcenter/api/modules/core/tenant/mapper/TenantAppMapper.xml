@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hbcy.authcenter.api.modules.core.tenant.dao.TenantAppMapper">
+    <resultMap id="BaseResultMap" type="com.hbcy.authcenter.api.modules.core.tenant.model.TenantApp">
+        <!--@mbg.generated-->
+        <!--@Table tenant_app-->
+        <id column="id" property="id"/>
+        <result column="app_id" property="appId"/>
+        <result column="tenant_id" property="tenantId"/>
+        <result column="org_tree" property="orgTree"/>
+        <result column="grant_all" property="grantAll"/>
+        <result column="forbidden" property="forbidden"/>
+        <result column="perm_ids" property="permIds"
+                typeHandler="com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="create_user" property="createUser"/>
+        <result column="update_user" property="updateUser"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        <!--@mbg.generated-->
+        id,
+        app_id,
+        tenant_id,
+        org_tree,
+        grant_all,
+        forbidden,
+        perm_ids,
+        create_time,
+        update_time,
+        create_user,
+        update_user
+    </sql>
+
+    <select id="listGrantApps" resultType="com.hbcy.authcenter.api.modules.core.app.dto.AppCardDTO">
+        select tenant_app.id as grant_id, app.id as app_id, app.name_cn, app.memo, tenant_app.forbidden
+        from app
+        join tenant_app on tenant_app.app_id = app.id
+        <where>
+            app.forbidden = 0
+            and tenant_app.tenant_id = #{tenantId}
+        </where>
+        order by app.show_order
+    </select>
+</mapper>
+

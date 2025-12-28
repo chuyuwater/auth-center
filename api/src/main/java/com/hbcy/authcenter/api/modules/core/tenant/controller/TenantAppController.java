@@ -1,9 +1,10 @@
-package com.hbcy.authcenter.api.modules.core.app.controller;
+package com.hbcy.authcenter.api.modules.core.tenant.controller;
 
 import com.hbcy.authcenter.api.modules.core.app.dto.AppCardDTO;
 import com.hbcy.authcenter.api.modules.core.app.service.TenantAppService;
 import com.hbcy.authcenter.api.modules.core.app.vo.BindOrgTreeVO;
 import com.hbcy.authcenter.api.modules.core.tenant.vo.TenantAppGrantStatusUpdateVO;
+import com.hbcy.authcenter.api.modules.core.tenant.vo.TenantAppGrantUpdateVO;
 import com.hbcy.authcenter.api.modules.core.tenant.vo.TenantAppGrantVO;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
@@ -27,13 +28,24 @@ public class TenantAppController {
     private TenantAppService tenantAppService;
 
     /**
-     * 创建租户绑定应用
+     * 授权应用
      *
-     * @param vo 绑定信息
+     * @param vo 授权信息
      */
     @PostMapping
     public void create(@RequestBody @Valid TenantAppGrantVO vo) {
-        tenantAppService.createBinding(vo.getTenantId(), vo.getAppId());
+        tenantAppService.grantApp(vo);
+    }
+
+    /**
+     * 修改已有的授权详情
+     *
+     * @param vo 授权详情
+     * @param id 授权id
+     */
+    @PutMapping("/{id}")
+    public void update(@RequestBody @Valid TenantAppGrantUpdateVO vo, @PathVariable String id) {
+        tenantAppService.updateGrantedApp(id, vo);
     }
 
     /**

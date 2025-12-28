@@ -19,6 +19,6 @@ public class BindOrgTreeVO {
     /**
      * 组织树ID
      */
-    @NotBlank(message = "组织树ID不能为空")
-    private String orgTreeId;
+    @NotBlank(message = "组织树根节点ID不能为空")
+    private String orgRootId;
 }

@@ -1,25 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.hbcy.authcenter.api.modules.core.perm.dao.PermUnitMapper">
-  <resultMap id="BaseResultMap" type="com.hbcy.authcenter.api.modules.core.perm.model.PermUnit">
-    <!--@mbg.generated-->
-    <!--@Table perm_unit-->
-    <id column="id" property="id" />
-    <result column="name_cn" property="nameCn" />
-    <result column="policy_model" property="policyModel" />
-    <result column="belong_to" property="belongTo" />
-    <result column="memo" property="memo" />
-    <result column="forbidden" property="forbidden" />
-    <result column="sys_protect" property="sysProtect" />
-    <result column="tenant_id" property="tenantId" />
-    <result column="create_user" property="createUser" />
-    <result column="update_user" property="updateUser" />
-    <result column="create_time" property="createTime" />
-    <result column="update_time" property="updateTime" />
-  </resultMap>
-  <sql id="Base_Column_List">
-    <!--@mbg.generated-->
-    id, name_cn, policy_model, belong_to, memo, forbidden, sys_protect, tenant_id, create_user, 
-    update_user, create_time, update_time
-  </sql>
+    <resultMap id="BaseResultMap" type="com.hbcy.authcenter.api.modules.core.perm.model.PermUnit">
+        <!--@mbg.generated-->
+        <!--@Table perm_unit-->
+        <id column="id" property="id"/>
+        <result column="name_cn" property="nameCn"/>
+        <result column="policy_model" property="policyModel"/>
+        <result column="belong_to" property="belongTo"/>
+        <result column="memo" property="memo"/>
+        <result column="forbidden" property="forbidden"/>
+        <result column="sys_protect" property="sysProtect"/>
+        <result column="tenant_id" property="tenantId"/>
+        <result column="create_user" property="createUser"/>
+        <result column="update_user" property="updateUser"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="delete_time" property="deleteTime"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        <!--@mbg.generated-->
+        id,
+        name_cn,
+        policy_model,
+        belong_to,
+        memo,
+        forbidden,
+        sys_protect,
+        tenant_id,
+        create_user,
+        update_user,
+        create_time,
+        update_time,
+        delete_time
+    </sql>
 </mapper>

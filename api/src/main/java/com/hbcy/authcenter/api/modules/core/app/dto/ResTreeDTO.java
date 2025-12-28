@@ -22,4 +22,10 @@ public class ResTreeDTO {
      * 权限信息
      */
     private ResourcePerm perm;
+    /**
+     * 是否已授权
+     * 用于构建授权树
+     */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Boolean granted;
 }

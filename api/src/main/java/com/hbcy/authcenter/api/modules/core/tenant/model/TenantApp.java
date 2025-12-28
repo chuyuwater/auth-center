@@ -1,12 +1,14 @@
-package com.hbcy.authcenter.api.modules.core.app.model;
+package com.hbcy.authcenter.api.modules.core.tenant.model;
 
 import com.baomidou.mybatisplus.annotation.*;
+import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
 import com.hbcy.authcenter.api.common.bean.BaseEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 
 /**
  * @author 姚泰然
@@ -26,6 +28,9 @@ public class TenantApp extends BaseEntity {
     public static final String COL_UPDATE_TIME = "update_time";
     public static final String COL_CREATE_USER = "create_user";
     public static final String COL_UPDATE_USER = "update_user";
+    public static final String COL_GRANT_ALL = "grant_all";
+    public static final String COL_PERM_IDS = "perm_ids";
+
     /**
      * ulid
      */
@@ -42,10 +47,16 @@ public class TenantApp extends BaseEntity {
     @TableField(value = "tenant_id")
     private String tenantId;
     /**
+     * 是否全部授权
+     */
+    private Integer grantAll;
+    /**
      * 组织树id
      */
     @TableField(value = "org_tree")
     private String orgTree;
+    @TableField(value = "perm_ids", typeHandler = JacksonTypeHandler.class)
+    private Set<String> permIds;
     @TableField(value = "forbidden")
     private Integer forbidden;
     @TableField(value = "create_time", fill = FieldFill.INSERT)

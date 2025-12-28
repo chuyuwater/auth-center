@@ -27,6 +27,7 @@ public class HeaderContextFilter extends OncePerRequestFilter {
             headers.put(AuthConstants.HEADER_USER_ID, request.getHeader(AuthConstants.HEADER_USER_ID));
             headers.put(AuthConstants.HEADER_APP_ID, request.getHeader(AuthConstants.HEADER_APP_ID));
             headers.put(AuthConstants.HEADER_TENANT_ID, request.getHeader(AuthConstants.HEADER_TENANT_ID));
+            headers.put(AuthConstants.HEADER_ADMIN_FLAG, request.getHeader(AuthConstants.HEADER_ADMIN_FLAG));
             MDC.put("appId", request.getHeader(AuthConstants.HEADER_APP_ID));
             MDC.put("userId", request.getHeader(AuthConstants.HEADER_USER_ID));
             MDC.put("tenantId", request.getHeader(AuthConstants.HEADER_TENANT_ID));

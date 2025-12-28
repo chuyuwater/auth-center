@@ -14,6 +14,8 @@ import jakarta.validation.Valid;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 /**
  * 资源树（菜单）相关api
  *
@@ -47,8 +49,9 @@ public class ResourceTreeController {
      * @return 资源树
      */
     @GetMapping
-    public TreeNode<ResTreeDTO> getTree(@Valid ResourceTreeQueryVO vo) {
-        return resourceTreeService.listResTreeRecursively(vo);
+    public List<TreeNode<ResTreeDTO>> getTree(@Valid ResourceTreeQueryVO vo) {
+        TreeNode<ResTreeDTO> root = resourceTreeService.listResTreeRecursively(vo);
+        return root.getChildren();
     }
 
     /**

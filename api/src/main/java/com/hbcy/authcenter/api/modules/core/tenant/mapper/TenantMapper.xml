@@ -1,26 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.hbcy.authcenter.api.modules.core.tenant.dao.TenantMapper">
-  <resultMap id="BaseResultMap" type="com.hbcy.authcenter.api.modules.core.tenant.model.Tenant">
-    <!--@mbg.generated-->
-    <!--@Table tenant-->
-    <id column="id" jdbcType="VARCHAR" property="id" />
-    <result column="name_cn" jdbcType="VARCHAR" property="nameCn" />
-    <result column="short_name" jdbcType="VARCHAR" property="shortName" />
-    <result column="logo" jdbcType="VARCHAR" property="logo" />
-    <result column="memo" jdbcType="VARCHAR" property="memo" />
-    <result column="forbidden" jdbcType="TINYINT" property="forbidden" />
-    <result column="contact_user" jdbcType="VARCHAR" property="contactUser" />
-    <result column="contact_phone" jdbcType="VARCHAR" property="contactPhone" />
-    <result column="delete_time" jdbcType="BIGINT" property="deleteTime" />
-    <result column="create_user" jdbcType="CHAR" property="createUser" />
-    <result column="update_user" jdbcType="CHAR" property="updateUser" />
-    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
-    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
-  </resultMap>
-  <sql id="Base_Column_List">
-    <!--@mbg.generated-->
-    id, name_cn, short_name, logo, memo, forbidden, contact_user, contact_phone, delete_time, 
-    create_user, update_user, create_time, update_time
-  </sql>
+    <resultMap id="BaseResultMap" type="com.hbcy.authcenter.api.modules.core.tenant.model.Tenant">
+        <!--@mbg.generated-->
+        <!--@Table tenant-->
+        <id column="id" jdbcType="VARCHAR" property="id"/>
+        <result column="name_cn" jdbcType="VARCHAR" property="nameCn"/>
+        <result column="short_name" jdbcType="VARCHAR" property="shortName"/>
+        <result column="logo" jdbcType="VARCHAR" property="logo"/>
+        <result column="memo" jdbcType="VARCHAR" property="memo"/>
+        <result column="admin_id" jdbcType="CHAR" property="adminId"/>
+        <result column="forbidden" jdbcType="TINYINT" property="forbidden"/>
+        <result column="contact_user" jdbcType="VARCHAR" property="contactUser"/>
+        <result column="contact_phone" jdbcType="VARCHAR" property="contactPhone"/>
+        <result column="delete_time" jdbcType="BIGINT" property="deleteTime"/>
+        <result column="create_user" jdbcType="CHAR" property="createUser"/>
+        <result column="update_user" jdbcType="CHAR" property="updateUser"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        <!--@mbg.generated-->
+        id,
+        name_cn,
+        short_name,
+        logo,
+        memo,
+        forbidden,
+        contact_user,
+        contact_phone,
+        admin_id,
+        delete_time,
+        create_user,
+        update_user,
+        create_time,
+        update_time
+    </sql>
 </mapper>

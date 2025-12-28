@@ -3,11 +3,13 @@ package com.hbcy.authcenter.api.modules.core.app.service;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.f4b6a3.ulid.UlidCreator;
+import com.google.common.base.Splitter;
 import com.hbcy.authcenter.api.common.bean.NodeMoveVO;
 import com.hbcy.authcenter.api.common.constants.G;
 import com.hbcy.authcenter.api.modules.core.app.dao.AppMapper;
 import com.hbcy.authcenter.api.modules.core.app.dao.ResourcePermMapper;
 import com.hbcy.authcenter.api.modules.core.app.dao.ResourceTreeMapper;
+import com.hbcy.authcenter.api.modules.core.app.dto.ResPermDTO;
 import com.hbcy.authcenter.api.modules.core.app.dto.ResTreeDTO;
 import com.hbcy.authcenter.api.modules.core.app.model.App;
 import com.hbcy.authcenter.api.modules.core.app.model.ResourcePerm;
@@ -24,6 +26,7 @@ import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import net.logstash.logback.argument.StructuredArguments;
 import org.apache.commons.lang3.StringUtils;
+import org.jspecify.annotations.Nullable;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -110,13 +113,24 @@ public class ResourceTreeService extends ServiceImpl<ResourceTreeMapper, Resourc
         return entity;
     }
 
+    public TreeNode<ResTreeDTO> listResTreeRecursively(ResourceTreeQueryVO vo) {
+        return listResTreeRecursively(vo, null, false);
+    }
+
     /**
      * 构建权限资源树
+     * 有以下返回情况：
+     * 1. 全量的资源树（菜单、菜单+权限点）
+     * 2. 给用户已授权的资源树（移除了未授权的节点，菜单、菜单+权限点）
+     * 3. 全量的资源树，但是标记区分了已授权和未授权的部分（菜单、菜单+权限点）
      *
-     * @param vo 查询条件
+     * @param vo            查询条件
+     * @param grantPermList 已授权的权限，如果不为null，则用来过滤（为空则标识全部未授权）
+     * @param removeUngrant 是否移除掉未授权的节点，如果不移除则标记为未授权
      * @return 树
      */
-    public TreeNode<ResTreeDTO> listResTreeRecursively(ResourceTreeQueryVO vo) {
+    public TreeNode<ResTreeDTO> listResTreeRecursively(ResourceTreeQueryVO vo,
+                                                       List<ResPermDTO> grantPermList, boolean removeUngrant) {
         TreeNode<ResTreeDTO> root = new TreeNode<>();
         if (StringUtils.isNotBlank(vo.getParentId())) {
             ResourceTree node = baseMapper.selectById(vo.getParentId());
@@ -135,6 +149,8 @@ public class ResourceTreeService extends ServiceImpl<ResourceTreeMapper, Resourc
             resourcePerms = resourcePermMapper.selectList(new QueryWrapper<ResourcePerm>()
                     .in(ResourcePerm.COL_RES_ID, ids));
         }
+
+        Set<String> allGrantIds = filterGranted(grantPermList, removeUngrant, resourceTrees, resourcePerms);
         Map<String, List<ResourceTree>> resChildrenMap = resourceTrees.stream()
                 .collect(Collectors.groupingBy(ResourceTree::getParentId, Collectors.collectingAndThen(
                         Collectors.toList(), l -> {
@@ -143,26 +159,73 @@ public class ResourceTreeService extends ServiceImpl<ResourceTreeMapper, Resourc
                         })));
         Map<String, List<ResourcePerm>> permChildrenMap = resourcePerms.stream()
                 .collect(Collectors.groupingBy(ResourcePerm::getResId, Collectors.toList()));
-        buildTree(root, resChildrenMap, permChildrenMap);
+        buildTree(root, resChildrenMap, permChildrenMap, allGrantIds);
         return root;
+    }
+
+    @Nullable
+    private Set<String> filterGranted(List<ResPermDTO> grantPermList, boolean removeUngrant,
+                                      List<ResourceTree> resourceTrees, List<ResourcePerm> resourcePerms) {
+        if (grantPermList == null) {
+            return null;
+        }
+        //权限点关联的直接资源节点
+        Set<String> directIds = new HashSet<>();
+        //授权的资源节点
+        Set<String> grantResIds = new HashSet<>();
+        //授权的权限点
+        Set<String> grantPermIds = new HashSet<>();
+        for (ResPermDTO dto : grantPermList) {
+            directIds.add(dto.getResId());
+            grantPermIds.add(dto.getId());
+        }
+        if (!directIds.isEmpty()) {
+            List<ResourceTree> grantRes = baseMapper.selectList(new QueryWrapper<ResourceTree>().
+                    in(ResourceTree.COL_ID, directIds)
+                    .select(ResourceTree.COL_ID_PATH));
+            for (ResourceTree rt : grantRes) {
+                grantResIds.addAll(Splitter.on(G.ID_PATH_SPLITTER).splitToList(rt.getIdPath()));
+            }
+        }
+        if (removeUngrant) {
+            //在这里直接移除掉未授权的节点
+            resourceTrees.removeIf(x -> !grantResIds.contains(x.getId()));
+            resourcePerms.removeIf(x -> !grantPermIds.contains(x.getId()));
+        } else {
+            //下文构建树的时候标记授权
+            Set<String> allGrantIds = new HashSet<>();
+            allGrantIds.addAll(grantPermIds);
+            allGrantIds.addAll(grantResIds);
+            return allGrantIds;
+        }
+        return null;
     }
 
     private void buildTree(TreeNode<ResTreeDTO> current,
                            Map<String, List<ResourceTree>> childrenMap,
-                           Map<String, List<ResourcePerm>> permMap) {
+                           Map<String, List<ResourcePerm>> permMap,
+                           Set<String> allGrantIds) {
         String resId = current.getData().getRes().getId();
         //先查询当前节点关联的权限点
         for (ResourcePerm t : permMap.get(resId)) {
             TreeNode<ResTreeDTO> node = new TreeNode<>();
-            node.setData(new ResTreeDTO().setPerm(t));
+            ResTreeDTO dto = new ResTreeDTO().setPerm(t);
+            if (allGrantIds != null) {
+                dto.setGranted(allGrantIds.contains(t.getId()));
+            }
+            node.setData(dto);
             current.addChild(node);
         }
         //再递归查询当前节点关联的菜单
         for (ResourceTree t : childrenMap.get(resId)) {
             TreeNode<ResTreeDTO> node = new TreeNode<>();
-            node.setData(new ResTreeDTO().setRes(t));
+            ResTreeDTO dto = new ResTreeDTO().setRes(t);
+            if (allGrantIds != null) {
+                dto.setGranted(allGrantIds.contains(t.getId()));
+            }
+            node.setData(dto);
             current.addChild(node);
-            buildTree(node, childrenMap, permMap);
+            buildTree(node, childrenMap, permMap, allGrantIds);
         }
     }
 

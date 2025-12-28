@@ -11,6 +11,10 @@ import lombok.Data;
 @Data
 public class AppCardDTO {
     /**
+     * 授权id
+     */
+    private String grantId;
+    /**
      * 应用id
      */
     private String appId;

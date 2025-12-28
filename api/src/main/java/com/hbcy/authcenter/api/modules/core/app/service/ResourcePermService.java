@@ -18,6 +18,7 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * 资源权限相关业务逻辑
@@ -84,6 +85,10 @@ public class ResourcePermService extends ServiceImpl<ResourcePermMapper, Resourc
                 .eq(StringUtils.isNotBlank(vo.getResId()), ResourcePerm.COL_RES_ID, vo.getResId())
                 .eq(StringUtils.isNotBlank(vo.getAppId()), ResourcePerm.COL_APP_ID, vo.getAppId())
                 .orderByAsc(ResourcePerm.COL_API_METHOD));
+    }
+
+    public Set<String> filterAppPermIds(String appId, Set<String> supplyIds) {
+        return baseMapper.filterAppPermIds(appId, supplyIds);
     }
 
     /**

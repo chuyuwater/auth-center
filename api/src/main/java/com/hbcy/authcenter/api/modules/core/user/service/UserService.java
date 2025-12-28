@@ -11,6 +11,8 @@ import com.hbcy.authcenter.api.common.constants.G;
 import com.hbcy.authcenter.api.common.enums.OrgNodeTypeEnum;
 import com.hbcy.authcenter.api.modules.core.org.model.OrgTree;
 import com.hbcy.authcenter.api.modules.core.org.service.OrgTreeService;
+import com.hbcy.authcenter.api.modules.core.tenant.dao.TenantMapper;
+import com.hbcy.authcenter.api.modules.core.tenant.model.Tenant;
 import com.hbcy.authcenter.api.modules.core.user.dao.UserMapper;
 import com.hbcy.authcenter.api.modules.core.user.dto.UserExportDTO;
 import com.hbcy.authcenter.api.modules.core.user.dto.UserOrgDTO;
@@ -58,6 +60,8 @@ public class UserService extends ServiceImpl<UserMapper, User> {
     private OrgTreeService orgTreeService;
     @Resource
     private NameCacheService nameCacheService;
+    @Resource
+    private TenantMapper tenantMapper;
 
     /**
      * 辅助判断：是否是纯文字（排除掉空格和常见的各种标点符号）
@@ -163,8 +167,16 @@ public class UserService extends ServiceImpl<UserMapper, User> {
         if (user == null) {
             return;
         }
-        if (!user.getTenantId().equals(UserContextUtils.getTenantId())) {
+        String tenantId = UserContextUtils.getTenantId();
+        if (!user.getTenantId().equals(tenantId)) {
             throw new PermissionError();
+        }
+        Tenant tenant = tenantMapper.selectById(user.getTenantId());
+        if (tenant == null) {
+            throw new ServerError("租户被移除，请联系管理员");
+        }
+        if (userId.equals(tenant.getAdminId())) {
+            throw new ParamError("无法删除租户默认管理员");
         }
         cleanNameCache(userId);
         removeById(userId);
@@ -229,7 +241,7 @@ public class UserService extends ServiceImpl<UserMapper, User> {
     }
 
     public UserQueryResultDTO getUser(String userId) {
-        User user = checkUser(userId);
+        checkUser(userId);
         UserQueryVO vo = new UserQueryVO();
         vo.setUserId(userId);
         PageResp<UserQueryResultDTO> resp = queryUser(vo);
@@ -344,17 +356,17 @@ public class UserService extends ServiceImpl<UserMapper, User> {
         //按用户分组映射
         Map<String, List<UserOrgDTO>> userOrgMap = userOrgs.stream().collect(
                 Collectors.groupingBy(UserOrgDTO::getUserId));
-        for (UserQueryResultDTO record : page.getRecords()) {
-            List<UserOrgDTO> orgs = userOrgMap.get(record.getId());
+        for (UserQueryResultDTO dto : page.getRecords()) {
+            List<UserOrgDTO> orgs = userOrgMap.get(dto.getId());
             if (orgs != null) {
                 for (UserOrgDTO org : orgs) {
-                    if (org.getOrgId().equals(record.getDefaultOrg())) {
+                    if (org.getOrgId().equals(dto.getDefaultOrg())) {
                         org.setDefaultOrg(true);
                     }
                 }
                 orgs.sort(Comparator.comparing(UserOrgDTO::isDefaultOrg).reversed());
             }
-            record.setOrgList(orgs);
+            dto.setOrgList(orgs);
         }
         return new PageRespEx<>(page);
     }

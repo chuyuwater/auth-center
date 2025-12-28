@@ -22,6 +22,7 @@ public class Tenant extends BaseEntity {
     public static final String COL_SHORT_NAME = "short_name";
     public static final String COL_LOGO = "logo";
     public static final String COL_MEMO = "memo";
+    public static final String COL_ADMIN_ID = "admin_id";
     public static final String COL_FORBIDDEN = "forbidden";
     public static final String COL_CONTACT_USER = "contact_user";
     public static final String COL_CONTACT_PHONE = "contact_phone";
@@ -74,7 +75,14 @@ public class Tenant extends BaseEntity {
      * 删除时间戳标记
      */
     @TableField(value = "delete_time")
-    private @TableLogic(value = "0", delval = "-1") Long deleteTime;
+    @TableLogic(value = "0", delval = "-1")
+    private Long deleteTime;
+
+    /**
+     * 租户管理员id
+     */
+    @TableField(value = "admin_id")
+    private String adminId;
     /**
      * 创建者
      */
