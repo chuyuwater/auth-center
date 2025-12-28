@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 
 /**
  * @author 姚泰然
- * @date 2025-12-27 20:34
+ * @date 2025-12-28 10:04
  */
 @Data
 @NoArgsConstructor
@@ -18,6 +18,7 @@ public class PermTree {
     public static final String COL_NODE_NAME = "node_name";
     public static final String COL_MEMO = "memo";
     public static final String COL_PARENT_ID = "parent_id";
+    public static final String COL_ID_PATH = "id_path";
     public static final String COL_TENANT_ID = "tenant_id";
     public static final String COL_CREATE_USER = "create_user";
     public static final String COL_UPDATE_USER = "update_user";
@@ -40,6 +41,8 @@ public class PermTree {
      */
     @TableField(value = "parent_id")
     private String parentId;
+    @TableField(value = "id_path")
+    private String idPath;
     @TableField(value = "tenant_id")
     private String tenantId;
     @TableField(value = "create_user")

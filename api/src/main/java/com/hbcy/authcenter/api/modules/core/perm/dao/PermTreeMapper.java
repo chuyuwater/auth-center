@@ -5,7 +5,7 @@ import com.hbcy.authcenter.api.modules.core.perm.model.PermTree;
 
 /**
  * @author 姚泰然
- * @date 2025-12-27 20:34
+ * @date 2025-12-28 10:04
  */
 public interface PermTreeMapper extends BaseMapper<PermTree> {
 }

@@ -8,6 +8,7 @@
     <result column="node_name" property="nodeName" />
     <result column="memo" property="memo" />
     <result column="parent_id" property="parentId" />
+    <result column="id_path" property="idPath" />
     <result column="tenant_id" property="tenantId" />
     <result column="create_user" property="createUser" />
     <result column="update_user" property="updateUser" />
@@ -16,7 +17,7 @@
   </resultMap>
   <sql id="Base_Column_List">
     <!--@mbg.generated-->
-    id, node_name, memo, parent_id, tenant_id, create_user, update_user, create_time, 
+    id, node_name, memo, parent_id, id_path, tenant_id, create_user, update_user, create_time, 
     update_time
   </sql>
 </mapper>
