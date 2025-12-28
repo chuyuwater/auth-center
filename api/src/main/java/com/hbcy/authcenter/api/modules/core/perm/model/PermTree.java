@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @TableName(value = "perm_tree")
 public class PermTree {
+    public static final String PERM_ID_TEMPLATE = "%s-PERM-%d";
     public static final String COL_ID = "id";
     public static final String COL_NODE_NAME = "node_name";
     public static final String COL_MEMO = "memo";
@@ -24,6 +25,7 @@ public class PermTree {
     public static final String COL_UPDATE_USER = "update_user";
     public static final String COL_CREATE_TIME = "create_time";
     public static final String COL_UPDATE_TIME = "update_time";
+    public static final String COL_SHOW_ORDER = "show_order";
     @TableId(value = "id", type = IdType.ASSIGN_UUID)
     private String id;
     /**
@@ -43,6 +45,8 @@ public class PermTree {
     private String parentId;
     @TableField(value = "id_path")
     private String idPath;
+    @TableField(value = "show_order")
+    private Integer showOrder;
     @TableField(value = "tenant_id")
     private String tenantId;
     @TableField(value = "create_user")

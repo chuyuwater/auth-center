@@ -1,23 +1,72 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.hbcy.authcenter.api.modules.core.perm.dao.PermTreeMapper">
-  <resultMap id="BaseResultMap" type="com.hbcy.authcenter.api.modules.core.perm.model.PermTree">
-    <!--@mbg.generated-->
-    <!--@Table perm_tree-->
-    <id column="id" property="id" />
-    <result column="node_name" property="nodeName" />
-    <result column="memo" property="memo" />
-    <result column="parent_id" property="parentId" />
-    <result column="id_path" property="idPath" />
-    <result column="tenant_id" property="tenantId" />
-    <result column="create_user" property="createUser" />
-    <result column="update_user" property="updateUser" />
-    <result column="create_time" property="createTime" />
-    <result column="update_time" property="updateTime" />
-  </resultMap>
-  <sql id="Base_Column_List">
-    <!--@mbg.generated-->
-    id, node_name, memo, parent_id, id_path, tenant_id, create_user, update_user, create_time, 
-    update_time
-  </sql>
+    <resultMap id="BaseResultMap" type="com.hbcy.authcenter.api.modules.core.perm.model.PermTree">
+        <!--@mbg.generated-->
+        <!--@Table perm_tree-->
+        <id column="id" property="id"/>
+        <result column="node_name" property="nodeName"/>
+        <result column="memo" property="memo"/>
+        <result column="parent_id" property="parentId"/>
+        <result column="id_path" property="idPath"/>
+        <result column="show_order" property="showOrder"/>
+        <result column="tenant_id" property="tenantId"/>
+        <result column="create_user" property="createUser"/>
+        <result column="update_user" property="updateUser"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        <!--@mbg.generated-->
+        id, node_name, memo, parent_id, id_path, show_order, tenant_id, create_user, update_user, create_time,
+        update_time
+    </sql>
+
+    <select id="listChildrenRecursively" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from perm_tree
+        <where>
+            tenant_id = #{tenantId}
+            <if test="parentIdPath != null and parentIdPath != ''">
+                and id_path like concat(#{parentIdPath}, '%')
+            </if>
+            <if test="vo != null">
+                <if test="vo.name != null">
+                    and node_name like concat('%', #{vo.name}, '%')
+                </if>
+            </if>
+        </where>
+    </select>
+
+    <insert id="append">
+        insert into perm_tree (id, node_name, memo, parent_id, id_path, tenant_id,
+        create_user, update_user, show_order)
+        select #{entity.id},
+        #{entity.nodeName},
+        #{entity.memo},
+        #{entity.parentId},
+        #{entity.idPath},
+        #{entity.tenantId},
+        #{entity.createUser},
+        #{entity.updateUser},
+        coalesce(max(show_order), 0) + 1
+        from perm_tree
+        where parent_id = #{entity.parentId}
+    </insert>
+
+    <update id="updateIdPath">
+        update perm_tree
+        set id_path = replace(id_path, #{oldPath}, #{newPath})
+        where tenant_id = #{tenantId}
+        and id_path like concat(#{oldPath}, '%')
+    </update>
+
+    <update id="updateShowOrder">
+        update perm_tree
+        set show_order = show_order + 1
+        where tenant_id = #{tenantId}
+        and parent_id = #{parentId}
+        and show_order &gt;= #{targetIdx}
+    </update>
 </mapper>
