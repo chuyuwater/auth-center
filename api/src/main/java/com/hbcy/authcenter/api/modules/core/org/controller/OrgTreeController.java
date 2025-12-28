@@ -48,8 +48,10 @@ public class OrgTreeController {
      * @return 组织架构树
      */
     @GetMapping
-    public TreeNode<OrgTree> getTree(@Valid OrgTreeQueryVO vo) {
-        return orgTreeService.listOrgTreeRecursively(vo);
+    public List<TreeNode<OrgTree>> getTree(@Valid OrgTreeQueryVO vo) {
+        TreeNode<OrgTree> root = orgTreeService.listOrgTreeRecursively(vo);
+        //不必返回根节点
+        return root.getChildren();
     }
 
     @GetMapping("/direct")
