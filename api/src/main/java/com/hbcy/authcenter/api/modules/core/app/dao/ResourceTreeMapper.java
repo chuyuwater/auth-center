@@ -19,6 +19,7 @@ public interface ResourceTreeMapper extends BaseMapper<ResourceTree> {
      */
     List<ResourceTree> listChildrenRecursively(
             @Param("appId") String appId,
+            @Param("keyword") String keyword,
             @Param("parentIdPath") String parentIdPath, @Param("clientType") Integer clientType);
 
     /**

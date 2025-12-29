@@ -17,6 +17,10 @@ public class ResourceTreeQueryVO {
     @NotBlank(message = "应用ID不能为空")
     private String appId;
     /**
+     * 关键字
+     */
+    private String keyword;
+    /**
      * 父节点ID
      */
     private String parentId = "";

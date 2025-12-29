@@ -243,7 +243,7 @@ public class ResourceTreeService extends ServiceImpl<ResourceTreeMapper, Resourc
             }
             idPath = tree.getIdPath() + G.ID_PATH_SPLITTER;
         }
-        return baseMapper.listChildrenRecursively(vo.getAppId(), idPath, vo.getClientType());
+        return baseMapper.listChildrenRecursively(vo.getAppId(), vo.getKeyword(), idPath, vo.getClientType());
     }
 
     /**
@@ -256,7 +256,8 @@ public class ResourceTreeService extends ServiceImpl<ResourceTreeMapper, Resourc
         if (node == null) {
             return;
         }
-        List<ResourceTree> related = baseMapper.listChildrenRecursively(node.getAppId(), node.getId(), null);
+        List<ResourceTree> related = baseMapper.listChildrenRecursively(node.getAppId(), null,
+                node.getId(), null);
         Set<String> resIds = related.stream().map(ResourceTree::getId).collect(Collectors.toSet());
         resIds.add(id);
         Set<String> permIds = resourcePermService.list(new QueryWrapper<ResourcePerm>()

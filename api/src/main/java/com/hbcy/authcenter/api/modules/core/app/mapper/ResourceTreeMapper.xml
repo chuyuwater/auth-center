@@ -62,6 +62,12 @@
                     and client_type in (0, 2)
                 </if>
             </if>
+            <if test="keyword != null and keyword != ''">
+                and (
+                name_cn like concat('%', #{keyword}, '%')
+                or custom_id like concat('%', #{keyword}, '%')
+                )
+            </if>
         </where>
     </select>
 
@@ -100,6 +106,8 @@
     <update id="updateShowOrder">
         update resource_tree
         set show_order = show_order + 1
-        where app_id=#{appId} and parent_id=#{parentId} and show_order >= #{targetIdx}
+        where app_id = #{appId}
+        and parent_id = #{parentId}
+        and show_order >= #{targetIdx}
     </update>
 </mapper>
