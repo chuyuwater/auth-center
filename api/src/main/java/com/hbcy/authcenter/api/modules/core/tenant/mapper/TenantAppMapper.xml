@@ -10,8 +10,7 @@
         <result column="org_tree" property="orgTree"/>
         <result column="grant_all" property="grantAll"/>
         <result column="forbidden" property="forbidden"/>
-        <result column="perm_ids" property="permIds"
-                typeHandler="com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler"/>
+        <result column="delete_time" property="deleteTime"/>
         <result column="create_time" property="createTime"/>
         <result column="update_time" property="updateTime"/>
         <result column="create_user" property="createUser"/>
@@ -25,7 +24,7 @@
         org_tree,
         grant_all,
         forbidden,
-        perm_ids,
+        delete_time,
         create_time,
         update_time,
         create_user,
@@ -39,6 +38,7 @@
         <where>
             app.forbidden = 0
             and tenant_app.tenant_id = #{tenantId}
+            and app.delete_time = 0
         </where>
         order by app.show_order
     </select>

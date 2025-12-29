@@ -1,4 +1,4 @@
-package com.hbcy.authcenter.api.modules.core.app.service;
+package com.hbcy.authcenter.api.modules.core.tenant.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -13,9 +13,11 @@ import com.hbcy.authcenter.api.modules.core.org.model.OrgTree;
 import com.hbcy.authcenter.api.modules.core.perm.dao.PermUnitResourceMapper;
 import com.hbcy.authcenter.api.modules.core.perm.model.PermUnitResource;
 import com.hbcy.authcenter.api.modules.core.tenant.dao.TenantAppMapper;
+import com.hbcy.authcenter.api.modules.core.tenant.dao.TenantAppResourceMapper;
 import com.hbcy.authcenter.api.modules.core.tenant.dao.TenantMapper;
 import com.hbcy.authcenter.api.modules.core.tenant.model.Tenant;
 import com.hbcy.authcenter.api.modules.core.tenant.model.TenantApp;
+import com.hbcy.authcenter.api.modules.core.tenant.model.TenantAppResource;
 import com.hbcy.authcenter.api.modules.core.tenant.vo.TenantAppGrantStatusUpdateVO;
 import com.hbcy.authcenter.api.modules.core.tenant.vo.TenantAppGrantUpdateVO;
 import com.hbcy.authcenter.api.modules.core.tenant.vo.TenantAppGrantVO;
@@ -29,6 +31,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -52,6 +55,23 @@ public class TenantAppService extends ServiceImpl<TenantAppMapper, TenantApp> {
     private PermUnitResourceMapper permUnitResourceMapper;
     @Resource
     private OrgTreeMapper orgTreeMapper;
+    @Resource
+    private TenantAppResourceMapper tenantAppResourceMapper;
+
+    private static List<TenantAppResource> genTenantAppResources(
+            String appId, Set<String> permIds, String tenantId) {
+        List<TenantAppResource> tenantAppResources = new ArrayList<>();
+        for (String filteredId : permIds) {
+            TenantAppResource tenantAppResource = new TenantAppResource();
+            tenantAppResource.setTenantId(tenantId);
+            tenantAppResource.setAppId(appId);
+            tenantAppResource.setPermId(filteredId);
+            tenantAppResource.setCreateUser(UserContextUtils.getUserId());
+            tenantAppResource.setUpdateUser(UserContextUtils.getUserId());
+            tenantAppResources.add(tenantAppResource);
+        }
+        return tenantAppResources;
+    }
 
     /**
      * 授权应用
@@ -89,6 +109,11 @@ public class TenantAppService extends ServiceImpl<TenantAppMapper, TenantApp> {
         tenantApp.setGrantAll(vo.isGrantAll() ? 1 : 0);
         tenantApp.setCreateUser(UserContextUtils.getUserId());
         tenantApp.setUpdateUser(UserContextUtils.getUserId());
+
+        //先删除已有的关联再批量插入
+        tenantAppResourceMapper.delete(new QueryWrapper<TenantAppResource>()
+                .eq(TenantAppResource.COL_TENANT_ID, tenantId)
+                .eq(TenantAppResource.COL_APP_ID, vo.getAppId()));
         if (!vo.isGrantAll()) {
             //手动勾选的资源
             Set<String> filteredIds = resourcePermMapper.selectList(new QueryWrapper<ResourcePerm>()
@@ -96,7 +121,9 @@ public class TenantAppService extends ServiceImpl<TenantAppMapper, TenantApp> {
                             .in(ResourcePerm.COL_ID, vo.getPermIds())
                             .select(ResourcePerm.COL_ID)).stream()
                     .map(ResourcePerm::getId).collect(Collectors.toSet());
-            tenantApp.setPermIds(filteredIds);
+            List<TenantAppResource> tenantAppResources = genTenantAppResources(
+                    vo.getAppId(), filteredIds, tenantId);
+            tenantAppResourceMapper.insert(tenantAppResources);
         }
         try {
             save(tenantApp);
@@ -107,38 +134,63 @@ public class TenantAppService extends ServiceImpl<TenantAppMapper, TenantApp> {
 
     /**
      * 修改授权
+     * 1. 原来是全部授权，现在也是 -> 无权限影响，直接返回
+     * 2. 原来是部分授权，现在是全部授权 -> 移除关联表中的数据
+     * 3. 原来是全部授权，现在不是 -> 计算新的授权，插入关联表，计算差值移除角色/策略授权
+     * 4. 原来是部分授权，现在也是 -> 同上
      *
      * @param vo 修改内容
      */
     @Transactional(rollbackFor = Exception.class)
     public void updateGrantedApp(String grantId, TenantAppGrantUpdateVO vo) {
-        TenantApp old = baseMapper.selectById(grantId);
-        if (old == null) {
+        TenantApp inst = baseMapper.selectById(grantId);
+        if (inst == null) {
             throw new ParamError("授权已取消");
         }
-        Set<String> oldPermIds = old.getPermIds();
-        Set<String> newPermIds = vo.getPermIds();
-        //不再全部授权
-        if (old.getGrantAll() > 0 && !vo.isGrantAll()) {
-            oldPermIds = resourcePermMapper.selectList(new QueryWrapper<ResourcePerm>()
-                            .eq(ResourcePerm.COL_APP_ID, old.getAppId()))
-                    .stream().map(ResourcePerm::getId).collect(Collectors.toSet());
-        } else if (old.getGrantAll() == 0 && !vo.isGrantAll()) {
-            if (oldPermIds == null) oldPermIds = new HashSet<>();
-            if (!CollectionUtils.isEmpty(vo.getPermIds())) {
-                newPermIds = resourcePermMapper.filterAppPermIds(old.getAppId(), vo.getPermIds());
-            }
+        //情况1
+        if (inst.getGrantAll() > 0 && vo.isGrantAll()) {
+            return;
         }
+        //情况2
+        if (inst.getGrantAll() == 0 && vo.isGrantAll()) {
+            tenantAppResourceMapper.delete(new QueryWrapper<TenantAppResource>()
+                    .eq(TenantAppResource.COL_TENANT_ID, inst.getTenantId())
+                    .eq(TenantAppResource.COL_APP_ID, inst.getAppId()));
+            inst.setGrantAll(1);
+            save(inst);
+            return;
+        }
+        //情况3/4
+        //计算新授权
+        Set<String> newPermIds = vo.getPermIds();
+        if (CollectionUtils.isEmpty(newPermIds)) {
+            newPermIds = new HashSet<>();
+        } else {
+            newPermIds = resourcePermMapper.filterAppPermIds(inst.getAppId(), newPermIds);
+        }
+        Set<String> oldPermIds = new HashSet<>();
+        if (inst.getGrantAll() > 0) {
+            oldPermIds = resourcePermMapper.listAppPermIds(inst.getAppId());
+        } else {
+            oldPermIds = tenantAppResourceMapper.getGrantedPermIds(inst.getTenantId(), inst.getAppId());
+            // 清空授权
+            tenantAppResourceMapper.deleteByIds(oldPermIds);
+        }
+        if (!newPermIds.isEmpty()) {
+            List<TenantAppResource> tenantAppResources = genTenantAppResources(
+                    inst.getAppId(), newPermIds, inst.getTenantId());
+            tenantAppResourceMapper.insert(tenantAppResources);
+        }
+        //检查权限是否缩小
         oldPermIds.removeAll(newPermIds);
         if (!CollectionUtils.isEmpty(oldPermIds)) {
             //最大授权缩小，需要在租户下的角色、策略中移除所有相关权限
             permUnitResourceMapper.delete(new QueryWrapper<PermUnitResource>()
                     .in(PermUnitResource.COL_PERM_ID, oldPermIds));
         }
-        old.setGrantAll(vo.isGrantAll() ? 1 : 0);
-        old.setUpdateUser(UserContextUtils.getUserId());
-        old.setPermIds(vo.isGrantAll() ? new HashSet<>() : newPermIds);
-        save(old);
+        inst.setGrantAll(vo.isGrantAll() ? 1 : 0);
+        inst.setUpdateUser(UserContextUtils.getUserId());
+        save(inst);
     }
 
     /**
@@ -155,20 +207,6 @@ public class TenantAppService extends ServiceImpl<TenantAppMapper, TenantApp> {
         grant.setForbidden(vo.getForbidden());
         grant.setUpdateUser(UserContextUtils.getUserId());
         this.updateById(grant);
-    }
-
-    /**
-     * 租户已授权的应用ID清单
-     * 不含被禁用的
-     *
-     * @param tenantId 租户id
-     * @return 应用id列表
-     */
-    public List<String> listBindAppIds(String tenantId) {
-        return baseMapper.selectList(new QueryWrapper<TenantApp>()
-                        .eq(TenantApp.COL_TENANT_ID, tenantId)
-                        .eq(TenantApp.COL_FORBIDDEN, 0))
-                .stream().map(TenantApp::getAppId).collect(Collectors.toList());
     }
 
     /**

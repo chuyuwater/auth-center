@@ -19,4 +19,12 @@ public interface ResourcePermMapper extends BaseMapper<ResourcePerm> {
      * @return 有效的id
      */
     Set<String> filterAppPermIds(@Param("appId") String appId, @Param("supplyIds") Set<String> supplyIds);
+
+    /**
+     * 列出应用下的权限点id
+     *
+     * @param appId 应用id
+     * @return 权限点id
+     */
+    Set<String> listAppPermIds(@Param("appId") String appId);
 }

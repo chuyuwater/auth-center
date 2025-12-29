@@ -14,13 +14,13 @@ import com.hbcy.authcenter.api.modules.core.perm.vo.PermUnitUserQueryVO;
 import com.hbcy.authcenter.api.modules.core.perm.vo.PermUnitUserUpdateVO;
 import com.hbcy.authcenter.api.modules.core.perm.vo.PermUserGrantVO;
 import com.hbcy.authcenter.api.modules.core.tenant.dao.TenantAppMapper;
+import com.hbcy.authcenter.api.modules.core.tenant.dao.TenantAppResourceMapper;
 import com.hbcy.authcenter.api.modules.core.tenant.model.TenantApp;
 import com.hbcy.authcenter.sdk.utils.UserContextUtils;
 import com.hbcy.common.base.error.ParamError;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,6 +34,8 @@ public class PermUnitUserService extends ServiceImpl<PermUnitUserMapper, PermUni
     private OrgTreeService orgTreeService;
     @Resource
     private TenantAppMapper tenantAppMapper;
+    @Resource
+    private TenantAppResourceMapper tenantAppResourceMapper;
 
     @Transactional(rollbackFor = Exception.class)
     public void addUsersToUnit(PermUnitUserUpdateVO vo) {
@@ -84,10 +86,8 @@ public class PermUnitUserService extends ServiceImpl<PermUnitUserMapper, PermUni
             if (tenantApp.getGrantAll() > 0) {
                 return baseMapper.listAppPerms(appId);
             } else {
-                if (CollectionUtils.isEmpty(tenantApp.getPermIds())) {
-                    return new ArrayList<>();
-                }
-                return baseMapper.listTenantAppMaxPerms(tenantApp.getPermIds());
+                Set<String> grantedPermIds = tenantAppResourceMapper.getGrantedPermIds(tenantId, appId);
+                return baseMapper.listPermInfo(grantedPermIds);
             }
         }
         String orgId = UserContextUtils.getUserOrg();

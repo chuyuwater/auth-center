@@ -1,11 +1,12 @@
 package com.hbcy.authcenter.api.modules.core.tenant.controller;
 
 import com.hbcy.authcenter.api.modules.core.app.dto.AppCardDTO;
-import com.hbcy.authcenter.api.modules.core.app.service.TenantAppService;
 import com.hbcy.authcenter.api.modules.core.app.vo.BindOrgTreeVO;
+import com.hbcy.authcenter.api.modules.core.tenant.service.TenantAppService;
 import com.hbcy.authcenter.api.modules.core.tenant.vo.TenantAppGrantStatusUpdateVO;
 import com.hbcy.authcenter.api.modules.core.tenant.vo.TenantAppGrantUpdateVO;
 import com.hbcy.authcenter.api.modules.core.tenant.vo.TenantAppGrantVO;
+import com.hbcy.authcenter.sdk.utils.UserContextUtils;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import org.springframework.validation.annotation.Validated;
@@ -58,16 +59,23 @@ public class TenantAppController {
         tenantAppService.switchGrantStatus(vo);
     }
 
-
     /**
-     * 查看租户已授权的应用列表（含禁用状态）
+     * 查看租户已授权的应用列表（门户侧）
      *
      * @param tenantId 租户id
      * @return 应用列表
      */
-    @GetMapping("")
-    public List<AppCardDTO> listGrantApps(@RequestParam String tenantId) {
+    @GetMapping("/{tenantId}")
+    public List<AppCardDTO> listGrantApps(@PathVariable String tenantId) {
         return tenantAppService.listGrantApps(tenantId);
+    }
+
+    /**
+     * 租户查看已授权的应用清单（租户侧）
+     */
+    @GetMapping
+    public List<AppCardDTO> listGrantApps() {
+        return tenantAppService.listGrantApps(UserContextUtils.getTenantId());
     }
 
     /**
@@ -77,6 +85,6 @@ public class TenantAppController {
      */
     @PostMapping("/orgTree")
     public void bindOrgTree(@Valid @RequestBody BindOrgTreeVO vo) {
-        //todo
+        tenantAppService.bindingOrgTree(vo);
     }
 }

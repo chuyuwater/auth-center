@@ -40,4 +40,10 @@
             #{sid}
         </foreach>
     </select>
+
+    <select id="listAppPermIds" resultType="java.lang.String">
+        select id
+        from resource_perm
+        where app_id = #{appId}
+    </select>
 </mapper>

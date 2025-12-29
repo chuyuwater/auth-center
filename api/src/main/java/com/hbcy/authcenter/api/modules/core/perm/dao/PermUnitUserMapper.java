@@ -19,8 +19,8 @@ public interface PermUnitUserMapper extends BaseMapper<PermUnitUser> {
     List<ResPermDTO> listFilteredPerms(@Param("userId") String userId, @Param("appId") String appId,
                                        @Param("tenantId") String tenantId, @Param("idPath") String idPath);
 
-    //过滤出当前租户对指定应用的最大权限
-    List<ResPermDTO> listTenantAppMaxPerms(@Param("permIds") Set<String> permIds);
+    //根据permId获取权限点信息
+    List<ResPermDTO> listPermInfo(@Param("permIds") Set<String> permIds);
 
     //当前应用的所有权限
     List<ResPermDTO> listAppPerms(@Param("appId") String appId);

@@ -12,5 +12,11 @@ import java.util.List;
  * @date 2025-12-23 17:19
  */
 public interface TenantAppMapper extends BaseMapper<TenantApp> {
+    /**
+     * 查看租户已授权的应用列表（含禁用状态）
+     *
+     * @param tenantId 租户id
+     * @return 应用列表
+     */
     List<AppCardDTO> listGrantApps(@Param("tenantId") String tenantId);
 }

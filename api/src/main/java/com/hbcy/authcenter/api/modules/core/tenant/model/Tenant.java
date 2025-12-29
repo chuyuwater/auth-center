@@ -74,7 +74,7 @@ public class Tenant extends BaseEntity {
     /**
      * 删除时间戳标记
      */
-    @TableField(value = "delete_time")
+    @TableField(value = "delete_time", fill = FieldFill.UPDATE)
     @TableLogic(value = "0", delval = "-1")
     private Long deleteTime;
 

@@ -11,8 +11,8 @@ import com.hbcy.authcenter.api.modules.core.app.vo.ResourcePermQueryVO;
 import com.hbcy.authcenter.api.modules.core.app.vo.ResourcePermUpdateVO;
 import com.hbcy.authcenter.api.modules.core.perm.dao.PermUnitResourceMapper;
 import com.hbcy.authcenter.api.modules.core.perm.model.PermUnitResource;
-import com.hbcy.authcenter.api.modules.core.tenant.dao.TenantAppMapper;
-import com.hbcy.authcenter.api.modules.core.tenant.model.TenantApp;
+import com.hbcy.authcenter.api.modules.core.tenant.dao.TenantAppResourceMapper;
+import com.hbcy.authcenter.api.modules.core.tenant.model.TenantAppResource;
 import com.hbcy.authcenter.sdk.utils.UserContextUtils;
 import com.hbcy.common.base.error.ParamError;
 import com.hbcy.common.base.util.BeanCopyUtils;
@@ -22,7 +22,6 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -38,7 +37,7 @@ public class ResourcePermService extends ServiceImpl<ResourcePermMapper, Resourc
     @Resource
     private ResourceTreeMapper resourceTreeMapper;
     @Resource
-    private TenantAppMapper tenantAppMapper;
+    private TenantAppResourceMapper tenantAppResourceMapper;
     @Resource
     private PermUnitResourceMapper permUnitResourceMapper;
     @Resource
@@ -119,24 +118,10 @@ public class ResourcePermService extends ServiceImpl<ResourcePermMapper, Resourc
     @Transactional(rollbackFor = Exception.class)
     public void delete(String appId, Collection<String> permIds) {
         baseMapper.deleteByIds(permIds);
-        List<TenantApp> mayUpdateApps = tenantAppMapper.selectList(new QueryWrapper<TenantApp>()
-                .eq(TenantApp.COL_APP_ID, appId)
-                .eq(TenantApp.COL_GRANT_ALL, 0));
-        List<TenantApp> toUpdate = new ArrayList<>();
-        if (!mayUpdateApps.isEmpty()) {
-            //最大授权改变
-            for (TenantApp ta : mayUpdateApps) {
-                if (ta.getPermIds() != null && ta.getPermIds().removeAll(permIds)) {
-                    TenantApp t = new TenantApp();
-                    t.setId(ta.getId());
-                    t.setPermIds(ta.getPermIds());
-                    toUpdate.add(t);
-                }
-            }
-            for (TenantApp tenantApp : toUpdate) {
-                tenantAppMapper.updateById(tenantApp);
-            }
-        }
+        //删除应用最大授权
+        tenantAppResourceMapper.delete(new QueryWrapper<TenantAppResource>()
+                .eq(TenantAppResource.COL_APP_ID, appId)
+                .in(TenantAppResource.COL_PERM_ID, permIds));
         //删除已有的角色/策略授权
         permUnitResourceMapper.delete(new QueryWrapper<PermUnitResource>()
                 .in(PermUnitResource.COL_PERM_ID, permIds));
