@@ -15,7 +15,7 @@ public class AppUpdateVO {
      * 中文名，也不能重复
      */
     @NotBlank(message = "应用中文名不能为空")
-    @Length(max = 50, message = "应用中文名长度不能超过50个字符")
+    @Length(max = 20, message = "应用中文名长度不能超过20个字符")
     private String nameCn;
     /**
      * 简介

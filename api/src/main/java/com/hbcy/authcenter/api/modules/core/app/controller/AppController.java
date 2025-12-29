@@ -1,17 +1,19 @@
 package com.hbcy.authcenter.api.modules.core.app.controller;
 
+import com.hbcy.authcenter.api.common.bean.NodeMoveVO;
 import com.hbcy.authcenter.api.modules.core.app.model.App;
 import com.hbcy.authcenter.api.modules.core.app.service.AppService;
 import com.hbcy.authcenter.api.modules.core.app.vo.AppCreateVO;
 import com.hbcy.authcenter.api.modules.core.app.vo.AppForbiddenVO;
 import com.hbcy.authcenter.api.modules.core.app.vo.AppQueryVO;
 import com.hbcy.authcenter.api.modules.core.app.vo.AppUpdateVO;
-import com.hbcy.common.base.pojo.PageResp;
 import com.hbcy.common.web.bean.NameFill;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * 应用相关api
@@ -28,14 +30,14 @@ public class AppController {
     private AppService appService;
 
     /**
-     * 分页查询应用列表
+     * 应用列表
      *
      * @param vo 查询条件
-     * @return 应用分页列表
+     * @return 全量列表
      */
     @GetMapping
     @NameFill
-    public PageResp<App> list(@RequestBody @Valid AppQueryVO vo) {
+    public List<App> list(@RequestBody @Valid AppQueryVO vo) {
         return appService.list(vo);
     }
 
@@ -60,6 +62,11 @@ public class AppController {
     @PostMapping
     public App create(@RequestBody @Valid AppCreateVO vo) {
         return appService.create(vo);
+    }
+
+    @PostMapping("/move")
+    public void move(@RequestBody @Valid NodeMoveVO vo) {
+        appService.move(vo);
     }
 
     /**

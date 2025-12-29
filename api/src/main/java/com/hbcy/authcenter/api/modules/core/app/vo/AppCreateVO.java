@@ -18,4 +18,9 @@ public class AppCreateVO extends AppUpdateVO {
     @Length(max = 50, message = "应用id长度不能超过50个字符")
     @NotBlank(message = "应用id不能为空")
     private String id;
+
+    /**
+     * 是否多租户
+     */
+    private boolean multiTenancy;
 }

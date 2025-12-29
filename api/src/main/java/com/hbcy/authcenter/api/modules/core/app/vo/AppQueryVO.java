@@ -1,21 +1,18 @@
 package com.hbcy.authcenter.api.modules.core.app.vo;
 
-import com.hbcy.common.db.model.PageVO;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import org.hibernate.validator.constraints.Range;
 
 /**
  * @author 姚泰然
  * @date 2025-12-23 16:26
  */
-@EqualsAndHashCode(callSuper = true)
 @Data
-public class AppQueryVO extends PageVO {
+public class AppQueryVO {
     /**
-     * 中文名，支持模糊查询
+     * 模糊查询
      */
-    private String nameCn;
+    private String keyword;
     /**
      * 是否禁用
      */

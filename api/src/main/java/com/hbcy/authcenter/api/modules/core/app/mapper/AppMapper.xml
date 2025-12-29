@@ -32,4 +32,21 @@
         create_user,
         update_user
     </sql>
+
+    <insert id="append">
+        insert into app(id, name_cn, memo, icon, binding_tenant, create_user, update_user, show_order)
+        values (#{app.id},
+        #{app.nameCn},
+        #{app.memo},
+        #{app.icon},
+        #{app.bindingTenant},
+        #{app.createUser},
+        #{app.updateUser},
+        coalesce(max(show_order), 0) + 1)
+    </insert>
+
+    <update id="move">
+        update app set show_order = show_order + 1
+        where show_order >= #{targetIdx}
+    </update>
 </mapper>

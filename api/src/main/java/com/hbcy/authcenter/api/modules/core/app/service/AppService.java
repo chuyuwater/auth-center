@@ -1,23 +1,28 @@
 package com.hbcy.authcenter.api.modules.core.app.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.hbcy.authcenter.api.common.bean.NodeMoveVO;
 import com.hbcy.authcenter.api.modules.core.app.dao.AppMapper;
 import com.hbcy.authcenter.api.modules.core.app.model.App;
 import com.hbcy.authcenter.api.modules.core.app.vo.AppCreateVO;
 import com.hbcy.authcenter.api.modules.core.app.vo.AppForbiddenVO;
 import com.hbcy.authcenter.api.modules.core.app.vo.AppQueryVO;
 import com.hbcy.authcenter.api.modules.core.app.vo.AppUpdateVO;
+import com.hbcy.authcenter.api.modules.core.tenant.dao.TenantAppMapper;
+import com.hbcy.authcenter.api.modules.core.tenant.model.TenantApp;
 import com.hbcy.authcenter.sdk.utils.UserContextUtils;
 import com.hbcy.common.base.error.ParamError;
-import com.hbcy.common.base.pojo.PageResp;
 import com.hbcy.common.base.util.BeanCopyUtils;
-import com.hbcy.common.db.model.PageRespEx;
+import jakarta.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 /**
  * 应用相关业务逻辑
@@ -27,6 +32,12 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class AppService extends ServiceImpl<AppMapper, App> {
+    //这个cache主要是给网关用的
+    public static final String APP_STATUS_CACHE = "portal:app:status";
+    @Resource
+    private StringRedisTemplate stringRedisTemplate;
+    @Resource
+    private TenantAppMapper tenantAppMapper;
 
     private void checkNameExist(String nameCn) {
         App one = this.getOne(new QueryWrapper<App>().eq(App.COL_NAME_CN, nameCn), false);
@@ -37,19 +48,25 @@ public class AppService extends ServiceImpl<AppMapper, App> {
 
     public App create(AppCreateVO vo) {
         if (getById(vo.getId()) != null) {
-            throw new ParamError("应用ID已存在");
+            throw new ParamError("应用编号已存在");
         }
         checkNameExist(vo.getNameCn());
 
         App app = new App();
         BeanCopyUtils.copy(vo, app);
+        if (vo.isMultiTenancy()) {
+            app.setBindingTenant("");
+        } else {
+            app.setBindingTenant(App.BINDING_PLACEHOLDER);
+        }
         app.setCreateUser(UserContextUtils.getUserId());
         app.setUpdateUser(UserContextUtils.getUserId());
         try {
-            this.save(app);
+            baseMapper.append(app);
         } catch (DuplicateKeyException e) {
             throw new ParamError("请重试");
         }
+        stringRedisTemplate.opsForHash().put(APP_STATUS_CACHE, app.getId(), "0");
         return app;
     }
 
@@ -85,16 +102,39 @@ public class AppService extends ServiceImpl<AppMapper, App> {
         toUpdate.setId(vo.getAppId());
         toUpdate.setForbidden(vo.getForbidden());
         toUpdate.setUpdateUser(UserContextUtils.getUserId());
+        stringRedisTemplate.opsForHash().delete(APP_STATUS_CACHE, app.getId());
         this.updateById(toUpdate);
     }
 
-    public PageResp<App> list(AppQueryVO vo) {
-        Page<App> dbPage = vo.getDbPage();
-        Page<App> resp = baseMapper.selectPage(dbPage, new QueryWrapper<App>()
+    public List<App> list(AppQueryVO vo) {
+        List<App> resp = baseMapper.selectList(new QueryWrapper<App>()
                 .eq(vo.getForbidden() != null, App.COL_FORBIDDEN, vo.getForbidden())
-                .like(StringUtils.isNotBlank(vo.getNameCn()), App.COL_NAME_CN, vo.getNameCn())
+                .or(StringUtils.isNotBlank(vo.getKeyword()))
+                .like(App.COL_NAME_CN, vo.getKeyword())
+                .like(App.COL_ID, vo.getKeyword())
                 .orderByAsc(App.COL_SHOW_ORDER));
-        return new PageRespEx<>(resp);
+        return resp;
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public void move(NodeMoveVO vo) {
+        App node = baseMapper.selectById(vo.getNodeId());
+        if (node == null) {
+            throw new ParamError("指定应用已被删除");
+        }
+        int targetIdx = 0;
+        if (StringUtils.isNotBlank(vo.getPrevId())) {
+            App app = baseMapper.selectById(vo.getPrevId());
+            if (app == null) {
+                throw new ParamError("前置节点已被删除，请刷新重试");
+            }
+            targetIdx = app.getShowOrder() + 1;
+        }
+        baseMapper.move(targetIdx);
+        App toUpdate = new App();
+        toUpdate.setId(vo.getNodeId());
+        toUpdate.setShowOrder(targetIdx);
+        updateById(toUpdate);
     }
 
     public void delete(String id) {
@@ -102,8 +142,11 @@ public class AppService extends ServiceImpl<AppMapper, App> {
         if (app == null) {
             return;
         }
+        if (tenantAppMapper.exists(new QueryWrapper<TenantApp>().eq(TenantApp.COL_APP_ID, id))) {
+            throw new ParamError("该应用下已存在关联配置，请先解除所有关联后再执行删除操作！");
+        }
         app.setUpdateUser(UserContextUtils.getUserId());
-        // Logic delete
+        stringRedisTemplate.opsForHash().delete(APP_STATUS_CACHE, app.getId());
         this.removeById(app);
     }
 }
