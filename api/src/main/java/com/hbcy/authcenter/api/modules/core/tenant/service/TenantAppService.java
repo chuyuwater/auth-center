@@ -74,8 +74,7 @@ public class TenantAppService extends ServiceImpl<TenantAppMapper, TenantApp> {
     }
 
     /**
-     * 授权应用
-     * 新建或修改已有的
+     * 创建应用授权
      *
      * @param vo 授权详情
      */
@@ -245,6 +244,11 @@ public class TenantAppService extends ServiceImpl<TenantAppMapper, TenantApp> {
         save(toUpdate);
     }
 
+    /**
+     * 删除应用授权
+     *
+     * @param grantId 授权关系ID
+     */
     @Transactional(rollbackFor = Exception.class)
     public void deleteGrant(String grantId) {
         TenantApp tenantApp = baseMapper.selectById(grantId);

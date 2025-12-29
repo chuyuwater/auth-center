@@ -6,19 +6,23 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.f4b6a3.ulid.UlidCreator;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
-import com.hbcy.authcenter.api.common.bean.NameCacheService;
+import com.google.common.collect.Lists;
 import com.hbcy.authcenter.api.common.constants.G;
 import com.hbcy.authcenter.api.common.enums.OrgNodeTypeEnum;
 import com.hbcy.authcenter.api.modules.core.org.model.OrgTree;
 import com.hbcy.authcenter.api.modules.core.org.service.OrgTreeService;
+import com.hbcy.authcenter.api.modules.core.perm.dao.PermUnitUserMapper;
+import com.hbcy.authcenter.api.modules.core.perm.model.PermUnitUser;
 import com.hbcy.authcenter.api.modules.core.tenant.dao.TenantMapper;
 import com.hbcy.authcenter.api.modules.core.tenant.model.Tenant;
 import com.hbcy.authcenter.api.modules.core.user.dao.UserMapper;
+import com.hbcy.authcenter.api.modules.core.user.dto.OrgUserDTO;
 import com.hbcy.authcenter.api.modules.core.user.dto.UserExportDTO;
 import com.hbcy.authcenter.api.modules.core.user.dto.UserOrgDTO;
 import com.hbcy.authcenter.api.modules.core.user.dto.UserQueryResultDTO;
 import com.hbcy.authcenter.api.modules.core.user.model.User;
 import com.hbcy.authcenter.api.modules.core.user.model.UserOrg;
+import com.hbcy.authcenter.api.modules.core.user.utils.PasswordUtils;
 import com.hbcy.authcenter.api.modules.core.user.vo.*;
 import com.hbcy.authcenter.sdk.utils.UserContextUtils;
 import com.hbcy.common.base.error.ParamError;
@@ -50,7 +54,7 @@ import java.util.stream.Collectors;
 @Service
 public class UserService extends ServiceImpl<UserMapper, User> {
 
-    private static final String ALLOWED_ACCOUNT_SYMBOLS = "_-";
+    private static final String ALLOWED_ACCOUNT_SYMBOLS = "_";
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
     @Resource
     private StringRedisTemplate stringRedisTemplate;
@@ -59,9 +63,9 @@ public class UserService extends ServiceImpl<UserMapper, User> {
     @Resource
     private OrgTreeService orgTreeService;
     @Resource
-    private NameCacheService nameCacheService;
-    @Resource
     private TenantMapper tenantMapper;
+    @Resource
+    private PermUnitUserMapper permUnitUserMapper;
 
     /**
      * 辅助判断：是否是纯文字（排除掉空格和常见的各种标点符号）
@@ -125,19 +129,19 @@ public class UserService extends ServiceImpl<UserMapper, User> {
         User user = new User();
         BeanCopyUtils.copy(vo, user);
         // 默认密码为手机号后面6位
-        user.setPasswd(passwordEncoder.encode(vo.getPhone().substring(vo.getPhone().length() - 6)));
+        user.setPasswd(passwordEncoder.encode(
+                vo.getPhone().substring(vo.getPhone().length() - 6)));
         //TODO: 改为随机密码+短信、邮件发送密码
         user.setCreateUser(op);
         user.setUpdateUser(op);
         user.setTenantId(tenantId);
-        user.setDefaultOrg(orgId);
         try {
             save(user);
         } catch (DuplicateKeyException e) {
             throw new ParamError("用户的账号、手机号或邮箱已存在，请检查");
         }
         // 关联组织
-        userOrgService.addUserNode(user.getId(), node);
+        userOrgService.addUserNode(user.getId(), orgId, vo.getNodeId(), true);
         return user.getId();
     }
 
@@ -179,6 +183,9 @@ public class UserService extends ServiceImpl<UserMapper, User> {
             throw new ParamError("无法删除租户默认管理员");
         }
         cleanNameCache(userId);
+        //删除所有角色授权
+        permUnitUserMapper.delete(new QueryWrapper<PermUnitUser>()
+                .eq(PermUnitUser.COL_USER_ID, userId));
         removeById(userId);
     }
 
@@ -191,7 +198,9 @@ public class UserService extends ServiceImpl<UserMapper, User> {
 
     public void adminResetPasswd(AdminResetPasswdVO vo) {
         var user = checkUser(vo.getUserId());
-        //TODO: 密码复杂度策略
+        if (!PasswordUtils.isValid(vo.getPassword())) {
+            throw new ParamError("密码强度要求：至少8位，且包含大小写字母、数字和符号中的至少3项");
+        }
         user.setPasswd(passwordEncoder.encode(vo.getPassword()));
         user.setUpdateUser(UserContextUtils.getUserId());
         updateById(user);
@@ -202,7 +211,9 @@ public class UserService extends ServiceImpl<UserMapper, User> {
         if (!passwordEncoder.matches(vo.getOldPasswd(), user.getPasswd())) {
             throw new ParamError("旧密码不正确");
         }
-        //TODO: 密码复杂度策略
+        if (!PasswordUtils.isValid(vo.getPassword())) {
+            throw new ParamError("密码强度要求：至少8位，且包含大小写字母、数字和符号中的至少3项");
+        }
         User toUpdate = new User();
         toUpdate.setId(user.getId());
         toUpdate.setPasswd(passwordEncoder.encode(vo.getPassword()));
@@ -210,27 +221,6 @@ public class UserService extends ServiceImpl<UserMapper, User> {
         updateById(user);
     }
 
-    public void switchDefaultOrg(SwitchDefaultOrgVO vo) {
-        User user;
-        if (StringUtils.isBlank(vo.getUserId())) {
-            vo.setUserId(UserContextUtils.getUserId());
-            user = getById(vo.getUserId());
-        } else {
-            user = checkUser(vo.getUserId());
-        }
-        // 检查用户是否在该组织下
-        boolean any = userOrgService.exists(new QueryWrapper<UserOrg>()
-                .eq(UserOrg.COL_USER_ID, vo.getUserId())
-                .eq(UserOrg.COL_ORG_ID, vo.getOrgId()));
-        if (!any) {
-            throw new ServerError("用户不在此组织中");
-        }
-        User toUpdate = new User();
-        toUpdate.setId(user.getId());
-        toUpdate.setDefaultOrg(vo.getOrgId());
-        toUpdate.setUpdateUser(UserContextUtils.getUserId());
-        updateById(toUpdate);
-    }
 
     public void deleteUsers(@Valid BatchDeleteVO vo) {
         var tenantId = UserContextUtils.getTenantId();
@@ -238,6 +228,10 @@ public class UserService extends ServiceImpl<UserMapper, User> {
         remove(new QueryWrapper<User>()
                 .eq(User.COL_TENANT_ID, tenantId)
                 .in(User.COL_ID, vo.getIds()));
+        //删除所有角色授权
+        permUnitUserMapper.delete(new QueryWrapper<PermUnitUser>()
+                .eq(PermUnitUser.COL_TENANT_ID, tenantId)
+                .in(PermUnitUser.COL_USER_ID, vo.getIds()));
     }
 
     public UserQueryResultDTO getUser(String userId) {
@@ -256,8 +250,6 @@ public class UserService extends ServiceImpl<UserMapper, User> {
         if (keyword == null || keyword.isEmpty()) {
             return result;
         }
-
-        boolean hasAt = false;
         boolean hasDigit = false;
         boolean hasLetter = false;
         boolean hasSymbol = false; // 下划线等允许在账号中的符号
@@ -266,9 +258,7 @@ public class UserService extends ServiceImpl<UserMapper, User> {
         for (int i = 0; i < keyword.length(); i++) {
             char c = keyword.charAt(i);
 
-            if (c == '@') {
-                hasAt = true;
-            } else if (c >= '0' && c <= '9') {
+            if (c >= '0' && c <= '9') {
                 hasDigit = true;
             } else if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) {
                 hasLetter = true;
@@ -281,60 +271,60 @@ public class UserService extends ServiceImpl<UserMapper, User> {
             }
         }
 
-        // 1. EMAIL: 包含 @
-        if (hasAt) {
-            result.add("EMAIL");
-            return result;
-        }
-
-        // 2. 只有数字 (不能有符号、字母、@、或其它)
+        // 1. 只有数字 (不能有符号、字母、@、或其它)
         if (hasDigit && !hasLetter && !hasSymbol && !hasInvalidForAccount) {
             result.add("PHONE");
-            result.add("EMAIL");
             result.add("ACCOUNT");
             return result;
         }
 
-        // 3. 包含 [数字、字母、符号]
+        // 2. 包含 [数字、字母、符号]
         if (!hasInvalidForAccount && (hasDigit || hasLetter || hasSymbol)) {
             result.add("ACCOUNT");
-            result.add("EMAIL");
             return result;
         }
 
-        // 4. NAME: 纯文字
+        // 3. NAME: 纯文字
         if (isPureText(keyword)) {
             result.add("NAME");
         }
         return result;
     }
 
-    private Page<UserQueryResultDTO> filterUsers(Page<?> page, UserQueryVO vo) {
-        if (StringUtils.isNotBlank(vo.getOrgId())) {
+    private void checkParams(UserQueryVO vo) {
+        if (StringUtils.isNotBlank(vo.getNodeId())) {
             //过滤了组织
-            OrgTree org = orgTreeService.getById(vo.getOrgId());
+            OrgTree org = orgTreeService.getById(vo.getNodeId());
             if (org == null) {
                 throw new ParamError("指定组织不存在");
-            }
-            if (org.getNodeType().equals(OrgNodeTypeEnum.DEPT.getValue())) {
-                throw new ParamError("应指定组织而非部门");
             }
             if (!org.getTenantId().equals(UserContextUtils.getTenantId())) {
                 throw new PermissionError();
             }
+            if (vo.getLevel() == UserQueryVO.LEVEL_ALL) {
+                vo.setIdPathPrefix(org.getIdPath());
+                vo.setNodeId(null);
+            } else if (vo.getLevel() == UserQueryVO.LEVEL_FOLLOWER) {
+                vo.setIdPathPrefix(org.getIdPath() + G.ID_PATH_SPLITTER);
+                vo.setNodeId(null);
+            }
         }
-        if (StringUtils.isNotBlank(vo.getKeyword()) &&
-                StringUtils.isAllBlank(vo.getPhone(), vo.getEmail(), vo.getAccount(), vo.getName())) {
+        if (StringUtils.isNotBlank(vo.getKeyword())) {
             vo.setKeywordType(guessKeywordType(vo.getKeyword()));
         }
         vo.setTenantId(UserContextUtils.getTenantId());
-        //首先查询满足筛选条件的人
-        return baseMapper.queryUser(page, vo);
     }
 
+    /**
+     * 查询用户，以用户为基准汇总
+     *
+     * @param vo 查询条件
+     * @return 列表结果
+     */
     public PageResp<UserQueryResultDTO> queryUser(UserQueryVO vo) {
+        checkParams(vo);
         Page<UserQueryResultDTO> dbPage = vo.getDbPage();
-        Page<UserQueryResultDTO> page = filterUsers(dbPage, vo);
+        Page<UserQueryResultDTO> page = baseMapper.queryUser(dbPage, vo);
         if (CollectionUtils.isEmpty(page.getRecords())) {
             return new PageResp<>();
         }
@@ -346,12 +336,12 @@ public class UserService extends ServiceImpl<UserMapper, User> {
         for (UserOrgDTO userOrg : userOrgs) {
             orgIds.addAll(Splitter.on(G.ID_PATH_SPLITTER).splitToList(userOrg.getIdPath()));
         }
-        Map<String, String> orgNameMap = nameCacheService.getOrgNameMap(orgIds);
+        Map<String, String> idNameMap = orgTreeService.getOrgNameMap(orgIds, vo.isUseFullName());
         //回填userOrg
         for (UserOrgDTO userOrg : userOrgs) {
             List<String> nameParts = Splitter.on(G.ID_PATH_SPLITTER).splitToList(userOrg.getIdPath()).stream()
-                    .map(k -> orgNameMap.getOrDefault(k, "")).toList();
-            userOrg.setNamePath(Joiner.on(G.ID_PATH_SPLITTER).join(nameParts));
+                    .map(k -> idNameMap.getOrDefault(k, "")).toList();
+            userOrg.setNamePath(Joiner.on("/").join(Lists.reverse(nameParts)));
         }
         //按用户分组映射
         Map<String, List<UserOrgDTO>> userOrgMap = userOrgs.stream().collect(
@@ -359,12 +349,7 @@ public class UserService extends ServiceImpl<UserMapper, User> {
         for (UserQueryResultDTO dto : page.getRecords()) {
             List<UserOrgDTO> orgs = userOrgMap.get(dto.getId());
             if (orgs != null) {
-                for (UserOrgDTO org : orgs) {
-                    if (org.getOrgId().equals(dto.getDefaultOrg())) {
-                        org.setDefaultOrg(true);
-                    }
-                }
-                orgs.sort(Comparator.comparing(UserOrgDTO::isDefaultOrg).reversed());
+                orgs.sort(Comparator.comparing(UserOrgDTO::getMainJob).reversed());
             }
             dto.setOrgList(orgs);
         }
@@ -372,7 +357,33 @@ public class UserService extends ServiceImpl<UserMapper, User> {
     }
 
     /**
-     * 批量导入
+     * 查询用户，以组织为基准
+     * 用于选人窗口
+     *
+     * @param vo 筛选条件
+     * @return 分页结果
+     */
+    public PageResp<OrgUserDTO> filterUser4Select(UserQueryVO vo) {
+        checkParams(vo);
+        Page<?> page = vo.getDbPage();
+        Page<OrgUserDTO> result = baseMapper.filterUser4Select(page, vo);
+        //填充namePath
+        Set<String> nodeIds = new HashSet<>();
+        for (OrgUserDTO r : result.getRecords()) {
+            nodeIds.addAll(Splitter.on(G.ID_PATH_SPLITTER).splitToList(r.getIdPath()));
+        }
+        Map<String, String> idNameMap = orgTreeService.getOrgNameMap(nodeIds, vo.isUseFullName());
+        //回填userOrg
+        for (OrgUserDTO r : result.getRecords()) {
+            List<String> nameParts = Splitter.on(G.ID_PATH_SPLITTER).splitToList(r.getIdPath()).stream()
+                    .map(k -> idNameMap.getOrDefault(k, "")).toList();
+            r.setNamePath(Joiner.on("/").join(Lists.reverse(nameParts)));
+        }
+        return new PageRespEx<>(result);
+    }
+
+    /**
+     * 批量导入用户
      *
      * @param dataList 列表
      */
@@ -421,9 +432,7 @@ public class UserService extends ServiceImpl<UserMapper, User> {
         if (!CollectionUtils.isEmpty(existUsers)) {
             StringBuilder sb = new StringBuilder();
             sb.append("以下手机号对应的用户已存在:");
-            existUsers.forEach(user -> {
-                sb.append(user.getPhone()).append(",");
-            });
+            existUsers.forEach(user -> sb.append(user.getPhone()).append(","));
             throw new ParamError(sb.toString());
         }
         //数据准备
@@ -432,11 +441,10 @@ public class UserService extends ServiceImpl<UserMapper, User> {
         List<UserOrg> userOrgs = new ArrayList<>();
         LocalDateTime now = LocalDateTime.now();
         for (UserImportVO d : dataList) {
+            //用户
             User u = new User();
             BeanCopyUtils.copy(d, u);
-            //手动生成id
             u.setId(UlidCreator.getUlid().toString());
-            u.setDefaultOrg(orgNameIdMap.get(d.getOrgName()));
             u.setCreateUser(createUser);
             u.setUpdateUser(createUser);
             u.setTenantId(tenantId);
@@ -445,20 +453,23 @@ public class UserService extends ServiceImpl<UserMapper, User> {
             //TODO:改为随机密码+短信通知
             u.setPasswd(passwordEncoder.encode(
                     d.getPhone().substring(d.getPhone().length() - 6)));
+            users.add(u);
+            //用户与组织的关联
             UserOrg uo = new UserOrg();
             uo.setId(UlidCreator.getUlid().toString());
             uo.setUserId(u.getId());
-            uo.setOrgId(u.getDefaultOrg());
+            uo.setOrgId(orgNameIdMap.get(d.getOrgName()));
+            uo.setTenantId(tenantId);
+            uo.setMainJob(1);
             uo.setCreateUser(createUser);
             uo.setUpdateUser(createUser);
-            uo.setTenantId(tenantId);
             uo.setCreateTime(now);
             uo.setUpdateTime(now);
             userOrgs.add(uo);
         }
         try {
             //批量插入用户
-            saveBatch(users);
+            baseMapper.insert(users);
             //批量插入关联关系
             userOrgService.saveBatch(userOrgs);
         } catch (DuplicateKeyException e) {
@@ -467,22 +478,22 @@ public class UserService extends ServiceImpl<UserMapper, User> {
     }
 
     public List<UserExportDTO> export(UserQueryVO vo) {
+        checkParams(vo);
         Page<?> dbPage = vo.getDbPage();
-        Page<UserQueryResultDTO> result = filterUsers(dbPage, vo);
+        Page<UserQueryResultDTO> result = baseMapper.queryUser(dbPage, vo);
         //全量导出
         dbPage.setSize(-1L);
         List<UserExportDTO> users = new ArrayList<>();
-        Set<String> orgSet = new HashSet<>();
+        Set<String> userIds = new HashSet<>();
         result.getRecords().forEach(u -> {
             UserExportDTO copy = BeanCopyUtils.copy(u, UserExportDTO.class);
-            //先放入id
-            copy.setOrgName(u.getDefaultOrg());
-            orgSet.add(u.getDefaultOrg());
+            userIds.add(u.getId());
             users.add(copy);
         });
-        Map<String, String> orgNameMap = nameCacheService.getOrgNameMap(orgSet);
+        List<UserOrgDTO> userMainOrgs = userOrgService.listUserOrgs(userIds, true);
+        Map<String, String> orgNameMap = userMainOrgs.stream().collect(
+                Collectors.toMap(UserOrgDTO::getUserId, UserOrgDTO::getOrgName));
         for (UserExportDTO user : users) {
-            //替换成名字
             user.setOrgName(orgNameMap.get(user.getOrgName()));
         }
         return users;

@@ -29,7 +29,7 @@ public class TenantAppController {
     private TenantAppService tenantAppService;
 
     /**
-     * 授权应用
+     * 门户为租户授权应用
      *
      * @param vo 授权信息
      */
@@ -39,7 +39,7 @@ public class TenantAppController {
     }
 
     /**
-     * 修改已有的授权详情
+     * 修改已有的应用授权
      *
      * @param vo 授权详情
      * @param id 授权id

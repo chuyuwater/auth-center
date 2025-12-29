@@ -20,7 +20,6 @@ public class UserDTO {
      * 姓名
      */
     private String realName;
-
     /**
      * 头像
      */
@@ -37,10 +36,6 @@ public class UserDTO {
      * 邮箱
      */
     private String email;
-    /**
-     * 主职组织id
-     */
-    private String defaultOrg;
     /**
      * 是否禁用
      */

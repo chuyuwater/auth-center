@@ -12,7 +12,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 /**
- * 权限单元（权限单元）相关api
+ * 权限单元（角色/策略）管理
  *
  * @author 姚泰然
  * @date 2025-12-28

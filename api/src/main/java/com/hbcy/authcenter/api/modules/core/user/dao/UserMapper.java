@@ -2,6 +2,7 @@ package com.hbcy.authcenter.api.modules.core.user.dao;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.hbcy.authcenter.api.modules.core.user.dto.OrgUserDTO;
 import com.hbcy.authcenter.api.modules.core.user.dto.UserQueryResultDTO;
 import com.hbcy.authcenter.api.modules.core.user.model.User;
 import com.hbcy.authcenter.api.modules.core.user.vo.UserQueryVO;
@@ -21,4 +22,6 @@ public interface UserMapper extends BaseMapper<User> {
     String selectNameById(@Param("userId") String userId);
 
     Page<UserQueryResultDTO> queryUser(Page<?> dbPage, @Param("vo") UserQueryVO vo);
+
+    Page<OrgUserDTO> filterUser4Select(Page<?> page, @Param("vo") UserQueryVO vo);
 }

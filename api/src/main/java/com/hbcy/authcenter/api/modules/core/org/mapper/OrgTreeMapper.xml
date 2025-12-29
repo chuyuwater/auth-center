@@ -98,7 +98,15 @@
     </select>
 
     <select id="selectNameByIds" resultType="com.hbcy.common.web.api.NamedId">
-        select id as item_id, node_name as item_name
+        select id as item_id,
+        <choose>
+            <when test="useFullName">
+                node_name as item_name,
+            </when>
+            <otherwise>
+                short_name as item_name
+            </otherwise>
+        </choose>
         from org_tree
         <where>
             id in

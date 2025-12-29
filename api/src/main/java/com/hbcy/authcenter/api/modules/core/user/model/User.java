@@ -30,7 +30,7 @@ public class User extends BaseEntity {
     public static final String COL_SRC_ID = "src_id";
     public static final String COL_PASSWD_EXPIRE = "passwd_expire";
     public static final String COL_TENANT_ID = "tenant_id";
-    public static final String COL_DEFAULT_ORG = "default_org";
+    public static final String COL_LAST_LOGIN = "last_login";
     public static final String COL_DELETE_TIME = "delete_time";
     public static final String COL_CREATE_TIME = "create_time";
     public static final String COL_UPDATE_TIME = "update_time";
@@ -94,15 +94,15 @@ public class User extends BaseEntity {
     @TableField(value = "passwd_expire")
     private LocalDateTime passwdExpire;
     /**
+     * 最后登录时间
+     */
+    @TableField(value = "last_login")
+    private LocalDateTime lastLogin;
+    /**
      * 账号所属租户
      */
     @TableField(value = "tenant_id")
     private String tenantId;
-    /**
-     * 主职组织
-     */
-    @TableField(value = "default_org")
-    private String defaultOrg;
     @TableField(value = "delete_time", fill = FieldFill.UPDATE)
     @TableLogic(value = "0", delval = "-1")
     private Long deleteTime;

@@ -20,6 +20,10 @@ public class UserOrgDTO {
      */
     private String orgId;
     /**
+     * 组织名称
+     */
+    private String orgName;
+    /**
      * 全路径（id）
      */
     private String idPath;
@@ -34,5 +38,5 @@ public class UserOrgDTO {
     /**
      * 是否主职组织
      */
-    private boolean defaultOrg;
+    private Integer mainJob;
 }

@@ -6,7 +6,7 @@ import lombok.EqualsAndHashCode;
 import java.util.List;
 
 /**
- * 列表/详情页返回数据
+ * 用户管理列表/详情页返回数据
  *
  * @author 姚泰然
  * @date 2025-12-26 13:57
@@ -14,7 +14,16 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class UserQueryResultDTO extends UserDTO {
+    /**
+     * 用户任职概况
+     */
     List<UserOrgDTO> orgList;
+    /**
+     * 创建人名称
+     */
     private String createUserName;
+    /**
+     * 修改人名称
+     */
     private String updateUserName;
 }

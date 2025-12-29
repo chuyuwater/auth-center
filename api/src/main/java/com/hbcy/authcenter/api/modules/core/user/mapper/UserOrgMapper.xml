@@ -7,7 +7,7 @@
         <id column="id" jdbcType="CHAR" property="id"/>
         <result column="user_id" jdbcType="CHAR" property="userId"/>
         <result column="org_id" jdbcType="VARCHAR" property="orgId"/>
-        <result column="dept_id" jdbcType="VARCHAR" property="deptId"/>
+        <result column="node_id" jdbcType="VARCHAR" property="nodeId"/>
         <result column="tenant_id" jdbcType="VARCHAR" property="tenantId"/>
         <result column="create_user" jdbcType="CHAR" property="createUser"/>
         <result column="update_user" jdbcType="CHAR" property="updateUser"/>
@@ -16,18 +16,41 @@
     </resultMap>
     <sql id="Base_Column_List">
         <!--@mbg.generated-->
-        id, user_id, org_id, dept_id, tenant_id, create_user, update_user, create_time, update_time
+        id, user_id, org_id, node_id, tenant_id, create_user, update_user, create_time, update_time
     </sql>
 
     <select id="listUserOrgs" resultType="com.hbcy.authcenter.api.modules.core.user.dto.UserOrgDTO">
-        select distinct(uo.org_id) as org_id, uo.user_id, o.id_path, o.node_category
-        from user_org uo
-        join org_tree o on uo.org_id = o.id
+        with temp as (
+        select user_id, org_id, main_job
+        from user_org
         <where>
-            uo.user_id in
+            <if test="onlyMain">
+                and main_job = 1
+            </if>
+            and user_id in
             <foreach collection="userIds" open="(" close=")" separator="," item="uid">
                 #{uid}
             </foreach>
+            group by user_id, org_id, main_job
         </where>
+        )
+        select temp.user_id, temp.org_id, temp.main_job, o.node_name as org_name, o.id_path, o.node_category
+        from temp
+        join org_tree o on temp.org_id = o.id
     </select>
+
+    <update id="updateMainJob">
+        update user_org
+        set main_job=1
+        where user_id = #{userId}
+        and org_id = #{orgId}
+    </update>
+
+    <update id="updatePartJob">
+        update user_org
+        set main_job=0
+        where user_id = #{userId}
+        and org_id != #{orgId}
+        and main_job = 1
+    </update>
 </mapper>

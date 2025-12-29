@@ -75,7 +75,7 @@ public class NameCacheService implements INameFillService {
 
     public Map<String, String> getOrgNameMap(Set<String> orgIds) {
         return doQuery(orgIds, G.ORG_NAME_CACHE_KEY,
-                k -> orgTreeService.getBaseMapper().selectNameByIds(k));
+                k -> orgTreeService.getBaseMapper().selectNameByIds(k, false));
     }
 
     public String getOrgName(String orgId) {

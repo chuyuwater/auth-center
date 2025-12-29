@@ -68,8 +68,10 @@ public interface OrgTreeMapper extends BaseMapper<OrgTree> {
     /**
      * 多节点查询名称
      *
-     * @param orgIds 组织/部门id
+     * @param orgIds      组织/部门id
+     * @param useFullName 全称还是简称
      * @return 组织/部门名称
      */
-    List<NamedId> selectNameByIds(@Param("orgIds") Set<String> orgIds);
+    List<NamedId> selectNameByIds(@Param("orgIds") Set<String> orgIds,
+                                  @Param("useFullName") boolean useFullName);
 }

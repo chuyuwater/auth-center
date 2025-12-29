@@ -17,7 +17,7 @@
         <result column="src_id" jdbcType="VARCHAR" property="srcId"/>
         <result column="passwd_expire" jdbcType="TIMESTAMP" property="passwdExpire"/>
         <result column="tenant_id" jdbcType="VARCHAR" property="tenantId"/>
-        <result column="default_org" jdbcType="VARCHAR" property="defaultOrg"/>
+        <result column="last_login" jdbcType="TIMESTAMP" property="lastLogin"/>
         <result column="delete_time" jdbcType="BIGINT" property="deleteTime"/>
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
         <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
@@ -39,7 +39,7 @@
         src_id,
         passwd_expire,
         tenant_id,
-        default_org,
+        last_login,
         delete_time,
         create_time,
         update_time,
@@ -73,45 +73,40 @@
         u.email,
         u.avatar,
         u.forbidden,
-        u.default_org
+        u.create_time,
+        u.create_user,
+        u.update_time,
+        u.update_user
         from sys_user u
         join user_org uo on uo.user_id = u.id
-        join org_tree o on uo.org_id = o.id
+        join org_tree o on uo.node_id = o.id
         <where>
             <if test="vo.tenantId != null and vo.tenantId != ''">
                 uo.tenant_id = #{vo.tenantId}
             </if>
             <if test="vo.keywordType != null and !vo.keywordType.empty">
-                <if test="vo.keywordType.contains('EMAIL')">
-                    and u.email like concat('%', #{vo.keyword}, '%')
-                </if>
-                <if test="vo.keywordType.contains('PHONE')">
-                    and u.phone like concat(#{vo.keyword}, '%')
-                </if>
-                <if test="vo.keywordType.contains('ACCOUNT')">
-                    and u.account like concat(#{vo.keyword}, '%')
-                </if>
-                <if test="vo.keywordType.contains('NAME')">
-                    and u.real_name like concat(#{vo.keyword}, '%')
-                </if>
+                and(
+                <trim prefixOverrides="or">
+                    <if test="vo.keywordType.contains('PHONE')">
+                        or u.phone like concat(#{vo.keyword}, '%')
+                    </if>
+                    <if test="vo.keywordType.contains('ACCOUNT')">
+                        or u.account like concat(#{vo.keyword}, '%')
+                    </if>
+                    <if test="vo.keywordType.contains('NAME')">
+                        or u.real_name like concat(#{vo.keyword}, '%')
+                    </if>
+                </trim>
+                )
             </if>
             <if test="vo.forbidden != null">
-                and u.forbidden= #{vo.forbidden}
+                and u.forbidden = #{vo.forbidden}
             </if>
-            <if test="vo.email != null and !vo.email.blank">
-                and u.email like concat('%', #{vo.email}, '%')
+            <if test="vo.nodeId != null and vo.nodeId != ''">
+                and o.id = #{vo.nodeId}
             </if>
-            <if test="vo.phone != null and !vo.phone.blank">
-                and u.phone like concat(#{vo.phone}, '%')
-            </if>
-            <if test="vo.account != null and !vo.account.blank">
-                and u.account like concat(#{vo.account}, '%')
-            </if>
-            <if test="vo.name != null and !vo.name.blank">
-                and u.real_name like concat(#{vo.name}, '%')
-            </if>
-            <if test="vo.orgId != null and vo.orgId != ''">
-                and uo.org_id = #{vo.orgId}
+            <if test="vo.mainJob != null">
+                and uo.main_job = #{vo.mainJob}
             </if>
             <if test="vo.idPathPrefix != null and vo.idPathPrefix != ''">
                 and o.id_path like concat(#{vo.idPathPrefix}, '%')
@@ -120,6 +115,50 @@
                 and uo.user_id = #{vo.userId}
             </if>
         </where>
-        order by u.real_name
+    </select>
+
+    <select id="filterUser4Select" resultType="com.hbcy.authcenter.api.modules.core.user.dto.OrgUserDTO">
+        select u.id,
+        u.phone,
+        u.account,
+        u.real_name,
+        u.email,
+        u.avatar,
+        u.forbidden,
+        uo.node_id,
+        uo.main_job,
+        uo.main_job,
+        o.id_path
+        from user_org uo
+        join sys_user u on uo.user_id = u.id
+        join org_tree o on uo.node_id = o.id
+        <where>
+            u.forbidden = 0
+            and uo.tenant_id = #{vo.tenantId}
+            <if test="vo.keywordType != null and !vo.keywordType.empty">
+                and(
+                <trim prefixOverrides="or">
+                    <if test="vo.keywordType.contains('PHONE')">
+                        or u.phone like concat(#{vo.keyword}, '%')
+                    </if>
+                    <if test="vo.keywordType.contains('ACCOUNT')">
+                        or u.account like concat(#{vo.keyword}, '%')
+                    </if>
+                    <if test="vo.keywordType.contains('NAME')">
+                        or u.real_name like concat(#{vo.keyword}, '%')
+                    </if>
+                </trim>
+                )
+            </if>
+            <if test="vo.nodeId != null and vo.nodeId != ''">
+                and o.id = #{vo.nodeId}
+            </if>
+            <if test="vo.mainJob != null">
+                and uo.main_job = #{vo.mainJob}
+            </if>
+            <if test="vo.idPathPrefix != null and vo.idPathPrefix != ''">
+                and o.id_path like concat(#{vo.idPathPrefix}, '%')
+            </if>
+        </where>
     </select>
 </mapper>

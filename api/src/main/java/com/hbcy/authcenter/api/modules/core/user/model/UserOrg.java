@@ -17,8 +17,9 @@ public class UserOrg {
     public static final String COL_ID = "id";
     public static final String COL_USER_ID = "user_id";
     public static final String COL_ORG_ID = "org_id";
-    public static final String COL_DEPT_ID = "dept_id";
+    public static final String COL_NODE_ID = "node_id";
     public static final String COL_TENANT_ID = "tenant_id";
+    public static final String COL_MAIN_JOB = "main_job";
     public static final String COL_CREATE_USER = "create_user";
     public static final String COL_UPDATE_USER = "update_user";
     public static final String COL_CREATE_TIME = "create_time";
@@ -36,15 +37,20 @@ public class UserOrg {
     @TableField(value = "org_id")
     private String orgId;
     /**
-     * 部门id
+     * 关联节点id
      */
-    @TableField(value = "dept_id")
-    private String deptId;
+    @TableField(value = "node_id")
+    private String nodeId;
     /**
      * 租户id
      */
     @TableField(value = "tenant_id")
     private String tenantId;
+    /**
+     * 是否主职组织
+     */
+    @TableField(value = "main_job")
+    private Integer mainJob;
     @TableField(value = "create_user")
     private String createUser;
     @TableField(value = "update_user")

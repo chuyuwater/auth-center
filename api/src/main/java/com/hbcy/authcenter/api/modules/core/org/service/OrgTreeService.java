@@ -21,6 +21,7 @@ import com.hbcy.common.base.error.PermissionError;
 import com.hbcy.common.base.tree.TreeNode;
 import com.hbcy.common.base.util.BeanCopyUtils;
 import com.hbcy.common.redis.RedisIdGenerator;
+import com.hbcy.common.web.api.NamedId;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
@@ -328,15 +329,12 @@ public class OrgTreeService extends ServiceImpl<OrgTreeMapper, OrgTree> {
         if (node.getId().equals(tenantRootId())) {
             throw new PermissionError("不能删除根节点");
         }
-        boolean isDept = node.getNodeType().equals(OrgNodeTypeEnum.DEPT.getValue());
         Long count = userOrgMapper.selectCount(new QueryWrapper<UserOrg>()
                 .eq(UserOrg.COL_TENANT_ID, node.getTenantId())
-                .eq(!isDept, UserOrg.COL_ORG_ID, node.getId())
-                .eq(isDept, UserOrg.COL_DEPT_ID, node.getId())
+                .eq(UserOrg.COL_NODE_ID, node.getId())
         );
         if (count > 0) {
-            String tips = isDept ? "部门" : "组织";
-            throw new PermissionError("删除%s内存在用户，需要将用户移出才能删除".formatted(tips));
+            throw new PermissionError("删除节点内存在用户，需要将用户移出才能删除");
         }
         List<OrgTree> related = baseMapper.listChildrenRecursively(node.getTenantId(), node.getIdPath(), null);
         Set<String> ids = related.stream().map(OrgTree::getId).collect(Collectors.toSet());
@@ -415,5 +413,10 @@ public class OrgTreeService extends ServiceImpl<OrgTreeMapper, OrgTree> {
         toUpdate.setParentId(vo.getParentId());
         toUpdate.setShowOrder(targetIdx);
         updateById(toUpdate);
+    }
+
+    public Map<String, String> getOrgNameMap(Set<String> orgIds, boolean useFullName) {
+        List<NamedId> namedIds = baseMapper.selectNameByIds(orgIds, useFullName);
+        return namedIds.stream().collect(Collectors.toMap(NamedId::getItemId, NamedId::getItemName));
     }
 }

@@ -1,6 +1,7 @@
 package com.hbcy.authcenter.api.modules.core.user.controller;
 
 import com.google.common.base.Joiner;
+import com.hbcy.authcenter.api.modules.core.user.dto.OrgUserDTO;
 import com.hbcy.authcenter.api.modules.core.user.dto.UserExportDTO;
 import com.hbcy.authcenter.api.modules.core.user.dto.UserQueryResultDTO;
 import com.hbcy.authcenter.api.modules.core.user.service.UserService;
@@ -74,6 +75,7 @@ public class UserController {
 
     /**
      * 搜索用户
+     * 人不会重复，汇总任职信息
      *
      * @param vo 搜索条件
      * @return 用户及其关联的组织信息
@@ -84,6 +86,18 @@ public class UserController {
         return userService.queryUser(vo);
     }
 
+    /**
+     * 搜索用户，供选人窗口使用
+     * 人员会重复，不同的任职信息各一条数据
+     *
+     * @param vo 搜索条件
+     * @return 用户及其关联的组织信息
+     */
+    @GetMapping("/for-select")
+    public PageResp<OrgUserDTO> listOrgUser(UserQueryVO vo) {
+        return userService.filterUser4Select(vo);
+    }
+
     @PostMapping("/export")
     @IgnoreResponseWrapper
     @ResponseExcel
@@ -91,6 +105,11 @@ public class UserController {
         return userService.export(vo);
     }
 
+    /**
+     * 导入用户
+     *
+     * @param vo 导入数据
+     */
     @SuppressWarnings("unchecked")
     @PostMapping("/import")
     public void importUser(@RequestExcel List<UserImportVO> vo, BindingResult bindingResult) {
@@ -140,13 +159,5 @@ public class UserController {
     @PatchMapping("/user-reset-passwd")
     public void userResetPasswd(@Valid @RequestBody UserResetPasswdVO vo) {
         userService.userResetPasswd(vo);
-    }
-
-    /**
-     * 切换默认组织
-     */
-    @PatchMapping("/switch-default-org")
-    public void switchDefaultOrg(@Valid @RequestBody SwitchDefaultOrgVO vo) {
-        userService.switchDefaultOrg(vo);
     }
 }

@@ -1,6 +1,7 @@
 package com.hbcy.authcenter.api.modules.core.user.controller;
 
 import com.hbcy.authcenter.api.modules.core.user.service.UserOrgService;
+import com.hbcy.authcenter.api.modules.core.user.vo.SwitchDefaultOrgVO;
 import com.hbcy.authcenter.api.modules.core.user.vo.UserAddOrgVO;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
@@ -22,7 +23,7 @@ public class UserOrgController {
      */
     @PostMapping("/add")
     public void addOrg(@Valid @RequestBody UserAddOrgVO vo) {
-        userOrgService.addUserNode(vo.getUserId(), vo.getNodeId());
+        userOrgService.addUserNode(vo.getUserId(), vo.getNodeId(), null);
     }
 
     /**
@@ -32,6 +33,15 @@ public class UserOrgController {
      */
     @DeleteMapping("/{id}")
     public void deleteUserOrg(@PathVariable String id) {
-        userOrgService.removeUserNode(id);
+        userOrgService.removeUserOrg(id);
+    }
+
+
+    /**
+     * 切换主职组织
+     */
+    @PostMapping("/switch-main")
+    public void switchDefaultOrg(@Valid @RequestBody SwitchDefaultOrgVO vo) {
+        userOrgService.switchDefaultOrg(vo);
     }
 }
