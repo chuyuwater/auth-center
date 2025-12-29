@@ -84,6 +84,7 @@ public class PermUnitResourceService extends ServiceImpl<PermUnitResourceMapper,
             resource.setAppId(vo.getAppId());
             resource.setCreateUser(userId);
             resource.setUpdateUser(userId);
+            resource.setTenantId(tenantId);
             resources.add(resource);
         }
         //先全部删除，再插入

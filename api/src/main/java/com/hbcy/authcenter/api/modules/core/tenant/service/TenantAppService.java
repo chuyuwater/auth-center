@@ -244,4 +244,19 @@ public class TenantAppService extends ServiceImpl<TenantAppMapper, TenantApp> {
         toUpdate.setOrgTree(vo.getOrgRootId());
         save(toUpdate);
     }
+
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteGrant(String grantId) {
+        TenantApp tenantApp = baseMapper.selectById(grantId);
+        if (tenantApp == null) {
+            return;
+        }
+        baseMapper.deleteById(grantId);
+        tenantAppResourceMapper.delete(new QueryWrapper<TenantAppResource>()
+                .eq(TenantAppResource.COL_TENANT_ID, tenantApp.getTenantId())
+                .eq(TenantAppResource.COL_APP_ID, tenantApp.getAppId()));
+        permUnitResourceMapper.delete(new QueryWrapper<PermUnitResource>()
+                .eq(PermUnitResource.COL_APP_ID, tenantApp.getAppId())
+                .eq(PermUnitResource.COL_TENANT_ID, tenantApp.getTenantId()));
+    }
 }

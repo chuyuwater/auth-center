@@ -11,7 +11,19 @@ import java.util.Set;
  * @date 2025-12-27 20:34
  */
 public interface PermUnitResourceMapper extends BaseMapper<PermUnitResource> {
+    /**
+     * 列出授权给指定权限单元的资源
+     *
+     * @param unitId 权限单元ID
+     * @return 资源ID
+     */
     Set<String> listGrantedApps(@Param("unitId") String unitId);
 
+    /**
+     * 列出授权给指定权限单元的资源
+     *
+     * @param unitId 权限单元ID
+     * @return 资源ID
+     */
     Set<String> listGrantPermIds(@Param("unitId") String unitId);
 }

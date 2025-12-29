@@ -18,6 +18,7 @@ public class PermUnitResource {
     public static final String COL_UNIT_ID = "unit_id";
     public static final String COL_APP_ID = "app_id";
     public static final String COL_PERM_ID = "perm_id";
+    public static final String COL_TENANT_ID = "tenant_id";
     public static final String COL_CREATE_USER = "create_user";
     public static final String COL_UPDATE_USER = "update_user";
     public static final String COL_CREATE_TIME = "create_time";
@@ -39,6 +40,11 @@ public class PermUnitResource {
      */
     @TableField(value = "perm_id")
     private String permId;
+    /**
+     * 租户id
+     */
+    @TableField(value = "tenant_id")
+    private String tenantId;
     @TableField(value = "create_user")
     private String createUser;
     @TableField(value = "update_user")

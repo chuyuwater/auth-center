@@ -60,6 +60,16 @@ public class TenantAppController {
     }
 
     /**
+     * 删除（撤销）授权
+     *
+     * @param grantId 授权id
+     */
+    @DeleteMapping("/{grantId}")
+    public void deleteGrant(@PathVariable String grantId) {
+        tenantAppService.deleteGrant(grantId);
+    }
+
+    /**
      * 查看租户已授权的应用列表（门户侧）
      *
      * @param tenantId 租户id

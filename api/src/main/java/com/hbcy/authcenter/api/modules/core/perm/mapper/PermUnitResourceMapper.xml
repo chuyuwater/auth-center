@@ -8,6 +8,7 @@
         <result column="unit_id" property="unitId"/>
         <result column="app_id" property="appId"/>
         <result column="perm_id" property="permId"/>
+        <result column="tenant_id" property="tenantId"/>
         <result column="create_user" property="createUser"/>
         <result column="update_user" property="updateUser"/>
         <result column="create_time" property="createTime"/>
@@ -15,16 +16,26 @@
     </resultMap>
     <sql id="Base_Column_List">
         <!--@mbg.generated-->
-        id, unit_id, app_id, perm_id, create_user, update_user, create_time, update_time
+        id,
+        unit_id,
+        app_id,
+        perm_id,
+        tenant_id,
+        create_user,
+        update_user,
+        create_time,
+        update_time
     </sql>
 
     <select id="listGrantedApps" resultType="java.lang.String">
-        select distinct app_id from perm_unit_resource
+        select distinct app_id
+        from perm_unit_resource
         where unit_id = #{unitId}
     </select>
 
     <select id="listGrantPermIds" resultType="java.lang.String">
-        select perm_id from perm_unit_resource
-        where unit_id= #{unitId}
+        select perm_id
+        from perm_unit_resource
+        where unit_id = #{unitId}
     </select>
 </mapper>
