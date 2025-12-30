@@ -98,6 +98,12 @@ public class UserController {
         return userService.filterUser4Select(vo);
     }
 
+    /**
+     * 导出用户
+     *
+     * @param vo 导出条件
+     * @return 用户及其关联的组织信息
+     */
     @PostMapping("/export")
     @IgnoreResponseWrapper
     @ResponseExcel

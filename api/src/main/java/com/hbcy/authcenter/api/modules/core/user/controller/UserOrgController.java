@@ -19,7 +19,7 @@ public class UserOrgController {
     private UserOrgService userOrgService;
 
     /**
-     * 为用户新增组织/部门
+     * 为用户新增组织/部门的关联
      */
     @PostMapping("/add")
     public void addOrg(@Valid @RequestBody UserAddOrgVO vo) {

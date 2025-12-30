@@ -18,7 +18,7 @@ import java.time.LocalDateTime;
 @TableName(value = "org_tree")
 public class OrgTree extends BaseEntity {
     public static final String ORG_ID_TEMPLATE = "%s-ORG-%06d";
-    public static final String DEPT_ID_TEMPLATE = "%s-DEPT-%06d";
+    public static final String DEPT_ID_TEMPLATE = "%s-DEP-%06d";
     public static final int EXIST_TYPE_ENTITY = 0;
     public static final int EXIST_TYPE_VIRTUAL = 1;
     public static final String COL_ID = "id";

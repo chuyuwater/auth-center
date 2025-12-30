@@ -19,6 +19,10 @@ public class UserQueryResultDTO extends UserDTO {
      */
     List<UserOrgDTO> orgList;
     /**
+     * 是否租户管理员
+     */
+    private boolean tenantAdmin;
+    /**
      * 创建人名称
      */
     private String createUserName;

@@ -6,6 +6,8 @@ import com.hbcy.authcenter.api.common.enums.OrgNodeTypeEnum;
 import com.hbcy.authcenter.api.modules.core.org.dao.OrgTreeMapper;
 import com.hbcy.authcenter.api.modules.core.org.model.OrgTree;
 import com.hbcy.authcenter.api.modules.core.org.service.OrgTreeService;
+import com.hbcy.authcenter.api.modules.core.perm.dao.PermUnitUserMapper;
+import com.hbcy.authcenter.api.modules.core.perm.model.PermUnitUser;
 import com.hbcy.authcenter.api.modules.core.user.dao.UserMapper;
 import com.hbcy.authcenter.api.modules.core.user.dao.UserOrgMapper;
 import com.hbcy.authcenter.api.modules.core.user.dto.UserOrgDTO;
@@ -35,6 +37,8 @@ public class UserOrgService extends ServiceImpl<UserOrgMapper, UserOrg> {
     private OrgTreeMapper orgTreeMapper;
     @Resource
     private UserMapper userMapper;
+    @Resource
+    private PermUnitUserMapper permUnitUserMapper;
 
     public void addUserNode(String userId, String nodeId, Boolean mainJob) {
         OrgTree node = orgTreeMapper.selectById(nodeId);
@@ -114,6 +118,12 @@ public class UserOrgService extends ServiceImpl<UserOrgMapper, UserOrg> {
         return baseMapper.listUserOrgs(userIds, false);
     }
 
+    /**
+     * 将用户从组织/部门中移除
+     *
+     * @param userOrgId 关联关系的id
+     */
+    @Transactional(rollbackFor = Exception.class)
     public void removeUserOrg(String userOrgId) {
         UserOrg userOrg = baseMapper.selectById(userOrgId);
         if (userOrg == null) {
@@ -130,6 +140,15 @@ public class UserOrgService extends ServiceImpl<UserOrgMapper, UserOrg> {
             if (count == 1) {
                 throw new ParamError("至少保留1个主职组织的任职");
             }
+        }
+        //如果删除之后用户与当前组织的关系为空，则删除该用户在组织中的所有赋权
+        long cnt = count(new QueryWrapper<UserOrg>()
+                .eq(UserOrg.COL_USER_ID, userOrg.getUserId())
+                .eq(UserOrg.COL_ORG_ID, userOrg.getOrgId()));
+        if (cnt == 1) {
+            permUnitUserMapper.delete(new QueryWrapper<PermUnitUser>()
+                    .eq(PermUnitUser.COL_USER_ID, userOrg.getUserId())
+                    .eq(PermUnitUser.COL_ORG_ID, userOrg.getOrgId()));
         }
         removeById(userOrgId);
     }

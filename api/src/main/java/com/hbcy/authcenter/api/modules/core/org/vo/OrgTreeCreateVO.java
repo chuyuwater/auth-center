@@ -13,7 +13,7 @@ import org.hibernate.validator.constraints.Range;
 @Data
 public class OrgTreeCreateVO extends OrgTreeUpdateVO {
     /**
-     * 父节点。
+     * 父节点
      * 创建时，节点固定在同级末尾。
      */
     private String parentId = "";

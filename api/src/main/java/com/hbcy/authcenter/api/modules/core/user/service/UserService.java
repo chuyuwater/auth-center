@@ -170,6 +170,9 @@ public class UserService extends ServiceImpl<UserMapper, User> {
         if (user == null) {
             return;
         }
+        if (user.getForbidden() == 0) {
+            throw new ParamError("删除用户前需要先禁用用户");
+        }
         String tenantId = UserContextUtils.getTenantId();
         if (!user.getTenantId().equals(tenantId)) {
             throw new PermissionError();
@@ -223,6 +226,12 @@ public class UserService extends ServiceImpl<UserMapper, User> {
 
     public void deleteUsers(@Valid BatchDeleteVO vo) {
         var tenantId = UserContextUtils.getTenantId();
+        boolean exists = exists(new QueryWrapper<User>()
+                .eq(User.COL_FORBIDDEN, "0")
+                .in(User.COL_ID, vo.getIds()));
+        if (exists) {
+            throw new ParamError("删除用户前需要先禁用用户");
+        }
         cleanNameCache(vo.getIds());
         remove(new QueryWrapper<User>()
                 .eq(User.COL_TENANT_ID, tenantId)
@@ -345,12 +354,14 @@ public class UserService extends ServiceImpl<UserMapper, User> {
         //按用户分组映射
         Map<String, List<UserOrgDTO>> userOrgMap = userOrgs.stream().collect(
                 Collectors.groupingBy(UserOrgDTO::getUserId));
+        Tenant tenant = tenantMapper.selectById(UserContextUtils.getTenantId());
         for (UserQueryResultDTO dto : page.getRecords()) {
             List<UserOrgDTO> orgs = userOrgMap.get(dto.getId());
             if (orgs != null) {
                 orgs.sort(Comparator.comparing(UserOrgDTO::getMainJob).reversed());
             }
             dto.setOrgList(orgs);
+            dto.setTenantAdmin(tenant.getAdminId().equals(dto.getId()));
         }
         return new PageRespEx<>(page);
     }
