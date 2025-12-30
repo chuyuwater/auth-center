@@ -90,6 +90,7 @@ public class AppService extends ServiceImpl<AppMapper, App> {
         return app;
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public void switchStatus(AppForbiddenVO vo) {
         App app = getById(vo.getAppId());
         if (app == null) {
@@ -104,6 +105,10 @@ public class AppService extends ServiceImpl<AppMapper, App> {
         toUpdate.setUpdateUser(UserContextUtils.getUserId());
         stringRedisTemplate.opsForHash().delete(APP_STATUS_CACHE, app.getId());
         this.updateById(toUpdate);
+        //应用被禁用，所有授权全部禁用
+        if (vo.getForbidden() == 1) {
+            tenantAppMapper.forbidApp(vo.getAppId());
+        }
     }
 
     public List<App> list(AppQueryVO vo) {

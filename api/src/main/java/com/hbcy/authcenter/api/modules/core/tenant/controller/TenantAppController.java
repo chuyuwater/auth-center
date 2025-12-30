@@ -1,6 +1,6 @@
 package com.hbcy.authcenter.api.modules.core.tenant.controller;
 
-import com.hbcy.authcenter.api.modules.core.app.dto.AppCardDTO;
+import com.hbcy.authcenter.api.modules.core.app.dto.GrantAppDTO;
 import com.hbcy.authcenter.api.modules.core.app.vo.BindOrgTreeVO;
 import com.hbcy.authcenter.api.modules.core.tenant.service.TenantAppService;
 import com.hbcy.authcenter.api.modules.core.tenant.vo.TenantAppGrantStatusUpdateVO;
@@ -76,15 +76,16 @@ public class TenantAppController {
      * @return 应用列表
      */
     @GetMapping("/{tenantId}")
-    public List<AppCardDTO> listGrantApps(@PathVariable String tenantId) {
+    public List<GrantAppDTO> listGrantApps(@PathVariable String tenantId) {
         return tenantAppService.listGrantApps(tenantId);
     }
 
     /**
      * 租户查看已授权的应用清单（租户侧）
+     * 含被禁用app
      */
     @GetMapping
-    public List<AppCardDTO> listGrantApps() {
+    public List<GrantAppDTO> listGrantApps() {
         return tenantAppService.listGrantApps(UserContextUtils.getTenantId());
     }
 

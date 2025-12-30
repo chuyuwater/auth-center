@@ -43,7 +43,7 @@ public class ResourceTreeController {
     }
 
     /**
-     * 获取资源树结构
+     * 获取应用资源树结构
      *
      * @param vo 查询条件
      * @return 资源树

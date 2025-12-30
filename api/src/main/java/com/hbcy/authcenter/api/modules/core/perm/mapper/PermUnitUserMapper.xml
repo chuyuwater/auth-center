@@ -102,4 +102,21 @@
         join org_tree ot on puu.org_id = ot.id
         where puu.unit_id = #{vo.unitId}
     </select>
+
+    <select id="listGrantApps" resultType="com.hbcy.authcenter.api.modules.core.app.dto.AppCardDTO">
+        select app.id as app_id,
+        app.name_cn,
+        app.memo,
+        app.icon
+        from app
+        join tenant_app on app.id = tenant_app.app_id
+        join perm_unit_resource pur on app.id = pur.app_id
+        join perm_unit_user puu on puu.unit_id = pur.unit_id
+        <where>
+            tenant_app.forbidden = 0
+            and puu.user_id = #{userId}
+            and puu.org_id = #{orgId}
+        </where>
+        order by app.show_order
+    </select>
 </mapper>

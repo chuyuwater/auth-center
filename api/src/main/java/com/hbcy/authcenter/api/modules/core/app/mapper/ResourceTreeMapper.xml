@@ -55,12 +55,24 @@
             app_id = #{appId}
             and id_path like concat(#{parentIdPath}, '%')
             <if test="clientType != null">
-                <if test="clientType == 1">
-                    and client_type in (0, 1)
-                </if>
-                <if test="clientType == 2">
-                    and client_type in (0, 2)
-                </if>
+                <choose>
+                    <when test="clientType == 1">
+                        and client_type in (0, 1)
+                    </when>
+                    <when test="clientType == 2">
+                        and client_type in (0, 2)
+                    </when>
+                </choose>
+            </if>
+            <if test="showLevel != null">
+                <choose>
+                    <when test="showLevel == 1">
+                        and show_level in (0, 1)
+                    </when>
+                    <when test="showLevel == 2">
+                        and show_level in (0, 2)
+                    </when>
+                </choose>
             </if>
             <if test="keyword != null and keyword != ''">
                 and (

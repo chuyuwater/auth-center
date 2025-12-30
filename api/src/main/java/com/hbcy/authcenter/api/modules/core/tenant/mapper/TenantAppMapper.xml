@@ -31,16 +31,20 @@
         update_user
     </sql>
 
-    <select id="listGrantApps" resultType="com.hbcy.authcenter.api.modules.core.app.dto.AppCardDTO">
-        select tenant_app.id as grant_id, app.id as app_id, app.name_cn, app.memo, tenant_app.forbidden
+    <select id="listGrantApps" resultType="com.hbcy.authcenter.api.modules.core.app.dto.GrantAppDTO">
+        select tenant_app.id as grant_id, app.id as app_id, app.icon, app.name_cn, app.memo, tenant_app.forbidden
         from app
         join tenant_app on tenant_app.app_id = app.id
         <where>
-            app.forbidden = 0
             and tenant_app.tenant_id = #{tenantId}
             and app.delete_time = 0
         </where>
         order by app.show_order
     </select>
+
+    <update id="forbidApp">
+        update tenant_app set forbidden = 1
+        where app_id= #{appId}
+    </update>
 </mapper>
 

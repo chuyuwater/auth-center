@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hbcy.authcenter.api.modules.core.app.dao.AppMapper;
 import com.hbcy.authcenter.api.modules.core.app.dao.ResourcePermMapper;
-import com.hbcy.authcenter.api.modules.core.app.dto.AppCardDTO;
+import com.hbcy.authcenter.api.modules.core.app.dto.GrantAppDTO;
 import com.hbcy.authcenter.api.modules.core.app.model.App;
 import com.hbcy.authcenter.api.modules.core.app.model.ResourcePerm;
 import com.hbcy.authcenter.api.modules.core.app.vo.BindOrgTreeVO;
@@ -211,7 +211,7 @@ public class TenantAppService extends ServiceImpl<TenantAppMapper, TenantApp> {
     /**
      * 查看租户已授权的应用列表
      */
-    public List<AppCardDTO> listGrantApps(String tenantId) {
+    public List<GrantAppDTO> listGrantApps(String tenantId) {
         return baseMapper.listGrantApps(tenantId);
     }
 

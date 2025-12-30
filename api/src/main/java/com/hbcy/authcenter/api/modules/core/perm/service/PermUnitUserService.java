@@ -1,9 +1,10 @@
 package com.hbcy.authcenter.api.modules.core.perm.service;
 
-import cn.idev.excel.util.StringUtils;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.f4b6a3.ulid.UlidCreator;
+import com.hbcy.authcenter.api.modules.core.app.dto.AppCardDTO;
+import com.hbcy.authcenter.api.modules.core.app.dto.GrantAppDTO;
 import com.hbcy.authcenter.api.modules.core.app.dto.ResPermDTO;
 import com.hbcy.authcenter.api.modules.core.org.model.OrgTree;
 import com.hbcy.authcenter.api.modules.core.org.service.OrgTreeService;
@@ -19,6 +20,7 @@ import com.hbcy.authcenter.api.modules.core.tenant.model.TenantApp;
 import com.hbcy.authcenter.sdk.utils.UserContextUtils;
 import com.hbcy.common.base.error.ParamError;
 import jakarta.annotation.Resource;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -99,6 +101,12 @@ public class PermUnitUserService extends ServiceImpl<PermUnitUserMapper, PermUni
         return baseMapper.listFilteredPerms(userId, appId, tenantId, idPath);
     }
 
+    public List<ResPermDTO> listPerms(String appId, String resId) {
+        List<ResPermDTO> resPermDTOS = listPerms(appId);
+        return resPermDTOS.stream().filter(
+                resPermDTO -> resPermDTO.getResId().equals(resId)).toList();
+    }
+
     //移除角色授权人员
     public void deleteGrant(List<String> grantIds) {
         String tenantId = UserContextUtils.getTenantId();
@@ -112,6 +120,30 @@ public class PermUnitUserService extends ServiceImpl<PermUnitUserMapper, PermUni
     //获取角色关联的人
     public List<UnitUserDTO> listGrantUsers(PermUnitUserQueryVO vo) {
         return baseMapper.listGrantUsers(vo);
+    }
+
+    //获取当前用户有权访问的app列表（不含被禁用）
+    public List<AppCardDTO> listApp(String orgId) {
+        String userId = UserContextUtils.getUserId();
+        if (UserContextUtils.isTenantAdmin()) {
+            //租户管理员直接获取授权的非禁用app列表
+            List<GrantAppDTO> apps = tenantAppMapper.listGrantApps(UserContextUtils.getTenantId());
+            List<AppCardDTO> resp = new ArrayList<>();
+            for (GrantAppDTO app : apps) {
+                if (app.getForbidden() == 0) {
+                    resp.add(app);
+                }
+            }
+            return resp;
+        }
+        if (StringUtils.isBlank(orgId)) {
+            orgId = UserContextUtils.getUserOrg();
+        }
+        OrgTree org = orgTreeService.getById(orgId);
+        if (org == null) {
+            throw new ParamError("用户未加入任何组织");
+        }
+        return baseMapper.listGrantApps(userId, orgId);
     }
 }
 

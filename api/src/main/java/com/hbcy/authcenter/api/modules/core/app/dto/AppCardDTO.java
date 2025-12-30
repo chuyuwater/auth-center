@@ -3,17 +3,14 @@ package com.hbcy.authcenter.api.modules.core.app.dto;
 import lombok.Data;
 
 /**
- * app卡片
+ * app基本信息
  *
  * @author 姚泰然
  * @date 2025-12-24 08:53
  */
 @Data
 public class AppCardDTO {
-    /**
-     * 授权id
-     */
-    private String grantId;
+
     /**
      * 应用id
      */
@@ -24,15 +21,11 @@ public class AppCardDTO {
     private String nameCn;
 
     /**
-     * logo图片的URL地址
+     * 图标
      */
-    private String logo;
+    private String icon;
     /**
      * 应用描述
      */
     private String memo;
-    /**
-     * 是否禁用, 0-启用，1-禁用
-     */
-    private Integer forbidden;
 }

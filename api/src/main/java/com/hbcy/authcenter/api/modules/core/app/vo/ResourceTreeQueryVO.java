@@ -32,4 +32,8 @@ public class ResourceTreeQueryVO {
      * 0-全端，1-pc端，2-移动端
      */
     private Integer clientType;
+    /**
+     * 显示级别，0-全局，1-组织级，2-项目级
+     */
+    private Integer showLevel;
 }
