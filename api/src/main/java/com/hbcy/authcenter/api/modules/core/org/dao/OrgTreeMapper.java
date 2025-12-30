@@ -19,9 +19,9 @@ public interface OrgTreeMapper extends BaseMapper<OrgTree> {
      * @param parentIdPath 父节点id
      * @return 下面所有的节点
      */
-    List<OrgTree> listChildrenRecursively(@Param("tenantId") String tenantId,
-                                          @Param("parentIdPath") String parentIdPath,
-                                          @Param("vo") OrgTreeQueryVO vo);
+    List<OrgTree> listChildren(@Param("tenantId") String tenantId,
+                               @Param("parentIdPath") String parentIdPath,
+                               @Param("vo") OrgTreeQueryVO vo);
 
     /**
      * 在同级尾部创建数据

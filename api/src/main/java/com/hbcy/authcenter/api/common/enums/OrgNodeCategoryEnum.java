@@ -10,9 +10,10 @@ import org.jspecify.annotations.Nullable;
  */
 public enum OrgNodeCategoryEnum implements IPairEnum<Integer> {
     PROJECT(0, "项目部"),
-    COMPANY(1, "公司"),
-    SUB_COMPANY(2, "子公司"),
-    BRANCH_COMPANY(3, "分公司");
+    CORP(1, "集团"),
+    COMPANY(2, "公司"),
+    BRANCH_COMPANY(3, "分公司"),
+    SUB_COMPANY(4, "子公司");
 
     private final Integer value;
     private final String desc;

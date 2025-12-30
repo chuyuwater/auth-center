@@ -2,7 +2,6 @@ package com.hbcy.authcenter.api.modules.core.tenant.controller;
 
 import com.hbcy.authcenter.api.modules.core.app.dto.GrantAppDTO;
 import com.hbcy.authcenter.api.modules.core.tenant.service.TenantAppService;
-import com.hbcy.authcenter.api.modules.core.tenant.vo.TenantAppGrantStatusUpdateVO;
 import com.hbcy.authcenter.api.modules.core.tenant.vo.TenantAppGrantUpdateVO;
 import com.hbcy.authcenter.api.modules.core.tenant.vo.TenantAppGrantVO;
 import jakarta.annotation.Resource;
@@ -45,16 +44,6 @@ public class TenantAppController {
     @PutMapping("/{id}")
     public void update(@RequestBody @Valid TenantAppGrantUpdateVO vo, @PathVariable String id) {
         tenantAppService.updateGrantedApp(id, vo);
-    }
-
-    /**
-     * 切换授权状态
-     *
-     * @param vo 状态信息
-     */
-    @PostMapping("/switch")
-    public void switchStatus(@RequestBody @Valid TenantAppGrantStatusUpdateVO vo) {
-        tenantAppService.switchGrantStatus(vo);
     }
 
     /**

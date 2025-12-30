@@ -10,6 +10,7 @@ import com.hbcy.common.base.tree.TreeNode;
 import com.hbcy.common.web.bean.NameFill;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -55,12 +56,28 @@ public class OrgTreeController {
     }
 
     /**
-     * 某个节点的直接下级节点
-     * 适用于逐级展开
+     * 搜索组织树节点（列表结构）
+     *
+     * @param vo 查询条件
+     * @return 满足条件的节点列表
      */
     @GetMapping("/list")
+    public List<OrgTree> list(@Valid OrgTreeQueryVO vo) {
+        return orgTreeService.listOrgTree(vo);
+    }
+
+    /**
+     * 某个组织节点的直接下级节点
+     * 适用于逐级展开
+     */
+    @GetMapping("/direct")
     @NameFill
-    public List<OrgTree> getDirectChildren(@Valid OrgTreeQueryVO vo) {
+    public List<OrgTree> getDirectChildren(String parentId) {
+        OrgTreeQueryVO vo = new OrgTreeQueryVO();
+        if (StringUtils.isBlank(parentId)) {
+            parentId = "";
+        }
+        vo.setParentId(parentId);
         return orgTreeService.listDirectChildren(vo);
     }
 

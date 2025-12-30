@@ -50,23 +50,6 @@ public class OrgTreeService extends ServiceImpl<OrgTreeMapper, OrgTree> {
             OrgNodeTypeEnum.ORG.getValue(), Set.of(OrgNodeTypeEnum.ORG.getValue(), OrgNodeTypeEnum.DEPT.getValue()),
             OrgNodeTypeEnum.DEPT.getValue(), Set.of(OrgNodeTypeEnum.DEPT.getValue())
     );
-    /**
-     * 组织类别节点规则
-     */
-    public static final Map<Integer, Set<Integer>> ALLOW_CHILD_NODE_CATEGORY = Map.of(
-            OrgNodeCategoryEnum.PROJECT.getValue(), Set.of(),
-            OrgNodeCategoryEnum.COMPANY.getValue(), Set.of(
-                    OrgNodeCategoryEnum.PROJECT.getValue(),
-                    OrgNodeCategoryEnum.SUB_COMPANY.getValue(),
-                    OrgNodeCategoryEnum.BRANCH_COMPANY.getValue()
-            ),
-            OrgNodeCategoryEnum.BRANCH_COMPANY.getValue(), Set.of(OrgNodeCategoryEnum.PROJECT.getValue()),
-            OrgNodeCategoryEnum.SUB_COMPANY.getValue(), Set.of(
-                    OrgNodeCategoryEnum.PROJECT.getValue(),
-                    OrgNodeCategoryEnum.SUB_COMPANY.getValue(),
-                    OrgNodeCategoryEnum.BRANCH_COMPANY.getValue()
-            )
-    );
     @Resource
     private NameCacheService nameCacheService;
     @Resource
@@ -129,16 +112,15 @@ public class OrgTreeService extends ServiceImpl<OrgTreeMapper, OrgTree> {
             if (!OrgNodeTypeEnum.ORG.getValue().equals(node.getNodeType())) {
                 throw new ParamError("根节点下面只能挂组织");
             }
-            if (!OrgNodeCategoryEnum.COMPANY.getValue().equals(node.getNodeCategory())) {
-                throw new ParamError("根节点下面只能挂公司");
-            }
             return;
         }
         if (!ALLOW_PARENT_NODE_TYPE.getOrDefault(parent.getNodeType(), Set.of()).contains(node.getNodeType())) {
             throw new ParamError("父节点类型不允许挂载该节点类型");
         }
-        if (!ALLOW_CHILD_NODE_CATEGORY.getOrDefault(parent.getNodeCategory(), Set.of()).contains(node.getNodeCategory())) {
-            throw new ParamError("父节点类别不允许挂载该节点类别");
+        //项目部下面不能挂其他组织
+        if (parent.getNodeCategory().equals(OrgNodeCategoryEnum.PROJECT.getValue()) &&
+                !node.getNodeType().equals(OrgNodeTypeEnum.DEPT.getValue())) {
+            throw new ParamError("项目部下面不能挂其他组织");
         }
     }
 
@@ -233,6 +215,35 @@ public class OrgTreeService extends ServiceImpl<OrgTreeMapper, OrgTree> {
     }
 
     /**
+     * 列表形式的组织节点
+     *
+     * @param vo 查询条件
+     * @return 满足条件的列表
+     */
+    public List<OrgTree> listOrgTree(@Valid OrgTreeQueryVO vo) {
+        String tenantId = UserContextUtils.getTenantId();
+        String parentId = StringUtils.isBlank(vo.getParentId()) ?
+                OrgTree.ORG_ID_TEMPLATE.formatted(tenantId, 0) :
+                vo.getParentId();
+        OrgTree rootData = baseMapper.selectById(parentId);
+        if (rootData == null) {
+            throw new ParamError("指定节点不存在");
+        }
+        if (!tenantId.equals(rootData.getTenantId())) {
+            throw new PermissionError();
+        }
+
+        List<OrgTree> orgTrees = baseMapper.listChildren(
+                tenantId, rootData.getIdPath() + G.ID_PATH_SPLITTER, vo
+        );
+        //fill user
+        Set<String> userIds = orgTrees.stream().map(OrgTree::getCreateUser).collect(Collectors.toSet());
+        Map<String, String> userNameMap = nameCacheService.getUserNameMap(userIds);
+        orgTrees.forEach(t -> t.setCreateUserName(userNameMap.get(t.getCreateUser())));
+        return orgTrees;
+    }
+
+    /**
      * 构建组织架构树
      * 完整的组织树可能数据量较大，使用懒加载方式更合适
      *
@@ -245,22 +256,8 @@ public class OrgTreeService extends ServiceImpl<OrgTreeMapper, OrgTree> {
                 OrgTree.ORG_ID_TEMPLATE.formatted(tenantId, 0) :
                 vo.getParentId();
         OrgTree rootData = baseMapper.selectById(parentId);
-        if (rootData == null) {
-            throw new ParamError("指定节点不存在");
-        }
-        if (!tenantId.equals(rootData.getTenantId())) {
-            throw new PermissionError();
-        }
         TreeNode<OrgTree> root = new TreeNode<>(rootData);
-
-        List<OrgTree> orgTrees = baseMapper.listChildrenRecursively(
-                tenantId, rootData.getIdPath() + G.ID_PATH_SPLITTER, vo
-        );
-        //fill user
-        Set<String> userIds = orgTrees.stream().map(OrgTree::getCreateUser).collect(Collectors.toSet());
-        Map<String, String> userNameMap = nameCacheService.getUserNameMap(userIds);
-        orgTrees.forEach(t -> t.setCreateUserName(userNameMap.get(t.getCreateUser())));
-
+        var orgTrees = listOrgTree(vo);
         Map<String, List<OrgTree>> childrenMap = orgTrees.stream()
                 .collect(Collectors.groupingBy(node ->
                                 StringUtils.isBlank(node.getParentId()) ? "" : node.getParentId(),
@@ -336,7 +333,7 @@ public class OrgTreeService extends ServiceImpl<OrgTreeMapper, OrgTree> {
         if (count > 0) {
             throw new PermissionError("删除节点内存在用户，需要将用户移出才能删除");
         }
-        List<OrgTree> related = baseMapper.listChildrenRecursively(node.getTenantId(), node.getIdPath(), null);
+        List<OrgTree> related = baseMapper.listChildren(node.getTenantId(), node.getIdPath(), null);
         Set<String> ids = related.stream().map(OrgTree::getId).collect(Collectors.toSet());
         ids.add(id);
         cleanNameCache(ids);
@@ -419,4 +416,6 @@ public class OrgTreeService extends ServiceImpl<OrgTreeMapper, OrgTree> {
         List<NamedId> namedIds = baseMapper.selectNameByIds(orgIds, useFullName);
         return namedIds.stream().collect(Collectors.toMap(NamedId::getItemId, NamedId::getItemName));
     }
+
+
 }
