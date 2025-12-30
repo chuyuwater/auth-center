@@ -89,12 +89,15 @@ public class ResourceTreeController {
     }
 
     /**
-     * 删除资源节点（及其子节点和关联权限）
+     * 删除资源节点
+     * 一般删除：检查是否有子节点，有的话不允许删除
+     * 强制删除：直接删除节点和所有子节点，及其关联的权限节点
      *
-     * @param id 节点ID
+     * @param id    节点ID
+     * @param force 是否强制删除，默认false
      */
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable String id) {
-        resourceTreeService.delete(id);
+    public void delete(@PathVariable String id, boolean force) {
+        resourceTreeService.delete(id, force);
     }
 }

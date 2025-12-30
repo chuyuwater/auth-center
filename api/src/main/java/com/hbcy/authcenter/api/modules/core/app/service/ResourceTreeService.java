@@ -267,7 +267,7 @@ public class ResourceTreeService extends ServiceImpl<ResourceTreeMapper, Resourc
      * 删除资源节点
      */
     @Transactional(rollbackFor = Exception.class)
-    public void delete(String id) {
+    public void delete(String id, boolean force) {
         //需要删除其下的所有子节点和附属的资源
         ResourceTree node = getById(id);
         if (node == null) {
@@ -279,10 +279,16 @@ public class ResourceTreeService extends ServiceImpl<ResourceTreeMapper, Resourc
         List<ResourceTree> related = baseMapper.listChildrenRecursively(vo);
         Set<String> resIds = related.stream().map(ResourceTree::getId).collect(Collectors.toSet());
         resIds.add(id);
+        if (!force && resIds.size() > 1) {
+            throw new ParamError("请先删除该菜单下的所有子资源");
+        }
         Set<String> permIds = resourcePermService.list(new QueryWrapper<ResourcePerm>()
                 .select(ResourcePerm.COL_ID)
                 .in(ResourcePerm.COL_RES_ID, resIds)).stream().map(
                 ResourcePerm::getId).collect(Collectors.toSet());
+        if (!force && !permIds.isEmpty()) {
+            throw new ParamError("请先删除该菜单下的所有权限点");
+        }
         baseMapper.deleteByIds(resIds);
         JsonLogUtils.log("delete-res-node", StructuredArguments.kv("id", id),
                 StructuredArguments.kv("permIds", permIds),
