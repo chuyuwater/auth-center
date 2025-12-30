@@ -6,13 +6,12 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hbcy.authcenter.api.common.constants.G;
 import com.hbcy.authcenter.api.modules.core.org.dao.OrgTreeMapper;
 import com.hbcy.authcenter.api.modules.core.org.model.OrgTree;
+import com.hbcy.authcenter.api.modules.core.tenant.dao.TenantAppMapper;
 import com.hbcy.authcenter.api.modules.core.tenant.dao.TenantMapper;
 import com.hbcy.authcenter.api.modules.core.tenant.model.Tenant;
+import com.hbcy.authcenter.api.modules.core.tenant.model.TenantApp;
 import com.hbcy.authcenter.api.modules.core.tenant.utils.TenantIdUtils;
-import com.hbcy.authcenter.api.modules.core.tenant.vo.TenantAdminUpdateVO;
-import com.hbcy.authcenter.api.modules.core.tenant.vo.TenantForbiddenVO;
-import com.hbcy.authcenter.api.modules.core.tenant.vo.TenantInsertVO;
-import com.hbcy.authcenter.api.modules.core.tenant.vo.TenantQueryVO;
+import com.hbcy.authcenter.api.modules.core.tenant.vo.*;
 import com.hbcy.authcenter.api.modules.core.user.model.User;
 import com.hbcy.authcenter.api.modules.core.user.service.UserService;
 import com.hbcy.authcenter.api.modules.core.user.vo.UserCreateVO;
@@ -38,7 +37,8 @@ public class TenantService extends ServiceImpl<TenantMapper, Tenant> {
     public static final String TENANT_KEY = "portal:tenant:";
     @Resource
     private RedisIdGenerator redisIdGenerator;
-
+    @Resource
+    private TenantAppMapper tenantAppMapper;
     @Resource
     private OrgTreeMapper orgTreeMapper;
     @Resource
@@ -103,7 +103,7 @@ public class TenantService extends ServiceImpl<TenantMapper, Tenant> {
      * @param id 租户id
      * @return 更新后的租户信息
      */
-    public Tenant update(TenantInsertVO vo, String id) {
+    public Tenant update(TenantUpdateVO vo, String id) {
         Tenant tenant = getById(id);
         if (tenant == null) {
             throw new ParamError("指定租户不存在");
@@ -139,6 +139,7 @@ public class TenantService extends ServiceImpl<TenantMapper, Tenant> {
         save(toUpdate);
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public void switchStatus(TenantForbiddenVO vo) {
         Tenant tenant = getById(vo.getTenantId());
         if (tenant == null) {
@@ -151,6 +152,10 @@ public class TenantService extends ServiceImpl<TenantMapper, Tenant> {
         toUpdate.setId(vo.getTenantId());
         toUpdate.setForbidden(vo.getForbidden());
         toUpdate.setUpdateUser(UserContextUtils.getUserId());
+        //应用授权状态级联变化
+        if (vo.getForbidden() == 1)
+            tenantAppMapper.switchTenantStatus(
+                    vo.getForbidden(), vo.getTenantId(), UserContextUtils.getUserId());
         this.updateById(tenant);
     }
 
@@ -158,10 +163,10 @@ public class TenantService extends ServiceImpl<TenantMapper, Tenant> {
         Page<Tenant> dbPage = vo.getDbPage();
         Page<Tenant> resp = baseMapper.selectPage(dbPage, new QueryWrapper<Tenant>()
                 .eq(vo.getForbidden() != null, Tenant.COL_FORBIDDEN, vo.getForbidden())
-                .or(StringUtils.isNotBlank(vo.getName()))
+                .or(StringUtils.isNotBlank(vo.getKeyword()))
                 //模糊查询，租户数量不会多，无需考虑优化
-                .like(Tenant.COL_NAME_CN, vo.getName())
-                .like(Tenant.COL_SHORT_NAME, vo.getName())
+                .like(Tenant.COL_NAME_CN, vo.getKeyword())
+                .like(Tenant.COL_ID, vo.getKeyword())
         );
         return new PageRespEx<>(resp);
     }
@@ -170,6 +175,16 @@ public class TenantService extends ServiceImpl<TenantMapper, Tenant> {
         Tenant tenant = getById(id);
         if (tenant == null) {
             return;
+        }
+        var anyApp = tenantAppMapper.exists(new QueryWrapper<TenantApp>()
+                .eq(TenantApp.COL_TENANT_ID, tenant.getId()));
+        if (anyApp) {
+            throw new ParamError("请先删除该租户下的所有应用");
+        }
+        Long cnt = orgTreeMapper.selectCount(new QueryWrapper<OrgTree>()
+                .eq(OrgTree.COL_TENANT_ID, tenant.getId()));
+        if (cnt > 1) { //不含虚拟根节点
+            throw new ParamError("请先删除该租户下的所有组织");
         }
         tenant.setUpdateUser(UserContextUtils.getUserId());
         //逻辑删除

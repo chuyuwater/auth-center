@@ -21,9 +21,20 @@ public interface TenantAppMapper extends BaseMapper<TenantApp> {
     List<GrantAppDTO> listGrantApps(@Param("tenantId") String tenantId);
 
     /**
-     * 禁用应用
+     * 切换应用禁用状态
      *
      * @param appId 应用id
      */
-    void forbidApp(@Param("appId") String appId);
+    void switchAppStatus(@Param("status") int status,
+                         @Param("appId") String appId,
+                         @Param("updateUser") String updateUser);
+
+    /**
+     * 切换租户禁用状态
+     *
+     * @param tenantId 租户id
+     */
+    void switchTenantStatus(@Param("status") int status,
+                            @Param("tenantId") String tenantId,
+                            @Param("updateUser") String updateUser);
 }

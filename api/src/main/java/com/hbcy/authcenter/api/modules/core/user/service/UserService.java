@@ -128,9 +128,8 @@ public class UserService extends ServiceImpl<UserMapper, User> {
         }
         User user = new User();
         BeanCopyUtils.copy(vo, user);
-        // 默认密码为手机号后面6位
-        user.setPasswd(passwordEncoder.encode(
-                vo.getPhone().substring(vo.getPhone().length() - 6)));
+        // 默认密码为手机号
+        user.setPasswd(passwordEncoder.encode(vo.getPhone()));
         //TODO: 改为随机密码+短信、邮件发送密码
         user.setCreateUser(op);
         user.setUpdateUser(op);
@@ -451,8 +450,7 @@ public class UserService extends ServiceImpl<UserMapper, User> {
             u.setCreateTime(now);
             u.setUpdateTime(now);
             //TODO:改为随机密码+短信通知
-            u.setPasswd(passwordEncoder.encode(
-                    d.getPhone().substring(d.getPhone().length() - 6)));
+            u.setPasswd(passwordEncoder.encode(d.getPhone()));
             users.add(u);
             //用户与组织的关联
             UserOrg uo = new UserOrg();

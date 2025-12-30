@@ -5,7 +5,6 @@ import com.hbcy.authcenter.api.modules.core.app.dto.ResTreeDTO;
 import com.hbcy.authcenter.api.modules.core.perm.service.PermUnitResourceService;
 import com.hbcy.authcenter.api.modules.core.perm.service.PermUnitUserService;
 import com.hbcy.authcenter.api.modules.core.perm.vo.ClientResQueryVO;
-import com.hbcy.authcenter.api.modules.core.tenant.service.TenantAppService;
 import com.hbcy.authcenter.sdk.utils.UserContextUtils;
 import com.hbcy.common.base.tree.TreeNode;
 import com.hbcy.common.web.bean.NameFill;
@@ -28,8 +27,6 @@ import java.util.List;
 @RequestMapping("api/portal/v1/my")
 @Validated
 public class MyResourceController {
-    @Resource
-    private TenantAppService tenantAppService;
     @Resource
     private PermUnitUserService permUnitUserService;
     @Resource

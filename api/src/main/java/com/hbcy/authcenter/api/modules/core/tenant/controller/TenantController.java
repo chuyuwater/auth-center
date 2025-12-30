@@ -5,6 +5,7 @@ import com.hbcy.authcenter.api.modules.core.tenant.service.TenantService;
 import com.hbcy.authcenter.api.modules.core.tenant.vo.TenantForbiddenVO;
 import com.hbcy.authcenter.api.modules.core.tenant.vo.TenantInsertVO;
 import com.hbcy.authcenter.api.modules.core.tenant.vo.TenantQueryVO;
+import com.hbcy.authcenter.api.modules.core.tenant.vo.TenantUpdateVO;
 import com.hbcy.common.base.pojo.PageResp;
 import com.hbcy.common.web.bean.NameFill;
 import jakarta.annotation.Resource;
@@ -69,7 +70,7 @@ public class TenantController {
      * @return 更新后的租户信息
      */
     @PutMapping("/{id}")
-    public Tenant update(@PathVariable String id, @RequestBody @Valid TenantInsertVO vo) {
+    public Tenant update(@PathVariable String id, @RequestBody @Valid TenantUpdateVO vo) {
         return tenantService.update(vo, id);
     }
 

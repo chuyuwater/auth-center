@@ -105,6 +105,8 @@ public class TenantAppService extends ServiceImpl<TenantAppMapper, TenantApp> {
         tenantApp.setTenantId(tenantId);
         tenantApp.setAppId(vo.getAppId());
         tenantApp.setForbidden(0);
+        //TODO：这里直接绑定默认组织树，后续由用户自己选择
+        tenantApp.setOrgTree(OrgTree.ORG_ID_TEMPLATE.formatted(tenantId, 1));
         tenantApp.setGrantAll(vo.isGrantAll() ? 1 : 0);
         tenantApp.setCreateUser(UserContextUtils.getUserId());
         tenantApp.setUpdateUser(UserContextUtils.getUserId());

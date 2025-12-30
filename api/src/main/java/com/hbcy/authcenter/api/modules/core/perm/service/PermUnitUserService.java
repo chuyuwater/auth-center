@@ -75,15 +75,17 @@ public class PermUnitUserService extends ServiceImpl<PermUnitUserMapper, PermUni
         if (StringUtils.isBlank(appId)) {
             appId = UserContextUtils.getAppId();
         }
+        //先确认应用有授权
+        TenantApp tenantApp = tenantAppMapper.selectOne(new QueryWrapper<TenantApp>()
+                .eq(TenantApp.COL_APP_ID, appId)
+                .eq(TenantApp.COL_TENANT_ID, tenantId)
+                .eq(TenantApp.COL_FORBIDDEN, 0)
+        );
+        if (tenantApp == null) {
+            return new ArrayList<>();
+        }
         //如果是默认管理员，直接获取app的最大权限
         if (UserContextUtils.isTenantAdmin()) {
-            TenantApp tenantApp = tenantAppMapper.selectOne(new QueryWrapper<TenantApp>()
-                    .eq(TenantApp.COL_APP_ID, appId)
-                    .eq(TenantApp.COL_TENANT_ID, tenantId)
-            );
-            if (tenantApp == null) {
-                return new ArrayList<>();
-            }
             if (tenantApp.getGrantAll() > 0) {
                 return baseMapper.listAppPerms(appId);
             } else {

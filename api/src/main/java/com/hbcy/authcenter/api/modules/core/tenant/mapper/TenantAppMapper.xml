@@ -44,14 +44,28 @@
         join tenant_app on tenant_app.app_id = app.id
         <where>
             and tenant_app.tenant_id = #{tenantId}
+            and tenant_app.delete_time = 0
             and app.delete_time = 0
         </where>
         order by app.show_order
     </select>
 
-    <update id="forbidApp">
-        update tenant_app set forbidden = 1
-        where app_id= #{appId}
+    <update id="switchAppStatus">
+        update tenant_app
+        set forbidden = #{status},
+        update_user=#{updateUser}
+        where app_id = #{appId}
+        and delete_time = 0
+        and tenant_id in (select tenant_id from tenant where tenant.delete_time = 0 and tenant.forbidden = 0)
+    </update>
+
+    <update id="switchTenantStatus">
+        update tenant_app
+        set forbidden = #{status},
+        update_user=#{updateUser}
+        where tenant_id = #{tenantId}
+        and delete_time = 0
+        and app_id in (select app_id from app where app.delete_time = 0 and app.forbidden = 0)
     </update>
 </mapper>
 

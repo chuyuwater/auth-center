@@ -117,8 +117,9 @@
         join perm_unit_resource pur on app.id = pur.app_id
         join perm_unit_user puu on puu.unit_id = pur.unit_id
         <where>
+            tenant_app.delete_time = 0
             <if test="!withForbidden">
-                tenant_app.forbidden = 0
+                and tenant_app.forbidden = 0
             </if>
             and puu.user_id = #{userId}
             and puu.org_id = #{orgId}

@@ -127,7 +127,7 @@ public class ResourceTreeService extends ServiceImpl<ResourceTreeMapper, Resourc
      * 3. 全量的资源树，但是标记区分了已授权和未授权的部分（菜单、菜单+权限点）
      *
      * @param vo            查询条件
-     * @param grantPermList 已授权的权限，如果不为null，则用来过滤（为空则标识全部未授权）
+     * @param grantPermList 已授权的权限，如果不为null，则用来过滤
      * @param removeUngrant 是否移除掉未授权的节点，如果不移除则标记为未授权
      * @return 树
      */

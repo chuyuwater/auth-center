@@ -12,9 +12,9 @@ import lombok.EqualsAndHashCode;
 @Data
 public class TenantQueryVO extends PageVO {
     /**
-     * 租户名称，模糊查询
+     * 关键字模糊查询
      */
-    private String name;
+    private String keyword;
     /**
      * 租户状态，0-正常，1-禁用
      */

@@ -105,20 +105,20 @@ public class AppService extends ServiceImpl<AppMapper, App> {
         toUpdate.setUpdateUser(UserContextUtils.getUserId());
         stringRedisTemplate.opsForHash().delete(APP_STATUS_CACHE, app.getId());
         this.updateById(toUpdate);
-        //应用被禁用，所有授权全部禁用
+        //对应应用授权状态级联变化
         if (vo.getForbidden() == 1) {
-            tenantAppMapper.forbidApp(vo.getAppId());
+            tenantAppMapper.switchAppStatus(
+                    vo.getForbidden(), vo.getAppId(), UserContextUtils.getTenantId());
         }
     }
 
     public List<App> list(AppQueryVO vo) {
-        List<App> resp = baseMapper.selectList(new QueryWrapper<App>()
+        return baseMapper.selectList(new QueryWrapper<App>()
                 .eq(vo.getForbidden() != null, App.COL_FORBIDDEN, vo.getForbidden())
                 .or(StringUtils.isNotBlank(vo.getKeyword()))
                 .like(App.COL_NAME_CN, vo.getKeyword())
                 .like(App.COL_ID, vo.getKeyword())
                 .orderByAsc(App.COL_SHOW_ORDER));
-        return resp;
     }
 
     @Transactional(rollbackFor = Exception.class)
