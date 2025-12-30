@@ -106,10 +106,8 @@ public class AppService extends ServiceImpl<AppMapper, App> {
         stringRedisTemplate.opsForHash().delete(APP_STATUS_CACHE, app.getId());
         this.updateById(toUpdate);
         //对应应用授权状态级联变化
-        if (vo.getForbidden() == 1) {
-            tenantAppMapper.switchAppStatus(
-                    vo.getForbidden(), vo.getAppId(), UserContextUtils.getTenantId());
-        }
+        tenantAppMapper.switchAppStatus(
+                vo.getForbidden(), vo.getAppId(), UserContextUtils.getTenantId());
     }
 
     public List<App> list(AppQueryVO vo) {

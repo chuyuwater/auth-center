@@ -153,9 +153,8 @@ public class TenantService extends ServiceImpl<TenantMapper, Tenant> {
         toUpdate.setForbidden(vo.getForbidden());
         toUpdate.setUpdateUser(UserContextUtils.getUserId());
         //应用授权状态级联变化
-        if (vo.getForbidden() == 1)
-            tenantAppMapper.switchTenantStatus(
-                    vo.getForbidden(), vo.getTenantId(), UserContextUtils.getUserId());
+        tenantAppMapper.switchTenantStatus(
+                vo.getForbidden(), vo.getTenantId(), UserContextUtils.getUserId());
         this.updateById(tenant);
     }
 
