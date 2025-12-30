@@ -16,6 +16,6 @@ public class PermTreeQueryVO {
     /**
      * 关键字
      */
-    private String name;
+    private String keyword;
 
 }

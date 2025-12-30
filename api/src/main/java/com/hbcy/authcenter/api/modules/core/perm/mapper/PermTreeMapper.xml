@@ -22,7 +22,7 @@
         update_time
     </sql>
 
-    <select id="listChildrenRecursively" resultMap="BaseResultMap">
+    <select id="listChildren" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
         from perm_tree
@@ -32,8 +32,8 @@
                 and id_path like concat(#{parentIdPath}, '%')
             </if>
             <if test="vo != null">
-                <if test="vo.name != null">
-                    and node_name like concat('%', #{vo.name}, '%')
+                <if test="vo.keyword != null">
+                    and node_name like concat('%', #{vo.keyword}, '%')
                 </if>
             </if>
         </where>

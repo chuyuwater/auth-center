@@ -6,13 +6,14 @@ import com.hbcy.authcenter.api.modules.core.perm.vo.PermUnitCreateVO;
 import com.hbcy.authcenter.api.modules.core.perm.vo.PermUnitQueryVO;
 import com.hbcy.authcenter.api.modules.core.perm.vo.PermUnitUpdateVO;
 import com.hbcy.common.base.pojo.PageResp;
+import com.hbcy.common.web.bean.NameFill;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 /**
- * 权限单元（角色/策略）管理
+ * 角色管理（租户侧）
  *
  * @author 姚泰然
  * @date 2025-12-28
@@ -32,6 +33,7 @@ public class PermUnitController {
      * @return 权限单元信息
      */
     @GetMapping("/{id}")
+    @NameFill
     public PermUnit getById(@PathVariable String id) {
         return permUnitService.getById(id);
     }
@@ -43,6 +45,7 @@ public class PermUnitController {
      * @return 权限单元列表
      */
     @GetMapping
+    @NameFill
     public PageResp<PermUnit> list(@Valid PermUnitQueryVO vo) {
         return permUnitService.list(vo);
     }

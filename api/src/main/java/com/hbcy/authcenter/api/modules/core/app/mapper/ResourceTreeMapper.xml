@@ -45,7 +45,7 @@
         update_user
     </sql>
 
-    <select id="listChildrenRecursively" resultMap="BaseResultMap">
+    <select id="listChildren" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
         from resource_tree

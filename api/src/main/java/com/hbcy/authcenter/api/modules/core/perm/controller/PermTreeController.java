@@ -15,13 +15,13 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * 权限分组树相关api
+ * 角色分组（租户侧）
  *
  * @author 姚泰然
  * @date 2025-12-28
  */
 @RestController
-@RequestMapping("api/portal/v1/perm/tree")
+@RequestMapping("api/portal/v1/perm/group")
 @Validated
 public class PermTreeController {
 
@@ -34,31 +34,40 @@ public class PermTreeController {
      * @param id 节点ID
      * @return 节点信息
      */
-    @GetMapping("/{id}")
+    @GetMapping("/node/{id}")
     public PermTree getById(@PathVariable String id) {
         return permTreeService.getById(id);
     }
 
     /**
-     * 获取权限树结构
+     * 获取分组树结构
      *
      * @param vo 查询条件
      * @return 权限树
      */
-    @GetMapping
+    @GetMapping("/tree")
     public List<TreeNode<PermTree>> getTree(@Valid PermTreeQueryVO vo) {
         TreeNode<PermTree> root = permTreeService.listPermTreeRecursively(vo);
         //不必返回根节点
         return root.getChildren();
     }
 
-    @GetMapping("/direct")
-    public List<PermTree> getDirectChildren(@Valid PermTreeQueryVO vo) {
+    /**
+     * 获取直接子节点
+     * 用于逐级展开
+     *
+     * @param parentId 父节点ID
+     * @return 节点列表
+     */
+    @GetMapping("/child")
+    public List<PermTree> getDirectChildren(String parentId) {
+        PermTreeQueryVO vo = new PermTreeQueryVO();
+        vo.setParentId(parentId);
         return permTreeService.listDirectChildren(vo);
     }
 
     /**
-     * 创建权限节点
+     * 创建分组节点
      *
      * @param vo 节点信息
      * @return 创建后的节点信息
@@ -69,7 +78,7 @@ public class PermTreeController {
     }
 
     /**
-     * 更新权限节点
+     * 更新分组节点
      *
      * @param id 节点ID
      * @param vo 更新信息
@@ -91,7 +100,7 @@ public class PermTreeController {
     }
 
     /**
-     * 删除权限节点
+     * 删除分组节点
      *
      * @param id 节点ID
      */

@@ -13,6 +13,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * 权限封装（租户侧）
+ */
 @RestController
 @RequestMapping("api/portal/v1/perm/unit")
 @Validated

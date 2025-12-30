@@ -12,6 +12,12 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * 角色用户管理（租户侧）
+ *
+ * @author 姚泰然
+ * @date 2025-12-28
+ */
 @RestController
 @RequestMapping("api/portal/v1/perm/unit/users")
 @Validated
@@ -20,21 +26,42 @@ public class PermUnitUserController {
     @Resource
     private PermUnitUserService permUnitUserService;
 
+    /**
+     * 添加用户到单位
+     *
+     * @param vo 添加用户到单位请求参数
+     */
     @PostMapping
     public void addUsersToUnit(@Valid @RequestBody PermUnitUserUpdateVO vo) {
         permUnitUserService.addUsersToUnit(vo);
     }
 
+    /**
+     * 从权限单元移除用户
+     *
+     * @param grantId 授权ID
+     */
     @DeleteMapping
     public void removeUsersFromUnit(@RequestParam String grantId) {
         permUnitUserService.deleteGrant(List.of(grantId));
     }
 
+    /**
+     * 从权限单元批量移除用户
+     *
+     * @param vo 批量删除请求参数
+     */
     @PostMapping("/batch-delete")
     public void batchDeleteUsers(@Valid @RequestBody BatchDeleteVO vo) {
         permUnitUserService.deleteGrant(vo.getIds());
     }
 
+    /**
+     * 查询授权用户列表
+     *
+     * @param vo 查询条件
+     * @return 用户列表
+     */
     @GetMapping
     public List<UnitUserDTO> listGrantUsers(@Valid PermUnitUserQueryVO vo) {
         return permUnitUserService.listGrantUsers(vo);

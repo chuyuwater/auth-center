@@ -13,9 +13,9 @@ import java.util.List;
  */
 public interface PermTreeMapper extends BaseMapper<PermTree> {
 
-    List<PermTree> listChildrenRecursively(@Param("tenantId") String tenantId,
-                                           @Param("parentIdPath") String parentIdPath,
-                                           @Param("vo") PermTreeQueryVO vo);
+    List<PermTree> listChildren(@Param("tenantId") String tenantId,
+                                @Param("parentIdPath") String parentIdPath,
+                                @Param("vo") PermTreeQueryVO vo);
 
     void append(@Param("entity") PermTree entity);
 

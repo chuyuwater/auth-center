@@ -14,7 +14,8 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @TableName(value = "perm_tree")
 public class PermTree {
-    public static final String PERM_ID_TEMPLATE = "%s-PERM-%d";
+    public static final String RBAC_ID_TEMPLATE = "%s-ROLEGRP-%06d";
+    public static final String ABAC_ID_TEMPLATE = "%s-POLICYGRP-%06d";
     public static final String COL_ID = "id";
     public static final String COL_NODE_NAME = "node_name";
     public static final String COL_MEMO = "memo";
@@ -26,7 +27,8 @@ public class PermTree {
     public static final String COL_CREATE_TIME = "create_time";
     public static final String COL_UPDATE_TIME = "update_time";
     public static final String COL_SHOW_ORDER = "show_order";
-    @TableId(value = "id", type = IdType.ASSIGN_UUID)
+    public static final String COL_DELETE_TIME = "delete_time";
+    @TableId(value = "id", type = IdType.INPUT)
     private String id;
     /**
      * 分组（节点）名称
@@ -57,4 +59,10 @@ public class PermTree {
     private LocalDateTime createTime;
     @TableField(value = "update_time", fill = FieldFill.INSERT_UPDATE)
     private LocalDateTime updateTime;
+    /**
+     * 删除时间
+     */
+    @TableField(value = "delete_time", fill = FieldFill.UPDATE)
+    @TableLogic(value = "0", delval = "-1")
+    private Long deleteTime;
 }

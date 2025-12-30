@@ -17,6 +17,7 @@ public class PermUnitResourceQueryVO {
     /**
      * 应用id
      */
+    @NotBlank(message = "应用id不能为空")
     private String appId;
     /**
      * 是否仅需要已封装的资源树

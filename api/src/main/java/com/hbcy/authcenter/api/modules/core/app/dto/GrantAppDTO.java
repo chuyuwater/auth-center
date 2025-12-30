@@ -1,6 +1,6 @@
 package com.hbcy.authcenter.api.modules.core.app.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -32,6 +32,6 @@ public class GrantAppDTO extends AppCardDTO {
     /**
      * 授权人姓名
      */
-    @JsonIgnore
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String createUserName;
 }

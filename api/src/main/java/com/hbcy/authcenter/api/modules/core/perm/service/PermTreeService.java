@@ -2,7 +2,6 @@ package com.hbcy.authcenter.api.modules.core.perm.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.github.f4b6a3.ulid.UlidCreator;
 import com.hbcy.authcenter.api.common.bean.NodeMoveVO;
 import com.hbcy.authcenter.api.common.constants.G;
 import com.hbcy.authcenter.api.modules.core.perm.dao.PermTreeMapper;
@@ -17,6 +16,7 @@ import com.hbcy.common.base.error.ParamError;
 import com.hbcy.common.base.error.PermissionError;
 import com.hbcy.common.base.tree.TreeNode;
 import com.hbcy.common.base.util.BeanCopyUtils;
+import com.hbcy.common.redis.RedisIdGenerator;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
@@ -32,9 +32,11 @@ import java.util.stream.Collectors;
 
 @Service
 public class PermTreeService extends ServiceImpl<PermTreeMapper, PermTree> {
+    public static final String BIZ_KEY = "portal:perm:group:%s";
     @Resource
     private PermUnitMapper permUnitMapper;
-
+    @Resource
+    private RedisIdGenerator redisIdGenerator;
 
     private PermTree checkParentId(String tenantId, String parentId) {
         if (StringUtils.isNotBlank(parentId)) {
@@ -59,7 +61,16 @@ public class PermTreeService extends ServiceImpl<PermTreeMapper, PermTree> {
 
         PermTree entity = new PermTree();
         BeanCopyUtils.copy(vo, entity);
-        entity.setId(UlidCreator.getUlid().toString());
+        String id = redisIdGenerator.generateId(BIZ_KEY.formatted(tenantId), () -> {
+            Long cnt = baseMapper.selectCount(new QueryWrapper<PermTree>()
+                    .eq(PermTree.COL_TENANT_ID, tenantId));
+            return cnt + 1;
+        }, k -> {
+            return vo.getPolicyModel() == 0 ?
+                    PermTree.RBAC_ID_TEMPLATE.formatted(tenantId, k) :
+                    PermTree.ABAC_ID_TEMPLATE.formatted(tenantId, k);
+        });
+        entity.setId(id);
         entity.setParentId(parentId);
         entity.setTenantId(tenantId);
         entity.setCreateUser(UserContextUtils.getUserId());
@@ -96,19 +107,18 @@ public class PermTreeService extends ServiceImpl<PermTreeMapper, PermTree> {
         String tenantId = UserContextUtils.getTenantId();
         String parentId = vo.getParentId();
         String pathPrefix;
-        PermTree rootData = null;
-        if (StringUtils.isBlank(parentId)) {
+        PermTree rootData = checkParentId(tenantId, parentId);
+        if (rootData == null) {
             rootData = new PermTree();
             rootData.setId(parentId);
             rootData.setIdPath("");
             rootData.setParentId("");
             pathPrefix = "";
         } else {
-            rootData = checkParentId(tenantId, parentId);
             pathPrefix = rootData.getIdPath() + G.ID_PATH_SPLITTER;
         }
         TreeNode<PermTree> root = new TreeNode<>(rootData);
-        List<PermTree> permTrees = baseMapper.listChildrenRecursively(tenantId, pathPrefix, vo);
+        List<PermTree> permTrees = baseMapper.listChildren(tenantId, pathPrefix, vo);
 
         Map<String, List<PermTree>> childrenMap = permTrees.stream()
                 .collect(Collectors.groupingBy(PermTree::getParentId,
@@ -145,7 +155,7 @@ public class PermTreeService extends ServiceImpl<PermTreeMapper, PermTree> {
         return baseMapper.selectList(new QueryWrapper<PermTree>()
                 .eq(PermTree.COL_PARENT_ID, vo.getParentId())
                 .eq(PermTree.COL_TENANT_ID, tenantId)
-                .like(StringUtils.isNotBlank(vo.getName()), PermTree.COL_NODE_NAME, vo.getName())
+                .like(StringUtils.isNotBlank(vo.getKeyword()), PermTree.COL_NODE_NAME, vo.getKeyword())
                 .orderByAsc(PermTree.COL_SHOW_ORDER)
         );
     }
@@ -158,7 +168,7 @@ public class PermTreeService extends ServiceImpl<PermTreeMapper, PermTree> {
         if (!node.getTenantId().equals(UserContextUtils.getTenantId())) {
             throw new PermissionError();
         }
-        List<PermTree> related = baseMapper.listChildrenRecursively(
+        List<PermTree> related = baseMapper.listChildren(
                 node.getTenantId(), node.getIdPath(), null);
         Set<String> ids = related.stream().map(PermTree::getId).collect(Collectors.toSet());
         ids.add(id);

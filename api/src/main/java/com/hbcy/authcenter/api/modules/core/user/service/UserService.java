@@ -53,7 +53,6 @@ import java.util.stream.Collectors;
  */
 @Service
 public class UserService extends ServiceImpl<UserMapper, User> {
-
     private static final String ALLOWED_ACCOUNT_SYMBOLS = "_";
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
     @Resource

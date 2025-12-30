@@ -70,7 +70,7 @@ public class OrgTreeController {
      * 某个组织节点的直接下级节点
      * 适用于逐级展开
      */
-    @GetMapping("/direct")
+    @GetMapping("/child")
     @NameFill
     public List<OrgTree> getDirectChildren(String parentId) {
         OrgTreeQueryVO vo = new OrgTreeQueryVO();

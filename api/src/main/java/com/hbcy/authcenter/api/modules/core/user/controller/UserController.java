@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * 用户管理
+ * 用户管理（租户侧）
  *
  * @author 姚泰然
  * @date 2025-12-26

@@ -3,8 +3,10 @@ package com.hbcy.authcenter.api.modules.core.perm.service;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.hbcy.authcenter.api.modules.core.perm.dao.PermTreeMapper;
 import com.hbcy.authcenter.api.modules.core.perm.dao.PermUnitMapper;
 import com.hbcy.authcenter.api.modules.core.perm.dao.PermUnitUserMapper;
+import com.hbcy.authcenter.api.modules.core.perm.model.PermTree;
 import com.hbcy.authcenter.api.modules.core.perm.model.PermUnit;
 import com.hbcy.authcenter.api.modules.core.perm.model.PermUnitUser;
 import com.hbcy.authcenter.api.modules.core.perm.vo.PermUnitCreateVO;
@@ -30,11 +32,17 @@ public class PermUnitService extends ServiceImpl<PermUnitMapper, PermUnit> {
     private RedisIdGenerator redisIdGenerator;
     @Resource
     private PermUnitUserMapper permUnitUserMapper;
+    @Resource
+    private PermTreeMapper permTreeMapper;
 
     @Transactional(rollbackFor = Exception.class)
     public PermUnit create(PermUnitCreateVO vo) {
         String tenantId = UserContextUtils.getTenantId();
         PermUnit entity = new PermUnit();
+        PermTree groupId = permTreeMapper.selectById(vo.getBelongTo());
+        if (groupId == null || !groupId.getTenantId().equals(tenantId)) {
+            throw new ParamError("指定分组不存在");
+        }
         BeanCopyUtils.copy(vo, entity);
         String id = redisIdGenerator.generateId(BIZ_KEY.formatted(tenantId),
                 () -> {
@@ -60,8 +68,15 @@ public class PermUnitService extends ServiceImpl<PermUnitMapper, PermUnit> {
         if (entity == null) {
             throw new ParamError("指定ID不存在");
         }
-        if (!entity.getTenantId().equals(UserContextUtils.getTenantId())) {
+        String tenantId = UserContextUtils.getTenantId();
+        if (!entity.getTenantId().equals(tenantId)) {
             throw new PermissionError();
+        }
+        if (!vo.getBelongTo().equals(entity.getBelongTo())) {
+            PermTree groupId = permTreeMapper.selectById(vo.getBelongTo());
+            if (groupId == null || !groupId.getTenantId().equals(tenantId)) {
+                throw new ParamError("指定分组不存在");
+            }
         }
         BeanCopyUtils.copy(vo, entity);
         entity.setUpdateUser(UserContextUtils.getUserId());

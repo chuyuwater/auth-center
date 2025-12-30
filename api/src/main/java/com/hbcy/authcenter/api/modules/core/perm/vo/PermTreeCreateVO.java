@@ -15,4 +15,9 @@ public class PermTreeCreateVO extends PermTreeUpdateVO {
      * 创建时，节点固定在同级末尾。
      */
     private String parentId = "";
+    /**
+     * 策略模型
+     * 0-RBAC, 1-ABAC
+     */
+    private int policyModel = 0;
 }

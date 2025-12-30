@@ -20,7 +20,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * 客户端渲染需要的接口
+ * 客户端开放接口
+ * <p>
  * 1. 根据当前用户权限，获取应用列表
  * 2. 根据当前用户的权限，和当前应用，获取菜单列表
  * 3. 获取指定菜单下的权限点列表

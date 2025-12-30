@@ -4,6 +4,7 @@ import com.hbcy.authcenter.api.modules.core.app.dto.GrantAppDTO;
 import com.hbcy.authcenter.api.modules.core.tenant.service.TenantAppService;
 import com.hbcy.authcenter.api.modules.core.tenant.vo.TenantAppGrantUpdateVO;
 import com.hbcy.authcenter.api.modules.core.tenant.vo.TenantAppGrantVO;
+import com.hbcy.common.web.bean.NameFill;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import org.springframework.validation.annotation.Validated;
@@ -63,6 +64,7 @@ public class TenantAppController {
      * @return 应用列表
      */
     @GetMapping("/{tenantId}")
+    @NameFill
     public List<GrantAppDTO> listGrantApps(@PathVariable String tenantId) {
         return tenantAppService.listGrantApps(tenantId);
     }

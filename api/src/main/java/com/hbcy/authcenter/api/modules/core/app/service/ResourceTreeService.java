@@ -260,7 +260,7 @@ public class ResourceTreeService extends ServiceImpl<ResourceTreeMapper, Resourc
             idPath = tree.getIdPath() + G.ID_PATH_SPLITTER;
         }
         vo.setIdPath(idPath);
-        return baseMapper.listChildrenRecursively(vo);
+        return baseMapper.listChildren(vo);
     }
 
     /**
@@ -276,7 +276,7 @@ public class ResourceTreeService extends ServiceImpl<ResourceTreeMapper, Resourc
         ResourceTreeQueryVO vo = new ResourceTreeQueryVO();
         vo.setAppId(node.getAppId());
         vo.setIdPath(node.getIdPath());
-        List<ResourceTree> related = baseMapper.listChildrenRecursively(vo);
+        List<ResourceTree> related = baseMapper.listChildren(vo);
         Set<String> resIds = related.stream().map(ResourceTree::getId).collect(Collectors.toSet());
         resIds.add(id);
         if (!force && resIds.size() > 1) {

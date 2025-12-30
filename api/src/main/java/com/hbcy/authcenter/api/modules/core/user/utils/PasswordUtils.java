@@ -53,6 +53,6 @@ public class PasswordUtils {
         if (hasDigit) count++;
         if (hasSpecial) count++;
 
-        return count >= 3;
+        return count == 4;
     }
 }

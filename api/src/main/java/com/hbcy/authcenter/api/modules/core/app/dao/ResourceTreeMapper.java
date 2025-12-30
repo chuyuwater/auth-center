@@ -17,7 +17,7 @@ public interface ResourceTreeMapper extends BaseMapper<ResourceTree> {
      *
      * @return 下面所有的节点
      */
-    List<ResourceTree> listChildrenRecursively(@Param("vo") ResourceTreeQueryVO vo);
+    List<ResourceTree> listChildren(@Param("vo") ResourceTreeQueryVO vo);
 
     /**
      * 在同级尾部创建数据
