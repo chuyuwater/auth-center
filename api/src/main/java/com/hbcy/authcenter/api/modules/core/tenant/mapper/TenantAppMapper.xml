@@ -32,7 +32,14 @@
     </sql>
 
     <select id="listGrantApps" resultType="com.hbcy.authcenter.api.modules.core.app.dto.GrantAppDTO">
-        select tenant_app.id as grant_id, app.id as app_id, app.icon, app.name_cn, app.memo, tenant_app.forbidden
+        select tenant_app.id as grant_id,
+        app.id as app_id,
+        app.icon,
+        app.name_cn,
+        app.memo,
+        tenant_app.forbidden,
+        tenant_app.create_user,
+        tenant_app.create_time
         from app
         join tenant_app on tenant_app.app_id = app.id
         <where>

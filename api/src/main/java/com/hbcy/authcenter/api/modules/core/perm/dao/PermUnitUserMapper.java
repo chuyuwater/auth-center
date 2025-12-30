@@ -1,7 +1,7 @@
 package com.hbcy.authcenter.api.modules.core.perm.dao;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.hbcy.authcenter.api.modules.core.app.dto.AppCardDTO;
+import com.hbcy.authcenter.api.modules.core.app.dto.GrantAppDTO;
 import com.hbcy.authcenter.api.modules.core.app.dto.ResPermDTO;
 import com.hbcy.authcenter.api.modules.core.perm.dto.UnitUserDTO;
 import com.hbcy.authcenter.api.modules.core.perm.model.PermUnitUser;
@@ -33,5 +33,7 @@ public interface PermUnitUserMapper extends BaseMapper<PermUnitUser> {
     List<UnitUserDTO> listGrantUsers(@Param("vo") PermUnitUserQueryVO vo);
 
     //获取当前用户授权的应用
-    List<AppCardDTO> listGrantApps(@Param("userId") String userId, @Param("orgId") String orgId);
+    List<GrantAppDTO> listGrantApps(@Param("userId") String userId,
+                                    @Param("orgId") String orgId,
+                                    @Param("withForbidden") boolean withForbidden);
 }

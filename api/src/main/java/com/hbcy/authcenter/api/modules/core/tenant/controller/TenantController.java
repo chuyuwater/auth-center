@@ -13,7 +13,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 /**
- * 租户相关api
+ * 租户管理（门户侧）
  *
  * @author 姚泰然
  * @date 2025-12-23 12:06

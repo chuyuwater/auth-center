@@ -22,7 +22,7 @@ import java.util.List;
  * @date 2025-12-25
  */
 @RestController
-@RequestMapping("api/portal/v1/org/tree")
+@RequestMapping("api/portal/v1/org")
 @Validated
 public class OrgTreeController {
 
@@ -35,7 +35,7 @@ public class OrgTreeController {
      * @param id 节点ID
      * @return 节点信息
      */
-    @GetMapping("/{id}")
+    @GetMapping("/node/{id}")
     @NameFill
     public OrgTree getById(@PathVariable String id) {
         return orgTreeService.getById(id);
@@ -47,14 +47,18 @@ public class OrgTreeController {
      * @param vo 查询条件
      * @return 组织架构树
      */
-    @GetMapping
+    @GetMapping("/tree")
     public List<TreeNode<OrgTree>> getTree(@Valid OrgTreeQueryVO vo) {
         TreeNode<OrgTree> root = orgTreeService.listOrgTreeRecursively(vo);
         //不必返回根节点
         return root.getChildren();
     }
 
-    @GetMapping("/direct")
+    /**
+     * 某个节点的直接下级节点
+     * 适用于逐级展开
+     */
+    @GetMapping("/list")
     @NameFill
     public List<OrgTree> getDirectChildren(@Valid OrgTreeQueryVO vo) {
         return orgTreeService.listDirectChildren(vo);
@@ -66,7 +70,7 @@ public class OrgTreeController {
      * @param vo 节点信息
      * @return 创建后的节点信息
      */
-    @PostMapping
+    @PostMapping("/node")
     public OrgTree create(@RequestBody @Valid OrgTreeCreateVO vo) {
         return orgTreeService.create(vo);
     }
@@ -78,7 +82,7 @@ public class OrgTreeController {
      * @param vo 更新信息
      * @return 更新后的节点信息
      */
-    @PutMapping("/{id}")
+    @PutMapping("/node/{id}")
     public OrgTree update(@PathVariable String id, @RequestBody @Valid OrgTreeUpdateVO vo) {
         return orgTreeService.update(vo, id);
     }
@@ -88,7 +92,7 @@ public class OrgTreeController {
      *
      * @param vo 移动详情
      */
-    @PostMapping("/move")
+    @PostMapping("/node/move")
     public void move(@RequestBody @Valid NodeMoveVO vo) {
         orgTreeService.move(vo);
     }
@@ -98,7 +102,7 @@ public class OrgTreeController {
      *
      * @param id 节点ID
      */
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/node/{id}")
     public void delete(@PathVariable String id) {
         orgTreeService.delete(id);
     }

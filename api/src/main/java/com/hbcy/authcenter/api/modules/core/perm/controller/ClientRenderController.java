@@ -1,6 +1,7 @@
 package com.hbcy.authcenter.api.modules.core.perm.controller;
 
 import com.hbcy.authcenter.api.modules.core.app.dto.AppCardDTO;
+import com.hbcy.authcenter.api.modules.core.app.dto.GrantAppDTO;
 import com.hbcy.authcenter.api.modules.core.app.dto.ResPermDTO;
 import com.hbcy.authcenter.api.modules.core.app.dto.ResTreeDTO;
 import com.hbcy.authcenter.api.modules.core.perm.service.PermUnitResourceService;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -43,7 +45,8 @@ public class ClientRenderController {
      */
     @GetMapping("/app")
     public List<AppCardDTO> listApp() {
-        return permUnitUserService.listApp(null);
+        List<GrantAppDTO> apps = permUnitUserService.listApp(null, false);
+        return new ArrayList<>(apps);
     }
 
     /**

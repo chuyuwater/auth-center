@@ -103,17 +103,23 @@
         where puu.unit_id = #{vo.unitId}
     </select>
 
-    <select id="listGrantApps" resultType="com.hbcy.authcenter.api.modules.core.app.dto.AppCardDTO">
+    <select id="listGrantApps" resultType="com.hbcy.authcenter.api.modules.core.app.dto.GrantAppDTO">
         select app.id as app_id,
         app.name_cn,
         app.memo,
-        app.icon
+        app.icon,
+        tenant_app.forbidden,
+        puu.id as grant_id,
+        puu.create_user,
+        puu.create_time
         from app
         join tenant_app on app.id = tenant_app.app_id
         join perm_unit_resource pur on app.id = pur.app_id
         join perm_unit_user puu on puu.unit_id = pur.unit_id
         <where>
-            tenant_app.forbidden = 0
+            <if test="!withForbidden">
+                tenant_app.forbidden = 0
+            </if>
             and puu.user_id = #{userId}
             and puu.org_id = #{orgId}
         </where>

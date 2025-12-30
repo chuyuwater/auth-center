@@ -3,7 +3,6 @@ package com.hbcy.authcenter.api.modules.core.perm.service;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.f4b6a3.ulid.UlidCreator;
-import com.hbcy.authcenter.api.modules.core.app.dto.AppCardDTO;
 import com.hbcy.authcenter.api.modules.core.app.dto.GrantAppDTO;
 import com.hbcy.authcenter.api.modules.core.app.dto.ResPermDTO;
 import com.hbcy.authcenter.api.modules.core.org.model.OrgTree;
@@ -122,13 +121,16 @@ public class PermUnitUserService extends ServiceImpl<PermUnitUserMapper, PermUni
         return baseMapper.listGrantUsers(vo);
     }
 
-    //获取当前用户有权访问的app列表（不含被禁用）
-    public List<AppCardDTO> listApp(String orgId) {
+    //获取当前用户有权访问的app列表
+    public List<GrantAppDTO> listApp(String orgId, boolean withForbidden) {
         String userId = UserContextUtils.getUserId();
         if (UserContextUtils.isTenantAdmin()) {
             //租户管理员直接获取授权的非禁用app列表
             List<GrantAppDTO> apps = tenantAppMapper.listGrantApps(UserContextUtils.getTenantId());
-            List<AppCardDTO> resp = new ArrayList<>();
+            if (withForbidden) {
+                return new ArrayList<>(apps);
+            }
+            List<GrantAppDTO> resp = new ArrayList<>();
             for (GrantAppDTO app : apps) {
                 if (app.getForbidden() == 0) {
                     resp.add(app);
@@ -143,7 +145,7 @@ public class PermUnitUserService extends ServiceImpl<PermUnitUserMapper, PermUni
         if (org == null) {
             throw new ParamError("用户未加入任何组织");
         }
-        return baseMapper.listGrantApps(userId, orgId);
+        return baseMapper.listGrantApps(userId, orgId, withForbidden);
     }
 }
 
