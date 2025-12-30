@@ -28,7 +28,6 @@ public class ResourceTree extends BaseEntity {
     public static final String COL_ROUTE_LINK = "route_link";
     public static final String COL_SHOW_ORDER = "show_order";
     public static final String COL_HIDDEN = "hidden";
-    public static final String COL_FORBIDDEN = "forbidden";
     public static final String COL_SHOW_LEVEL = "show_level";
     public static final String COL_SUB_DOM = "sub_dom";
     public static final String COL_OBJ_DOM = "obj_dom";
@@ -89,11 +88,6 @@ public class ResourceTree extends BaseEntity {
      */
     @TableField(value = "hidden")
     private Integer hidden;
-    /**
-     * 0-启用，1-禁用
-     */
-    @TableField(value = "forbidden")
-    private Integer forbidden;
     /**
      * 显示级别，0-全局，1-组织级，2-项目级
      */

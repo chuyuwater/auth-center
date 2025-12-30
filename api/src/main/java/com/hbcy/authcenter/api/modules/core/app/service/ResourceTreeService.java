@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.f4b6a3.ulid.UlidCreator;
 import com.google.common.base.Splitter;
+import com.hbcy.authcenter.api.common.bean.NameCacheService;
 import com.hbcy.authcenter.api.common.bean.NodeMoveVO;
 import com.hbcy.authcenter.api.common.constants.G;
 import com.hbcy.authcenter.api.modules.core.app.dao.AppMapper;
@@ -45,6 +46,8 @@ public class ResourceTreeService extends ServiceImpl<ResourceTreeMapper, Resourc
     private AppMapper appMapper;
     @Resource
     private ResourcePermService resourcePermService;
+    @Resource
+    private NameCacheService nameCacheService;
 
     private ResourceTree checkParentId(String appId, String parentId) {
         App app = appMapper.selectById(appId);
@@ -150,6 +153,19 @@ public class ResourceTreeService extends ServiceImpl<ResourceTreeMapper, Resourc
         }
 
         Set<String> allGrantIds = filterGranted(grantPermList, removeUngrant, resourceTrees, resourcePerms);
+        if (vo.isWithCreator()) {
+            //填充创建者信息
+            Set<String> creator = new HashSet<>();
+            for (ResourceTree resourceTree : resourceTrees) {
+                creator.add(resourceTree.getCreateUser());
+            }
+            for (ResourcePerm resourcePerm : resourcePerms) {
+                creator.add(resourcePerm.getCreateUser());
+            }
+            Map<String, String> userNameMap = nameCacheService.getUserNameMap(creator);
+            resourceTrees.forEach(t -> t.setCreateUserName(userNameMap.get(t.getCreateUser())));
+            resourcePerms.forEach(t -> t.setCreateUserName(userNameMap.get(t.getCreateUser())));
+        }
         Map<String, List<ResourceTree>> resChildrenMap = resourceTrees.stream()
                 .collect(Collectors.groupingBy(ResourceTree::getParentId, Collectors.collectingAndThen(
                         Collectors.toList(), l -> {
@@ -243,8 +259,8 @@ public class ResourceTreeService extends ServiceImpl<ResourceTreeMapper, Resourc
             }
             idPath = tree.getIdPath() + G.ID_PATH_SPLITTER;
         }
-        return baseMapper.listChildrenRecursively(vo.getAppId(), vo.getKeyword(), idPath,
-                vo.getClientType(), vo.getShowLevel());
+        vo.setIdPath(idPath);
+        return baseMapper.listChildrenRecursively(vo);
     }
 
     /**
@@ -257,8 +273,10 @@ public class ResourceTreeService extends ServiceImpl<ResourceTreeMapper, Resourc
         if (node == null) {
             return;
         }
-        List<ResourceTree> related = baseMapper.listChildrenRecursively(node.getAppId(), null,
-                node.getId(), null, null);
+        ResourceTreeQueryVO vo = new ResourceTreeQueryVO();
+        vo.setAppId(node.getAppId());
+        vo.setIdPath(node.getIdPath());
+        List<ResourceTree> related = baseMapper.listChildrenRecursively(vo);
         Set<String> resIds = related.stream().map(ResourceTree::getId).collect(Collectors.toSet());
         resIds.add(id);
         Set<String> permIds = resourcePermService.list(new QueryWrapper<ResourcePerm>()

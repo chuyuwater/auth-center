@@ -3,7 +3,6 @@ package com.hbcy.authcenter.api.modules.core.perm.controller;
 import com.hbcy.authcenter.api.modules.core.app.dto.AppCardDTO;
 import com.hbcy.authcenter.api.modules.core.app.dto.ResPermDTO;
 import com.hbcy.authcenter.api.modules.core.app.dto.ResTreeDTO;
-import com.hbcy.authcenter.api.modules.core.perm.service.ClientRenderService;
 import com.hbcy.authcenter.api.modules.core.perm.service.PermUnitResourceService;
 import com.hbcy.authcenter.api.modules.core.perm.service.PermUnitUserService;
 import com.hbcy.authcenter.api.modules.core.perm.vo.ClientResQueryVO;
@@ -34,8 +33,6 @@ import java.util.stream.Collectors;
 public class ClientRenderController {
     @Resource
     private PermUnitUserService permUnitUserService;
-    @Resource
-    private ClientRenderService clientRenderService;
     @Resource
     private PermUnitResourceService permUnitResourceService;
 

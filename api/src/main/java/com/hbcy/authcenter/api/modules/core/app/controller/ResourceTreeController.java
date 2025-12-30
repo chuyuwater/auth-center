@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * 资源树（菜单）相关api
+ * 菜单管理（门户侧）
  *
  * @author 姚泰然
  * @date 2025-12-24
@@ -50,6 +50,7 @@ public class ResourceTreeController {
      */
     @GetMapping
     public List<TreeNode<ResTreeDTO>> getTree(@Valid ResourceTreeQueryVO vo) {
+        vo.setWithCreator(true);
         TreeNode<ResTreeDTO> root = resourceTreeService.listResTreeRecursively(vo);
         return root.getChildren();
     }

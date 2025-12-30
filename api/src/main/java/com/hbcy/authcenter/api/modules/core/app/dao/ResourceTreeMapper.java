@@ -2,6 +2,7 @@ package com.hbcy.authcenter.api.modules.core.app.dao;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.hbcy.authcenter.api.modules.core.app.model.ResourceTree;
+import com.hbcy.authcenter.api.modules.core.app.vo.ResourceTreeQueryVO;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -12,17 +13,11 @@ import java.util.List;
  */
 public interface ResourceTreeMapper extends BaseMapper<ResourceTree> {
     /**
-     * @param appId        应用id
-     * @param parentIdPath 父节点id
-     * @param clientType   客户端类型
+     * 权限资源树查询
+     *
      * @return 下面所有的节点
      */
-    List<ResourceTree> listChildrenRecursively(
-            @Param("appId") String appId,
-            @Param("keyword") String keyword,
-            @Param("parentIdPath") String parentIdPath,
-            @Param("clientType") Integer clientType,
-            @Param("showLevel") Integer showLevel);
+    List<ResourceTree> listChildrenRecursively(@Param("vo") ResourceTreeQueryVO vo);
 
     /**
      * 在同级尾部创建数据

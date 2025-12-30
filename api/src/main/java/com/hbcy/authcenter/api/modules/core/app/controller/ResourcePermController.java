@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * 资源权限相关api
+ * 权限点管理（门户侧）
  *
  * @author 姚泰然
  * @date 2025-12-24
@@ -52,7 +52,7 @@ public class ResourcePermController {
     }
 
     /**
-     * 创建资源权限点
+     * 创建权限点
      *
      * @param vo 权限信息
      * @return 创建后的权限信息
@@ -63,7 +63,7 @@ public class ResourcePermController {
     }
 
     /**
-     * 更新资源权限点
+     * 更新权限点
      *
      * @param id 权限ID
      * @param vo 更新信息
@@ -75,7 +75,7 @@ public class ResourcePermController {
     }
 
     /**
-     * 删除资源权限点
+     * 删除权限点
      *
      * @param id 权限ID
      */

@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * 应用相关api
+ * 应用管理（门户侧）
  *
  * @author 姚泰然
  * @date 2025-12-23
@@ -64,6 +64,9 @@ public class AppController {
         return appService.create(vo);
     }
 
+    /**
+     * 拖动节点排序
+     **/
     @PostMapping("/move")
     public void move(@RequestBody @Valid NodeMoveVO vo) {
         appService.move(vo);

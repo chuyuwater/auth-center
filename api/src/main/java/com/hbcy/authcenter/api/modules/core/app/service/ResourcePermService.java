@@ -118,7 +118,7 @@ public class ResourcePermService extends ServiceImpl<ResourcePermMapper, Resourc
     @Transactional(rollbackFor = Exception.class)
     public void delete(String appId, Collection<String> permIds) {
         baseMapper.deleteByIds(permIds);
-        //删除应用最大授权
+        //删除租户应用最大授权
         tenantAppResourceMapper.delete(new QueryWrapper<TenantAppResource>()
                 .eq(TenantAppResource.COL_APP_ID, appId)
                 .in(TenantAppResource.COL_PERM_ID, permIds));

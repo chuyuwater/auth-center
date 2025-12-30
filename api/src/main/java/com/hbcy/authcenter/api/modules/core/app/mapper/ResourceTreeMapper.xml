@@ -15,7 +15,6 @@
         <result column="route_link" jdbcType="VARCHAR" property="routeLink"/>
         <result column="show_order" jdbcType="INTEGER" property="showOrder"/>
         <result column="hidden" jdbcType="TINYINT" property="hidden"/>
-        <result column="forbidden" jdbcType="TINYINT" property="forbidden"/>
         <result column="show_level" jdbcType="TINYINT" property="showLevel"/>
         <result column="sub_dom" jdbcType="INTEGER" property="subDom"/>
         <result column="obj_dom" jdbcType="VARCHAR" property="objDom"/>
@@ -37,7 +36,6 @@
         route_link,
         show_order,
         hidden,
-        forbidden,
         show_level,
         sub_dom,
         obj_dom,
@@ -52,32 +50,37 @@
         <include refid="Base_Column_List"/>
         from resource_tree
         <where>
-            app_id = #{appId}
-            and id_path like concat(#{parentIdPath}, '%')
-            <if test="clientType != null">
+            app_id = #{vo.appId}
+            <if test="vo.idPath != null and vo.idPath != ''">
+                and id_path like concat(#{vo.idPath}, '%')
+            </if>
+            <if test="vo.clientType != null">
                 <choose>
-                    <when test="clientType == 1">
+                    <when test="vo.clientType == 1">
                         and client_type in (0, 1)
                     </when>
-                    <when test="clientType == 2">
+                    <when test="vo.clientType == 2">
                         and client_type in (0, 2)
                     </when>
                 </choose>
             </if>
-            <if test="showLevel != null">
+            <if test="vo.showLevel != null">
                 <choose>
-                    <when test="showLevel == 1">
+                    <when test="vo.showLevel == 1">
                         and show_level in (0, 1)
                     </when>
-                    <when test="showLevel == 2">
+                    <when test="vo.showLevel == 2">
                         and show_level in (0, 2)
                     </when>
                 </choose>
             </if>
-            <if test="keyword != null and keyword != ''">
+            <if test="vo.withHidden != null and !vo.withHidden">
+                and hidden = 0
+            </if>
+            <if test="vo.keyword != null and vo.keyword != ''">
                 and (
-                name_cn like concat('%', #{keyword}, '%')
-                or custom_id like concat('%', #{keyword}, '%')
+                name_cn like concat('%', #{vo.keyword}, '%')
+                or custom_id like concat('%', #{vo.keyword}, '%')
                 )
             </if>
         </where>
@@ -85,7 +88,7 @@
 
     <insert id="append">
         insert into resource_tree (id, name_cn, app_id, custom_id, parent_id, id_path, client_type, icon, route_link,
-        hidden, show_level, forbidden, sub_dom, obj_dom, create_user, update_user,
+        hidden, show_level, sub_dom, obj_dom, create_user, update_user,
         show_order)
         select #{entity.id},
         #{entity.nameCn},
@@ -98,7 +101,6 @@
         #{entity.routeLink},
         #{entity.hidden},
         #{entity.showLevel},
-        #{entity.forbidden},
         #{entity.subDom},
         #{entity.objDom},
         #{entity.createUser},

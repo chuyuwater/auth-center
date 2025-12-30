@@ -1,5 +1,6 @@
 package com.hbcy.authcenter.api.modules.core.app.vo;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -36,4 +37,18 @@ public class ResourceTreeQueryVO {
      * 显示级别，0-全局，1-组织级，2-项目级
      */
     private Integer showLevel;
+    /**
+     * 是否需要被隐藏的菜单
+     */
+    private Boolean withHidden;
+    /**
+     * 是否需要创建者信息
+     * api侧默认需要
+     */
+    private boolean withCreator;
+    /**
+     * 父节点idPath,后端填充
+     */
+    @JsonIgnore
+    private String idPath;
 }
