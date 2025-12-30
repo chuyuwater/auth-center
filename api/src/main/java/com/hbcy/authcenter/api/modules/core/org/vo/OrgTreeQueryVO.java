@@ -14,18 +14,18 @@ public class OrgTreeQueryVO {
     private String parentId;
 
     /**
-     * 节点类型
+     * 节点类型，0-组织，1-部门
      */
     private Integer nodeType;
 
     /**
-     * 节点类别
+     * 节点类别，0-项目部，1-公司，2-子公司，3-分公司
      */
     private Integer nodeCategory;
 
     /**
      * 关键字
      */
-    private String name;
+    private String keyword;
 
 }

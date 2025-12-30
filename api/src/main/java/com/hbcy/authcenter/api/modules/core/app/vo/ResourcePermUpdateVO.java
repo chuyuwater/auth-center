@@ -11,16 +11,29 @@ import org.hibernate.validator.constraints.Range;
  */
 @Data
 public class ResourcePermUpdateVO {
+    /**
+     * 权限名称
+     */
     @NotBlank(message = "权限名称不能为空")
     @Length(max = 100, message = "权限名称长度不能超过100")
     private String permName;
 
+    /**
+     * 权限码
+     */
     @Length(max = 100, message = "权限码长度不能超过100")
     private String permCode = "";
 
+    /**
+     * API请求方法
+     * 0-GET, 1-POST, 2-PUT, 3-DELETE
+     */
     @Range(min = 0, max = 3, message = "请求方法只能为0-3")
     private Integer apiMethod;
 
+    /**
+     * API路径
+     */
     @Length(max = 255, message = "API路径长度不能超过255")
     private String apiPath;
 }

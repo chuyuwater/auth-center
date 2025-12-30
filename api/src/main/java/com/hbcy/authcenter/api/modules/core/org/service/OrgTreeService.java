@@ -307,9 +307,9 @@ public class OrgTreeService extends ServiceImpl<OrgTreeMapper, OrgTree> {
                 .eq(OrgTree.COL_TENANT_ID, UserContextUtils.getTenantId())
                 .eq(vo.getNodeType() != null, OrgTree.COL_NODE_TYPE, vo.getNodeType())
                 .eq(vo.getNodeCategory() != null, OrgTree.COL_NODE_CATEGORY, vo.getNodeCategory())
-                .or(StringUtils.isNotBlank(vo.getName()))
-                .like(OrgTree.COL_NODE_NAME, vo.getName())
-                .like(OrgTree.COL_SHORT_NAME, vo.getName())
+                .or(StringUtils.isNotBlank(vo.getKeyword()))
+                .like(OrgTree.COL_NODE_NAME, vo.getKeyword())
+                .like(OrgTree.COL_SHORT_NAME, vo.getKeyword())
                 .orderByAsc(OrgTree.COL_SHOW_ORDER)
         );
     }

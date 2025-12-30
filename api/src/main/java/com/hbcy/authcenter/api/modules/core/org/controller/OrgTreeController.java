@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * 组织架构树相关api
+ * 组织树管理（租户侧）
  *
  * @author 姚泰然
  * @date 2025-12-25

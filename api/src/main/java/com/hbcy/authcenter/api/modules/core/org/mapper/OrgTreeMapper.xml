@@ -43,9 +43,9 @@
                 <if test="vo.nodeCategory != null">
                     and node_category = #{vo.nodeCategory}
                 </if>
-                <if test="vo.name != null">
-                    and (node_name like concat('%', #{vo.name}, '%')
-                    or short_name like concat('%', #{vo.name}, '%'))
+                <if test="vo.keyword != null">
+                    and (node_name like concat('%', #{vo.keyword}, '%')
+                    or short_name like concat('%', #{vo.keyword}, '%'))
                 </if>
             </if>
         </where>

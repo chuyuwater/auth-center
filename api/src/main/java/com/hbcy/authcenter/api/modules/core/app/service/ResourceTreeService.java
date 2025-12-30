@@ -87,7 +87,7 @@ public class ResourceTreeService extends ServiceImpl<ResourceTreeMapper, Resourc
         try {
             baseMapper.append(entity);
         } catch (DuplicateKeyException e) {
-            throw new ParamError("同一应用下自定义菜单ID不能重复");
+            throw new ParamError("同一应用下菜单唯一ID不能重复");
         }
         return entity;
     }

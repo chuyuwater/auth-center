@@ -11,6 +11,9 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class ResourcePermCreateVO extends ResourcePermUpdateVO {
+    /**
+     * 关联的资源id
+     */
     @NotBlank(message = "资源id不能为空")
     private String resId;
 }
