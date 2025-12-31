@@ -18,15 +18,15 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 /**
- * 我的应用资源（租户侧）
+ * 被授权的应用资源（租户侧）
  *
  * @author 姚泰然
  * @date 2025-12-30 13:02
  */
 @RestController
-@RequestMapping("api/portal/v1/my")
+@RequestMapping("api/portal/v1/granted")
 @Validated
-public class MyResourceController {
+public class TenantResourceController {
     @Resource
     private PermUnitUserService permUnitUserService;
     @Resource

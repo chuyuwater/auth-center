@@ -5,11 +5,13 @@ import cn.dev33.satoken.stp.StpUtil;
 import cn.dev33.satoken.stp.parameter.SaLoginParameter;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.github.f4b6a3.ulid.UlidCreator;
+import com.hbcy.authcenter.api.config.UserAuthConfig;
 import com.hbcy.authcenter.api.modules.core.auth.dto.CaptchaDTO;
 import com.hbcy.authcenter.api.modules.core.auth.dto.LoginRespDTO;
 import com.hbcy.authcenter.api.modules.core.auth.vo.LoginVO;
 import com.hbcy.authcenter.api.modules.core.user.model.User;
 import com.hbcy.authcenter.api.modules.core.user.service.UserService;
+import com.hbcy.common.base.error.AuthError;
 import com.hbcy.common.base.error.ClientError;
 import com.hbcy.common.base.error.ParamError;
 import com.pig4cloud.captcha.ArithmeticCaptcha;
@@ -35,11 +37,35 @@ import java.util.concurrent.TimeUnit;
 public class UserAuthService {
 
     public static final String CAPTCHA_KEY_PREFIX = "portal:captcha:";
+    public static final String USER_LOCK_KEY_PREFIX = "portal:user:auth:lock:";
+    public static final String USER_LOGIN_FAIL_KEY_PREFIX = "portal:user:auth:fail:";
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
     @Resource
     private UserService userService;
     @Resource
     private StringRedisTemplate stringRedisTemplate;
+    @Resource
+    private UserAuthConfig authConfig;
+
+    private long checkLockTime(String userId) {
+        Long expire = stringRedisTemplate.getExpire(USER_LOCK_KEY_PREFIX + userId, TimeUnit.SECONDS);
+        if (expire == null) {
+            return 0;
+        }
+        return expire;
+    }
+
+    private boolean checkLoginFail(String userId) {
+        String key = USER_LOGIN_FAIL_KEY_PREFIX + userId;
+        Long cnt = stringRedisTemplate.opsForValue().increment(key);
+        stringRedisTemplate.expire(key, authConfig.getRetryTime());
+        return cnt != null && cnt >= authConfig.getMaxRetry();
+    }
+
+    private void lockUser(String userId) {
+        stringRedisTemplate.opsForValue().set(USER_LOCK_KEY_PREFIX + userId, "1",
+                authConfig.getLockTime());
+    }
 
     public LoginRespDTO login(LoginVO vo) {
         if (StringUtils.isAllBlank(vo.getAccount(), vo.getPhone(), vo.getEmail())) {
@@ -66,20 +92,31 @@ public class UserAuthService {
         for (User user : userList) {
             if (passwordEncoder.matches(vo.getPassword(), user.getPasswd())) {
                 hitTenant.add(user.getTenantId());
+            } else {
+                if (checkLoginFail(user.getId())) {
+                    lockUser(user.getId());
+                    throw new AuthError("登录失败次数过多，请稍后再试");
+                }
             }
         }
         if (CollectionUtils.isEmpty(hitTenant)) {
-            throw new ParamError("账号或密码错误");
+            throw new AuthError("账号或密码错误");
         }
         if (hitTenant.size() > 1) {
             throw new ClientError(100, "请选择租户", hitTenant);
         }
         chosen = userList.get(0);
+        long expire = checkLockTime(chosen.getId());
+        if (expire > 0) {
+            throw new AuthError("登录被锁定，请等待%d秒".formatted(expire));
+        }
         if (Integer.valueOf(1).equals(chosen.getForbidden())) {
-            throw new ParamError("账号已被禁用，请联系管理员");
+            throw new AuthError("账号已被禁用，请联系管理员");
         }
         // 执行登录
         StpUtil.login(chosen.getId(), new SaLoginParameter()
+                .setTimeout(authConfig.getTokenExpire().toSeconds())
+                .setActiveTimeout(authConfig.getTokenExpire().toSeconds())
         );
         SaTokenInfo tokenInfo = StpUtil.getTokenInfo();
 

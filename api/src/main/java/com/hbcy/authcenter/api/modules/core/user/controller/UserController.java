@@ -158,12 +158,4 @@ public class UserController {
     public void adminResetPasswd(@Valid @RequestBody AdminResetPasswdVO vo) {
         userService.adminResetPasswd(vo);
     }
-
-    /**
-     * 用户重置密码
-     */
-    @PatchMapping("/user-reset-passwd")
-    public void userResetPasswd(@Valid @RequestBody UserResetPasswdVO vo) {
-        userService.userResetPasswd(vo);
-    }
 }

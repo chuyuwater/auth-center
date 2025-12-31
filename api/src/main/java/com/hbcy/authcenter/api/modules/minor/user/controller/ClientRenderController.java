@@ -1,4 +1,4 @@
-package com.hbcy.authcenter.api.modules.core.perm.controller;
+package com.hbcy.authcenter.api.modules.minor.user.controller;
 
 import com.hbcy.authcenter.api.modules.core.app.dto.AppCardDTO;
 import com.hbcy.authcenter.api.modules.core.app.dto.GrantAppDTO;
@@ -20,7 +20,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * 客户端开放接口
+ * 客户端开放接口（用户侧）
  * <p>
  * 1. 根据当前用户权限，获取应用列表
  * 2. 根据当前用户的权限，和当前应用，获取菜单列表
