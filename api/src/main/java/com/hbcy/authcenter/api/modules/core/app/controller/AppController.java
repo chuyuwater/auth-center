@@ -43,7 +43,7 @@ public class AppController {
     }
 
     /**
-     * 根据ID获取应用信息
+     * 应用详情
      *
      * @param id 应用ID
      * @return 应用信息
@@ -86,7 +86,7 @@ public class AppController {
     }
 
     /**
-     * 切换应用状态（禁用/启用）
+     * 禁用/启用应用
      *
      * @param vo 状态切换信息
      */

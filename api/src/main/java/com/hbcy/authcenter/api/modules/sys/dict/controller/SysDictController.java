@@ -70,7 +70,7 @@ public class SysDictController {
     }
 
     /**
-     * 根据ID获取系统字典
+     * 字典详情
      *
      * @param id 字典ID
      * @return 字典信息
@@ -81,7 +81,7 @@ public class SysDictController {
     }
 
     /**
-     * 根据业务编码获取系统字典列表
+     * 字典项列表
      *
      * @param featCode 业务编码
      * @return 字典列表
@@ -92,7 +92,7 @@ public class SysDictController {
     }
 
     /**
-     * 根据业务编码获取字典值映射
+     * 字典值映射
      *
      * @param featCode 业务编码
      * @return 字典值映射 map
@@ -103,7 +103,7 @@ public class SysDictController {
     }
 
     /**
-     * 递归获取子节点列表
+     * 搜索子节点（列表）
      *
      * @param vo 查询条件
      * @return 子节点列表
@@ -119,13 +119,15 @@ public class SysDictController {
     }
 
     /**
-     * 获取子节点树结构
+     * 搜索子节点（树状）
      *
      * @param vo 查询条件
      * @return 树结构
      */
     @GetMapping("/children/tree")
-    public TreeNode<SysDict> getChildrenAsTree(DictQueryVO vo) {
-        return sysDictService.getChildrenAsTree(vo);
+    public List<TreeNode<SysDict>> getChildrenAsTree(DictQueryVO vo) {
+        TreeNode<SysDict> root = sysDictService.getChildrenAsTree(vo);
+        if (root == null) return null;
+        return root.getChildren();
     }
 }

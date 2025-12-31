@@ -21,7 +21,7 @@ public class TenantMaintainController {
     private TenantMaintainService tenantMaintainService;
 
     /**
-     * 修改默认管理员信息
+     * 修改默认管理员
      * 供租户使用
      *
      * @param vo 新的管理员

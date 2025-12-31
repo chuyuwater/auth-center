@@ -88,7 +88,7 @@ public class UserController {
     }
 
     /**
-     * 搜索用户，供选人窗口使用
+     * 搜索用户（选人窗口）
      * 人员会重复，不同的任职信息各一条数据
      *
      * @param vo 搜索条件

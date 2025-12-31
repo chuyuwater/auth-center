@@ -8,7 +8,7 @@ import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 /**
- * 用户组织关联管理
+ * 用户组织关联管理（租户侧）
  *
  * @author 姚泰然
  * @module user

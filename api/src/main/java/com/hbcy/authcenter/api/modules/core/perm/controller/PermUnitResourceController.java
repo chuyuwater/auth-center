@@ -29,7 +29,7 @@ public class PermUnitResourceController {
     private PermUnitResourceService permUnitResourceService;
 
     /**
-     * 全量创建/更新权限单元关联的权限资源
+     * 覆盖权限单元关联的权限资源
      *
      * @param vo 详情
      */

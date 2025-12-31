@@ -28,7 +28,7 @@ public class PermUnitUserController {
     private PermUnitUserService permUnitUserService;
 
     /**
-     * 添加用户到单位
+     * 添加用户到权限单元
      *
      * @param vo 添加用户到单位请求参数
      */
@@ -58,7 +58,7 @@ public class PermUnitUserController {
     }
 
     /**
-     * 查询授权用户列表
+     * 授权用户列表
      *
      * @param vo 查询条件
      * @return 用户列表

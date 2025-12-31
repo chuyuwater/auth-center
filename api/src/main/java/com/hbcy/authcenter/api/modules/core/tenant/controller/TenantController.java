@@ -29,7 +29,7 @@ public class TenantController {
     private TenantService tenantService;
 
     /**
-     * 分页查询租户列表
+     * 租户列表
      *
      * @param vo 查询条件
      * @return 租户分页列表
@@ -41,7 +41,7 @@ public class TenantController {
     }
 
     /**
-     * 根据ID获取租户信息
+     * 租户详情
      *
      * @param id 租户ID
      * @return 租户信息
@@ -76,7 +76,7 @@ public class TenantController {
     }
 
     /**
-     * 切换租户状态（禁用/启用）
+     * 启用/禁用租户
      *
      * @param vo 状态切换信息
      */

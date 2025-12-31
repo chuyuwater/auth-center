@@ -30,7 +30,7 @@ public class PermTreeController {
     private PermTreeService permTreeService;
 
     /**
-     * 根据ID获取权限节点详情
+     * 节点详情
      *
      * @param id 节点ID
      * @return 节点信息

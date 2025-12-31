@@ -28,7 +28,7 @@ public class PermUnitController {
     private PermUnitService permUnitService;
 
     /**
-     * 根据ID获取权限单元详情
+     * 权限单元详情
      *
      * @param id 权限单元ID
      * @return 权限单元信息
@@ -40,7 +40,7 @@ public class PermUnitController {
     }
 
     /**
-     * 获取权限单元列表
+     * 权限单元列表
      *
      * @param vo 查询条件
      * @return 权限单元列表
