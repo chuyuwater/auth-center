@@ -4,6 +4,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 /**
+ * 权限树创建VO
+ *
  * @author 姚泰然
  * @date 2025-12-28
  */

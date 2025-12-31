@@ -4,6 +4,8 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 /**
+ * 权限单元资源查询VO
+ *
  * @author 姚泰然
  * @date 2025-12-28 12:09
  */

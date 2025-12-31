@@ -6,6 +6,8 @@ import lombok.EqualsAndHashCode;
 import org.hibernate.validator.constraints.Length;
 
 /**
+ * 资源树创建VO
+ *
  * @author 姚泰然
  * @date 2025-12-24
  */

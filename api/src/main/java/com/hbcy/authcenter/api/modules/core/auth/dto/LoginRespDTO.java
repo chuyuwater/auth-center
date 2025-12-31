@@ -6,6 +6,8 @@ import lombok.experimental.Accessors;
 import java.time.LocalDateTime;
 
 /**
+ * 登录响应信息
+ *
  * @author 姚泰然
  * @date 2025-12-30
  */

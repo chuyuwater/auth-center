@@ -17,6 +17,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * 系统字典管理
+ *
  * @author 姚泰然
  * @date 2025-12-22 13:45
  */

@@ -6,6 +6,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 /**
+ * 用户导出DTO
+ *
  * @author 姚泰然
  * @date 2025-12-27 13:44
  */

@@ -4,6 +4,12 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import org.hibernate.validator.constraints.Length;
 
+/**
+ * 权限单元更新VO
+ *
+ * @author 姚泰然
+ * @date 2025-12-28
+ */
 @Data
 public class PermUnitUpdateVO {
     /**

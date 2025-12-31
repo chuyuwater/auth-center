@@ -9,6 +9,8 @@ import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 /**
+ * 认证接口（用户侧）
+ *
  * @author 姚泰然
  * @date 2025-12-30 17:07
  */
@@ -19,17 +21,30 @@ public class UserAuthController {
     @Resource
     private UserAuthService userAuthService;
 
+    /**
+     * 获取验证码
+     *
+     * @return 验证码
+     */
     @GetMapping("/captcha")
     public CaptchaDTO getCaptcha() {
         return userAuthService.getCaptcha();
     }
 
+    /**
+     * 登录
+     *
+     * @param vo 登录参数
+     * @return 登录结果
+     */
     @PostMapping("/login")
     public LoginRespDTO login(@Valid @RequestBody LoginVO vo) {
         return userAuthService.login(vo);
     }
 
-    @PostMapping("/logout")
+    /**
+     * 登出
+     */
     public void logout() {
         userAuthService.logout(null);
     }

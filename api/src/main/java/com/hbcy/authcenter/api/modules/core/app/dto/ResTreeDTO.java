@@ -7,6 +7,8 @@ import lombok.Data;
 import lombok.experimental.Accessors;
 
 /**
+ * 资源树节点信息DTO
+ *
  * @author 姚泰然
  * @date 2025-12-24 15:33
  */

@@ -7,6 +7,8 @@ import lombok.Data;
 import org.hibernate.validator.constraints.Length;
 
 /**
+ * 用户更新VO
+ *
  * @author 姚泰然
  * @date 2025-12-26 19:40
  */

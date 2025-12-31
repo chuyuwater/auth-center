@@ -4,6 +4,8 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 /**
+ * 管理员重置密码VO
+ *
  * @author 姚泰然
  * @date 2025-12-26 09:26
  */

@@ -3,6 +3,8 @@ package com.hbcy.authcenter.api.modules.core.inner.dto;
 import lombok.Data;
 
 /**
+ * API权限映射信息
+ *
  * @author 姚泰然
  * @date 2025-12-31 12:15
  */

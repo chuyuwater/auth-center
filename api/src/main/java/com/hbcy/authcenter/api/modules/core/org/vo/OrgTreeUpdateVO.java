@@ -8,6 +8,8 @@ import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.Range;
 
 /**
+ * 组织节点更新VO
+ *
  * @author 姚泰然
  * @date 2025-12-25
  */

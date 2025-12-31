@@ -4,6 +4,8 @@ import lombok.Data;
 import org.hibernate.validator.constraints.Range;
 
 /**
+ * 应用查询VO
+ *
  * @author 姚泰然
  * @date 2025-12-23 16:26
  */

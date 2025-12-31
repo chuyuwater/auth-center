@@ -7,6 +7,12 @@ import lombok.Data;
 
 import java.util.List;
 
+/**
+ * 权限单元用户更新VO
+ *
+ * @author 姚泰然
+ * @date 2025-12-28
+ */
 @Data
 public class PermUnitUserUpdateVO {
     @NotBlank(message = "权限单元不能为空")

@@ -7,7 +7,10 @@ import lombok.Data;
 import java.util.Set;
 
 /**
- * 全量更新
+ * 权限单元资源保存VO
+ *
+ * @author 姚泰然
+ * @date 2025-12-28
  */
 @Data
 public class PermUnitResourceSaveVO {

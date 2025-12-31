@@ -4,6 +4,8 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 /**
+ * 登录请求参数
+ *
  * @author 姚泰然
  * @date 2025-12-30
  */

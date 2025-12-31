@@ -3,6 +3,8 @@ package com.hbcy.authcenter.api.modules.core.org.vo;
 import lombok.Data;
 
 /**
+ * 组织节点查询VO
+ *
  * @author 姚泰然
  * @date 2025-12-25
  */
