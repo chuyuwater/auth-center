@@ -2,8 +2,10 @@ package com.hbcy.authcenter.api.modules.core.app.dao;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.hbcy.authcenter.api.modules.core.app.model.ResourcePerm;
+import com.hbcy.authcenter.api.modules.core.inner.dto.ApiPermDTO;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -27,4 +29,19 @@ public interface ResourcePermMapper extends BaseMapper<ResourcePerm> {
      * @return 权限点id
      */
     Set<String> listAppPermIds(@Param("appId") String appId);
+
+    /**
+     * 列出应用下的权限点id
+     *
+     * @param appIds 应用id
+     * @return 权限点id
+     */
+    Set<String> listAppsPermIds(@Param("appIds") Set<String> appIds);
+
+    /**
+     * 列出所有API权限点
+     *
+     * @return API权限点
+     */
+    List<ApiPermDTO> selectAll4Gateway();
 }

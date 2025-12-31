@@ -43,7 +43,7 @@
         <where>
             puu.user_id = #{userId}
             and puu.tenant_id = #{tenantId}
-            and ot.id_path like concat(#{idPath}, '%')
+            and ot.id_path like concat(#{orgIdPath}, '%')
             and pur.app_id = #{appId}
         </where>
     </select>
@@ -125,5 +125,16 @@
             and puu.org_id = #{orgId}
         </where>
         order by app.show_order
+    </select>
+
+    <select id="listUserPerms" resultType="java.lang.String">
+        select pur.perm_id
+        from perm_unit_user puu
+        join perm_unit_resource pur on puu.unit_id = pur.unit_id
+        join org_tree ot on puu.org_id = ot.id
+        <where>
+            puu.user_id = #{userId}
+            and ot.id_path like concat(#{orgIdPath}, '%')
+        </where>
     </select>
 </mapper>

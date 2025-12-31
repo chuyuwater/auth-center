@@ -5,12 +5,15 @@ import cn.dev33.satoken.stp.StpUtil;
 import cn.dev33.satoken.stp.parameter.SaLoginParameter;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.github.f4b6a3.ulid.UlidCreator;
+import com.hbcy.authcenter.api.common.constants.G;
 import com.hbcy.authcenter.api.config.UserAuthConfig;
 import com.hbcy.authcenter.api.modules.core.auth.dto.CaptchaDTO;
 import com.hbcy.authcenter.api.modules.core.auth.dto.LoginRespDTO;
 import com.hbcy.authcenter.api.modules.core.auth.vo.LoginVO;
+import com.hbcy.authcenter.api.modules.core.user.dao.UserOrgMapper;
 import com.hbcy.authcenter.api.modules.core.user.model.User;
 import com.hbcy.authcenter.api.modules.core.user.service.UserService;
+import com.hbcy.authcenter.sdk.utils.UserContextUtils;
 import com.hbcy.common.base.error.AuthError;
 import com.hbcy.common.base.error.ClientError;
 import com.hbcy.common.base.error.ParamError;
@@ -26,7 +29,9 @@ import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -37,8 +42,10 @@ import java.util.concurrent.TimeUnit;
 public class UserAuthService {
 
     public static final String CAPTCHA_KEY_PREFIX = "portal:captcha:";
-    public static final String USER_LOCK_KEY_PREFIX = "portal:user:auth:lock:";
-    public static final String USER_LOGIN_FAIL_KEY_PREFIX = "portal:user:auth:fail:";
+    public static final String USER_LOCK_KEY_PREFIX = "portal:auth:login:lock:";
+    public static final String USER_LOGIN_FAIL_KEY_PREFIX = "portal:auth:login:fail:";
+    //用户权限缓存（按orgId）
+    public static final String USER_PERM_CACHE_PREFIX = "portal:auth:user:perm:%s:%s";
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
     @Resource
     private UserService userService;
@@ -46,6 +53,8 @@ public class UserAuthService {
     private StringRedisTemplate stringRedisTemplate;
     @Resource
     private UserAuthConfig authConfig;
+    @Resource
+    private UserOrgMapper userOrgMapper;
 
     private long checkLockTime(String userId) {
         Long expire = stringRedisTemplate.getExpire(USER_LOCK_KEY_PREFIX + userId, TimeUnit.SECONDS);
@@ -118,6 +127,8 @@ public class UserAuthService {
                 .setTimeout(authConfig.getTokenExpire().toSeconds())
                 .setActiveTimeout(authConfig.getTokenExpire().toSeconds())
         );
+        //将租户id保存到session中
+        StpUtil.getSession(true).set(G.SESSION_TENANT_ID, chosen.getTenantId());
         SaTokenInfo tokenInfo = StpUtil.getTokenInfo();
 
         LoginRespDTO resp = new LoginRespDTO()
@@ -132,8 +143,18 @@ public class UserAuthService {
         return resp;
     }
 
-    public void logout() {
-        StpUtil.logout();
+    public void logout(String userId) {
+        if (StringUtils.isBlank(userId)) {
+            userId = UserContextUtils.getUserId();
+        }
+        Set<String> userOrgs = userOrgMapper.listAllOrg(userId);
+        Set<String> keys = new HashSet<>();
+        //强制移除权限缓存
+        for (String orgId : userOrgs) {
+            keys.add(USER_PERM_CACHE_PREFIX.formatted(userId, orgId));
+        }
+        stringRedisTemplate.delete(keys);
+        StpUtil.logout(userId);
     }
 
     private String getCaptchaCode(String key) {

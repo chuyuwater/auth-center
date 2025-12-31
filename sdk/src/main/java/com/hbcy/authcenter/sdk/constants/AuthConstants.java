@@ -22,5 +22,4 @@ public class AuthConstants {
     //手动trace标记（如不使用OpenTelemetry）
     public static final String HEADER_TRACE_ID = "X-TRACE-ID";
     public static final String HEADER_ORG_ID = "X-ORG-ID";
-
 }

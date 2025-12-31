@@ -29,6 +29,8 @@
         select perm_id
         from tenant_app_resource
         where tenant_id = #{tenantId}
-        and app_id = #{appId}
+        <if test="appId != null and appId != ''">
+            and app_id = #{appId}
+        </if>
     </select>
 </mapper>

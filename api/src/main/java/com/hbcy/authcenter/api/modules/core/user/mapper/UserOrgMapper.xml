@@ -53,4 +53,8 @@
         and org_id != #{orgId}
         and main_job = 1
     </update>
+
+    <select id="listAllOrg" resultType="java.lang.String">
+        select distinct org_id from user_org where user_id= #{userId}
+    </select>
 </mapper>

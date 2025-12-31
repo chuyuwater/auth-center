@@ -42,4 +42,8 @@ public class UserAuthConfig {
      * 达到最大失败之后锁定时间
      */
     private Duration lockTime = Duration.ofMinutes(5);
+    /**
+     * 权限缓存时间
+     */
+    private Duration permExpire = Duration.ofMinutes(30);
 }

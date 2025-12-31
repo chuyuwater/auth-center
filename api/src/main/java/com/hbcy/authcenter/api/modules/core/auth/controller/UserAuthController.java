@@ -31,6 +31,6 @@ public class UserAuthController {
 
     @PostMapping("/logout")
     public void logout() {
-        userAuthService.logout();
+        userAuthService.logout(null);
     }
 }

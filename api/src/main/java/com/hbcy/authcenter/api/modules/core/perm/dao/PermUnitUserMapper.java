@@ -18,7 +18,7 @@ import java.util.Set;
 public interface PermUnitUserMapper extends BaseMapper<PermUnitUser> {
     //过滤出用户在当前组织下对指定应用的权限点
     List<ResPermDTO> listFilteredPerms(@Param("userId") String userId, @Param("appId") String appId,
-                                       @Param("tenantId") String tenantId, @Param("idPath") String idPath);
+                                       @Param("tenantId") String tenantId, @Param("orgIdPath") String orgIdPath);
 
     //根据permId获取权限点信息
     List<ResPermDTO> listPermInfo(@Param("permIds") Set<String> permIds);
@@ -36,4 +36,7 @@ public interface PermUnitUserMapper extends BaseMapper<PermUnitUser> {
     List<GrantAppDTO> listGrantApps(@Param("userId") String userId,
                                     @Param("orgId") String orgId,
                                     @Param("withForbidden") boolean withForbidden);
+
+    //获取用户在指定组织下的所有权限点
+    Set<String> listUserPerms(@Param("userId") String userId, @Param("orgIdPath") String orgIdPath);
 }

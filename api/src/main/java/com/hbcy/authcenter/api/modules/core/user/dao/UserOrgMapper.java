@@ -7,6 +7,7 @@ import org.apache.ibatis.annotations.Param;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author 姚泰然
@@ -38,4 +39,12 @@ public interface UserOrgMapper extends BaseMapper<UserOrg> {
      * @param orgId  组织id
      */
     void updatePartJob(@Param("userId") String userId, @Param("orgId") String orgId);
+
+    /**
+     * 获取用户的所有任职组织
+     *
+     * @param userId 用户id
+     * @return 组织id集合
+     */
+    Set<String> listAllOrg(@Param("userId") String userId);
 }

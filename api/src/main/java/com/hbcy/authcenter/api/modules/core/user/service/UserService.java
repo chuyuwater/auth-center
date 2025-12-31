@@ -9,6 +9,7 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.hbcy.authcenter.api.common.constants.G;
 import com.hbcy.authcenter.api.common.enums.OrgNodeTypeEnum;
+import com.hbcy.authcenter.api.modules.core.auth.service.UserAuthService;
 import com.hbcy.authcenter.api.modules.core.org.model.OrgTree;
 import com.hbcy.authcenter.api.modules.core.org.service.OrgTreeService;
 import com.hbcy.authcenter.api.modules.core.perm.dao.PermUnitUserMapper;
@@ -65,6 +66,8 @@ public class UserService extends ServiceImpl<UserMapper, User> {
     private TenantMapper tenantMapper;
     @Resource
     private PermUnitUserMapper permUnitUserMapper;
+    @Resource
+    private UserAuthService userAuthService;
 
     /**
      * 辅助判断：是否是纯文字（排除掉空格和常见的各种标点符号）
@@ -195,6 +198,9 @@ public class UserService extends ServiceImpl<UserMapper, User> {
         user.setForbidden(vo.getForbidden());
         user.setUpdateUser(UserContextUtils.getUserId());
         updateById(user);
+        if (vo.getForbidden() == 1) {
+            userAuthService.logout(vo.getUserId());
+        }
     }
 
     public void adminResetPasswd(AdminResetPasswdVO vo) {

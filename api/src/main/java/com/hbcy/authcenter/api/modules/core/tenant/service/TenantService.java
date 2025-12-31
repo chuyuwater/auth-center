@@ -3,6 +3,7 @@ package com.hbcy.authcenter.api.modules.core.tenant.service;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.hbcy.authcenter.api.common.bean.EventDispatcher;
 import com.hbcy.authcenter.api.common.constants.G;
 import com.hbcy.authcenter.api.modules.core.org.dao.OrgTreeMapper;
 import com.hbcy.authcenter.api.modules.core.org.model.OrgTree;
@@ -11,10 +12,14 @@ import com.hbcy.authcenter.api.modules.core.tenant.dao.TenantMapper;
 import com.hbcy.authcenter.api.modules.core.tenant.model.Tenant;
 import com.hbcy.authcenter.api.modules.core.tenant.model.TenantApp;
 import com.hbcy.authcenter.api.modules.core.tenant.utils.TenantIdUtils;
-import com.hbcy.authcenter.api.modules.core.tenant.vo.*;
-import com.hbcy.authcenter.api.modules.core.user.model.User;
+import com.hbcy.authcenter.api.modules.core.tenant.vo.TenantForbiddenVO;
+import com.hbcy.authcenter.api.modules.core.tenant.vo.TenantInsertVO;
+import com.hbcy.authcenter.api.modules.core.tenant.vo.TenantQueryVO;
+import com.hbcy.authcenter.api.modules.core.tenant.vo.TenantUpdateVO;
 import com.hbcy.authcenter.api.modules.core.user.service.UserService;
 import com.hbcy.authcenter.api.modules.core.user.vo.UserCreateVO;
+import com.hbcy.authcenter.sdk.bean.AppEventOutDTO;
+import com.hbcy.authcenter.sdk.constants.EventConstants;
 import com.hbcy.authcenter.sdk.utils.UserContextUtils;
 import com.hbcy.common.base.error.ParamError;
 import com.hbcy.common.base.pojo.PageResp;
@@ -43,6 +48,8 @@ public class TenantService extends ServiceImpl<TenantMapper, Tenant> {
     private OrgTreeMapper orgTreeMapper;
     @Resource
     private UserService userService;
+    @Resource
+    private EventDispatcher eventDispatcher;
 
     private void checkExist(String nameCn) {
         Tenant one = this.getOne(new QueryWrapper<Tenant>().eq(Tenant.COL_NAME_CN, nameCn), false);
@@ -93,6 +100,8 @@ public class TenantService extends ServiceImpl<TenantMapper, Tenant> {
         } catch (DuplicateKeyException e) {
             throw new ParamError("请重试");
         }
+        eventDispatcher.dispatch(
+                new AppEventOutDTO().setCode(EventConstants.TENANT_CREATED).setInfo(tenant));
         return tenant;
     }
 
@@ -116,27 +125,6 @@ public class TenantService extends ServiceImpl<TenantMapper, Tenant> {
             throw new ParamError("租户名称重复");
         }
         return tenant;
-    }
-
-    /**
-     * 修改默认管理员信息
-     * 供租户使用
-     *
-     * @param vo 新的管理员
-     */
-    public void updateDefaultAdmin(TenantAdminUpdateVO vo) {
-        User user = userService.getById(vo.getUserId());
-        String tenantId = UserContextUtils.getTenantId();
-        if (!user.getTenantId().equals(tenantId)) {
-            throw new ParamError("用户不属于当前租户");
-        }
-        Tenant toUpdate = new Tenant();
-        toUpdate.setId(tenantId);
-        toUpdate.setAdminId(user.getId());
-        toUpdate.setContactPhone(user.getPhone());
-        toUpdate.setContactUser(user.getRealName());
-        toUpdate.setUpdateUser(UserContextUtils.getUserId());
-        save(toUpdate);
     }
 
     @Transactional(rollbackFor = Exception.class)
