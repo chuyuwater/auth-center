@@ -25,7 +25,7 @@ public class PermUnitResourceSaveVO {
     @NotBlank(message = "应用id不能为空")
     private String appId;
     /**
-     * 权限码
+     * 权限id
      */
     @NotEmpty(message = "权限id不能为空")
     private Set<String> permIds;
