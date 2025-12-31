@@ -29,7 +29,7 @@ public class ResourcePermController {
     private ResourcePermService resourcePermService;
 
     /**
-     * 查询资源权限列表
+     * 权限点列表
      *
      * @param vo 查询条件
      * @return 权限列表
@@ -41,7 +41,7 @@ public class ResourcePermController {
     }
 
     /**
-     * 根据ID获取权限详情
+     * 权限点详情
      *
      * @param id 权限ID
      * @return 权限信息
