@@ -21,6 +21,7 @@ import java.util.List;
  * 被授权的应用资源（租户侧）
  *
  * @author 姚泰然
+ * @module myapp
  * @date 2025-12-30 13:02
  */
 @RestController

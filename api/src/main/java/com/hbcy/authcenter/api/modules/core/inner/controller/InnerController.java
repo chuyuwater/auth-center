@@ -16,6 +16,7 @@ import java.util.Map;
  * 缓存在网关层，这里不需要写
  *
  * @author 姚泰然
+ * @ignore
  * @date 2025-12-31 10:10
  */
 @RestController

@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
  * 维护租户信息（租户侧）
  *
  * @author 姚泰然
+ * @module tenant
  * @date 2025-12-31 14:31
  */
 @RestController

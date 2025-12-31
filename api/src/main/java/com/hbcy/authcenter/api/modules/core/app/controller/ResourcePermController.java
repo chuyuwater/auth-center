@@ -17,6 +17,7 @@ import java.util.List;
  * 权限点管理（门户侧）
  *
  * @author 姚泰然
+ * @module app
  * @date 2025-12-24
  */
 @RestController

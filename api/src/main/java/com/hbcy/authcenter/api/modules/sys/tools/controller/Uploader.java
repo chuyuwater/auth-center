@@ -10,9 +10,10 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
- * 一些工具接口
+ * 工具接口
  *
  * @author 姚泰然
+ * @module sys
  * @date 2025-12-23 10:23
  */
 @RestController
@@ -22,6 +23,12 @@ public class Uploader {
     @Resource
     private UploadService uploadService;
 
+    /**
+     * 上传文件
+     *
+     * @param file 文件
+     * @return 上传结果
+     */
     @PostMapping("/upload")
     public UploadResultDTO upload(@RequestParam("file") MultipartFile file) {
         return uploadService.upload(file);

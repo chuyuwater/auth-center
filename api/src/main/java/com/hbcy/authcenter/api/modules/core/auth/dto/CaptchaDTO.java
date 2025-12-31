@@ -12,6 +12,12 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class CaptchaDTO {
+    /**
+     * 验证码ID
+     */
     private String id;
+    /**
+     * 验证码图片Base64
+     */
     private String base64;
 }

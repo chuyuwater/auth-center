@@ -10,9 +10,10 @@ import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 /**
- * 我的的个人资料（用户侧）
+ * 个人资料（用户侧）
  *
  * @author 姚泰然
+ * @module open
  * @date 2025-12-31 08:33
  */
 @RestController

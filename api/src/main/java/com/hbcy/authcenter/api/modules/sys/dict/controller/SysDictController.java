@@ -17,9 +17,10 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 系统字典管理
+ * 系统字典
  *
  * @author 姚泰然
+ * @module sys
  * @date 2025-12-22 13:45
  */
 @RestController
@@ -30,17 +31,35 @@ public class SysDictController {
     @Resource
     private SysDictService sysDictService;
 
+    /**
+     * 创建系统字典
+     *
+     * @param vo 字典信息
+     * @return 创建后的字典
+     */
     @PostMapping
     public SysDict createSysDict(@Valid @RequestBody DictUpsertVO vo) {
         return sysDictService.createSysDict(vo);
     }
 
+    /**
+     * 更新系统字典
+     *
+     * @param id 字典ID
+     * @param vo 字典信息
+     * @return 更新后的字典
+     */
     @PutMapping("/{id}")
     public SysDict updateSysDict(@NotBlank(message = "ID不能为空") @PathVariable String id,
                                  @Valid @RequestBody DictUpsertVO vo) {
         return sysDictService.updateSysDict(id, vo);
     }
 
+    /**
+     * 删除系统字典
+     *
+     * @param id 字典ID
+     */
     @DeleteMapping("/{id}")
     public void deleteSysDict(@NotBlank(message = "ID不能为空") @PathVariable String id) {
         SysDict dict = sysDictService.getById(id);
@@ -50,21 +69,45 @@ public class SysDictController {
         sysDictService.deleteSysDict(dict.getFeatCode(), id);
     }
 
+    /**
+     * 根据ID获取系统字典
+     *
+     * @param id 字典ID
+     * @return 字典信息
+     */
     @GetMapping("/{id}")
     public SysDict getSysDictById(@NotBlank(message = "ID不能为空") @PathVariable String id) {
         return sysDictService.getById(id);
     }
 
+    /**
+     * 根据业务编码获取系统字典列表
+     *
+     * @param featCode 业务编码
+     * @return 字典列表
+     */
     @GetMapping("/list")
     public List<SysDict> getSysDictsByFeatCode(@NotBlank(message = "featCode不能为空") String featCode) {
         return sysDictService.getSysDictsByFeatCode(featCode);
     }
 
+    /**
+     * 根据业务编码获取字典值映射
+     *
+     * @param featCode 业务编码
+     * @return 字典值映射 map
+     */
     @GetMapping("/map")
     public Map<String, String> getDictValueMapByFeatCode(@NotBlank(message = "featCode不能为空") String featCode) {
         return sysDictService.getDictValueMapByFeatCode(featCode);
     }
 
+    /**
+     * 递归获取子节点列表
+     *
+     * @param vo 查询条件
+     * @return 子节点列表
+     */
     @GetMapping("/children")
     public List<SysDict> getChildrenRecursively(DictQueryVO vo) {
         if (StringUtils.isNotBlank(vo.getParentId())) {
@@ -75,6 +118,12 @@ public class SysDictController {
         throw new ParamError("请传入parentId或featCode+valueStr");
     }
 
+    /**
+     * 获取子节点树结构
+     *
+     * @param vo 查询条件
+     * @return 树结构
+     */
     @GetMapping("/children/tree")
     public TreeNode<SysDict> getChildrenAsTree(DictQueryVO vo) {
         return sysDictService.getChildrenAsTree(vo);

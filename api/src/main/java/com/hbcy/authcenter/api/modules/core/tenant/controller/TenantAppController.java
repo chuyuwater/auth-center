@@ -16,6 +16,7 @@ import java.util.List;
  * 应用授权（门户侧）
  *
  * @author 姚泰然
+ * @module tenant
  * @date 2025-12-23 17:19
  */
 @RestController

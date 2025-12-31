@@ -20,6 +20,7 @@ import java.util.List;
  * 组织树管理（租户侧）
  *
  * @author 姚泰然
+ * @module org
  * @date 2025-12-25
  */
 @RestController

@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
  * 认证接口（用户侧）
  *
  * @author 姚泰然
+ * @module auth
  * @date 2025-12-30 17:07
  */
 @RestController

@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
  * 角色管理（租户侧）
  *
  * @author 姚泰然
+ * @module perm
  * @date 2025-12-28
  */
 @RestController

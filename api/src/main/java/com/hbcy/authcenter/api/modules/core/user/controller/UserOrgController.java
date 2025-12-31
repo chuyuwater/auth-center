@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
  * 用户组织关联管理
  *
  * @author 姚泰然
+ * @module user
  * @date 2025-12-26 21:46
  */
 @RestController

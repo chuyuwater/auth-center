@@ -26,6 +26,7 @@ import java.util.List;
  * 用户管理（租户侧）
  *
  * @author 姚泰然
+ * @module user
  * @date 2025-12-26
  */
 @RestController

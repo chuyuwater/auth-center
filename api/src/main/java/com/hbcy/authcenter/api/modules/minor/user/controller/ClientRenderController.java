@@ -20,7 +20,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * 客户端开放接口（用户侧）
+ * 前端菜单渲染
  * <p>
  * 1. 根据当前用户权限，获取应用列表
  * 2. 根据当前用户的权限，和当前应用，获取菜单列表
@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
  * 本页提供的接口不限制权限，仅需要登录即可访问
  *
  * @author 姚泰然
+ * @module open
  * @date 2025-12-30 08:36
  */
 @RestController
