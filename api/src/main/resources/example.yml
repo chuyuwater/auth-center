@@ -80,3 +80,11 @@ oss:
   bucket-name: digital
   endpoint: http://127.0.0.1:19000
   custom-domain: https://dev.chuyuwater.cn:32008
+
+sa-token:
+  token-name: "x-auth-token"
+  is-print: off
+  is-read-header: true
+  is-read-cookie: false
+  is-log: false
+  token-style: simple-uuid

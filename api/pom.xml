@@ -89,7 +89,6 @@
         <dependency>
             <groupId>com.pig4cloud.excel</groupId>
             <artifactId>excel-spring-boot-starter</artifactId>
-            <version>3.4.3</version>
         </dependency>
     </dependencies>
 
