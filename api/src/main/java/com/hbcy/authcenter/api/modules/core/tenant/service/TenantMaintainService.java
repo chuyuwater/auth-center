@@ -10,13 +10,13 @@ import com.hbcy.authcenter.sdk.constants.EventConstants;
 import com.hbcy.authcenter.sdk.utils.UserContextUtils;
 import com.hbcy.common.base.error.ParamError;
 import jakarta.annotation.Resource;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 /**
  * @author 姚泰然
  * @date 2025-12-31 14:31
  */
-@Component
+@Service
 public class TenantMaintainService {
     @Resource
     private TenantService tenantService;

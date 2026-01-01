@@ -1,2 +1,2 @@
 com.hbcy.authcenter.sdk.config.BeanAutoConfiguration
-com.hbcy.authcenter.sdk.config.TtlBeanPostProcessor
+com.hbcy.authcenter.sdk.config.TtlConfiguration

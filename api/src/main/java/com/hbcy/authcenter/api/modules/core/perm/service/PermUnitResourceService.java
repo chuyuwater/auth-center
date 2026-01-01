@@ -48,8 +48,6 @@ public class PermUnitResourceService extends ServiceImpl<PermUnitResourceMapper,
     @Resource
     private PermUnitMapper permUnitMapper;
     @Resource
-    private PermUnitResourceService self;
-    @Resource
     private PermUnitUserService permUnitUserService;
     @Resource
     private ResourceTreeService resourceTreeService;
@@ -100,7 +98,7 @@ public class PermUnitResourceService extends ServiceImpl<PermUnitResourceMapper,
         baseMapper.delete(new QueryWrapper<PermUnitResource>()
                 .eq(PermUnitResource.COL_APP_ID, vo.getAppId())
                 .eq(PermUnitResource.COL_UNIT_ID, vo.getUnitId()));
-        self.saveBatch(resources);
+        baseMapper.insert(resources);
     }
 
     public List<PermUnitAppDTO> listApps(String unitId) {

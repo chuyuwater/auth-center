@@ -10,9 +10,9 @@ import com.hbcy.authcenter.api.config.UserAuthConfig;
 import com.hbcy.authcenter.api.modules.core.auth.dto.CaptchaDTO;
 import com.hbcy.authcenter.api.modules.core.auth.dto.LoginRespDTO;
 import com.hbcy.authcenter.api.modules.core.auth.vo.LoginVO;
+import com.hbcy.authcenter.api.modules.core.user.dao.UserMapper;
 import com.hbcy.authcenter.api.modules.core.user.dao.UserOrgMapper;
 import com.hbcy.authcenter.api.modules.core.user.model.User;
-import com.hbcy.authcenter.api.modules.core.user.service.UserService;
 import com.hbcy.authcenter.sdk.utils.UserContextUtils;
 import com.hbcy.common.base.error.AuthError;
 import com.hbcy.common.base.error.ClientError;
@@ -48,7 +48,7 @@ public class UserAuthService {
     public static final String USER_PERM_CACHE_PREFIX = "portal:auth:user:perm:%s:%s";
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
     @Resource
-    private UserService userService;
+    private UserMapper userMapper;
     @Resource
     private StringRedisTemplate stringRedisTemplate;
     @Resource
@@ -87,7 +87,7 @@ public class UserAuthService {
         if (!captchaCode.equals(vo.getCaptchaCode())) {
             throw new ParamError("验证码错误");
         }
-        List<User> userList = userService.list(new QueryWrapper<User>()
+        List<User> userList = userMapper.selectList(new QueryWrapper<User>()
                 .eq(StringUtils.isNotBlank(vo.getAccount()), User.COL_ACCOUNT, vo.getAccount())
                 .eq(StringUtils.isNotBlank(vo.getPhone()), User.COL_PHONE, vo.getPhone())
                 .eq(StringUtils.isNotBlank(vo.getEmail()), User.COL_EMAIL, vo.getEmail())
@@ -139,7 +139,7 @@ public class UserAuthService {
                 .setAvatar(chosen.getAvatar());
         // 更新最后登录时间
         chosen.setLastLogin(LocalDateTime.now());
-        userService.updateById(chosen);
+        userMapper.updateById(chosen);
         return resp;
     }
 

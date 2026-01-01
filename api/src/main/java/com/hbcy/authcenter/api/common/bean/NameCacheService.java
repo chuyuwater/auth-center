@@ -1,8 +1,8 @@
 package com.hbcy.authcenter.api.common.bean;
 
 import com.hbcy.authcenter.api.common.constants.G;
-import com.hbcy.authcenter.api.modules.core.org.service.OrgTreeService;
-import com.hbcy.authcenter.api.modules.core.user.service.UserService;
+import com.hbcy.authcenter.api.modules.core.org.dao.OrgTreeMapper;
+import com.hbcy.authcenter.api.modules.core.user.dao.UserMapper;
 import com.hbcy.common.base.error.ServerError;
 import com.hbcy.common.web.api.NamedId;
 import com.hbcy.common.web.bean.INameFillService;
@@ -24,10 +24,10 @@ import java.util.function.Function;
 @Component
 public class NameCacheService implements INameFillService {
     @Resource
-    private UserService userService;
+    private UserMapper userMapper;
 
     @Resource
-    private OrgTreeService orgTreeService;
+    private OrgTreeMapper orgTreeMapper;
 
     @Resource
     private StringRedisTemplate stringRedisTemplate;
@@ -66,7 +66,7 @@ public class NameCacheService implements INameFillService {
 
     public Map<String, String> getUserNameMap(Set<String> userIds) {
         return doQuery(userIds, G.USER_NAME_CACHE_KEY,
-                k -> userService.getBaseMapper().selectNameByIds(k));
+                k -> userMapper.selectNameByIds(k));
     }
 
     public String getUserName(String userId) {
@@ -75,7 +75,7 @@ public class NameCacheService implements INameFillService {
 
     public Map<String, String> getOrgNameMap(Set<String> orgIds) {
         return doQuery(orgIds, G.ORG_NAME_CACHE_KEY,
-                k -> orgTreeService.getBaseMapper().selectNameByIds(k, false));
+                k -> orgTreeMapper.selectNameByIds(k, false));
     }
 
     public String getOrgName(String orgId) {

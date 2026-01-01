@@ -40,8 +40,6 @@ public class ResourcePermService extends ServiceImpl<ResourcePermMapper, Resourc
     private TenantAppResourceMapper tenantAppResourceMapper;
     @Resource
     private PermUnitResourceMapper permUnitResourceMapper;
-    @Resource
-    private ResourcePermService self;
 
     /**
      * 创建资源权限点
@@ -109,13 +107,12 @@ public class ResourcePermService extends ServiceImpl<ResourcePermMapper, Resourc
         if (rp == null) {
             return;
         }
-        self.delete(rp.getAppId(), Set.of(id));
+        delete(rp.getAppId(), Set.of(id));
     }
 
     /**
      * 删除资源权限点
      */
-    @Transactional(rollbackFor = Exception.class)
     public void delete(String appId, Collection<String> permIds) {
         baseMapper.deleteByIds(permIds);
         //删除租户应用最大授权
