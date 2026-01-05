@@ -39,7 +39,7 @@ public class User extends BaseEntity {
     /**
      * 用户id
      */
-    @TableId(value = "id", type = IdType.ASSIGN_UUID)
+    @TableId(value = "id", type = IdType.INPUT)
     private String id;
     /**
      * 手机号

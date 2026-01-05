@@ -56,7 +56,7 @@ public class UserOrgService extends ServiceImpl<UserOrgMapper, UserOrg> {
         if (orgId == null) {
             throw new ParamError("组织选择错误");
         }
-        addUserNode(userId, orgId, nodeId, mainJob);
+        addUserNode(userId, orgId, node, mainJob);
     }
 
     public String getMainJobOrg(String userId) {
@@ -65,11 +65,11 @@ public class UserOrgService extends ServiceImpl<UserOrgMapper, UserOrg> {
         return userOrg == null ? null : userOrg.getOrgId();
     }
 
-    public void addUserNode(String userId, String orgId, String nodeId, Boolean mainJob) {
+    public void addUserNode(String userId, String orgId, OrgTree node, Boolean mainJob) {
         UserOrg userOrg = new UserOrg();
         userOrg.setUserId(userId);
         userOrg.setOrgId(orgId);
-        userOrg.setNodeId(nodeId);
+        userOrg.setNodeId(node.getId());
         if (mainJob != null) {
             //只有在创建用户时，才能设置为主职
             userOrg.setMainJob(mainJob ? 1 : 0);
@@ -78,7 +78,7 @@ public class UserOrgService extends ServiceImpl<UserOrgMapper, UserOrg> {
             String mainJobOrg = getMainJobOrg(userId);
             userOrg.setMainJob(orgId.equals(mainJobOrg) ? 1 : 0);
         }
-        userOrg.setTenantId(UserContextUtils.getTenantId());
+        userOrg.setTenantId(node.getTenantId());
         userOrg.setCreateUser(UserContextUtils.getUserId());
         userOrg.setUpdateUser(UserContextUtils.getUserId());
         try {

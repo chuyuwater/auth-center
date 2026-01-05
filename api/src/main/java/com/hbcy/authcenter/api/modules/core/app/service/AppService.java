@@ -113,9 +113,11 @@ public class AppService extends ServiceImpl<AppMapper, App> {
     public List<App> list(AppQueryVO vo) {
         return baseMapper.selectList(new QueryWrapper<App>()
                 .eq(vo.getForbidden() != null, App.COL_FORBIDDEN, vo.getForbidden())
-                .or(StringUtils.isNotBlank(vo.getKeyword()))
-                .like(App.COL_NAME_CN, vo.getKeyword())
-                .like(App.COL_ID, vo.getKeyword())
+                .and(StringUtils.isNotBlank(vo.getKeyword()),
+                        qw -> qw.like(App.COL_NAME_CN, vo.getKeyword())
+                                .or()
+                                .like(App.COL_ID, vo.getKeyword()))
+
                 .orderByAsc(App.COL_SHOW_ORDER));
     }
 

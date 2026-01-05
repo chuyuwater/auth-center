@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.hbcy.authcenter.api.modules.core.org.model.OrgTree;
 import com.hbcy.authcenter.api.modules.core.org.vo.OrgTreeQueryVO;
 import com.hbcy.common.web.api.NamedId;
+import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -13,6 +14,7 @@ import java.util.Set;
  * @author 姚泰然
  * @date 2025-12-25 17:47
  */
+@Mapper
 public interface OrgTreeMapper extends BaseMapper<OrgTree> {
     /**
      * @param tenantId     租户id

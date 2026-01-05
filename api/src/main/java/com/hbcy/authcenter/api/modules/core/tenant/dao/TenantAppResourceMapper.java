@@ -2,6 +2,7 @@ package com.hbcy.authcenter.api.modules.core.tenant.dao;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.hbcy.authcenter.api.modules.core.tenant.model.TenantAppResource;
+import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.Set;
@@ -10,6 +11,7 @@ import java.util.Set;
  * @author 姚泰然
  * @date 2025-12-29 09:07
  */
+@Mapper
 public interface TenantAppResourceMapper extends BaseMapper<TenantAppResource> {
     /**
      * 获取授权应用资源权限ID列表

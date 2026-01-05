@@ -157,7 +157,7 @@ public class OrgTreeService extends ServiceImpl<OrgTreeMapper, OrgTree> {
                     .eq(OrgTree.COL_NODE_TYPE, vo.getNodeType())
             );
             //由于存在虚拟根组织，组织的id是从0开始的
-            return isDept ? count + 1 : count;
+            return isDept ? count : count - 1;
         }, key -> {
             if (isDept) {
                 return OrgTree.ORG_ID_TEMPLATE.formatted(tenantId, key);
@@ -304,9 +304,9 @@ public class OrgTreeService extends ServiceImpl<OrgTreeMapper, OrgTree> {
                 .eq(OrgTree.COL_TENANT_ID, UserContextUtils.getTenantId())
                 .eq(vo.getNodeType() != null, OrgTree.COL_NODE_TYPE, vo.getNodeType())
                 .eq(vo.getNodeCategory() != null, OrgTree.COL_NODE_CATEGORY, vo.getNodeCategory())
-                .or(StringUtils.isNotBlank(vo.getKeyword()))
-                .like(OrgTree.COL_NODE_NAME, vo.getKeyword())
-                .like(OrgTree.COL_SHORT_NAME, vo.getKeyword())
+                .and(StringUtils.isNotBlank(vo.getKeyword()),
+                        qw -> qw.like(OrgTree.COL_NODE_NAME, vo.getKeyword()).or()
+                                .like(OrgTree.COL_SHORT_NAME, vo.getKeyword()))
                 .orderByAsc(OrgTree.COL_SHOW_ORDER)
         );
     }

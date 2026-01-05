@@ -1,5 +1,6 @@
 package com.hbcy.authcenter.api.modules.core.tenant.utils;
 
+import com.hbcy.authcenter.api.common.constants.G;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -15,8 +16,12 @@ public class TenantIdUtils {
      * 将数字转换为 Excel 列名 (1 -> A, 2 -> B, ..., 27 -> AA)
      */
     public static String convertToTitle(long n) {
+        if (n == 1) {
+            // 第一个是默认租户，要特殊处理
+            return G.DEFAULT_TENANT;
+        }
+        n--;
         StringBuilder columnTitle = new StringBuilder();
-
         while (n > 0) {
             // 核心步骤：因为 Excel 是从 1 开始计数，
             // 减 1 是为了将 1-26 映射到 0-25 以便处理 ASCII

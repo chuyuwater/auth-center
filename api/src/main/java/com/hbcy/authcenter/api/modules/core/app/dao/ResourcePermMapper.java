@@ -3,6 +3,7 @@ package com.hbcy.authcenter.api.modules.core.app.dao;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.hbcy.authcenter.api.modules.core.app.model.ResourcePerm;
 import com.hbcy.authcenter.api.modules.core.inner.dto.ApiPermDTO;
+import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -12,6 +13,7 @@ import java.util.Set;
  * @author 姚泰然
  * @date 2025-12-24 16:50
  */
+@Mapper
 public interface ResourcePermMapper extends BaseMapper<ResourcePerm> {
     /**
      * 过滤出有效的权限点id

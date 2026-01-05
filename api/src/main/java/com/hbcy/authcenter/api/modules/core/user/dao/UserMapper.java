@@ -7,6 +7,7 @@ import com.hbcy.authcenter.api.modules.core.user.dto.UserQueryResultDTO;
 import com.hbcy.authcenter.api.modules.core.user.model.User;
 import com.hbcy.authcenter.api.modules.core.user.vo.UserQueryVO;
 import com.hbcy.common.web.api.NamedId;
+import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -16,6 +17,7 @@ import java.util.Set;
  * @author 姚泰然
  * @date 2025-12-26 08:54
  */
+@Mapper
 public interface UserMapper extends BaseMapper<User> {
     List<NamedId> selectNameByIds(@Param("uids") Set<String> uids);
 

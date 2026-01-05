@@ -50,7 +50,7 @@
         #{entity.tenantId},
         #{entity.createUser},
         #{entity.updateUser},
-        coalesce(max(show_order), 0) + 1
+        (SELECT COALESCE(MAX(show_order), 0) + 1 FROM perm_tree AS temp)
         from perm_tree
         where parent_id = #{entity.parentId}
     </insert>

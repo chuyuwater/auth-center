@@ -65,7 +65,8 @@ public class App extends BaseEntity {
      */
     @TableField(value = "binding_tenant")
     private String bindingTenant;
-    @TableField(value = "delete_time")
+    @TableField(value = "delete_time", fill = FieldFill.UPDATE)
+    @TableLogic(value = "0", delval = "-1")
     private Long deleteTime;
     @TableField(value = "create_time", fill = FieldFill.INSERT)
     private LocalDateTime createTime;

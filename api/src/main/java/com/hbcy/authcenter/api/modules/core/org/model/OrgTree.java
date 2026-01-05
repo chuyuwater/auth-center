@@ -32,6 +32,7 @@ public class OrgTree extends BaseEntity {
     public static final String COL_ID_PATH = "id_path";
     public static final String COL_SHOW_ORDER = "show_order";
     public static final String COL_TENANT_ID = "tenant_id";
+    public static final String COL_RELATE_ID = "relate_id";
     public static final String COL_DELETE_TIME = "delete_time";
     public static final String COL_CREATE_TIME = "create_time";
     public static final String COL_UPDATE_TIME = "update_time";
@@ -89,6 +90,11 @@ public class OrgTree extends BaseEntity {
      */
     @TableField(value = "tenant_id")
     private String tenantId;
+    /**
+     * 关联id
+     */
+    @TableField(value = "relate_id")
+    private String relateId;
     /**
      * 逻辑删除
      */

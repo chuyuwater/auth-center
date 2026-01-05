@@ -45,11 +45,9 @@ public class PermUnitService extends ServiceImpl<PermUnitMapper, PermUnit> {
         }
         BeanCopyUtils.copy(vo, entity);
         String id = redisIdGenerator.generateId(BIZ_KEY.formatted(tenantId),
-                () -> {
-                    Long cnt = baseMapper.selectCount(new QueryWrapper<PermUnit>()
-                            .eq(PermUnit.COL_TENANT_ID, tenantId));
-                    return cnt + 1;
-                }, key -> PermUnit.ROLE_ID_TEMPLATE.formatted(tenantId, key));
+                () -> baseMapper.selectCount(new QueryWrapper<PermUnit>()
+                        .eq(PermUnit.COL_TENANT_ID, tenantId)),
+                key -> PermUnit.ROLE_ID_TEMPLATE.formatted(tenantId, key));
         entity.setId(id);
         entity.setTenantId(tenantId);
         entity.setCreateUser(UserContextUtils.getUserId());

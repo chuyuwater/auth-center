@@ -32,5 +32,5 @@ public class AppUpdateVO {
     /**
      * 应用图标
      */
-    private String icon;
+    private String icon = "";
 }

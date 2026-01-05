@@ -3,8 +3,11 @@ package com.hbcy.authcenter.api.modules.core.tenant.service;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.github.f4b6a3.ulid.UlidCreator;
 import com.hbcy.authcenter.api.common.bean.EventDispatcher;
 import com.hbcy.authcenter.api.common.constants.G;
+import com.hbcy.authcenter.api.common.enums.OrgNodeCategoryEnum;
+import com.hbcy.authcenter.api.common.enums.OrgNodeTypeEnum;
 import com.hbcy.authcenter.api.modules.core.org.dao.OrgTreeMapper;
 import com.hbcy.authcenter.api.modules.core.org.model.OrgTree;
 import com.hbcy.authcenter.api.modules.core.tenant.dao.TenantAppMapper;
@@ -16,8 +19,8 @@ import com.hbcy.authcenter.api.modules.core.tenant.vo.TenantForbiddenVO;
 import com.hbcy.authcenter.api.modules.core.tenant.vo.TenantInsertVO;
 import com.hbcy.authcenter.api.modules.core.tenant.vo.TenantQueryVO;
 import com.hbcy.authcenter.api.modules.core.tenant.vo.TenantUpdateVO;
+import com.hbcy.authcenter.api.modules.core.user.model.User;
 import com.hbcy.authcenter.api.modules.core.user.service.UserService;
-import com.hbcy.authcenter.api.modules.core.user.vo.UserCreateVO;
 import com.hbcy.authcenter.sdk.bean.AppEventOutDTO;
 import com.hbcy.authcenter.sdk.constants.EventConstants;
 import com.hbcy.authcenter.sdk.utils.UserContextUtils;
@@ -61,7 +64,7 @@ public class TenantService extends ServiceImpl<TenantMapper, Tenant> {
     @Transactional(rollbackFor = Exception.class)
     public Tenant create(TenantInsertVO vo) {
         checkExist(vo.getNameCn());
-        //租户不能被物理删除，所以用count就行
+        //租户不能被物理删除，所以用count就行，根租户id是0，不计入总数
         String calcedId = redisIdGenerator.generateId(TENANT_KEY, this::count, TenantIdUtils::convertToTitle);
         Tenant tenant = new Tenant();
         tenant.setId(calcedId);
@@ -72,31 +75,44 @@ public class TenantService extends ServiceImpl<TenantMapper, Tenant> {
         OrgTree root = new OrgTree();
         root.setId(OrgTree.ORG_ID_TEMPLATE.formatted(tenant.getId(), 0));
         root.setNodeName("根组织");
+        root.setNodeType(OrgNodeTypeEnum.ORG.getValue());
+        root.setNodeCategory(OrgNodeCategoryEnum.CORP.getValue());
+        root.setExistType(OrgTree.EXIST_TYPE_VIRTUAL);
         root.setCreateUser(UserContextUtils.getUserId());
         root.setUpdateUser(UserContextUtils.getUserId());
         root.setIdPath(root.getId());
         root.setTenantId(tenant.getId());
+        root.setParentId("");
+        root.setShowOrder(0);
         //租户名字作为真正的根节点(默认组织树，行政组织）
         OrgTree current = new OrgTree();
         current.setId(OrgTree.ORG_ID_TEMPLATE.formatted(tenant.getId(), 1));
         current.setNodeName(tenant.getNameCn());
         current.setShortName(tenant.getShortName());
+        current.setNodeType(OrgNodeTypeEnum.ORG.getValue());
+        current.setShowOrder(0);
+        if (tenant.getNameCn().contains("集团")) {
+            current.setNodeCategory(OrgNodeCategoryEnum.CORP.getValue());
+        } else {
+            current.setNodeCategory(OrgNodeCategoryEnum.COMPANY.getValue());
+        }
         current.setParentId(root.getId());
         current.setCreateUser(UserContextUtils.getUserId());
         current.setUpdateUser(UserContextUtils.getUserId());
         current.setIdPath(root.getId() + G.ID_PATH_SPLITTER + current.getId());
-        //创建租户管理员
-        UserCreateVO userCreateVO = new UserCreateVO();
-        userCreateVO.setNodeId(current.getId());
-        userCreateVO.setAccount(vo.getContactPhone());
-        userCreateVO.setRealName(vo.getContactUser());
-        userCreateVO.setPhone(vo.getContactPhone());
-        String userId = userService.createUser(userCreateVO);
-        tenant.setAdminId(userId);
+        current.setTenantId(tenant.getId());
+        //租户管理员
+        User user = new User();
+        user.setId(UlidCreator.getUlid().toString());
+        user.setAccount(vo.getContactPhone());
+        user.setRealName(vo.getContactUser());
+        user.setPhone(vo.getContactPhone());
+        tenant.setAdminId(user.getId());
         try {
-            this.save(tenant);
-            orgTreeMapper.append(root);
-            orgTreeMapper.append(current);
+            baseMapper.insert(tenant);
+            orgTreeMapper.insert(root);
+            orgTreeMapper.insert(current);
+            userService.createUser(user, current);
         } catch (DuplicateKeyException e) {
             throw new ParamError("请重试");
         }
@@ -129,6 +145,9 @@ public class TenantService extends ServiceImpl<TenantMapper, Tenant> {
 
     @Transactional(rollbackFor = Exception.class)
     public void switchStatus(TenantForbiddenVO vo) {
+        if (G.DEFAULT_TENANT.equals(vo.getTenantId()) && vo.getForbidden() == 1) {
+            throw new ParamError("系统租户不能被禁用");
+        }
         Tenant tenant = getById(vo.getTenantId());
         if (tenant == null) {
             throw new ParamError("指定租户不存在");
@@ -150,15 +169,18 @@ public class TenantService extends ServiceImpl<TenantMapper, Tenant> {
         Page<Tenant> dbPage = vo.getDbPage();
         Page<Tenant> resp = baseMapper.selectPage(dbPage, new QueryWrapper<Tenant>()
                 .eq(vo.getForbidden() != null, Tenant.COL_FORBIDDEN, vo.getForbidden())
-                .or(StringUtils.isNotBlank(vo.getKeyword()))
-                //模糊查询，租户数量不会多，无需考虑优化
-                .like(Tenant.COL_NAME_CN, vo.getKeyword())
-                .like(Tenant.COL_ID, vo.getKeyword())
+                .and(StringUtils.isNotBlank(vo.getKeyword()),
+                        qw -> qw.like(Tenant.COL_NAME_CN, vo.getKeyword())
+                                .or()
+                                .like(Tenant.COL_ID, vo.getKeyword()))
         );
         return new PageRespEx<>(resp);
     }
 
     public void delete(String id) {
+        if (G.DEFAULT_TENANT.equals(id)) {
+            throw new ParamError("请勿删除系统租户");
+        }
         Tenant tenant = getById(id);
         if (tenant == null) {
             return;

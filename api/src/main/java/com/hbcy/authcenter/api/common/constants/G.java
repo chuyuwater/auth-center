@@ -10,6 +10,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class G {
     /**
+     * 默认系统租户id
+     */
+    public static final String DEFAULT_TENANT = "0";
+    /**
      * 数据库里面树结构id全路径的分隔符
      */
     public static final String ID_PATH_SPLITTER = "/";

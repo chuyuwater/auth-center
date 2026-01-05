@@ -36,7 +36,7 @@ public class ResourcePermController {
      */
     @GetMapping
     @NameFill
-    public List<ResourcePerm> list(@RequestBody @Valid ResourcePermQueryVO vo) {
+    public List<ResourcePerm> list(@Valid ResourcePermQueryVO vo) {
         return resourcePermService.list(vo);
     }
 

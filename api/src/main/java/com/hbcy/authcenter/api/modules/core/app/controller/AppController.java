@@ -38,7 +38,7 @@ public class AppController {
      */
     @GetMapping
     @NameFill
-    public List<App> list(@RequestBody @Valid AppQueryVO vo) {
+    public List<App> list(@Valid AppQueryVO vo) {
         return appService.list(vo);
     }
 

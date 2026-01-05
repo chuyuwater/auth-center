@@ -3,6 +3,7 @@ package com.hbcy.authcenter.api.modules.core.app.dao;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.hbcy.authcenter.api.modules.core.app.model.ResourceTree;
 import com.hbcy.authcenter.api.modules.core.app.vo.ResourceTreeQueryVO;
+import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -11,6 +12,7 @@ import java.util.List;
  * @author 姚泰然
  * @date 2025-12-24 15:19
  */
+@Mapper
 public interface ResourceTreeMapper extends BaseMapper<ResourceTree> {
     /**
      * 权限资源树查询

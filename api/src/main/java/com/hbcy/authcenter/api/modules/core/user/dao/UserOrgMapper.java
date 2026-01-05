@@ -3,6 +3,7 @@ package com.hbcy.authcenter.api.modules.core.user.dao;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.hbcy.authcenter.api.modules.core.user.dto.UserOrgDTO;
 import com.hbcy.authcenter.api.modules.core.user.model.UserOrg;
+import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.Collection;
@@ -13,6 +14,7 @@ import java.util.Set;
  * @author 姚泰然
  * @date 2025-12-26 08:45
  */
+@Mapper
 public interface UserOrgMapper extends BaseMapper<UserOrg> {
     /**
      * 获取用户的任职信息

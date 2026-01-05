@@ -36,7 +36,7 @@ public class TenantController {
      */
     @GetMapping
     @NameFill
-    public PageResp<Tenant> list(@RequestBody @Valid TenantQueryVO vo) {
+    public PageResp<Tenant> list(@Valid TenantQueryVO vo) {
         return tenantService.list(vo);
     }
 

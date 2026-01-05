@@ -119,31 +119,44 @@ public class UserService extends ServiceImpl<UserMapper, User> {
     public String createUser(UserCreateVO vo) {
         checkAnyExist(vo);
         String tenantId = UserContextUtils.getTenantId();
-        String op = UserContextUtils.getUserId();
         OrgTree node = orgTreeService.getById(vo.getNodeId());
         if (node == null || !node.getTenantId().equals(tenantId)) {
-            throw new ParamError("组织选择错误");
+            throw new ParamError("组织" + (node == null ? "不存在" : "不属于当前租户"));
         }
+        User user = new User();
+        BeanCopyUtils.copy(vo, user);
+        user.setId(UlidCreator.getUlid().toString());
+        createUser(user, node);
+        return user.getId();
+    }
+
+    /**
+     * 用于创建组织的同时创建用户，跳过校验
+     *
+     * @param user 用户信息
+     * @param node 组织信息
+     * @return 用户
+     */
+    public User createUser(User user, OrgTree node) {
+        String op = UserContextUtils.getUserId();
         String orgId = node.getId();
         if (node.getNodeType().equals(OrgNodeTypeEnum.DEPT.getValue())) {
             orgId = OrgTreeService.findDeptDirectOrg(node.getIdPath());
         }
-        User user = new User();
-        BeanCopyUtils.copy(vo, user);
         // 默认密码为手机号
-        user.setPasswd(passwordEncoder.encode(vo.getPhone()));
+        user.setPasswd(passwordEncoder.encode(user.getPhone()));
         //TODO: 改为随机密码+短信、邮件发送密码
         user.setCreateUser(op);
         user.setUpdateUser(op);
-        user.setTenantId(tenantId);
+        user.setTenantId(node.getTenantId());
         try {
             save(user);
         } catch (DuplicateKeyException e) {
             throw new ParamError("用户的账号、手机号或邮箱已存在，请检查");
         }
         // 关联组织
-        userOrgService.addUserNode(user.getId(), orgId, vo.getNodeId(), true);
-        return user.getId();
+        userOrgService.addUserNode(user.getId(), orgId, node, true);
+        return user;
     }
 
     private User checkUser(String userId) {
@@ -440,10 +453,10 @@ public class UserService extends ServiceImpl<UserMapper, User> {
                 Collectors.toMap(OrgTree::getNodeName, OrgTree::getId));
         //账号、手机号、邮箱都要验重
         List<User> existUsers = baseMapper.selectList(new QueryWrapper<User>()
-                .or()
-                .in(User.COL_ACCOUNT, accountSet)
-                .in(User.COL_PHONE, phoneSet)
-                .in(User.COL_EMAIL, emailSet));
+                .eq(User.COL_TENANT_ID, tenantId)
+                .and(qw -> qw.in(User.COL_ACCOUNT, accountSet).or()
+                        .in(User.COL_PHONE, phoneSet).or()
+                        .in(User.COL_EMAIL, emailSet)));
         if (!CollectionUtils.isEmpty(existUsers)) {
             StringBuilder sb = new StringBuilder();
             sb.append("以下手机号对应的用户已存在:");

@@ -42,7 +42,7 @@
         #{app.bindingTenant},
         #{app.createUser},
         #{app.updateUser},
-        coalesce(max(show_order), 0) + 1)
+        (SELECT COALESCE(MAX(show_order), 0) + 1 FROM app AS temp))
     </insert>
 
     <update id="move">

@@ -6,6 +6,7 @@ import com.hbcy.authcenter.api.modules.core.app.dto.ResPermDTO;
 import com.hbcy.authcenter.api.modules.core.perm.dto.UnitUserDTO;
 import com.hbcy.authcenter.api.modules.core.perm.model.PermUnitUser;
 import com.hbcy.authcenter.api.modules.core.perm.vo.PermUnitUserQueryVO;
+import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -15,6 +16,7 @@ import java.util.Set;
  * @author 姚泰然
  * @date 2025-12-27 20:34
  */
+@Mapper
 public interface PermUnitUserMapper extends BaseMapper<PermUnitUser> {
     //过滤出用户在当前组织下对指定应用的权限点
     List<ResPermDTO> listFilteredPerms(@Param("userId") String userId, @Param("appId") String appId,

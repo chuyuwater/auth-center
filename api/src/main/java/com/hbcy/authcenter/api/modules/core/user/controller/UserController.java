@@ -155,7 +155,7 @@ public class UserController {
     /**
      * 管理员重置密码
      */
-    @PatchMapping("/admin-reset-passwd")
+    @PostMapping("/admin-reset-passwd")
     public void adminResetPasswd(@Valid @RequestBody AdminResetPasswdVO vo) {
         userService.adminResetPasswd(vo);
     }
