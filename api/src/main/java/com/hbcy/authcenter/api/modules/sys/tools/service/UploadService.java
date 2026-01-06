@@ -13,7 +13,9 @@ import org.apache.commons.lang3.Strings;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * @author 姚泰然
@@ -38,7 +40,10 @@ public class UploadService {
                 throw new ParamError("后缀不在允许范围内");
             }
             String uploadName = UlidCreator.getUlid().toString() + "." + suffix;
-            ossTemplate.putObject(ossProperties.getBucketName(), uploadName, file.getInputStream());
+            // 使用 BufferedInputStream 包装
+            try (InputStream is = new BufferedInputStream(file.getInputStream())) {
+                ossTemplate.putObject(ossProperties.getBucketName(), uploadName, is);
+            }
             UploadResultDTO dto = new UploadResultDTO();
             dto.setFileName(uploadName);
             dto.setUrl(ossProperties.getEndpoint() + "/" + ossProperties.getBucketName() + "/" + uploadName);
