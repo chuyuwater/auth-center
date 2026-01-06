@@ -30,9 +30,9 @@ public class OrgTreeUpdateVO {
     private String memo;
 
     /**
-     * 组织类型，字典ORG_TYPE
+     * 组织类别，字典ORG_CATEGORY
      */
-    @DictField(dictKey = "ORG_TYPE")
+    @DictField(dictKey = "ORG_CATEGORY")
     private Integer nodeCategory = OrgNodeCategoryEnum.COMPANY.getValue();
 
     /**

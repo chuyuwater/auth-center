@@ -105,9 +105,7 @@
         #{entity.objDom},
         #{entity.createUser},
         #{entity.updateUser},
-        (SELECT COALESCE(MAX(show_order), 0) + 1 FROM resource_tree AS temp)
-        from resource_tree
-        where parent_id = #{entity.parentId}
+        (SELECT COALESCE(MAX(show_order), 0) + 1 from resource_tree where parent_id = #{entity.parentId})
     </insert>
 
     <update id="updateIdPath">

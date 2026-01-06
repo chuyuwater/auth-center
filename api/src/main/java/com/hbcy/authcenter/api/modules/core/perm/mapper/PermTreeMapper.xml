@@ -50,9 +50,7 @@
         #{entity.tenantId},
         #{entity.createUser},
         #{entity.updateUser},
-        (SELECT COALESCE(MAX(show_order), 0) + 1 FROM perm_tree AS temp)
-        from perm_tree
-        where parent_id = #{entity.parentId}
+        (SELECT COALESCE(MAX(show_order), 0) + 1 from perm_tree where parent_id = #{entity.parentId})
     </insert>
 
     <update id="updateIdPath">

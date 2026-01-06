@@ -21,7 +21,7 @@ public class OrgTreeCreateVO extends OrgTreeUpdateVO {
     private String parentId = "";
 
     /**
-     * 节点类型，组织或者部门
+     * 节点类型，0-组织，1-部门
      */
     @Range(min = 0, max = 1, message = "节点类型只能为0-1")
     private Integer nodeType = OrgNodeTypeEnum.ORG.getValue();
