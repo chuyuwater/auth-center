@@ -25,14 +25,13 @@ public class FeignHeaderInterceptor implements RequestInterceptor {
 
         if (method.isAnnotationPresent(EnableHeaderPassthrough.class) ||
                 targetClass.isAnnotationPresent(EnableHeaderPassthrough.class)) {
-
             Map<String, String> headers = UserContextUtils.getHeaders();
             if (headers != null) {
+                //标记SDK版本
+                headers.put(AuthConstants.HEADER_SDK_VERSION, AuthConstants.SDK_VERSION);
                 headers.forEach((key, value) -> {
                     if (value != null) template.header(key, value);
                 });
-                //标记SDK版本
-                headers.put(AuthConstants.HEADER_SDK_VERSION, AuthConstants.SDK_VERSION);
             }
         }
     }

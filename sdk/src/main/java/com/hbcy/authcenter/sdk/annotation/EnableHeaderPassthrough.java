@@ -12,6 +12,6 @@ import java.lang.annotation.Target;
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface EnableHeaderPassthrough {
-    // 可以扩展：指定透传哪些具体的 header，默认全部透传
+    // 暂无意义
     String[] value() default {};
 }
