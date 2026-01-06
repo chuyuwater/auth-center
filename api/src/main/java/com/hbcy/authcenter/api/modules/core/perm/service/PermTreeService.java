@@ -3,6 +3,7 @@ package com.hbcy.authcenter.api.modules.core.perm.service;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.google.common.base.Splitter;
 import com.hbcy.authcenter.api.common.bean.NodeMoveVO;
 import com.hbcy.authcenter.api.common.constants.G;
 import com.hbcy.authcenter.api.modules.core.perm.dao.PermTreeMapper;
@@ -25,15 +26,12 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 public class PermTreeService extends ServiceImpl<PermTreeMapper, PermTree> {
-    public static final String BIZ_KEY = "portal:perm:group:%s";
+    public static final String BIZ_KEY = "portal:perm:group:%s:";
     @Resource
     private PermUnitMapper permUnitMapper;
     @Resource
@@ -120,7 +118,13 @@ public class PermTreeService extends ServiceImpl<PermTreeMapper, PermTree> {
         }
         TreeNode<PermTree> root = new TreeNode<>(rootData);
         List<PermTree> permTrees = baseMapper.listChildren(tenantId, pathPrefix, vo);
-
+        Set<String> ids = new HashSet<>();
+        for (PermTree permTree : permTrees) {
+            ids.addAll(Splitter.on(G.ID_PATH_SPLITTER).splitToList(permTree.getIdPath()));
+        }
+        if (ids.size() > permTrees.size()) {
+            permTrees = baseMapper.selectByIds(ids);
+        }
         Map<String, List<PermTree>> childrenMap = permTrees.stream()
                 .collect(Collectors.groupingBy(PermTree::getParentId,
                         Collectors.collectingAndThen(

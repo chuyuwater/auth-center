@@ -27,7 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class PermUnitService extends ServiceImpl<PermUnitMapper, PermUnit> {
-    public static final String BIZ_KEY = "portal:id:role:%s";
+    public static final String BIZ_KEY = "portal:id:role:%s:";
     @Resource
     private RedisIdGenerator redisIdGenerator;
     @Resource

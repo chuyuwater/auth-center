@@ -64,7 +64,7 @@ public class OrgTreeController {
      */
     @GetMapping("/list")
     public List<OrgTree> list(@Valid OrgTreeQueryVO vo) {
-        return orgTreeService.listOrgTree(vo);
+        return orgTreeService.listOrgTree(vo, false);
     }
 
     /**

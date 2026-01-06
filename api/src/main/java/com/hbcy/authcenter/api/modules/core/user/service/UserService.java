@@ -35,7 +35,6 @@ import com.hbcy.common.base.pojo.PageResp;
 import com.hbcy.common.base.util.BeanCopyUtils;
 import com.hbcy.common.db.model.PageRespEx;
 import jakarta.annotation.Resource;
-import jakarta.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -82,6 +81,16 @@ public class UserService extends ServiceImpl<UserMapper, User> {
             if (!Character.isLetter(c)) return false;
         }
         return true;
+    }
+
+    private static String trimSplitter(String namePath) {
+        if (namePath.startsWith("/")) {
+            namePath = namePath.substring(1);
+        }
+        if (namePath.endsWith("/")) {
+            namePath = namePath.substring(0, namePath.length() - 1);
+        }
+        return namePath;
     }
 
     private void cleanNameCache(String userId) {
@@ -244,8 +253,7 @@ public class UserService extends ServiceImpl<UserMapper, User> {
         updateById(user);
     }
 
-
-    public void deleteUsers(@Valid BatchDeleteVO vo) {
+    public void deleteUsers(BatchDeleteVO vo) {
         var tenantId = UserContextUtils.getTenantId();
         boolean exists = exists(new QueryWrapper<User>()
                 .eq(User.COL_FORBIDDEN, "0")
@@ -373,7 +381,7 @@ public class UserService extends ServiceImpl<UserMapper, User> {
         for (UserOrgDTO userOrg : userOrgs) {
             List<String> nameParts = Splitter.on(G.ID_PATH_SPLITTER).splitToList(userOrg.getIdPath()).stream()
                     .map(k -> idNameMap.getOrDefault(k, "")).toList();
-            userOrg.setNamePath(Joiner.on("/").join(Lists.reverse(nameParts)));
+            userOrg.setNamePath(trimSplitter(Joiner.on("/").join(Lists.reverse(nameParts))));
         }
         //按用户分组映射
         Map<String, List<UserOrgDTO>> userOrgMap = userOrgs.stream().collect(
@@ -411,7 +419,7 @@ public class UserService extends ServiceImpl<UserMapper, User> {
         for (OrgUserDTO r : result.getRecords()) {
             List<String> nameParts = Splitter.on(G.ID_PATH_SPLITTER).splitToList(r.getIdPath()).stream()
                     .map(k -> idNameMap.getOrDefault(k, "")).toList();
-            r.setNamePath(Joiner.on("/").join(Lists.reverse(nameParts)));
+            r.setNamePath(trimSplitter(Joiner.on("/").join(Lists.reverse(nameParts))));
         }
         return new PageRespEx<>(result);
     }
@@ -527,7 +535,7 @@ public class UserService extends ServiceImpl<UserMapper, User> {
         Map<String, String> orgNameMap = userMainOrgs.stream().collect(
                 Collectors.toMap(UserOrgDTO::getUserId, UserOrgDTO::getOrgName));
         for (UserExportDTO user : users) {
-            user.setOrgName(orgNameMap.get(user.getOrgName()));
+            user.setOrgName(orgNameMap.get(user.getId()));
         }
         return users;
     }

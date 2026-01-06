@@ -42,7 +42,7 @@ import java.util.stream.Collectors;
  */
 @Service
 public class OrgTreeService extends ServiceImpl<OrgTreeMapper, OrgTree> {
-    public static final String BIZ_KEY = "portal:orgtree:tenant:%s:%d";
+    public static final String BIZ_KEY = "portal:orgtree:tenant:%s:%d:";
     public static final String NAME_CACHE_KEY = "portal:orgtree:name:%s";
     /**
      * 节点类型规则
@@ -67,8 +67,7 @@ public class OrgTreeService extends ServiceImpl<OrgTreeMapper, OrgTree> {
      * @return 组织id
      */
     public static String findDeptDirectOrg(String idPath) {
-        //用'-'分割之后，倒序查找含有"ORG"的部分
-        List<String> parts = Splitter.on("-").splitToList(idPath);
+        List<String> parts = Splitter.on(G.ID_PATH_SPLITTER).splitToList(idPath);
         for (int i = parts.size() - 1; i >= 0; i--) {
             String part = parts.get(i);
             if (part.contains("ORG")) {
@@ -161,9 +160,9 @@ public class OrgTreeService extends ServiceImpl<OrgTreeMapper, OrgTree> {
             return isDept ? count : count - 1;
         }, key -> {
             if (isDept) {
-                return OrgTree.ORG_ID_TEMPLATE.formatted(tenantId, key);
-            } else {
                 return OrgTree.DEPT_ID_TEMPLATE.formatted(tenantId, key);
+            } else {
+                return OrgTree.ORG_ID_TEMPLATE.formatted(tenantId, key);
             }
         });
         entity.setId(id);
@@ -221,7 +220,7 @@ public class OrgTreeService extends ServiceImpl<OrgTreeMapper, OrgTree> {
      * @param vo 查询条件
      * @return 满足条件的列表
      */
-    public List<OrgTree> listOrgTree(@Valid OrgTreeQueryVO vo) {
+    public List<OrgTree> listOrgTree(OrgTreeQueryVO vo, boolean buildTree) {
         String tenantId = UserContextUtils.getTenantId();
         String parentId = StringUtils.isBlank(vo.getParentId()) ?
                 OrgTree.ORG_ID_TEMPLATE.formatted(tenantId, 0) :
@@ -237,6 +236,15 @@ public class OrgTreeService extends ServiceImpl<OrgTreeMapper, OrgTree> {
         List<OrgTree> orgTrees = baseMapper.listChildren(
                 tenantId, rootData.getIdPath() + G.ID_PATH_SPLITTER, vo
         );
+        if (buildTree) {
+            //需要向上查询整个路径
+            Set<String> ids = new HashSet<>();
+            for (OrgTree orgTree : orgTrees) {
+                ids.addAll(Splitter.on(G.ID_PATH_SPLITTER).splitToList(orgTree.getIdPath()));
+            }
+            ids.remove(tenantRootId());
+            orgTrees = baseMapper.selectByIds(ids);
+        }
         //fill user
         Set<String> userIds = orgTrees.stream().map(OrgTree::getCreateUser).collect(Collectors.toSet());
         Map<String, String> userNameMap = nameCacheService.getUserNameMap(userIds);
@@ -252,13 +260,11 @@ public class OrgTreeService extends ServiceImpl<OrgTreeMapper, OrgTree> {
      * @return 树
      */
     public TreeNode<OrgTree> listOrgTreeRecursively(OrgTreeQueryVO vo) {
-        String tenantId = UserContextUtils.getTenantId();
         String parentId = StringUtils.isBlank(vo.getParentId()) ?
-                OrgTree.ORG_ID_TEMPLATE.formatted(tenantId, 0) :
-                vo.getParentId();
+                tenantRootId() : vo.getParentId();
         OrgTree rootData = baseMapper.selectById(parentId);
         TreeNode<OrgTree> root = new TreeNode<>(rootData);
-        var orgTrees = listOrgTree(vo);
+        var orgTrees = listOrgTree(vo, true);
         Map<String, List<OrgTree>> childrenMap = orgTrees.stream()
                 .collect(Collectors.groupingBy(node ->
                                 StringUtils.isBlank(node.getParentId()) ? "" : node.getParentId(),
@@ -397,6 +403,15 @@ public class OrgTreeService extends ServiceImpl<OrgTreeMapper, OrgTree> {
                 if (!Objects.equals(directOrg, newDirectOrg)) {
                     throw new PermissionError("部门不能跨组织移动");
                 }
+                //确认无同名节点
+                if (exists(new QueryWrapper<OrgTree>()
+                        .eq(OrgTree.COL_PARENT_ID, vo.getParentId())
+                        .eq(OrgTree.COL_TENANT_ID, node.getTenantId())
+                        .and(qw -> qw.eq(OrgTree.COL_NODE_NAME, node.getNodeName())
+                                .or().eq(OrgTree.COL_SHORT_NAME, node.getShortName()))
+                )) {
+                    throw new ParamError("同一层级的名称、简称均不能重复");
+                }
             }
             // Update children's paths
             baseMapper.updateIdPath(node.getTenantId(), oldPath, newPath);
@@ -414,13 +429,15 @@ public class OrgTreeService extends ServiceImpl<OrgTreeMapper, OrgTree> {
         toUpdate.setId(vo.getNodeId());
         toUpdate.setParentId(vo.getParentId());
         toUpdate.setShowOrder(targetIdx);
-        updateById(toUpdate);
+        try {
+            updateById(toUpdate);
+        } catch (DuplicateKeyException e) {
+            throw new ParamError("同一层级的名称、简称均不能重复");
+        }
     }
 
     public Map<String, String> getOrgNameMap(Set<String> orgIds, boolean useFullName) {
         List<NamedId> namedIds = baseMapper.selectNameByIds(orgIds, useFullName);
         return namedIds.stream().collect(Collectors.toMap(NamedId::getItemId, NamedId::getItemName));
     }
-
-
 }

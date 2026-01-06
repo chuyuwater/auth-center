@@ -262,7 +262,15 @@ public class ResourceTreeService extends ServiceImpl<ResourceTreeMapper, Resourc
             idPath = tree.getIdPath() + G.ID_PATH_SPLITTER;
         }
         vo.setIdPath(idPath);
-        return baseMapper.listChildren(vo);
+        List<ResourceTree> resourceTrees = baseMapper.listChildren(vo);
+        Set<String> ids = new HashSet<>();
+        for (ResourceTree rt : resourceTrees) {
+            ids.addAll(Splitter.on(G.ID_PATH_SPLITTER).splitToList(rt.getIdPath()));
+        }
+        if (ids.size() > resourceTrees.size()) {
+            resourceTrees = baseMapper.selectByIds(ids);
+        }
+        return resourceTrees;
     }
 
     /**

@@ -107,7 +107,7 @@ public class UserController {
      */
     @PostMapping("/export")
     @IgnoreResponseWrapper
-    @ResponseExcel
+    @ResponseExcel(name = "用户清单")
     public List<UserExportDTO> exportUser(UserQueryVO vo) {
         return userService.export(vo);
     }
@@ -147,7 +147,7 @@ public class UserController {
     /**
      * 禁用/解禁用户
      */
-    @PatchMapping("/forbidden")
+    @PostMapping("/forbidden")
     public void forbidUser(@Valid @RequestBody UserForbidVO vo) {
         userService.forbidUser(vo);
     }

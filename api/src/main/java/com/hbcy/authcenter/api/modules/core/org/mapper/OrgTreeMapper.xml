@@ -68,10 +68,11 @@
     </select>
 
     <insert id="append">
-        insert into org_tree (id, node_name, node_type, node_category, parent_id, id_path, tenant_id,
+        insert into org_tree (id, node_name, short_name, node_type, node_category, parent_id, id_path, tenant_id,
         create_user, update_user, show_order)
         select #{entity.id},
         #{entity.nodeName},
+        #{entity.shortName},
         #{entity.nodeType},
         #{entity.nodeCategory},
         #{entity.parentId},
