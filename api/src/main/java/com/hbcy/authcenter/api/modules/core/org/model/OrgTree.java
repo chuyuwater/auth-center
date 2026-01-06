@@ -99,7 +99,7 @@ public class OrgTree extends BaseEntity {
      * 逻辑删除
      */
     @TableField(value = "delete_time")
-    private @TableLogic(value = "0", delval = "-1") Long deleteTime;
+    private Long deleteTime;
     @TableField(value = "create_time", fill = FieldFill.INSERT)
     private LocalDateTime createTime;
     @TableField(value = "update_time", fill = FieldFill.INSERT_UPDATE)

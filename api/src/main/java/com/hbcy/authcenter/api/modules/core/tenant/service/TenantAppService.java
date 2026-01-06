@@ -257,7 +257,9 @@ public class TenantAppService extends ServiceImpl<TenantAppMapper, TenantApp> {
         if (tenantApp == null) {
             return;
         }
-        baseMapper.deleteById(grantId);
+        tenantApp.setDeleteTime(System.currentTimeMillis());
+        tenantApp.setUpdateUser(UserContextUtils.getUserId());
+        baseMapper.updateById(tenantApp);
         tenantAppResourceMapper.delete(new QueryWrapper<TenantAppResource>()
                 .eq(TenantAppResource.COL_TENANT_ID, tenantApp.getTenantId())
                 .eq(TenantAppResource.COL_APP_ID, tenantApp.getAppId()));

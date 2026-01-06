@@ -1,6 +1,7 @@
 package com.hbcy.authcenter.api.modules.core.perm.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hbcy.authcenter.api.common.bean.NodeMoveVO;
 import com.hbcy.authcenter.api.common.constants.G;
@@ -177,7 +178,10 @@ public class PermTreeService extends ServiceImpl<PermTreeMapper, PermTree> {
         if (any) {
             throw new ParamError("必须先删除分组及其子分组内的角色");
         }
-        baseMapper.deleteByIds(ids);
+        baseMapper.update(new UpdateWrapper<PermTree>()
+                .in(PermTree.COL_ID, ids)
+                .set(PermTree.COL_DELETE_TIME, System.currentTimeMillis())
+                .set(PermTree.COL_UPDATE_USER, UserContextUtils.getUserId()));
     }
 
     @Transactional(rollbackFor = Exception.class)

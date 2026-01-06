@@ -1,6 +1,7 @@
 package com.hbcy.authcenter.api.modules.core.user.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.f4b6a3.ulid.UlidCreator;
@@ -203,7 +204,9 @@ public class UserService extends ServiceImpl<UserMapper, User> {
         //删除所有角色授权
         permUnitUserMapper.delete(new QueryWrapper<PermUnitUser>()
                 .eq(PermUnitUser.COL_USER_ID, userId));
-        removeById(userId);
+        user.setDeleteTime(System.currentTimeMillis());
+        user.setUpdateUser(UserContextUtils.getUserId());
+        updateById(user);
     }
 
     public void forbidUser(UserForbidVO vo) {
@@ -251,9 +254,12 @@ public class UserService extends ServiceImpl<UserMapper, User> {
             throw new ParamError("删除用户前需要先禁用用户");
         }
         cleanNameCache(vo.getIds());
-        remove(new QueryWrapper<User>()
+        //逻辑删除
+        baseMapper.update(new UpdateWrapper<User>()
                 .eq(User.COL_TENANT_ID, tenantId)
-                .in(User.COL_ID, vo.getIds()));
+                .in(User.COL_ID, vo.getIds())
+                .set(User.COL_DELETE_TIME, System.currentTimeMillis())
+                .set(User.COL_UPDATE_USER, UserContextUtils.getUserId()));
         //删除所有角色授权
         permUnitUserMapper.delete(new QueryWrapper<PermUnitUser>()
                 .eq(PermUnitUser.COL_TENANT_ID, tenantId)

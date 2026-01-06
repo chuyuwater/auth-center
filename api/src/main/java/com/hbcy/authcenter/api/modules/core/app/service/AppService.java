@@ -152,6 +152,8 @@ public class AppService extends ServiceImpl<AppMapper, App> {
         }
         app.setUpdateUser(UserContextUtils.getUserId());
         stringRedisTemplate.opsForHash().delete(APP_STATUS_CACHE, app.getId());
-        this.removeById(app);
+        app.setDeleteTime(System.currentTimeMillis());
+        app.setUpdateUser(UserContextUtils.getUserId());
+        baseMapper.updateById(app);
     }
 }

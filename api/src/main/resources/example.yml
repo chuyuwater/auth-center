@@ -1,6 +1,6 @@
 logging:
   level:
-    root: INFO
+    root: debug
     com.alibaba.nacos: off
     org.springframework.kafka: info
 
@@ -15,28 +15,23 @@ spring:
       password: chuyu@redis123
       timeout: 5s
       cluster:
-        nodes: 127.0.0.1:16379, 127.0.0.1:16380, 127.0.0.1:16381
+        nodes: 127.0.0.1:6379, 127.0.0.1:6380, 127.0.0.1:6381
         max-redirects: 3
   kafka:
-    bootstrap-servers: localhost:19092
+    bootstrap-servers: localhost:9092
     listener:
       # 这里的数量*实例数=分区数
-      concurrency: 1
+      concurrency: 3
       type: batch
       ack-mode: manual_immediate
-    properties:
-      security.protocol: SASL_PLAINTEXT
-      sasl.mechanism: SCRAM-SHA-256
-      sasl.jaas.config: >-
-        org.apache.kafka.common.security.scram.ScramLoginModule required
-        username="admin"
-        password="zaq1@WSXcde3";
 
   datasource:
     username: dev
     password: 9fVBpXJqRaFY
-    url: jdbc:oceanbase://localhost:2881/portal_auth_center?useUnicode=true&characterEncoding=utf-8&useSSL=false&rewriteBatchedStatements=true&allowMultiQueries=true
-    driver-class-name: com.oceanbase.jdbc.Driver
+    #    url: jdbc:oceanbase://localhost:2881/portal_auth_center?useUnicode=true&characterEncoding=utf-8&useSSL=false&rewriteBatchedStatements=true&allowMultiQueries=true
+    #    driver-class-name: com.oceanbase.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/portal_auth_center?useUnicode=true&characterEncoding=utf-8&useSSL=false&rewriteBatchedStatements=true&allowMultiQueries=true&timezone=Asia/Shanghai
+    driver-class-name: com.mysql.cj.jdbc.Driver
     type: com.alibaba.druid.pool.DruidDataSource
     druid:
       initial-size: 4
@@ -66,12 +61,18 @@ mybatis-plus:
     cache-enabled: false
     jdbc-type-for-null: 'null'
     lazy-loading-enabled: false
-    log-impl: org.apache.ibatis.logging.nologging.NoLoggingImpl
+    #    log-impl: org.apache.ibatis.logging.nologging.NoLoggingImpl
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
     map-underscore-to-camel-case: true
     multiple-result-sets-enabled: true
     default-enum-type-handler: org.apache.ibatis.type.EnumOrdinalTypeHandler
   global-config:
     banner: false
+    db-config:
+      logic-delete-field: deleteTime
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+
   mapper-locations: classpath*:com/hbcy/**/mapper/*.xml
   type-handlers-package: com.hbcy.common.db.typehandler
 oss:

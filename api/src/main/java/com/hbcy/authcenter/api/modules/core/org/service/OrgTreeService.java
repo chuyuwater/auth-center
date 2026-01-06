@@ -1,6 +1,7 @@
 package com.hbcy.authcenter.api.modules.core.org.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.common.base.Splitter;
 import com.hbcy.authcenter.api.common.bean.NameCacheService;
@@ -337,7 +338,11 @@ public class OrgTreeService extends ServiceImpl<OrgTreeMapper, OrgTree> {
         Set<String> ids = related.stream().map(OrgTree::getId).collect(Collectors.toSet());
         ids.add(id);
         cleanNameCache(ids);
-        baseMapper.deleteByIds(ids);
+        //逻辑删除
+        baseMapper.update(new UpdateWrapper<OrgTree>()
+                .in(OrgTree.COL_ID, ids)
+                .set(OrgTree.COL_DELETE_TIME, System.currentTimeMillis())
+                .set(OrgTree.COL_UPDATE_USER, UserContextUtils.getUserId()));
     }
 
     /**

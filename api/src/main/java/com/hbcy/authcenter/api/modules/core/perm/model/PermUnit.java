@@ -76,7 +76,6 @@ public class PermUnit extends BaseEntity {
     private LocalDateTime createTime;
     @TableField(value = "update_time", fill = FieldFill.INSERT_UPDATE)
     private LocalDateTime updateTime;
-    @TableField(value = "delete_time", fill = FieldFill.UPDATE)
-    @TableLogic(value = "0", delval = "-1")
+    @TableField(value = "delete_time")
     private Long deleteTime;
 }
