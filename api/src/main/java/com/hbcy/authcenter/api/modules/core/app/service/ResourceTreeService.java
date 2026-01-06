@@ -24,7 +24,6 @@ import com.hbcy.common.base.tree.TreeNode;
 import com.hbcy.common.base.util.BeanCopyUtils;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
-import net.logstash.logback.argument.StructuredArguments;
 import org.apache.commons.lang3.StringUtils;
 import org.jspecify.annotations.Nullable;
 import org.springframework.dao.DuplicateKeyException;
@@ -83,6 +82,8 @@ public class ResourceTreeService extends ServiceImpl<ResourceTreeMapper, Resourc
         entity.setUpdateUser(UserContextUtils.getUserId());
         if (parent != null) {
             entity.setIdPath(parent.getIdPath() + G.ID_PATH_SPLITTER + entity.getId());
+        } else {
+            entity.setIdPath(entity.getId());
         }
         try {
             baseMapper.append(entity);
@@ -134,15 +135,14 @@ public class ResourceTreeService extends ServiceImpl<ResourceTreeMapper, Resourc
     public TreeNode<ResTreeDTO> listResTreeRecursively(ResourceTreeQueryVO vo,
                                                        List<ResPermDTO> grantPermList, boolean removeUngrant) {
         TreeNode<ResTreeDTO> root = new TreeNode<>();
+        ResTreeDTO dto = new ResTreeDTO();
+        root.setData(dto);
         if (StringUtils.isNotBlank(vo.getParentId())) {
             ResourceTree node = baseMapper.selectById(vo.getParentId());
             if (node == null) {
                 throw new ParamError("指定节点不存在");
             }
-            ResTreeDTO dto = new ResTreeDTO();
             dto.setRes(node);
-        } else {
-            root.setData(new ResTreeDTO());
         }
         List<ResourceTree> resourceTrees = listResTree(vo);
         List<ResourcePerm> resourcePerms = new ArrayList<>();
@@ -220,9 +220,11 @@ public class ResourceTreeService extends ServiceImpl<ResourceTreeMapper, Resourc
                            Map<String, List<ResourceTree>> childrenMap,
                            Map<String, List<ResourcePerm>> permMap,
                            Set<String> allGrantIds) {
-        String resId = current.getData().getRes().getId();
+        String resId = Optional.ofNullable(
+                        current.getData()).map(ResTreeDTO::getRes)
+                .map(ResourceTree::getId).orElse("");
         //先查询当前节点关联的权限点
-        for (ResourcePerm t : permMap.get(resId)) {
+        for (ResourcePerm t : permMap.getOrDefault(resId, Collections.emptyList())) {
             TreeNode<ResTreeDTO> node = new TreeNode<>();
             ResTreeDTO dto = new ResTreeDTO().setPerm(t);
             if (allGrantIds != null) {
@@ -232,7 +234,7 @@ public class ResourceTreeService extends ServiceImpl<ResourceTreeMapper, Resourc
             current.addChild(node);
         }
         //再递归查询当前节点关联的菜单
-        for (ResourceTree t : childrenMap.get(resId)) {
+        for (ResourceTree t : childrenMap.getOrDefault(resId, Collections.emptyList())) {
             TreeNode<ResTreeDTO> node = new TreeNode<>();
             ResTreeDTO dto = new ResTreeDTO().setRes(t);
             if (allGrantIds != null) {
@@ -290,9 +292,7 @@ public class ResourceTreeService extends ServiceImpl<ResourceTreeMapper, Resourc
             throw new ParamError("请先删除该菜单下的所有权限点");
         }
         baseMapper.deleteByIds(resIds);
-        JsonLogUtils.log("delete-res-node", StructuredArguments.kv("id", id),
-                StructuredArguments.kv("permIds", permIds),
-                StructuredArguments.kv("resIds", resIds));
+        JsonLogUtils.log("delete-res-node", "id", id, "permIds", permIds, "resIds", resIds);
         if (permIds.isEmpty()) {
             return;
         }

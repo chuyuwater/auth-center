@@ -1,6 +1,7 @@
 package com.hbcy.authcenter.api.modules.core.app.vo;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.Range;
@@ -37,5 +38,6 @@ public class ResourcePermUpdateVO {
      * API路径
      */
     @Length(max = 255, message = "API路径长度不能超过255")
+    @Pattern(regexp = "^/[\\w/\\-\\*\\?]*$", message = "API路径格式错误")
     private String apiPath;
 }

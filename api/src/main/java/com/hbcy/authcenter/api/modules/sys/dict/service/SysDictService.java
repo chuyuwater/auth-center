@@ -159,7 +159,8 @@ public class SysDictService extends ServiceImpl<SysDictMapper, SysDict> {
     }
 
     private void buildTree(TreeNode<SysDict> current, Map<String, List<SysDict>> childrenMap) {
-        for (SysDict d : childrenMap.get(current.getData().getId())) {
+        String id = current.getData().getId();
+        for (SysDict d : childrenMap.getOrDefault(id, List.of())) {
             TreeNode<SysDict> node = new TreeNode<>(d);
             current.addChild(node);
             buildTree(node, childrenMap);

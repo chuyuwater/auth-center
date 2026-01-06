@@ -29,8 +29,6 @@ public class ResourceTree extends BaseEntity {
     public static final String COL_SHOW_ORDER = "show_order";
     public static final String COL_HIDDEN = "hidden";
     public static final String COL_SHOW_LEVEL = "show_level";
-    public static final String COL_SUB_DOM = "sub_dom";
-    public static final String COL_OBJ_DOM = "obj_dom";
     public static final String COL_CREATE_TIME = "create_time";
     public static final String COL_UPDATE_TIME = "update_time";
     public static final String COL_CREATE_USER = "create_user";
@@ -93,16 +91,6 @@ public class ResourceTree extends BaseEntity {
      */
     @TableField(value = "show_level")
     private Integer showLevel;
-    /**
-     * 资源主体域，0-全局，1-组织，2-岗位
-     */
-    @TableField(value = "sub_dom")
-    private Integer subDom;
-    /**
-     * 资源客体域
-     */
-    @TableField(value = "obj_dom")
-    private String objDom;
     @TableField(value = "create_time", fill = FieldFill.INSERT)
     private LocalDateTime createTime;
     @TableField(value = "update_time", fill = FieldFill.INSERT_UPDATE)

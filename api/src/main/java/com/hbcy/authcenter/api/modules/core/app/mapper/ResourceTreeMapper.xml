@@ -16,8 +16,6 @@
         <result column="show_order" jdbcType="INTEGER" property="showOrder"/>
         <result column="hidden" jdbcType="TINYINT" property="hidden"/>
         <result column="show_level" jdbcType="TINYINT" property="showLevel"/>
-        <result column="sub_dom" jdbcType="INTEGER" property="subDom"/>
-        <result column="obj_dom" jdbcType="VARCHAR" property="objDom"/>
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
         <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
         <result column="create_user" jdbcType="CHAR" property="createUser"/>
@@ -37,8 +35,6 @@
         show_order,
         hidden,
         show_level,
-        sub_dom,
-        obj_dom,
         create_time,
         update_time,
         create_user,
@@ -88,7 +84,7 @@
 
     <insert id="append">
         insert into resource_tree (id, name_cn, app_id, custom_id, parent_id, id_path, client_type, icon, route_link,
-        hidden, show_level, sub_dom, obj_dom, create_user, update_user,
+        hidden, show_level, create_user, update_user,
         show_order)
         select #{entity.id},
         #{entity.nameCn},
@@ -101,11 +97,10 @@
         #{entity.routeLink},
         #{entity.hidden},
         #{entity.showLevel},
-        #{entity.subDom},
-        #{entity.objDom},
         #{entity.createUser},
         #{entity.updateUser},
-        (SELECT COALESCE(MAX(show_order), 0) + 1 from resource_tree where parent_id = #{entity.parentId})
+        (SELECT COALESCE(MAX(show_order), 0) + 1 from
+        resource_tree where parent_id = #{entity.parentId} and app_id= #{entity.appId})
     </insert>
 
     <update id="updateIdPath">
