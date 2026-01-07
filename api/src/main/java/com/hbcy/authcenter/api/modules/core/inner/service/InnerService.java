@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.hbcy.authcenter.api.config.UserAuthConfig;
 import com.hbcy.authcenter.api.modules.core.app.dao.ResourcePermMapper;
 import com.hbcy.authcenter.api.modules.core.auth.service.UserAuthService;
+import com.hbcy.authcenter.api.modules.core.inner.dto.ApiPermDTO;
+import com.hbcy.authcenter.api.modules.core.inner.vo.RefreshUserPermVO;
 import com.hbcy.authcenter.api.modules.core.org.dao.OrgTreeMapper;
 import com.hbcy.authcenter.api.modules.core.org.model.OrgTree;
 import com.hbcy.authcenter.api.modules.core.perm.dao.PermUnitUserMapper;
@@ -12,7 +14,6 @@ import com.hbcy.authcenter.api.modules.core.tenant.dao.TenantAppResourceMapper;
 import com.hbcy.authcenter.api.modules.core.tenant.dao.TenantMapper;
 import com.hbcy.authcenter.api.modules.core.tenant.model.Tenant;
 import com.hbcy.authcenter.api.modules.core.tenant.model.TenantApp;
-import com.hbcy.authcenter.sdk.feign.dto.ApiPermDTO;
 import com.hbcy.authcenter.sdk.utils.UserContextUtils;
 import com.hbcy.common.redis.RedisExtendService;
 import jakarta.annotation.Resource;
@@ -48,17 +49,14 @@ public class InnerService {
     @Resource
     private TenantMapper tenantMapper;
 
-    public void refreshUserPerms() {
-        String userId = UserContextUtils.getUserId();
-        String orgId = UserContextUtils.getUserOrg();
-        String tenantId = UserContextUtils.getTenantId();
+    public void refreshUserPerms(RefreshUserPermVO vo) {
         Set<String> resp = new HashSet<>();
         if (UserContextUtils.isTenantAdmin()) {
             //管理员
             List<TenantApp> tenantApps = tenantAppMapper.selectList(new QueryWrapper<TenantApp>()
-                    .eq(TenantApp.COL_TENANT_ID, tenantId));
+                    .eq(TenantApp.COL_TENANT_ID, vo.getTenantId()));
             if (CollectionUtils.isEmpty(tenantApps)) {
-                refreshAppPerms(userId, orgId, resp);
+                refreshAppPerms(vo.getUserId(), vo.getOrgId(), resp);
                 return;
             }
             Set<String> grantAllAppIds = tenantApps.stream()
@@ -68,18 +66,18 @@ public class InnerService {
             if (!grantAllAppIds.isEmpty()) {
                 resp.addAll(resourcePermMapper.listAppsPermIds(grantAllAppIds));
             }
-            resp.addAll(tenantAppResourceMapper.getGrantedPermIds(tenantId, ""));
-            refreshAppPerms(userId, orgId, resp);
+            resp.addAll(tenantAppResourceMapper.getGrantedPermIds(vo.getTenantId(), ""));
+            refreshAppPerms(vo.getUserId(), vo.getOrgId(), resp);
             return;
         }
         //普通用户
-        OrgTree org = orgTreeMapper.selectById(orgId);
+        OrgTree org = orgTreeMapper.selectById(vo.getOrgId());
         if (org == null) {
-            refreshAppPerms(userId, orgId, resp);
+            refreshAppPerms(vo.getUserId(), vo.getOrgId(), resp);
             return;
         }
-        resp.addAll(permUnitUserMapper.listUserPerms(userId, org.getIdPath()));
-        refreshAppPerms(userId, orgId, resp);
+        resp.addAll(permUnitUserMapper.listUserPerms(vo.getUserId(), org.getIdPath()));
+        refreshAppPerms(vo.getUserId(), vo.getOrgId(), resp);
     }
 
     /**

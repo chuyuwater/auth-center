@@ -56,7 +56,7 @@
         </foreach>
     </select>
 
-    <select id="selectAll4Gateway" resultType="com.hbcy.authcenter.sdk.feign.dto.ApiPermDTO">
+    <select id="selectAll4Gateway" resultType="com.hbcy.authcenter.api.modules.core.inner.dto.ApiPermDTO">
         select id as perm_id,
                api_method,
                api_path
