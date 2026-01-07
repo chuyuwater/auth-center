@@ -28,7 +28,7 @@
     </sql>
 
     <select id="listFilteredPerms" resultType="com.hbcy.authcenter.api.modules.core.app.dto.ResPermDTO">
-        select rp.id,
+        select distinct rp.id,
         rp.app_id,
         rp.res_id,
         rp.perm_name,
@@ -37,8 +37,7 @@
         rp.api_path
         from perm_unit_user puu
         join perm_unit_resource pur on puu.unit_id = pur.unit_id
-        join resource_perm rp
-        on pur.perm_id = rp.id
+        join resource_perm rp on pur.perm_id = rp.id
         join org_tree ot on puu.org_id = ot.id
         <where>
             puu.user_id = #{userId}

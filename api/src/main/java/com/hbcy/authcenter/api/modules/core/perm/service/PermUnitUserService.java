@@ -7,8 +7,10 @@ import com.hbcy.authcenter.api.modules.core.app.dto.GrantAppDTO;
 import com.hbcy.authcenter.api.modules.core.app.dto.ResPermDTO;
 import com.hbcy.authcenter.api.modules.core.org.model.OrgTree;
 import com.hbcy.authcenter.api.modules.core.org.service.OrgTreeService;
+import com.hbcy.authcenter.api.modules.core.perm.dao.PermUnitMapper;
 import com.hbcy.authcenter.api.modules.core.perm.dao.PermUnitUserMapper;
 import com.hbcy.authcenter.api.modules.core.perm.dto.UnitUserDTO;
+import com.hbcy.authcenter.api.modules.core.perm.model.PermUnit;
 import com.hbcy.authcenter.api.modules.core.perm.model.PermUnitUser;
 import com.hbcy.authcenter.api.modules.core.perm.vo.PermUnitUserQueryVO;
 import com.hbcy.authcenter.api.modules.core.perm.vo.PermUnitUserUpdateVO;
@@ -16,8 +18,11 @@ import com.hbcy.authcenter.api.modules.core.perm.vo.PermUserGrantVO;
 import com.hbcy.authcenter.api.modules.core.tenant.dao.TenantAppMapper;
 import com.hbcy.authcenter.api.modules.core.tenant.dao.TenantAppResourceMapper;
 import com.hbcy.authcenter.api.modules.core.tenant.model.TenantApp;
+import com.hbcy.authcenter.api.modules.core.user.dao.UserOrgMapper;
+import com.hbcy.authcenter.api.modules.core.user.model.UserOrg;
 import com.hbcy.authcenter.sdk.utils.UserContextUtils;
 import com.hbcy.common.base.error.ParamError;
+import com.hbcy.common.base.error.PermissionError;
 import jakarta.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -25,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -37,13 +43,38 @@ public class PermUnitUserService extends ServiceImpl<PermUnitUserMapper, PermUni
     private TenantAppMapper tenantAppMapper;
     @Resource
     private TenantAppResourceMapper tenantAppResourceMapper;
+    @Resource
+    private UserOrgMapper userOrgMapper;
+    @Resource
+    private PermUnitMapper permUnitMapper;
 
     @Transactional(rollbackFor = Exception.class)
     public void addUsersToUnit(PermUnitUserUpdateVO vo) {
         String tenantId = UserContextUtils.getTenantId();
         String currentUserId = UserContextUtils.getUserId();
+        PermUnit permUnit = permUnitMapper.selectById(vo.getUnitId());
+        if (permUnit == null) {
+            throw new ParamError("权限单元已被删除");
+        }
+        if (!permUnit.getTenantId().equals(tenantId)) {
+            throw new PermissionError("权限单元不属于当前租户");
+        }
+        //校验数据，在user_org表里找到对应
+        //为减少io，直接取出用户所有的org整理成map
+        Set<String> userIds = vo.getUserList().stream().map(
+                PermUserGrantVO::getUserId).collect(Collectors.toSet());
+        List<UserOrg> userOrgs = userOrgMapper.selectList(new QueryWrapper<UserOrg>()
+                .in(UserOrg.COL_USER_ID, userIds)
+                .eq(UserOrg.COL_TENANT_ID, tenantId));
+        Map<String, Set<String>> userOrgSet = userOrgs.stream().collect(Collectors.groupingBy(
+                UserOrg::getUserId,
+                Collectors.mapping(UserOrg::getOrgId, Collectors.toSet())
+        ));
         List<PermUnitUser> list = new ArrayList<>();
         for (PermUserGrantVO g : vo.getUserList()) {
+            if (!userOrgSet.containsKey(g.getUserId()) || !userOrgSet.get(g.getUserId()).contains(g.getOrgId())) {
+                throw new ParamError("用户或组织信息错误");
+            }
             PermUnitUser u = new PermUnitUser();
             u.setId(UlidCreator.getUlid().toString());
             u.setUnitId(vo.getUnitId());

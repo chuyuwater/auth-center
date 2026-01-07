@@ -5,6 +5,7 @@ import com.hbcy.authcenter.api.modules.core.perm.service.PermUnitUserService;
 import com.hbcy.authcenter.api.modules.core.perm.vo.PermUnitUserQueryVO;
 import com.hbcy.authcenter.api.modules.core.perm.vo.PermUnitUserUpdateVO;
 import com.hbcy.common.base.pojo.BatchDeleteVO;
+import com.hbcy.common.web.bean.NameFill;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import org.springframework.validation.annotation.Validated;
@@ -38,7 +39,7 @@ public class PermUnitUserController {
     }
 
     /**
-     * 从权限单元移除用户
+     * 按授权id移除授权
      *
      * @param grantId 授权ID
      */
@@ -48,7 +49,7 @@ public class PermUnitUserController {
     }
 
     /**
-     * 从权限单元批量移除用户
+     * 按授权id批量移除授权
      *
      * @param vo 批量删除请求参数
      */
@@ -64,6 +65,7 @@ public class PermUnitUserController {
      * @return 用户列表
      */
     @GetMapping
+    @NameFill
     public List<UnitUserDTO> listGrantUsers(@Valid PermUnitUserQueryVO vo) {
         return permUnitUserService.listGrantUsers(vo);
     }

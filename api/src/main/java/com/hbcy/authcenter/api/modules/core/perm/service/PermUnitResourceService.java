@@ -75,6 +75,9 @@ public class PermUnitResourceService extends ServiceImpl<PermUnitResourceMapper,
         }
         //仅保留权限点
         Set<String> pointIds = resourcePermService.filterAppPermIds(vo.getAppId(), vo.getPermIds());
+        if (CollectionUtils.isEmpty(pointIds)) {
+            throw new ParamError("无有效权限");
+        }
         //用户只能授权自己拥有的权限
         List<ResPermDTO> granted = permUnitUserService.listPerms(vo.getAppId());
         var grantedIds = granted.stream().map(ResPermDTO::getId).collect(Collectors.toSet());
@@ -128,6 +131,16 @@ public class PermUnitResourceService extends ServiceImpl<PermUnitResourceMapper,
         return resp;
     }
 
+    /**
+     * 获取权限单元关联的权限树
+     * 这个接口有多个作用：
+     * 1. 当onlyPacked为true时，则返回权限单元已封装的权限树
+     * 2. 当onlyPacked为false时，则返回用户有权授权的权限树，同时标注出已授权的节点
+     * 对不同的用户而言，这颗树是不一样的，用户只能看到自己本身拥有的权限。
+     *
+     * @param vo 查询条件
+     * @return 权限树
+     */
     public List<TreeNode<ResTreeDTO>> listUnitResources(PermUnitResourceQueryVO vo) {
         //查找权限单元已封装的权限
         PermUnit permUnit = permUnitMapper.selectById(vo.getUnitId());
@@ -137,7 +150,17 @@ public class PermUnitResourceService extends ServiceImpl<PermUnitResourceMapper,
         if (!permUnit.getTenantId().equals(UserContextUtils.getTenantId())) {
             throw new PermissionError();
         }
+        //当前用户拥有的APP权限
         List<ResPermDTO> currentUserPerms = permUnitUserService.listPerms(vo.getAppId());
+        //权限单元已勾选的APP权限
+        Set<String> grantIds = baseMapper.selectList(new QueryWrapper<PermUnitResource>()
+                        .eq(PermUnitResource.COL_UNIT_ID, vo.getUnitId())
+                        .eq(PermUnitResource.COL_APP_ID, vo.getAppId())
+                        .select(PermUnitResource.COL_PERM_ID))
+                .stream().map(PermUnitResource::getPermId).collect(Collectors.toSet());
+        //取交集
+        currentUserPerms.removeIf(perm -> !grantIds.contains(perm.getId()));
+
         ResourceTreeQueryVO queryVO = new ResourceTreeQueryVO();
         queryVO.setAppId(vo.getAppId());
         queryVO.setWithPerm(true);
