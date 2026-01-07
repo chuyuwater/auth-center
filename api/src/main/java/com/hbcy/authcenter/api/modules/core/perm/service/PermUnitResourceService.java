@@ -145,13 +145,16 @@ public class PermUnitResourceService extends ServiceImpl<PermUnitResourceMapper,
         //查找权限单元已封装的权限
         PermUnit permUnit = permUnitMapper.selectById(vo.getUnitId());
         if (permUnit == null) {
-            return new ArrayList<>();
+            return List.of();
         }
         if (!permUnit.getTenantId().equals(UserContextUtils.getTenantId())) {
             throw new PermissionError();
         }
         //当前用户拥有的APP权限
         List<ResPermDTO> currentUserPerms = permUnitUserService.listPerms(vo.getAppId());
+        if (CollectionUtils.isEmpty(currentUserPerms)) {
+            return List.of();
+        }
         //权限单元已勾选的APP权限
         Set<String> grantIds = baseMapper.selectList(new QueryWrapper<PermUnitResource>()
                         .eq(PermUnitResource.COL_UNIT_ID, vo.getUnitId())
@@ -160,7 +163,9 @@ public class PermUnitResourceService extends ServiceImpl<PermUnitResourceMapper,
                 .stream().map(PermUnitResource::getPermId).collect(Collectors.toSet());
         //取交集
         currentUserPerms.removeIf(perm -> !grantIds.contains(perm.getId()));
-
+        if (CollectionUtils.isEmpty(currentUserPerms)) {
+            return List.of();
+        }
         ResourceTreeQueryVO queryVO = new ResourceTreeQueryVO();
         queryVO.setAppId(vo.getAppId());
         queryVO.setWithPerm(true);
