@@ -116,6 +116,7 @@ public class UserController {
      * 导入用户
      *
      * @param vo 导入数据
+     * @ignore
      */
     @SuppressWarnings("unchecked")
     @PostMapping("/import")

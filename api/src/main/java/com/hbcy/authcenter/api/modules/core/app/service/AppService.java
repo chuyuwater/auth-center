@@ -1,6 +1,7 @@
 package com.hbcy.authcenter.api.modules.core.app.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hbcy.authcenter.api.common.bean.NodeMoveVO;
 import com.hbcy.authcenter.api.modules.core.app.dao.AppMapper;
@@ -152,8 +153,9 @@ public class AppService extends ServiceImpl<AppMapper, App> {
         }
         app.setUpdateUser(UserContextUtils.getUserId());
         stringRedisTemplate.opsForHash().delete(APP_STATUS_CACHE, app.getId());
-        app.setDeleteTime(System.currentTimeMillis());
-        app.setUpdateUser(UserContextUtils.getUserId());
-        baseMapper.updateById(app);
+        baseMapper.update(new UpdateWrapper<App>()
+                .eq(App.COL_ID, id)
+                .set(App.COL_UPDATE_USER, UserContextUtils.getUserId())
+                .set(App.COL_DELETE_TIME, System.currentTimeMillis()));
     }
 }

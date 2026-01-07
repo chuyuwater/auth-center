@@ -63,7 +63,7 @@ public class PermTreeController {
     @GetMapping("/child")
     public List<PermTree> getDirectChildren(String parentId) {
         PermTreeQueryVO vo = new PermTreeQueryVO();
-        vo.setParentId(parentId);
+        vo.setParentId(parentId == null ? "" : parentId);
         return permTreeService.listDirectChildren(vo);
     }
 

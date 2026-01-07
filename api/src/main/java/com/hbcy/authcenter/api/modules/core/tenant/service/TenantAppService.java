@@ -1,6 +1,7 @@
 package com.hbcy.authcenter.api.modules.core.tenant.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hbcy.authcenter.api.modules.core.app.dao.AppMapper;
 import com.hbcy.authcenter.api.modules.core.app.dao.ResourcePermMapper;
@@ -257,9 +258,10 @@ public class TenantAppService extends ServiceImpl<TenantAppMapper, TenantApp> {
         if (tenantApp == null) {
             return;
         }
-        tenantApp.setDeleteTime(System.currentTimeMillis());
-        tenantApp.setUpdateUser(UserContextUtils.getUserId());
-        baseMapper.updateById(tenantApp);
+        baseMapper.update(new UpdateWrapper<TenantApp>()
+                .eq(TenantApp.COL_ID, tenantApp.getId())
+                .set(TenantApp.COL_UPDATE_USER, UserContextUtils.getUserId())
+                .set(TenantApp.COL_DELETE_TIME, System.currentTimeMillis()));
         tenantAppResourceMapper.delete(new QueryWrapper<TenantAppResource>()
                 .eq(TenantAppResource.COL_TENANT_ID, tenantApp.getTenantId())
                 .eq(TenantAppResource.COL_APP_ID, tenantApp.getAppId()));

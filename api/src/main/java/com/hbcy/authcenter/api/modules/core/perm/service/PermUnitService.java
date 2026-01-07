@@ -1,6 +1,7 @@
 package com.hbcy.authcenter.api.modules.core.perm.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hbcy.authcenter.api.modules.core.perm.dao.PermTreeMapper;
@@ -96,6 +97,7 @@ public class PermUnitService extends ServiceImpl<PermUnitMapper, PermUnit> {
         return new PageRespEx<>(page);
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public void delete(String id) {
         PermUnit entity = getById(id);
         if (entity == null) {
@@ -109,6 +111,9 @@ public class PermUnitService extends ServiceImpl<PermUnitMapper, PermUnit> {
         if (any) {
             throw new ParamError("请先移除关联的用户");
         }
-        removeById(id);
+        baseMapper.update(new UpdateWrapper<PermUnit>()
+                .eq(PermUnit.COL_ID, id)
+                .set(PermUnit.COL_UPDATE_USER, UserContextUtils.getUserId())
+                .set(PermUnit.COL_DELETE_TIME, System.currentTimeMillis()));
     }
 }

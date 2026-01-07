@@ -60,21 +60,18 @@ public class PermTreeService extends ServiceImpl<PermTreeMapper, PermTree> {
 
         PermTree entity = new PermTree();
         BeanCopyUtils.copy(vo, entity);
-        String id = redisIdGenerator.generateId(BIZ_KEY.formatted(tenantId), () -> {
-            Long cnt = baseMapper.selectCount(new QueryWrapper<PermTree>()
-                    .eq(PermTree.COL_TENANT_ID, tenantId));
-            return cnt + 1;
-        }, k -> {
-            return vo.getPolicyModel() == 0 ?
-                    PermTree.RBAC_ID_TEMPLATE.formatted(tenantId, k) :
-                    PermTree.ABAC_ID_TEMPLATE.formatted(tenantId, k);
-        });
+        String id = redisIdGenerator.generateId(BIZ_KEY.formatted(tenantId),
+                () -> baseMapper.selectCount(new QueryWrapper<PermTree>()
+                        .eq(PermTree.COL_TENANT_ID, tenantId)),
+                k -> vo.getPolicyModel() == 0 ?
+                        PermTree.RBAC_ID_TEMPLATE.formatted(tenantId, k) :
+                        PermTree.ABAC_ID_TEMPLATE.formatted(tenantId, k));
         entity.setId(id);
         entity.setParentId(parentId);
         entity.setTenantId(tenantId);
         entity.setCreateUser(UserContextUtils.getUserId());
         entity.setUpdateUser(UserContextUtils.getUserId());
-        entity.setIdPath(parentIdPath + G.ID_PATH_SPLITTER + entity.getId());
+        entity.setIdPath(parent == null ? entity.getId() : parentIdPath + G.ID_PATH_SPLITTER + entity.getId());
         try {
             baseMapper.append(entity);
         } catch (DuplicateKeyException e) {

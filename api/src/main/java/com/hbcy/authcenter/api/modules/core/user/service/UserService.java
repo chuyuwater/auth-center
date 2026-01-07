@@ -213,9 +213,10 @@ public class UserService extends ServiceImpl<UserMapper, User> {
         //删除所有角色授权
         permUnitUserMapper.delete(new QueryWrapper<PermUnitUser>()
                 .eq(PermUnitUser.COL_USER_ID, userId));
-        user.setDeleteTime(System.currentTimeMillis());
-        user.setUpdateUser(UserContextUtils.getUserId());
-        updateById(user);
+        baseMapper.update(new UpdateWrapper<User>()
+                .eq(User.COL_ID, userId)
+                .set(User.COL_UPDATE_USER, UserContextUtils.getUserId())
+                .set(User.COL_DELETE_TIME, System.currentTimeMillis()));
     }
 
     public void forbidUser(UserForbidVO vo) {
@@ -231,7 +232,7 @@ public class UserService extends ServiceImpl<UserMapper, User> {
     public void adminResetPasswd(AdminResetPasswdVO vo) {
         var user = checkUser(vo.getUserId());
         if (!PasswordUtils.isValid(vo.getPassword())) {
-            throw new ParamError("密码强度要求：至少8位，且包含大小写字母、数字和符号中的至少3项");
+            throw new ParamError("密码强度要求：至少8位，且同时包含大小写字母、数字和符号");
         }
         user.setPasswd(passwordEncoder.encode(vo.getPassword()));
         user.setUpdateUser(UserContextUtils.getUserId());
@@ -244,7 +245,7 @@ public class UserService extends ServiceImpl<UserMapper, User> {
             throw new ParamError("旧密码不正确");
         }
         if (!PasswordUtils.isValid(vo.getPassword())) {
-            throw new ParamError("密码强度要求：至少8位，且包含大小写字母、数字和符号中的至少3项");
+            throw new ParamError("密码强度要求：至少8位，且同时包含大小写字母、数字和符号");
         }
         User toUpdate = new User();
         toUpdate.setId(user.getId());
@@ -368,7 +369,8 @@ public class UserService extends ServiceImpl<UserMapper, User> {
         if (CollectionUtils.isEmpty(page.getRecords())) {
             return new PageResp<>();
         }
-        List<String> userIds = page.getRecords().stream().map(UserQueryResultDTO::getId).toList();
+        Set<String> userIds = page.getRecords().stream().map(
+                UserQueryResultDTO::getId).collect(Collectors.toSet());
         //然后查询每个人的所有任职组织及其概况
         List<UserOrgDTO> userOrgs = userOrgService.listUserOrgs(userIds);
         //根据orgId查询orgName
@@ -500,6 +502,7 @@ public class UserService extends ServiceImpl<UserMapper, User> {
             uo.setId(UlidCreator.getUlid().toString());
             uo.setUserId(u.getId());
             uo.setOrgId(orgNameIdMap.get(d.getOrgName()));
+            uo.setNodeId(uo.getOrgId());
             uo.setTenantId(tenantId);
             uo.setMainJob(1);
             uo.setCreateUser(createUser);
