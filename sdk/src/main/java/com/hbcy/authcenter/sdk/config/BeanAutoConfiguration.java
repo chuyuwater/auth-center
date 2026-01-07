@@ -1,5 +1,6 @@
 package com.hbcy.authcenter.sdk.config;
 
+import com.hbcy.authcenter.sdk.filter.FeignHeaderInterceptor;
 import com.hbcy.authcenter.sdk.filter.HeaderContextFilter;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
@@ -21,5 +22,10 @@ public class BeanAutoConfiguration {
         registration.addUrlPatterns("/*");
         registration.setOrder(Ordered.HIGHEST_PRECEDENCE);
         return registration;
+    }
+
+    @Bean
+    public FeignHeaderInterceptor feignHeaderInterceptor() {
+        return new FeignHeaderInterceptor();
     }
 }

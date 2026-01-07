@@ -6,6 +6,7 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -31,6 +32,21 @@ public class UserContextUtils {
      */
     public static void setHeaders(Map<String, String> headers) {
         HEADER.set(headers);
+    }
+
+    /**
+     * 额外增加header
+     *
+     * @param key   header key
+     * @param value header value
+     */
+    public static void setHeader(String key, String value) {
+        Map<String, String> headers = getHeaders();
+        if (headers == null) {
+            headers = new HashMap<>();
+            setHeaders(headers);
+        }
+        headers.put(key, value);
     }
 
     private static String getHeader(String key) {

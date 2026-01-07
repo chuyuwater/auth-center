@@ -1,9 +1,10 @@
 package com.hbcy.authcenter.api.modules.core.inner.controller;
 
-import com.hbcy.authcenter.api.modules.core.inner.dto.ApiPermDTO;
 import com.hbcy.authcenter.api.modules.core.inner.service.InnerService;
+import com.hbcy.authcenter.sdk.feign.dto.ApiPermDTO;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -26,10 +27,9 @@ public class InnerController {
     private InnerService innerService;
 
     /**
-     * 获取用户在指定组织本下的所有permId
-     * 用于网关层建立redis缓存
+     * 刷新用户权限缓存，供网关调用
      */
-    @GetMapping("/user/perm")
+    @PostMapping("/user/perm/refresh")
     public void refreshUserPerms() {
         innerService.refreshUserPerms();
     }

@@ -1,4 +1,4 @@
-package com.hbcy.authcenter.api.modules.core.inner.dto;
+package com.hbcy.authcenter.sdk.feign.dto;
 
 import lombok.Data;
 

@@ -46,6 +46,7 @@ public class UserAuthController {
     /**
      * 登出
      */
+    @PostMapping("/logout")
     public void logout() {
         userAuthService.logout(null);
     }
