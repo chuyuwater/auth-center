@@ -1,6 +1,5 @@
 package com.hbcy.authcenter.api.modules.core.app.vo;
 
-import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -14,8 +13,11 @@ import lombok.EqualsAndHashCode;
 @Data
 public class ResourcePermCreateVO extends ResourcePermUpdateVO {
     /**
+     * 权限点id
+     */
+    private String id;
+    /**
      * 关联的资源id
      */
-    @NotBlank(message = "资源id不能为空")
     private String resId;
 }

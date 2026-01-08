@@ -87,6 +87,7 @@ public class ResourceTreeService extends ServiceImpl<ResourceTreeMapper, Resourc
         }
         try {
             baseMapper.append(entity);
+            resourcePermService.batchCreate(entity.getId(), vo.getSubPerms());
         } catch (DuplicateKeyException e) {
             throw new ParamError("同一应用下菜单唯一ID不能重复");
         }
@@ -110,6 +111,7 @@ public class ResourceTreeService extends ServiceImpl<ResourceTreeMapper, Resourc
         entity.setUpdateUser(UserContextUtils.getUserId());
         try {
             updateById(entity);
+            resourcePermService.overwrite(id, vo.getSubPerms(), entity.getAppId());
         } catch (DuplicateKeyException e) {
             throw new ParamError("同一应用下自定义菜单ID不能重复");
         }

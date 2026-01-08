@@ -21,4 +21,8 @@ public class EventConstants {
      * 租户管理员变更，info是租户的详情
      */
     public static final String TENANT_ADMIN_CHANGED = "TENANT_ADMIN_CHANGED";
+    /**
+     * app的权限资源发生变更，网关需要重建缓存
+     */
+    public static final String KAFKA_RESOURCE_PERM_CHANGED = "RESOURCE_PERM_CHANGED";
 }

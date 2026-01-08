@@ -2,19 +2,20 @@ package com.hbcy.authcenter.api.modules.core.app.controller;
 
 import com.hbcy.authcenter.api.modules.core.app.model.ResourcePerm;
 import com.hbcy.authcenter.api.modules.core.app.service.ResourcePermService;
-import com.hbcy.authcenter.api.modules.core.app.vo.ResourcePermCreateVO;
 import com.hbcy.authcenter.api.modules.core.app.vo.ResourcePermQueryVO;
-import com.hbcy.authcenter.api.modules.core.app.vo.ResourcePermUpdateVO;
 import com.hbcy.common.web.bean.NameFill;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
 /**
- * 权限点管理（门户侧）
+ * 权限点管理
+ * 目前是通过资源批量管理的，因此这里的api没啥用
  *
  * @author 姚泰然
  * @module app
@@ -38,50 +39,5 @@ public class ResourcePermController {
     @NameFill
     public List<ResourcePerm> list(@Valid ResourcePermQueryVO vo) {
         return resourcePermService.list(vo);
-    }
-
-    /**
-     * 权限点详情
-     *
-     * @param id 权限ID
-     * @return 权限信息
-     */
-    @GetMapping("/{id}")
-    @NameFill
-    public ResourcePerm getById(@PathVariable String id) {
-        return resourcePermService.getById(id);
-    }
-
-    /**
-     * 创建权限点
-     *
-     * @param vo 权限信息
-     * @return 创建后的权限信息
-     */
-    @PostMapping
-    public ResourcePerm create(@RequestBody @Valid ResourcePermCreateVO vo) {
-        return resourcePermService.create(vo);
-    }
-
-    /**
-     * 更新权限点
-     *
-     * @param id 权限ID
-     * @param vo 更新信息
-     * @return 更新后的权限信息
-     */
-    @PutMapping("/{id}")
-    public ResourcePerm update(@PathVariable String id, @RequestBody @Valid ResourcePermUpdateVO vo) {
-        return resourcePermService.update(vo, id);
-    }
-
-    /**
-     * 删除权限点
-     *
-     * @param id 权限ID
-     */
-    @DeleteMapping("/{id}")
-    public void delete(@PathVariable String id) {
-        resourcePermService.delete(id);
     }
 }
