@@ -1,6 +1,6 @@
 package com.hbcy.authcenter.api.common.bean;
 
-import com.hbcy.authcenter.dto.AppEventOutDTO;
+import com.hbcy.authcenter.global.dto.AppEventOutDTO;
 import com.hbcy.authcenter.sdk.constants.EventConstants;
 import jakarta.annotation.Resource;
 import org.springframework.kafka.core.KafkaTemplate;

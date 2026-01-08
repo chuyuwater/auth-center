@@ -1,4 +1,4 @@
-package com.hbcy.authcenter.dto;
+package com.hbcy.authcenter.global.dto;
 
 import lombok.Data;
 import lombok.experimental.Accessors;

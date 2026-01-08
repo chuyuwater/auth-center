@@ -1,6 +1,6 @@
 package com.hbcy.authcenter.sdk.filter;
 
-import com.hbcy.authcenter.constants.AuthConstants;
+import com.hbcy.authcenter.global.constants.AuthConstants;
 import com.hbcy.authcenter.sdk.utils.UserContextUtils;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

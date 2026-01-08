@@ -1,4 +1,4 @@
-package com.hbcy.authcenter.dto;
+package com.hbcy.authcenter.global.dto;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.Data;
