@@ -11,18 +11,15 @@ import lombok.Data;
  */
 @Data
 public class AppEventInDTO {
+
     /**
-     * 应用id
+     * 事件元数据
      */
-    private String appId = "portal";
-    /**
-     * 事件编码
-     */
-    private String code;
+    private EventMeta meta;
     /**
      * 事件详情
      * 可以用treeToValue转成具体的数据结构
      * 也可以直接取值
      */
-    private JsonNode info;
+    private JsonNode payload;
 }

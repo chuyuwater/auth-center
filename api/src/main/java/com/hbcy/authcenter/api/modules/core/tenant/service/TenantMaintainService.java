@@ -5,7 +5,6 @@ import com.hbcy.authcenter.api.modules.core.tenant.model.Tenant;
 import com.hbcy.authcenter.api.modules.core.tenant.vo.TenantAdminUpdateVO;
 import com.hbcy.authcenter.api.modules.core.user.model.User;
 import com.hbcy.authcenter.api.modules.core.user.service.UserService;
-import com.hbcy.authcenter.global.dto.AppEventOutDTO;
 import com.hbcy.authcenter.sdk.constants.EventConstants;
 import com.hbcy.authcenter.sdk.utils.UserContextUtils;
 import com.hbcy.common.base.error.ParamError;
@@ -49,7 +48,10 @@ public class TenantMaintainService {
         toUpdate.setUpdateUser(UserContextUtils.getUserId());
         tenantService.save(toUpdate);
         eventDispatcher.dispatch(
-                new AppEventOutDTO().setCode(EventConstants.TENANT_ADMIN_CHANGED).setInfo(toUpdate));
+                tenantId,
+                EventConstants.TENANT_ADMIN_CHANGED,
+                toUpdate
+        );
     }
 
 }

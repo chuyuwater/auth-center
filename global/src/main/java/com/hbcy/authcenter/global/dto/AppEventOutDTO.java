@@ -5,6 +5,7 @@ import lombok.experimental.Accessors;
 
 /**
  * 应用事件通知，发送时用
+ * 不同应用（业务域）使用不同的kafka topic
  *
  * @author 姚泰然
  * @date 2025-12-31 14:11
@@ -13,15 +14,11 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public class AppEventOutDTO {
     /**
-     * 应用id
+     * 事件元数据
      */
-    private String appId = "portal";
-    /**
-     * 事件编码
-     */
-    private String code;
+    private EventMeta meta;
     /**
      * 事件详情
      */
-    private Object info;
+    private Object payload;
 }

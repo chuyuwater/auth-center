@@ -5,7 +5,6 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.f4b6a3.ulid.UlidCreator;
 import com.hbcy.authcenter.api.common.bean.EventDispatcher;
 import com.hbcy.authcenter.api.modules.core.app.dao.ResourcePermMapper;
-import com.hbcy.authcenter.api.modules.core.app.dao.ResourceTreeMapper;
 import com.hbcy.authcenter.api.modules.core.app.model.ResourcePerm;
 import com.hbcy.authcenter.api.modules.core.app.vo.ResourcePermCreateVO;
 import com.hbcy.authcenter.api.modules.core.app.vo.ResourcePermQueryVO;
@@ -14,7 +13,6 @@ import com.hbcy.authcenter.api.modules.core.perm.model.PermUnitResource;
 import com.hbcy.authcenter.api.modules.core.tenant.dao.TenantAppResourceMapper;
 import com.hbcy.authcenter.api.modules.core.tenant.model.TenantAppResource;
 import com.hbcy.authcenter.gateway.dto.EventResPermChanged;
-import com.hbcy.authcenter.global.dto.AppEventOutDTO;
 import com.hbcy.authcenter.sdk.constants.EventConstants;
 import com.hbcy.authcenter.sdk.utils.UserContextUtils;
 import com.hbcy.common.base.error.ParamError;
@@ -39,8 +37,6 @@ import java.util.stream.Collectors;
  */
 @Service
 public class ResourcePermService extends ServiceImpl<ResourcePermMapper, ResourcePerm> {
-    @Resource
-    private ResourceTreeMapper resourceTreeMapper;
     @Resource
     private TenantAppResourceMapper tenantAppResourceMapper;
     @Resource
@@ -167,9 +163,10 @@ public class ResourcePermService extends ServiceImpl<ResourcePermMapper, Resourc
         }
         if (isChanged) {
             //权限资源变更
-            eventDispatcher.dispatch(new AppEventOutDTO()
-                    .setCode(EventConstants.KAFKA_RESOURCE_PERM_CHANGED)
-                    .setInfo(new EventResPermChanged().setAppId(appId).setResId(resId)));
+            eventDispatcher.dispatch(
+                    appId,
+                    EventConstants.KAFKA_RESOURCE_PERM_CHANGED,
+                    new EventResPermChanged().setAppId(appId).setResId(resId));
         }
     }
 }

@@ -10,9 +10,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class EventConstants {
     /**
-     * kafka topic
+     * 门户相关应用事件的topic
      */
-    public static final String KAFKA_TOPIC_APP_EVENT = "app-event";
+    public static final String KAFKA_TOPIC_PORTAL_EVENT = "app-event-portal";
     /**
      * 新增租户，info是租户的详情
      */

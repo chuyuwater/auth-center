@@ -21,7 +21,6 @@ import com.hbcy.authcenter.api.modules.core.tenant.vo.TenantQueryVO;
 import com.hbcy.authcenter.api.modules.core.tenant.vo.TenantUpdateVO;
 import com.hbcy.authcenter.api.modules.core.user.model.User;
 import com.hbcy.authcenter.api.modules.core.user.service.UserService;
-import com.hbcy.authcenter.global.dto.AppEventOutDTO;
 import com.hbcy.authcenter.sdk.constants.EventConstants;
 import com.hbcy.authcenter.sdk.utils.UserContextUtils;
 import com.hbcy.common.base.error.ParamError;
@@ -116,8 +115,7 @@ public class TenantService extends ServiceImpl<TenantMapper, Tenant> {
         } catch (DuplicateKeyException e) {
             throw new ParamError("请重试");
         }
-        eventDispatcher.dispatch(
-                new AppEventOutDTO().setCode(EventConstants.TENANT_CREATED).setInfo(tenant));
+        eventDispatcher.dispatch(EventConstants.TENANT_CREATED, tenant);
         return tenant;
     }
 
