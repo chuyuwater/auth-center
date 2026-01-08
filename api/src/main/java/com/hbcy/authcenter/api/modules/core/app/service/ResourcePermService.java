@@ -7,10 +7,8 @@ import com.hbcy.authcenter.api.common.bean.EventDispatcher;
 import com.hbcy.authcenter.api.modules.core.app.dao.ResourcePermMapper;
 import com.hbcy.authcenter.api.modules.core.app.dao.ResourceTreeMapper;
 import com.hbcy.authcenter.api.modules.core.app.model.ResourcePerm;
-import com.hbcy.authcenter.api.modules.core.app.model.ResourceTree;
 import com.hbcy.authcenter.api.modules.core.app.vo.ResourcePermCreateVO;
 import com.hbcy.authcenter.api.modules.core.app.vo.ResourcePermQueryVO;
-import com.hbcy.authcenter.api.modules.core.app.vo.ResourcePermUpdateVO;
 import com.hbcy.authcenter.api.modules.core.perm.dao.PermUnitResourceMapper;
 import com.hbcy.authcenter.api.modules.core.perm.model.PermUnitResource;
 import com.hbcy.authcenter.api.modules.core.tenant.dao.TenantAppResourceMapper;
@@ -50,47 +48,6 @@ public class ResourcePermService extends ServiceImpl<ResourcePermMapper, Resourc
     @Resource
     private EventDispatcher eventDispatcher;
 
-    /**
-     * 创建资源权限点
-     *
-     * @param vo 权限信息
-     * @return 创建后的权限信息
-     */
-    public ResourcePerm create(ResourcePermCreateVO vo) {
-        ResourceTree tree = resourceTreeMapper.selectById(vo.getResId());
-        if (tree == null) {
-            throw new ParamError("关联的菜单资源不存在");
-        }
-        ResourcePerm entity = new ResourcePerm();
-        BeanCopyUtils.copy(vo, entity);
-        entity.setAppId(tree.getAppId());
-        entity.setCreateUser(UserContextUtils.getUserId());
-        entity.setUpdateUser(UserContextUtils.getUserId());
-        try {
-            save(entity);
-        } catch (DuplicateKeyException e) {
-            throw new ParamError("API路径和方法组合已存在");
-        }
-        return entity;
-    }
-
-    /**
-     * 更新资源权限点
-     *
-     * @param vo 更新信息
-     * @param id 权限ID
-     * @return 更新后的权限信息
-     */
-    public ResourcePerm update(ResourcePermUpdateVO vo, String id) {
-        ResourcePerm entity = getById(id);
-        if (entity == null) {
-            throw new ParamError("指定权限不存在");
-        }
-        BeanCopyUtils.copy(vo, entity);
-        entity.setUpdateUser(UserContextUtils.getUserId());
-        updateById(entity);
-        return entity;
-    }
 
     /**
      * 查询资源权限列表
@@ -168,7 +125,7 @@ public class ResourcePermService extends ServiceImpl<ResourcePermMapper, Resourc
         List<ResourcePerm> exists = baseMapper.selectList(new QueryWrapper<ResourcePerm>()
                 .eq(ResourcePerm.COL_RES_ID, resId));
         Set<String> existsIds = exists.stream().map(ResourcePerm::getId).collect(Collectors.toSet());
-        Set<String> subIds = subPerms.stream().map(ResourcePermCreateVO::getResId).collect(Collectors.toSet());
+        Set<String> subIds = subPerms.stream().map(ResourcePermCreateVO::getId).collect(Collectors.toSet());
         boolean isChanged = false;
         //计算出被删除的条目
         existsIds.removeAll(subIds);

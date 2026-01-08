@@ -16,8 +16,4 @@ public class ResourcePermCreateVO extends ResourcePermUpdateVO {
      * 权限点id
      */
     private String id;
-    /**
-     * 关联的资源id
-     */
-    private String resId;
 }
