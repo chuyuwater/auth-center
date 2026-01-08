@@ -1,4 +1,4 @@
-package com.hbcy.authcenter.sdk.constants;
+package com.hbcy.authcenter.global.constants;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;

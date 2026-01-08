@@ -13,7 +13,7 @@ import com.hbcy.authcenter.api.modules.core.perm.model.PermUnitResource;
 import com.hbcy.authcenter.api.modules.core.tenant.dao.TenantAppResourceMapper;
 import com.hbcy.authcenter.api.modules.core.tenant.model.TenantAppResource;
 import com.hbcy.authcenter.gateway.dto.EventResPermChanged;
-import com.hbcy.authcenter.sdk.constants.EventConstants;
+import com.hbcy.authcenter.global.constants.EventConstants;
 import com.hbcy.authcenter.sdk.utils.UserContextUtils;
 import com.hbcy.common.base.error.ParamError;
 import com.hbcy.common.base.util.BeanCopyUtils;
