@@ -1,8 +1,8 @@
 package com.hbcy.authcenter.api.modules.core.inner.controller;
 
-import com.hbcy.authcenter.api.modules.core.inner.dto.ApiPermDTO;
 import com.hbcy.authcenter.api.modules.core.inner.service.InnerService;
-import com.hbcy.authcenter.api.modules.core.inner.vo.RefreshUserPermVO;
+import com.hbcy.authcenter.gateway.dto.ApiPermDTO;
+import com.hbcy.authcenter.gateway.vo.RefreshUserPermVO;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.GetMapping;

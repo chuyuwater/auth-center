@@ -1,4 +1,4 @@
-package com.hbcy.authcenter.sdk.bean;
+package com.hbcy.authcenter.dto;
 
 import lombok.Data;
 import lombok.experimental.Accessors;

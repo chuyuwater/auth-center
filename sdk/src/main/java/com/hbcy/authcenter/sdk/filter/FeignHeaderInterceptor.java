@@ -1,7 +1,7 @@
 package com.hbcy.authcenter.sdk.filter;
 
+import com.hbcy.authcenter.constants.AuthConstants;
 import com.hbcy.authcenter.sdk.annotation.EnableHeaderPassthrough;
-import com.hbcy.authcenter.sdk.constants.AuthConstants;
 import com.hbcy.authcenter.sdk.utils.UserContextUtils;
 import feign.RequestInterceptor;
 import feign.RequestTemplate;

@@ -1,4 +1,4 @@
-package com.hbcy.authcenter.sdk.bean;
+package com.hbcy.authcenter.dto;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.Data;

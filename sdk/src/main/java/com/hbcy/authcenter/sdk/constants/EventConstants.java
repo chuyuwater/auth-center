@@ -12,7 +12,7 @@ public class EventConstants {
     /**
      * kafka topic
      */
-    public static final String KAFKA_TOPIC = "app-event";
+    public static final String KAFKA_TOPIC_APP_EVENT = "app-event";
     /**
      * 新增租户，info是租户的详情
      */

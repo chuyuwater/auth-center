@@ -5,7 +5,6 @@ import cn.dev33.satoken.stp.StpUtil;
 import cn.dev33.satoken.stp.parameter.SaLoginParameter;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.github.f4b6a3.ulid.UlidCreator;
-import com.hbcy.authcenter.api.common.constants.G;
 import com.hbcy.authcenter.api.config.UserAuthConfig;
 import com.hbcy.authcenter.api.modules.core.auth.dto.CaptchaDTO;
 import com.hbcy.authcenter.api.modules.core.auth.dto.LoginRespDTO;
@@ -13,6 +12,7 @@ import com.hbcy.authcenter.api.modules.core.auth.vo.LoginVO;
 import com.hbcy.authcenter.api.modules.core.user.dao.UserMapper;
 import com.hbcy.authcenter.api.modules.core.user.dao.UserOrgMapper;
 import com.hbcy.authcenter.api.modules.core.user.model.User;
+import com.hbcy.authcenter.gateway.constants.GatewayConstants;
 import com.hbcy.authcenter.sdk.utils.UserContextUtils;
 import com.hbcy.common.base.error.AuthError;
 import com.hbcy.common.base.error.ClientError;
@@ -45,7 +45,6 @@ public class UserAuthService {
     public static final String USER_LOCK_KEY_PREFIX = "portal:auth:login:lock:";
     public static final String USER_LOGIN_FAIL_KEY_PREFIX = "portal:auth:login:fail:";
     //用户权限缓存（按orgId）
-    public static final String USER_PERM_CACHE_PREFIX = "portal:auth:user:perm:%s:%s";
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
     @Resource
     private UserMapper userMapper;
@@ -128,7 +127,7 @@ public class UserAuthService {
                 .setActiveTimeout(authConfig.getTokenExpire().toSeconds())
         );
         //将租户id保存到session中
-        StpUtil.getSession(true).set(G.SESSION_TENANT_ID, chosen.getTenantId());
+        StpUtil.getSession(true).set(GatewayConstants.SESSION_TENANT_ID, chosen.getTenantId());
         SaTokenInfo tokenInfo = StpUtil.getTokenInfo();
 
         LoginRespDTO resp = new LoginRespDTO()
@@ -151,7 +150,7 @@ public class UserAuthService {
         Set<String> keys = new HashSet<>();
         //强制移除权限缓存
         for (String orgId : userOrgs) {
-            keys.add(USER_PERM_CACHE_PREFIX.formatted(userId, orgId));
+            keys.add(GatewayConstants.USER_PERM_CACHE_PREFIX.formatted(userId, orgId));
         }
         stringRedisTemplate.delete(keys);
         StpUtil.logout(userId);

@@ -3,9 +3,6 @@ package com.hbcy.authcenter.api.modules.core.inner.service;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.hbcy.authcenter.api.config.UserAuthConfig;
 import com.hbcy.authcenter.api.modules.core.app.dao.ResourcePermMapper;
-import com.hbcy.authcenter.api.modules.core.auth.service.UserAuthService;
-import com.hbcy.authcenter.api.modules.core.inner.dto.ApiPermDTO;
-import com.hbcy.authcenter.api.modules.core.inner.vo.RefreshUserPermVO;
 import com.hbcy.authcenter.api.modules.core.org.dao.OrgTreeMapper;
 import com.hbcy.authcenter.api.modules.core.org.model.OrgTree;
 import com.hbcy.authcenter.api.modules.core.perm.dao.PermUnitUserMapper;
@@ -14,6 +11,9 @@ import com.hbcy.authcenter.api.modules.core.tenant.dao.TenantAppResourceMapper;
 import com.hbcy.authcenter.api.modules.core.tenant.dao.TenantMapper;
 import com.hbcy.authcenter.api.modules.core.tenant.model.Tenant;
 import com.hbcy.authcenter.api.modules.core.tenant.model.TenantApp;
+import com.hbcy.authcenter.gateway.constants.GatewayConstants;
+import com.hbcy.authcenter.gateway.dto.ApiPermDTO;
+import com.hbcy.authcenter.gateway.vo.RefreshUserPermVO;
 import com.hbcy.authcenter.sdk.utils.UserContextUtils;
 import com.hbcy.common.redis.RedisExtendService;
 import jakarta.annotation.Resource;
@@ -87,7 +87,7 @@ public class InnerService {
      * @param permIds 权限id
      */
     private void refreshAppPerms(String userId, String orgId, Set<String> permIds) {
-        String key = UserAuthService.USER_PERM_CACHE_PREFIX.formatted(userId, orgId);
+        String key = GatewayConstants.USER_PERM_CACHE_PREFIX.formatted(userId, orgId);
         redisExtendService.setAll(key, permIds, userAuthConfig.getPermExpire());
     }
 

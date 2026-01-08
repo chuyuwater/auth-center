@@ -1,7 +1,7 @@
 package com.hbcy.authcenter.sdk.utils;
 
 import com.alibaba.ttl.TransmittableThreadLocal;
-import com.hbcy.authcenter.sdk.constants.AuthConstants;
+import com.hbcy.authcenter.constants.AuthConstants;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;

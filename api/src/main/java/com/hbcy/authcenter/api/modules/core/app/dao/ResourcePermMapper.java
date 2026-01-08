@@ -2,7 +2,7 @@ package com.hbcy.authcenter.api.modules.core.app.dao;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.hbcy.authcenter.api.modules.core.app.model.ResourcePerm;
-import com.hbcy.authcenter.api.modules.core.inner.dto.ApiPermDTO;
+import com.hbcy.authcenter.gateway.dto.ApiPermDTO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 

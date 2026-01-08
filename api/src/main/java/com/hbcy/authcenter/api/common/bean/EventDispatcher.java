@@ -1,6 +1,6 @@
 package com.hbcy.authcenter.api.common.bean;
 
-import com.hbcy.authcenter.sdk.bean.AppEventOutDTO;
+import com.hbcy.authcenter.dto.AppEventOutDTO;
 import com.hbcy.authcenter.sdk.constants.EventConstants;
 import jakarta.annotation.Resource;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -18,6 +18,6 @@ public class EventDispatcher {
     private KafkaTemplate<String, Object> kafkaTemplate;
 
     public void dispatch(AppEventOutDTO event) {
-        kafkaTemplate.send(EventConstants.KAFKA_TOPIC, event.getAppId(), event);
+        kafkaTemplate.send(EventConstants.KAFKA_TOPIC_APP_EVENT, event.getAppId(), event);
     }
 }

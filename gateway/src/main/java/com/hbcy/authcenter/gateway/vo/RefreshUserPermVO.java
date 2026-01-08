@@ -1,4 +1,4 @@
-package com.hbcy.authcenter.api.modules.core.inner.vo;
+package com.hbcy.authcenter.gateway.vo;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;

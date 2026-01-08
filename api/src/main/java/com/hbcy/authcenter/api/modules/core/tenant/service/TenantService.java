@@ -21,7 +21,7 @@ import com.hbcy.authcenter.api.modules.core.tenant.vo.TenantQueryVO;
 import com.hbcy.authcenter.api.modules.core.tenant.vo.TenantUpdateVO;
 import com.hbcy.authcenter.api.modules.core.user.model.User;
 import com.hbcy.authcenter.api.modules.core.user.service.UserService;
-import com.hbcy.authcenter.sdk.bean.AppEventOutDTO;
+import com.hbcy.authcenter.dto.AppEventOutDTO;
 import com.hbcy.authcenter.sdk.constants.EventConstants;
 import com.hbcy.authcenter.sdk.utils.UserContextUtils;
 import com.hbcy.common.base.error.ParamError;

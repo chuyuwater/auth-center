@@ -1,6 +1,6 @@
 package com.hbcy.authcenter.sdk.filter;
 
-import com.hbcy.authcenter.sdk.constants.AuthConstants;
+import com.hbcy.authcenter.constants.AuthConstants;
 import com.hbcy.authcenter.sdk.utils.UserContextUtils;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -42,6 +42,7 @@ public class HeaderContextFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
         } finally {
             UserContextUtils.clear();
+            MDC.clear();
         }
     }
 }
