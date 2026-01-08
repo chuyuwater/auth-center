@@ -41,8 +41,8 @@ public class InnerController {
      * 用于网关层建立内存缓存
      */
     @GetMapping("/app/perm")
-    public List<ApiPermDTO> listAppPerms() {
-        return innerService.listAppPerms();
+    public List<ApiPermDTO> listAppPerms(String appId) {
+        return innerService.listAppPerms(appId);
     }
 
     /**

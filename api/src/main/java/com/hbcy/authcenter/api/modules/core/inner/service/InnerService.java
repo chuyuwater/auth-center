@@ -91,8 +91,8 @@ public class InnerService {
         redisExtendService.setAll(key, permIds, userAuthConfig.getPermExpire());
     }
 
-    public List<ApiPermDTO> listAppPerms() {
-        return resourcePermMapper.selectAll4Gateway();
+    public List<ApiPermDTO> listAppPerms(String appId) {
+        return resourcePermMapper.select4Gateway(appId);
     }
 
     public Map<String, String> getAllTenantAdmin() {

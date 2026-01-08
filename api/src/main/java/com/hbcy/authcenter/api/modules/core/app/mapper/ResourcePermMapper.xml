@@ -56,10 +56,15 @@
         </foreach>
     </select>
 
-    <select id="selectAll4Gateway" resultType="com.hbcy.authcenter.gateway.dto.ApiPermDTO">
+    <select id="select4Gateway" resultType="com.hbcy.authcenter.gateway.dto.ApiPermDTO">
         select id as perm_id,
-               api_method,
-               api_path
+        api_method,
+        api_path
         from resource_perm
+        <where>
+            <if test="appId != null and appId != ''">
+                app_id = #{appId}
+            </if>
+        </where>
     </select>
 </mapper>

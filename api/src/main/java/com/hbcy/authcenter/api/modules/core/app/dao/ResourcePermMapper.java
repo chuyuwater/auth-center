@@ -41,9 +41,9 @@ public interface ResourcePermMapper extends BaseMapper<ResourcePerm> {
     Set<String> listAppsPermIds(@Param("appIds") Set<String> appIds);
 
     /**
-     * 列出所有API权限点
+     * 列出所有或指定应用的API权限点
      *
      * @return API权限点
      */
-    List<ApiPermDTO> selectAll4Gateway();
+    List<ApiPermDTO> select4Gateway(@Param("appId") String appId);
 }
