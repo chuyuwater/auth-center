@@ -32,7 +32,7 @@ public class UserSessionService {
     @Nullable
     public SessionDTO checkLogin(String token) {
         try {
-            String loginId = (String) StpUtil.getLoginId();
+            String loginId = (String) StpUtil.getLoginIdByToken(token);
             SaSession session = StpUtil.getSessionByLoginId(loginId);
             return new SessionDTO()
                     .setUserId(loginId)
