@@ -22,4 +22,8 @@ public class ApiPermDTO {
      * 权限id
      */
     private String permId;
+    /**
+     * 应用id
+     */
+    private String appId;
 }

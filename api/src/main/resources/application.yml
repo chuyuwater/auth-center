@@ -1,8 +1,6 @@
 spring:
   application:
     name: portal-auth-center
-  profiles:
-    active: dev
 ---
 spring:
   cloud:
@@ -23,4 +21,4 @@ spring:
 
   config:
     import:
-      - nacos:${spring.application.name}-${spring.profiles.active}.yml
+      - nacos:${spring.application.name}.yml
