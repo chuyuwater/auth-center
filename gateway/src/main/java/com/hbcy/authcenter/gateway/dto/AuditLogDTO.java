@@ -3,7 +3,6 @@ package com.hbcy.authcenter.gateway.dto;
 import lombok.Data;
 
 import java.time.LocalDateTime;
-import java.util.Map;
 
 /**
  * 审计日志内容
@@ -25,10 +24,6 @@ public class AuditLogDTO {
      * 请求应用
      */
     private String appId;
-    /**
-     * 请求头
-     */
-    private Map<String, String> reqHeader;
     /**
      * 请求方法
      */
