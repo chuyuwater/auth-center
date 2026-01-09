@@ -5,10 +5,7 @@ import com.hbcy.authcenter.gateway.dto.ApiPermDTO;
 import com.hbcy.authcenter.gateway.vo.RefreshUserPermVO;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
@@ -32,7 +29,7 @@ public class InnerController {
      * 刷新用户权限缓存，供网关调用
      */
     @PostMapping("/user/perm/refresh")
-    public void refreshUserPerms(@Valid RefreshUserPermVO vo) {
+    public void refreshUserPerms(@Valid @RequestBody RefreshUserPermVO vo) {
         innerService.refreshUserPerms(vo);
     }
 

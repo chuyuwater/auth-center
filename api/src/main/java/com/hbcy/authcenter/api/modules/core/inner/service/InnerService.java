@@ -14,7 +14,6 @@ import com.hbcy.authcenter.api.modules.core.tenant.model.TenantApp;
 import com.hbcy.authcenter.gateway.constants.GatewayConstants;
 import com.hbcy.authcenter.gateway.dto.ApiPermDTO;
 import com.hbcy.authcenter.gateway.vo.RefreshUserPermVO;
-import com.hbcy.authcenter.sdk.utils.UserContextUtils;
 import com.hbcy.common.redis.RedisExtendService;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
@@ -51,7 +50,13 @@ public class InnerService {
 
     public void refreshUserPerms(RefreshUserPermVO vo) {
         Set<String> resp = new HashSet<>();
-        if (UserContextUtils.isTenantAdmin()) {
+        Tenant tenant = tenantMapper.selectById(vo.getTenantId());
+        if (tenant == null || tenant.getForbidden() > 0) {
+            refreshAppPerms(vo.getUserId(), vo.getOrgId(), resp);
+            return;
+        }
+
+        if (tenant.getAdminId().equals(vo.getUserId())) {
             //管理员
             List<TenantApp> tenantApps = tenantAppMapper.selectList(new QueryWrapper<TenantApp>()
                     .eq(TenantApp.COL_TENANT_ID, vo.getTenantId()));
