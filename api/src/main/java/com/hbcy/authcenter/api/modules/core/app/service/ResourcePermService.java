@@ -22,6 +22,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -93,6 +94,9 @@ public class ResourcePermService extends ServiceImpl<ResourcePermMapper, Resourc
      * @param subPerms 权限点
      */
     public void batchCreate(String resId, List<ResourcePermCreateVO> subPerms) {
+        if (CollectionUtils.isEmpty(subPerms)) {
+            return;
+        }
         List<ResourcePerm> toInsert = new ArrayList<>();
         for (ResourcePermCreateVO vo : subPerms) {
             ResourcePerm subPerm = new ResourcePerm();
