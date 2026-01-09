@@ -5,9 +5,6 @@ WORKDIR /app
 
 # 复制 Maven 配置文件
 COPY pom.xml .
-# 下载依赖（利用 Docker 缓存）
-RUN mvn dependency:go-offline -B
-
 # 复制源代码
 COPY api ./api
 COPY gateway ./gateway
