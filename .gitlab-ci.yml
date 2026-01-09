@@ -1,0 +1,4 @@
+include:
+  - project: 'devops/cicd'
+    ref: v0.3.0
+    file: 'templates/backend.yml'
