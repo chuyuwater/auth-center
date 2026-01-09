@@ -9,7 +9,11 @@ COPY pom.xml .
 RUN mvn dependency:go-offline -B
 
 # 复制源代码
-COPY src ./src
+COPY api ./api
+COPY gateway ./gateway
+COPY global ./global
+COPY intgr ./intgr
+COPY sdk ./sdk
 
 # 编译打包
 RUN mvn package -DskipTests
@@ -21,7 +25,7 @@ FROM dev.chuyuwater.cn:32003/cicd/openjdk:17
 WORKDIR /app
 
 # 从 builder 阶段复制 jar 包
-COPY --from=builder /app/target/*.jar app.jar
+COPY --from=builder /app/api/target/*.jar app.jar
 
 # 暴露端口
 EXPOSE 8080

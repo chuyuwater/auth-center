@@ -1,0 +1,38 @@
+# Maven build artifacts
+target/
+**/target/
+
+# Gradle build artifacts
+build/
+.gradle/
+
+# IDE files and directories (IntelliJ, Eclipse, VS Code, etc.)
+.idea/
+.vscode/
+.settings/
+.project
+.classpath
+
+# Compiled class files
+*.class
+
+# Log files
+*.log
+
+# Package Files (if not the final artifact)
+# *.jar
+# *.war
+# *.nar
+# *.ear
+# *.zip
+# *.tar.gz
+# *.rar
+
+# Virtual machine crash logs
+hs_err_pid*
+
+# Environment variables and secrets (important for security)
+.env
+aws-credentials.json
+config.properties
+src/main/resources/application.properties # Only if you use env variables to configure the app
