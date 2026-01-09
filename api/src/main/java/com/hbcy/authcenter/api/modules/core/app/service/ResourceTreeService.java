@@ -14,6 +14,7 @@ import com.hbcy.authcenter.api.modules.core.app.dto.ResTreeDTO;
 import com.hbcy.authcenter.api.modules.core.app.model.App;
 import com.hbcy.authcenter.api.modules.core.app.model.ResourcePerm;
 import com.hbcy.authcenter.api.modules.core.app.model.ResourceTree;
+import com.hbcy.authcenter.api.modules.core.app.vo.ResourcePermCreateVO;
 import com.hbcy.authcenter.api.modules.core.app.vo.ResourceTreeCreateVO;
 import com.hbcy.authcenter.api.modules.core.app.vo.ResourceTreeQueryVO;
 import com.hbcy.authcenter.api.modules.core.app.vo.ResourceTreeUpdateVO;
@@ -66,6 +67,22 @@ public class ResourceTreeService extends ServiceImpl<ResourceTreeMapper, Resourc
         return null;
     }
 
+    private void checkSubPerms(List<ResourcePermCreateVO> subPerms) {
+        if (subPerms == null) {
+            return;
+        }
+        for (ResourcePermCreateVO subPerm : subPerms) {
+            String apiPath = subPerm.getApiPath();
+            List<String> parts = Splitter.on("/").splitToList(apiPath);
+            if (parts.size() < 3) {
+                throw new ParamError("API路径过短");
+            }
+            if (apiPath.contains("**") && !"**".equals(parts.get(parts.size() - 1))) {
+                throw new ParamError("API路径中，**只能放在末尾");
+            }
+        }
+    }
+
     /**
      * 创建资源节点（菜单）
      *
@@ -74,6 +91,7 @@ public class ResourceTreeService extends ServiceImpl<ResourceTreeMapper, Resourc
      */
     @Transactional(rollbackFor = Exception.class)
     public ResourceTree create(ResourceTreeCreateVO vo) {
+        checkSubPerms(vo.getSubPerms());
         ResourceTree parent = checkParentId(vo.getAppId(), vo.getParentId());
         ResourceTree entity = new ResourceTree();
         BeanCopyUtils.copy(vo, entity);
@@ -103,6 +121,7 @@ public class ResourceTreeService extends ServiceImpl<ResourceTreeMapper, Resourc
      */
     @Transactional(rollbackFor = Exception.class)
     public ResourceTree update(ResourceTreeUpdateVO vo, String id) {
+        checkSubPerms(vo.getSubPerms());
         ResourceTree entity = getById(id);
         if (entity == null) {
             throw new ParamError("指定节点不存在");
