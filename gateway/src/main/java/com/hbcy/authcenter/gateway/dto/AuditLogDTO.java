@@ -23,7 +23,11 @@ public class AuditLogDTO {
     /**
      * 请求应用
      */
-    private String appId;
+    private String srcApp;
+    /**
+     * 目标应用
+     */
+    private String targetApp;
     /**
      * 请求方法
      */
