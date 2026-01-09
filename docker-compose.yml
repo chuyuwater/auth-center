@@ -1,5 +1,5 @@
 services:
-  auth-center:
+  portal-auth-center:
     container_name: portal-auth-center
     restart: always
     image: dev.chuyuwater.cn:32003/dev/auth-center:latest
