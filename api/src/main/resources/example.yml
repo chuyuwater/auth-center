@@ -56,36 +56,9 @@ spring:
           config:
             multi-statement-allow: true
 
-mybatis-plus:
-  configuration:
-    cache-enabled: false
-    jdbc-type-for-null: 'null'
-    lazy-loading-enabled: false
-    #    log-impl: org.apache.ibatis.logging.nologging.NoLoggingImpl
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
-    map-underscore-to-camel-case: true
-    multiple-result-sets-enabled: true
-    default-enum-type-handler: org.apache.ibatis.type.EnumOrdinalTypeHandler
-  global-config:
-    banner: false
-    db-config:
-      logic-delete-field: deleteTime
-      logic-delete-value: 1
-      logic-not-delete-value: 0
-
-  mapper-locations: classpath*:com/hbcy/**/mapper/*.xml
-  type-handlers-package: com.hbcy.common.db.typehandler
 oss:
   access-key: aWhBryDoYGVXxviqNT15
   secret-key: 2yrDkt5N7WcHLvpYdXT3940mOCgsIbqwhQa1uolS
   bucket-name: digital
   endpoint: http://127.0.0.1:19000
   custom-domain: https://dev.chuyuwater.cn:32008
-
-sa-token:
-  token-name: "x-auth-token"
-  is-print: off
-  is-read-header: true
-  is-read-cookie: false
-  is-log: false
-  token-style: simple-uuid

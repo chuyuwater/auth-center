@@ -1,24 +1,48 @@
+# 各个环境通用的配置放在这里
+# nacos的连接配置放在外置的application.yml中
+# 其他配置放在nacos里面
+
 spring:
   application:
     name: portal-auth-center
----
-spring:
-  cloud:
-    nacos:
-      discovery:
-        server-addr: localhost:18848
-        username: dev
-        password: 7rPBGRZ0aGnXUmtA
-        namespace: public
-        group: DEFAULT_GROUP
-      config:
-        server-addr: localhost:18848
-        username: dev
-        password: 7rPBGRZ0aGnXUmtA
-        file-extension: yml
-        namespace: public
-        group: DEFAULT_GROUP
 
-  config:
-    import:
-      - nacos:${spring.application.name}.yml
+mybatis-plus:
+  configuration:
+    cache-enabled: false
+    jdbc-type-for-null: 'null'
+    lazy-loading-enabled: false
+    # 生产环境需要关闭log
+    # log-impl: org.apache.ibatis.logging.nologging.NoLoggingImpl
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    map-underscore-to-camel-case: true
+    multiple-result-sets-enabled: true
+    default-enum-type-handler: org.apache.ibatis.type.EnumOrdinalTypeHandler
+  global-config:
+    banner: false
+    db-config:
+      logic-delete-field: deleteTime
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+  mapper-locations: classpath*:com/hbcy/**/mapper/*.xml
+  type-handlers-package: com.hbcy.common.db.typehandler
+
+sa-token:
+  token-name: "x-auth-token"
+  is-print: off
+  is-read-header: true
+  is-read-cookie: false
+  is-log: false
+  token-style: simple-uuid
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "health,info,prometheus"
+  endpoint:
+    prometheus:
+      access: read_only
+  prometheus:
+    metrics:
+      export:
+        enabled: true
