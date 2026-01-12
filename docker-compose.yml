@@ -2,7 +2,7 @@ services:
   portal-auth-center:
     container_name: portal-auth-center
     restart: always
-    image: dev.chuyuwater.cn:32003/dev/auth-center:latest
+    image: dev.chuyuwater.cn:32003/dev/portal-auth-center:latest
     ports:
       - "20001:8080"
     volumes:
