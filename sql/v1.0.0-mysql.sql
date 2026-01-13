@@ -148,6 +148,7 @@ create table perm_unit_user
     user_id     char(26)                           not null,
     org_id      varchar(20)                        null comment '主体域1：组织id',
     tenant_id   varchar(20)                        not null,
+    forbidden   tinyint  default 0                 not null,
     create_user char(26) default '0'               not null,
     update_user char(26) default '0'               not null,
     create_time datetime default CURRENT_TIMESTAMP not null,
@@ -351,7 +352,7 @@ INSERT INTO `tenant_app`
 VALUES ('01KE8DY46ZGMHAZH7P7RDRZDQW', 'portal', '0', '0-ORG-000001', 1, 0, 0, '2026-01-06 09:14:57',
         '2026-01-06 09:14:57', '0', '0');
 INSERT INTO `sys_user`
-VALUES ('01KE8DW1DK2KPAZJAENJW6SSFE', '18502710984', '18502710984', '姚泰然',
+VALUES ('01KE8DW1DK2KPAZJAENJW6SSFE', '18502710984', 'admin', '超级管理员',
         '$2a$10$Kg/w2Tcsqbu1RsmcuZgW4uRseXBFuAADY3Eavl9yplcPRHRZovFHC', NULL, '', 0, NULL, 0, NULL, NULL, '0',
         '2026-01-08 17:48:17', 0, '2026-01-06 09:13:48', '2026-01-06 09:13:48', '0', '0');
 

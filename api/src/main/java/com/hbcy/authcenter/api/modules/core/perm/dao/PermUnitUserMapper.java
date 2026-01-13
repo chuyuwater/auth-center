@@ -25,9 +25,6 @@ public interface PermUnitUserMapper extends BaseMapper<PermUnitUser> {
     //根据permId获取权限点信息
     List<ResPermDTO> listPermInfo(@Param("permIds") Set<String> permIds);
 
-    //当前应用的所有权限
-    List<ResPermDTO> listAppPerms(@Param("appId") String appId);
-
     //添加用户到权限单元
     void insertIgnore(@Param("list") List<PermUnitUser> list);
 

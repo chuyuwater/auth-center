@@ -3,6 +3,7 @@ package com.hbcy.authcenter.api.modules.core.perm.controller;
 import com.hbcy.authcenter.api.modules.core.perm.model.PermUnit;
 import com.hbcy.authcenter.api.modules.core.perm.service.PermUnitService;
 import com.hbcy.authcenter.api.modules.core.perm.vo.PermUnitCreateVO;
+import com.hbcy.authcenter.api.modules.core.perm.vo.PermUnitForbidVO;
 import com.hbcy.authcenter.api.modules.core.perm.vo.PermUnitQueryVO;
 import com.hbcy.authcenter.api.modules.core.perm.vo.PermUnitUpdateVO;
 import com.hbcy.common.base.pojo.PageResp;
@@ -72,6 +73,14 @@ public class PermUnitController {
     @PutMapping("/{id}")
     public PermUnit update(@PathVariable String id, @RequestBody @Valid PermUnitUpdateVO vo) {
         return permUnitService.update(vo, id);
+    }
+
+    /**
+     * 启用/禁用权限单元
+     */
+    @PostMapping("/forbidden")
+    public void forbid(@Valid @RequestBody PermUnitForbidVO vo) {
+        permUnitService.forbid(vo);
     }
 
     /**

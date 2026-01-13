@@ -68,4 +68,16 @@
             </if>
         </where>
     </select>
+
+    <select id="listAppPerms" resultType="com.hbcy.authcenter.api.modules.core.app.dto.ResPermDTO">
+        select rp.id,
+        rp.app_id,
+        rp.res_id,
+        rp.perm_name,
+        rp.perm_code,
+        rp.api_method,
+        rp.api_path
+        from resource_perm rp
+        where app_id = #{appId}
+    </select>
 </mapper>

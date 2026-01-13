@@ -3,6 +3,7 @@ package com.hbcy.authcenter.api.modules.core.perm.service;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.f4b6a3.ulid.UlidCreator;
+import com.hbcy.authcenter.api.modules.core.app.dao.ResourcePermMapper;
 import com.hbcy.authcenter.api.modules.core.app.dto.GrantAppDTO;
 import com.hbcy.authcenter.api.modules.core.app.dto.ResPermDTO;
 import com.hbcy.authcenter.api.modules.core.org.model.OrgTree;
@@ -47,6 +48,8 @@ public class PermUnitUserService extends ServiceImpl<PermUnitUserMapper, PermUni
     private UserOrgMapper userOrgMapper;
     @Resource
     private PermUnitMapper permUnitMapper;
+    @Resource
+    private ResourcePermMapper resourcePermMapper;
 
     @Transactional(rollbackFor = Exception.class)
     public void addUsersToUnit(PermUnitUserUpdateVO vo) {
@@ -118,7 +121,7 @@ public class PermUnitUserService extends ServiceImpl<PermUnitUserMapper, PermUni
         //如果是默认管理员，直接获取app的最大权限
         if (UserContextUtils.isTenantAdmin()) {
             if (tenantApp.getGrantAll() > 0) {
-                return baseMapper.listAppPerms(appId);
+                return resourcePermMapper.listAppPerms(appId);
             } else {
                 Set<String> grantedPermIds = tenantAppResourceMapper.getGrantedPermIds(tenantId, appId);
                 return baseMapper.listPermInfo(grantedPermIds);

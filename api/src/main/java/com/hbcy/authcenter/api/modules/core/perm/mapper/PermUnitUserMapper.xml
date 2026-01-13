@@ -9,6 +9,7 @@
         <result column="user_id" property="userId"/>
         <result column="org_id" property="orgId"/>
         <result column="tenant_id" property="tenantId"/>
+        <result column="forbidden" property="forbidden"/>
         <result column="create_user" property="createUser"/>
         <result column="update_user" property="updateUser"/>
         <result column="create_time" property="createTime"/>
@@ -21,6 +22,7 @@
         user_id,
         org_id,
         tenant_id,
+        forbidden,
         create_user,
         update_user,
         create_time,
@@ -44,6 +46,7 @@
             and puu.tenant_id = #{tenantId}
             and ot.id_path like concat(#{orgIdPath}, '%')
             and pur.app_id = #{appId}
+            and puu.forbidden=0
         </where>
     </select>
 
@@ -62,18 +65,6 @@
                 #{item}
             </foreach>
         </where>
-    </select>
-
-    <select id="listAppPerms" resultType="com.hbcy.authcenter.api.modules.core.app.dto.ResPermDTO">
-        select rp.id,
-        rp.app_id,
-        rp.res_id,
-        rp.perm_name,
-        rp.perm_code,
-        rp.api_method,
-        rp.api_path
-        from resource_perm rp
-        where app_id = #{appId}
     </select>
 
     <!--    TODO：仅MySQL适用，需适配其他数据库-->
@@ -122,6 +113,7 @@
             </if>
             and puu.user_id = #{userId}
             and puu.org_id = #{orgId}
+            and puu.forbidden = 0
         </where>
         order by app.show_order
     </select>
@@ -132,8 +124,10 @@
         join perm_unit_resource pur on puu.unit_id = pur.unit_id
         join org_tree ot on puu.org_id = ot.id
         <where>
-            puu.user_id = #{userId}
+            puu.forbidden = 0
+            and puu.user_id = #{userId}
             and ot.id_path like concat(#{orgIdPath}, '%')
+            and ot.delete_time = 0
         </where>
     </select>
 
@@ -146,6 +140,7 @@
         <where>
             puu.user_id = #{userId}
             and ot.id_path like concat(#{orgIdPath}, '%')
+            and puu.forbidden = 0
         </where>
     </select>
 </mapper>

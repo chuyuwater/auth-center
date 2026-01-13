@@ -1,7 +1,7 @@
 package com.hbcy.authcenter.api.config;
 
 import com.google.common.collect.ImmutableMap;
-import com.hbcy.authcenter.api.modules.minor.log.dto.AuditLogDTO;
+import com.hbcy.authcenter.gateway.dto.AuditLogDTO;
 import com.hbcy.authcenter.global.dto.AppEventInDTO;
 import com.hbcy.authcenter.global.dto.AppEventOutDTO;
 import com.hbcy.common.kafka.CustomJsonDeserializer;

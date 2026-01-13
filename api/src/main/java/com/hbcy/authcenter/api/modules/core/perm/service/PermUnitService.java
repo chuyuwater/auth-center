@@ -11,6 +11,7 @@ import com.hbcy.authcenter.api.modules.core.perm.model.PermTree;
 import com.hbcy.authcenter.api.modules.core.perm.model.PermUnit;
 import com.hbcy.authcenter.api.modules.core.perm.model.PermUnitUser;
 import com.hbcy.authcenter.api.modules.core.perm.vo.PermUnitCreateVO;
+import com.hbcy.authcenter.api.modules.core.perm.vo.PermUnitForbidVO;
 import com.hbcy.authcenter.api.modules.core.perm.vo.PermUnitQueryVO;
 import com.hbcy.authcenter.api.modules.core.perm.vo.PermUnitUpdateVO;
 import com.hbcy.authcenter.sdk.utils.UserContextUtils;
@@ -21,6 +22,7 @@ import com.hbcy.common.base.util.BeanCopyUtils;
 import com.hbcy.common.db.model.PageRespEx;
 import com.hbcy.common.redis.RedisIdGenerator;
 import jakarta.annotation.Resource;
+import jakarta.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
@@ -118,5 +120,24 @@ public class PermUnitService extends ServiceImpl<PermUnitMapper, PermUnit> {
                 .eq(PermUnit.COL_ID, id)
                 .set(PermUnit.COL_UPDATE_USER, UserContextUtils.getUserId())
                 .set(PermUnit.COL_DELETE_TIME, System.currentTimeMillis()));
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public void forbid(@Valid PermUnitForbidVO vo) {
+        PermUnit pu = baseMapper.selectById(vo.getUnitId());
+        if (pu == null) {
+            throw new ParamError("权限单元不存在");
+        }
+        if (pu.getForbidden().equals(vo.getForbidden())) {
+            return;
+        }
+        PermUnit toUpdate = new PermUnit();
+        toUpdate.setId(vo.getUnitId());
+        toUpdate.setUpdateUser(UserContextUtils.getUserId());
+        baseMapper.updateById(toUpdate);
+        //级联更新授权用户，避免查询的时候join表过多
+        permUnitUserMapper.update(new UpdateWrapper<PermUnitUser>()
+                .eq(PermUnitUser.COL_UNIT_ID, vo.getUnitId())
+                .set(PermUnitUser.COL_FORBIDDEN, vo.getForbidden()));
     }
 }
