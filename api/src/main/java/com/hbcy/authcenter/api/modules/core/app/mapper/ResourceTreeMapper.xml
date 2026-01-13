@@ -149,30 +149,24 @@
         rt.client_type,
         rt.icon,
         rt.route_link,
-        rt.show_order,
-        hidden,
-        show_level
+        rt.show_order
         from resource_tree rt
         join app on rt.app_id = app.id
         <where>
             app.forbidden = 0
             and rt.hidden = 0
             and rt.id in
-            <foreach collection="resIds" open="(" close=")" item="item">
+            <foreach collection="resIds" open="(" close=")" separator="," item="item">
                 #{item}
             </foreach>
-            <if test="showLevels != null and showLevels.size() != 0">
-                and show_level in
-                <foreach item="showLevel" collection="showLevels" separator="," open="(" close=")" index="">
-                    #{showLevel}
-                </foreach>
-            </if>
-            <if test="clientTypes != null and clientTypes.size() != 0">
-                and client_type in
-                <foreach item="clientType" collection="clientTypes" separator="," open="(" close=")" index="">
-                    #{clientType}
-                </foreach>
-            </if>
+            and rt.show_level in
+            <foreach item="showLevel" collection="showLevels" separator="," open="(" close=")">
+                #{showLevel}
+            </foreach>
+            and rt.client_type in
+            <foreach item="clientType" collection="clientTypes" separator="," open="(" close=")">
+                #{clientType}
+            </foreach>
         </where>
         order by app.show_order, rt.show_order
     </select>

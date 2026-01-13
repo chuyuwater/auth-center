@@ -27,18 +27,22 @@
 
     <select id="getGrantedPermIds" resultType="java.lang.String">
         select perm_id
-        from tenant_app_resource
-        where tenant_id = #{tenantId}
+        from tenant_app_resource tar
+        join tenant_app ta on tar.app_id = ta.id
+        where tar.tenant_id = #{tenantId}
+        and ta.forbidden = 0
         <if test="appId != null and appId != ''">
-            and app_id = #{appId}
+            and tar.app_id = #{appId}
         </if>
     </select>
 
     <select id="getGrantedResIds" resultType="java.lang.String">
         select distinct rp.res_id
         from tenant_app_resource tar
-        join resource_perm rp on tar.perm_id=rp.id
-        where tenant_id = #{tenantId}
+        join tenant_app ta on tar.app_id = ta.id
+        join resource_perm rp on tar.perm_id = rp.id
+        where tar.tenant_id = #{tenantId}
+        and ta.forbidden = 0
         <if test="appId != null and appId != ''">
             and tar.app_id = #{appId}
         </if>

@@ -67,11 +67,11 @@ public class ClientRenderService {
         if (UserContextUtils.isTenantAdmin()) {
             //管理员特殊逻辑
             List<TenantApp> tenantApps = tenantAppMapper.selectList(new QueryWrapper<TenantApp>()
-                    .eq(TenantApp.COL_TENANT_ID, tenantId));
+                    .eq(TenantApp.COL_TENANT_ID, tenantId)
+                    .eq(TenantApp.COL_FORBIDDEN, 0)
+                    .eq(TenantApp.COL_GRANT_ALL, 1));
             for (TenantApp tenantApp : tenantApps) {
-                if (tenantApp.getGrantAll().equals(1)) {
-                    appIds.add(tenantApp.getAppId());
-                }
+                appIds.add(tenantApp.getAppId());
             }
             resIds.addAll(tenantAppResourceMapper.getGrantedResIds(tenantId, null));
         } else {
