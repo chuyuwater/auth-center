@@ -26,6 +26,8 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+
 @Service
 public class PermUnitService extends ServiceImpl<PermUnitMapper, PermUnit> {
     public static final String BIZ_KEY = "portal:id:role:%s:";
@@ -79,6 +81,7 @@ public class PermUnitService extends ServiceImpl<PermUnitMapper, PermUnit> {
         }
         BeanCopyUtils.copy(vo, entity);
         entity.setUpdateUser(UserContextUtils.getUserId());
+        entity.setUpdateTime(LocalDateTime.now());
         try {
             updateById(entity);
         } catch (DuplicateKeyException e) {

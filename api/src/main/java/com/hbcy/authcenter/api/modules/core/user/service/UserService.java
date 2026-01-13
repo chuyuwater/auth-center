@@ -187,6 +187,7 @@ public class UserService extends ServiceImpl<UserMapper, User> {
         }
         BeanCopyUtils.copy(vo, user);
         user.setUpdateUser(UserContextUtils.getUserId());
+        user.setUpdateTime(LocalDateTime.now());
         updateById(user);
     }
 
@@ -223,20 +224,27 @@ public class UserService extends ServiceImpl<UserMapper, User> {
         var user = checkUser(vo.getUserId());
         user.setForbidden(vo.getForbidden());
         user.setUpdateUser(UserContextUtils.getUserId());
+        user.setUpdateTime(LocalDateTime.now());
         updateById(user);
         if (vo.getForbidden() == 1) {
             userAuthService.logout(vo.getUserId());
         }
     }
 
+    private void updatePass(String uid, String passwd) {
+        User toUpdate = new User();
+        toUpdate.setId(uid);
+        toUpdate.setPasswd(passwordEncoder.encode(passwd));
+        toUpdate.setUpdateUser(UserContextUtils.getUserId());
+        baseMapper.updateById(toUpdate);
+    }
+
     public void adminResetPasswd(AdminResetPasswdVO vo) {
-        var user = checkUser(vo.getUserId());
+        checkUser(vo.getUserId());
         if (!PasswordUtils.isValid(vo.getPassword())) {
             throw new ParamError("密码强度要求：至少8位，且同时包含大小写字母、数字和符号");
         }
-        user.setPasswd(passwordEncoder.encode(vo.getPassword()));
-        user.setUpdateUser(UserContextUtils.getUserId());
-        updateById(user);
+        updatePass(vo.getUserId(), vo.getPassword());
     }
 
     public void userResetPasswd(UserResetPasswdVO vo) {
@@ -247,11 +255,7 @@ public class UserService extends ServiceImpl<UserMapper, User> {
         if (!PasswordUtils.isValid(vo.getPassword())) {
             throw new ParamError("密码强度要求：至少8位，且同时包含大小写字母、数字和符号");
         }
-        User toUpdate = new User();
-        toUpdate.setId(user.getId());
-        toUpdate.setPasswd(passwordEncoder.encode(vo.getPassword()));
-        toUpdate.setUpdateUser(UserContextUtils.getUserId());
-        updateById(user);
+        updatePass(user.getId(), vo.getPassword());
     }
 
     public void deleteUsers(BatchDeleteVO vo) {

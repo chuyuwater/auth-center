@@ -18,6 +18,7 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -63,6 +64,7 @@ public class SysDictService extends ServiceImpl<SysDictMapper, SysDict> {
             throw new ClientError("指定字典项不存在");
         }
         BeanCopyUtils.copy(vo, sysDict);
+        sysDict.setUpdateTime(LocalDateTime.now());
         try {
             this.updateById(sysDict);
         } catch (DuplicateKeyException e) {

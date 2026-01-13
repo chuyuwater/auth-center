@@ -32,6 +32,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -98,6 +99,7 @@ public class TenantAppService extends ServiceImpl<TenantAppMapper, TenantApp> {
             //单租户应用绑定租户
             app.setBindingTenant(tenantId);
             app.setUpdateUser(UserContextUtils.getUserId());
+            app.setUpdateTime(LocalDateTime.now());
             appMapper.updateById(app);
         } else if (!"".equals(currentBinding) && !tenantId.equals(currentBinding)) {
             throw new ParamError("单租户应用已绑定其他租户");
@@ -208,6 +210,7 @@ public class TenantAppService extends ServiceImpl<TenantAppMapper, TenantApp> {
         }
         grant.setForbidden(vo.getForbidden());
         grant.setUpdateUser(UserContextUtils.getUserId());
+        grant.setUpdateTime(LocalDateTime.now());
         this.updateById(grant);
     }
 

@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -153,6 +154,7 @@ public class ResourcePermService extends ServiceImpl<ResourcePermMapper, Resourc
                         entity.setPermCode(vo.getPermCode());
                         entity.setApiMethod(vo.getApiMethod());
                         entity.setApiPath(vo.getApiPath());
+                        entity.setUpdateTime(LocalDateTime.now());
                         entity.setUpdateUser(UserContextUtils.getUserId());
                         //逐个更新（一般没几条）
                         updateById(entity);

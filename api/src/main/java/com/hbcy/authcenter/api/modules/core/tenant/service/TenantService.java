@@ -34,6 +34,8 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+
 /**
  * @author 姚泰然
  * @date 2025-12-23 14:38
@@ -133,6 +135,7 @@ public class TenantService extends ServiceImpl<TenantMapper, Tenant> {
         }
         BeanCopyUtils.copy(vo, tenant);
         tenant.setUpdateUser(UserContextUtils.getUserId());
+        tenant.setUpdateTime(LocalDateTime.now());
         try {
             this.updateById(tenant);
         } catch (DuplicateKeyException e) {
@@ -160,7 +163,7 @@ public class TenantService extends ServiceImpl<TenantMapper, Tenant> {
         //应用授权状态级联变化
         tenantAppMapper.switchTenantStatus(
                 vo.getForbidden(), vo.getTenantId(), UserContextUtils.getUserId());
-        this.updateById(tenant);
+        this.updateById(toUpdate);
     }
 
     public PageResp<Tenant> list(TenantQueryVO vo) {

@@ -31,6 +31,7 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -127,6 +128,7 @@ public class ResourceTreeService extends ServiceImpl<ResourceTreeMapper, Resourc
             throw new ParamError("指定节点不存在");
         }
         BeanCopyUtils.copy(vo, entity);
+        entity.setUpdateTime(LocalDateTime.now());
         entity.setUpdateUser(UserContextUtils.getUserId());
         try {
             updateById(entity);
