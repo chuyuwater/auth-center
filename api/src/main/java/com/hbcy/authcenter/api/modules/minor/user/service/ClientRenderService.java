@@ -19,7 +19,6 @@ import com.hbcy.authcenter.sdk.utils.UserContextUtils;
 import com.hbcy.common.base.tree.TreeNode;
 import jakarta.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -40,7 +39,7 @@ public class ClientRenderService {
     private PermUnitUserMapper permUnitUserMapper;
     @Resource
     private OrgTreeMapper orgTreeMapper;
-    @Autowired
+    @Resource
     private ResourceTreeMapper resourceTreeMapper;
 
     /**
@@ -87,9 +86,10 @@ public class ClientRenderService {
         //通过idPath剥离出一级菜单和二级菜单
         for (String idPath : idPaths) {
             String[] split = idPath.split(G.ID_PATH_SPLITTER);
-            if (split.length == 1) {
+            if (split.length >= 1) {
                 filteredResIds.add(split[0]);
-            } else if (clientType == ClientTypeEnum.MOBILE && split.length >= 2) {
+            }
+            if (clientType == ClientTypeEnum.MOBILE && split.length >= 2) {
                 filteredResIds.add(split[1]);
             }
         }
