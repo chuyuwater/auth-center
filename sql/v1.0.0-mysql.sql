@@ -342,6 +342,41 @@ create table user_org
 create index ix_user_org_main_job
     on user_org (org_id, tenant_id, main_job);
 
+create table audit_log
+(
+    id          char(26)                           not null
+        primary key,
+    user_id     char(26)                           not null comment '用户id',
+    org_id      varchar(20)                        not null comment '组织id',
+    src_app     varchar(20)                        not null comment '请求源app',
+    target_app  varchar(20)                        not null comment '目标应用',
+    req_method  varchar(10)                        not null comment '请求方法',
+    req_host    varchar(200)                       not null comment '请求域名或ip',
+    req_path    varchar(300)                       not null comment 'uri的路径',
+    req_param   text                               null comment '请求参数',
+    req_body    text                               null comment '返回值',
+    resp_code   int                                not null comment 'http状态码',
+    resp_body   text                               null,
+    req_time    datetime                           not null comment '请求时间点',
+    duration    int                                not null comment '响应时间（毫秒）',
+    client_ip   varchar(100)                       null,
+    create_time datetime default CURRENT_TIMESTAMP not null comment '插入数据库时间'
+)
+    comment '审计日志';
+
+create index ix_audit_log_req_org
+    on audit_log (org_id);
+
+create index ix_audit_log_req_path
+    on audit_log (target_app, req_method, req_path);
+
+create index ix_audit_log_req_time
+    on audit_log (req_time);
+
+create index ix_audit_log_req_user
+    on audit_log (user_id);
+
+
 
 INSERT INTO `app`
 VALUES ('portal', '统一门户', '', 1, '', 0, '0', 0, '2026-01-06 01:10:24', '2026-01-06 01:10:24', '0', '0');
