@@ -1,6 +1,5 @@
 package com.hbcy.authcenter.api.modules.core.app.vo;
 
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import org.hibernate.validator.constraints.Length;
@@ -24,11 +23,6 @@ public class AppUpdateVO {
      */
     @Length(max = 200, message = "应用简介长度不能超过200个字符")
     private String memo;
-    /**
-     * 显示顺序，越小越靠前
-     */
-    @Min(value = 0, message = "显示顺序不能小于0")
-    private int showOrder;
     /**
      * 应用图标
      */
