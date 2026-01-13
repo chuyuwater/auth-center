@@ -9,7 +9,7 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 
 @SpringBootApplication(scanBasePackages = "com.hbcy")
 @EnableDiscoveryClient
-@MapperScan(basePackages = "com.hbcy.authcenter.api")
+@MapperScan(basePackages = "com.hbcy.authcenter.api.**.dao")
 @EnableFeignClients(basePackages = "com.hbcy")
 public class Main {
     public static void main(String[] args) {

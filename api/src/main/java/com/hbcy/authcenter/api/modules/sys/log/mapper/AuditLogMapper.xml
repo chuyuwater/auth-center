@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hbcy.authcenter.api.modules.sys.log.dao.AuditLogMapper">
+    <resultMap id="BaseResultMap" type="com.hbcy.authcenter.api.modules.sys.log.model.AuditLog">
+        <!--@mbg.generated-->
+        <!--@Table audit_log-->
+        <id column="id" jdbcType="CHAR" property="id"/>
+        <result column="user_id" jdbcType="CHAR" property="userId"/>
+        <result column="org_id" jdbcType="VARCHAR" property="orgId"/>
+        <result column="src_app" jdbcType="VARCHAR" property="srcApp"/>
+        <result column="target_app" jdbcType="VARCHAR" property="targetApp"/>
+        <result column="req_method" jdbcType="VARCHAR" property="reqMethod"/>
+        <result column="req_host" jdbcType="VARCHAR" property="reqHost"/>
+        <result column="req_path" jdbcType="VARCHAR" property="reqPath"/>
+        <result column="req_param" jdbcType="LONGVARCHAR" property="reqParam"/>
+        <result column="req_body" jdbcType="LONGVARCHAR" property="reqBody"/>
+        <result column="resp_code" jdbcType="INTEGER" property="respCode"/>
+        <result column="resp_body" jdbcType="LONGVARCHAR" property="respBody"/>
+        <result column="req_time" jdbcType="TIMESTAMP" property="reqTime"/>
+        <result column="duration" jdbcType="INTEGER" property="duration"/>
+        <result column="client_ip" jdbcType="VARCHAR" property="clientIp"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        <!--@mbg.generated-->
+        id, user_id, org_id, src_app, target_app, req_method, req_host, req_path, req_param,
+        req_body, resp_code, resp_body, req_time, duration, client_ip, create_time
+    </sql>
+
+    <select id="listLog" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from audit_log
+        <where>
+            <if test="vo.userId != null">
+                and user_id = #{vo.userId}
+            </if>
+            <if test="vo.orgId != null">
+                and org_id = #{vo.orgId}
+            </if>
+            <if test="vo.targetApp != null">
+                and target_app = #{vo.targetApp}
+            </if>
+            <if test="vo.reqMethod != null">
+                and req_method = #{vo.reqMethod}
+            </if>
+            <if test="vo.reqPath != null">
+                and req_path like concat(#{vo.reqPath}, '%')
+            </if>
+            <if test="vo.startTime != null">
+                and req_time >= #{vo.startTime}
+            </if>
+            <if test="vo.endTime != null">
+                and #{vo.endTime} >= req_time
+            </if>
+        </where>
+    </select>
+</mapper>

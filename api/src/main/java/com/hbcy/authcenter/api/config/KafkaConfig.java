@@ -1,7 +1,7 @@
 package com.hbcy.authcenter.api.config;
 
 import com.google.common.collect.ImmutableMap;
-import com.hbcy.authcenter.gateway.dto.AuditLogDTO;
+import com.hbcy.authcenter.api.modules.sys.log.model.AuditLog;
 import com.hbcy.authcenter.global.dto.AppEventInDTO;
 import com.hbcy.authcenter.global.dto.AppEventOutDTO;
 import com.hbcy.common.kafka.CustomJsonDeserializer;
@@ -43,7 +43,7 @@ public class KafkaConfig implements KafkaListenerConfigurer {
             .put("event", AppEventOutDTO.class)
             .build();
     private final Map<String, Class<?>> consumeTypes = ImmutableMap.<String, Class<?>>builder()
-            .put("audit", AuditLogDTO.class)
+            .put("audit", AuditLog.class)
             .put("event", AppEventInDTO.class)
             .build();
 
