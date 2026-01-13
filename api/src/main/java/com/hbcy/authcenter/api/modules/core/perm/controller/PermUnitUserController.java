@@ -5,6 +5,7 @@ import com.hbcy.authcenter.api.modules.core.perm.service.PermUnitUserService;
 import com.hbcy.authcenter.api.modules.core.perm.vo.PermUnitUserQueryVO;
 import com.hbcy.authcenter.api.modules.core.perm.vo.PermUnitUserUpdateVO;
 import com.hbcy.common.base.pojo.BatchDeleteVO;
+import com.hbcy.common.base.pojo.PageResp;
 import com.hbcy.common.web.bean.NameFill;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
@@ -66,7 +67,7 @@ public class PermUnitUserController {
      */
     @GetMapping
     @NameFill
-    public List<UnitUserDTO> listGrantUsers(@Valid PermUnitUserQueryVO vo) {
+    public PageResp<UnitUserDTO> listGrantUsers(@Valid PermUnitUserQueryVO vo) {
         return permUnitUserService.listGrantUsers(vo);
     }
 }

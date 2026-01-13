@@ -1,6 +1,7 @@
 package com.hbcy.authcenter.api.modules.core.perm.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.f4b6a3.ulid.UlidCreator;
 import com.hbcy.authcenter.api.modules.core.app.dao.ResourcePermMapper;
@@ -24,6 +25,8 @@ import com.hbcy.authcenter.api.modules.core.user.model.UserOrg;
 import com.hbcy.authcenter.sdk.utils.UserContextUtils;
 import com.hbcy.common.base.error.ParamError;
 import com.hbcy.common.base.error.PermissionError;
+import com.hbcy.common.base.pojo.PageResp;
+import com.hbcy.common.db.model.PageRespEx;
 import jakarta.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -153,8 +156,10 @@ public class PermUnitUserService extends ServiceImpl<PermUnitUserMapper, PermUni
     }
 
     //获取角色关联的人
-    public List<UnitUserDTO> listGrantUsers(PermUnitUserQueryVO vo) {
-        return baseMapper.listGrantUsers(vo);
+    public PageResp<UnitUserDTO> listGrantUsers(PermUnitUserQueryVO vo) {
+        Page<Object> dbPage = vo.getDbPage();
+        Page<UnitUserDTO> page = baseMapper.listGrantUsers(dbPage, vo);
+        return new PageRespEx<>(page);
     }
 
     //获取当前用户有权访问的app列表

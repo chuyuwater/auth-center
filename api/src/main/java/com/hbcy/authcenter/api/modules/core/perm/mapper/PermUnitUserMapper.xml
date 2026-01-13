@@ -91,6 +91,9 @@
         join sys_user u on puu.user_id = u.id
         join org_tree ot on puu.org_id = ot.id
         where puu.unit_id = #{vo.unitId}
+        <if test="vo.keyword != null and vo.keyword != ''">
+            and u.real_name like concat('%', #{vo.keyword}, '%')
+        </if>
     </select>
 
     <select id="listGrantApps" resultType="com.hbcy.authcenter.api.modules.core.app.dto.GrantAppDTO">

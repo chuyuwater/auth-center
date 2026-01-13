@@ -14,6 +14,13 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class PermUnitUserQueryVO extends PageVO {
+    /**
+     * 权限单元id
+     */
     @NotBlank(message = "权限单元id不能为空")
     private String unitId;
+    /**
+     * 关键字
+     */
+    private String keyword;
 }
