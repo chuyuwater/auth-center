@@ -99,8 +99,10 @@
         #{entity.showLevel},
         #{entity.createUser},
         #{entity.updateUser},
-        (SELECT COALESCE(MAX(show_order), 0) + 1 from
-        resource_tree where parent_id = #{entity.parentId} and app_id= #{entity.appId})
+        (SELECT COALESCE(MAX(show_order), 0) + 1
+        from resource_tree
+        where parent_id = #{entity.parentId}
+        and app_id = #{entity.appId})
     </insert>
 
     <update id="updateIdPath">
@@ -117,4 +119,61 @@
         and parent_id = #{parentId}
         and show_order >= #{targetIdx}
     </update>
+
+    <select id="listIdPath" resultType="java.lang.String">
+        select id_path
+        from resource_tree
+        <where>
+            <if test="resIds != null and resIds.size() != 0">
+                id in
+                <foreach item="resId" collection="resIds" separator="," open="(" close=")" index="">
+                    #{resId}
+                </foreach>
+            </if>
+            <if test="appIds != null and appIds.size() != 0">
+                or app_id in
+                <foreach item="appId" collection="appIds" separator="," open="(" close=")" index="">
+                    #{appId}
+                </foreach>
+            </if>
+        </where>
+    </select>
+
+    <select id="listOrderdMenu" resultMap="BaseResultMap">
+        select rt.id,
+        rt.name_cn,
+        rt.app_id,
+        rt.custom_id,
+        rt.parent_id,
+        rt.id_path,
+        rt.client_type,
+        rt.icon,
+        rt.route_link,
+        rt.show_order,
+        hidden,
+        show_level
+        from resource_tree rt
+        join app on rt.app_id = app.id
+        <where>
+            app.forbidden = 0
+            and rt.hidden = 0
+            and rt.id in
+            <foreach collection="resIds" open="(" close=")" item="item">
+                #{item}
+            </foreach>
+            <if test="showLevels != null and showLevels.size() != 0">
+                and show_level in
+                <foreach item="showLevel" collection="showLevels" separator="," open="(" close=")" index="">
+                    #{showLevel}
+                </foreach>
+            </if>
+            <if test="clientTypes != null and clientTypes.size() != 0">
+                and client_type in
+                <foreach item="clientType" collection="clientTypes" separator="," open="(" close=")" index="">
+                    #{clientType}
+                </foreach>
+            </if>
+        </where>
+        order by app.show_order, rt.show_order
+    </select>
 </mapper>

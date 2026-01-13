@@ -127,9 +127,21 @@
     </select>
 
     <select id="listUserPerms" resultType="java.lang.String">
-        select pur.perm_id
+        select distinct pur.perm_id
         from perm_unit_user puu
         join perm_unit_resource pur on puu.unit_id = pur.unit_id
+        join org_tree ot on puu.org_id = ot.id
+        <where>
+            puu.user_id = #{userId}
+            and ot.id_path like concat(#{orgIdPath}, '%')
+        </where>
+    </select>
+
+    <select id="listUserRes" resultType="java.lang.String">
+        select distinct rp.res_id
+        from perm_unit_user puu
+        join perm_unit_resource pur on puu.unit_id = pur.unit_id
+        join resource_perm rp on rp.id = pur.perm_id
         join org_tree ot on puu.org_id = ot.id
         <where>
             puu.user_id = #{userId}

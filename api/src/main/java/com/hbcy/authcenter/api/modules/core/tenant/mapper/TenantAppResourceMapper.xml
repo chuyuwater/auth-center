@@ -33,4 +33,14 @@
             and app_id = #{appId}
         </if>
     </select>
+
+    <select id="getGrantedResIds" resultType="java.lang.String">
+        select distinct rp.res_id
+        from tenant_app_resource tar
+        join resource_perm rp on tar.perm_id=rp.id
+        where tenant_id = #{tenantId}
+        <if test="appId != null and appId != ''">
+            and tar.app_id = #{appId}
+        </if>
+    </select>
 </mapper>

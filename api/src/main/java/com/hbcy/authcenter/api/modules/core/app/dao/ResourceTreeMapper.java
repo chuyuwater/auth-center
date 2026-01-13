@@ -3,10 +3,12 @@ package com.hbcy.authcenter.api.modules.core.app.dao;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.hbcy.authcenter.api.modules.core.app.model.ResourceTree;
 import com.hbcy.authcenter.api.modules.core.app.vo.ResourceTreeQueryVO;
+import com.hbcy.authcenter.api.modules.minor.user.vo.OrderedMenuQueryVO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author 姚泰然
@@ -47,4 +49,21 @@ public interface ResourceTreeMapper extends BaseMapper<ResourceTree> {
      */
     void updateShowOrder(@Param("appId") String appId, @Param("parentId") String parentId,
                          @Param("targetIdx") int targetIdx);
+
+    /**
+     * 获取满足条件的idPath
+     *
+     * @param resIds 叶子节点id
+     * @param appIds 应用id
+     * @return idPath
+     */
+    Set<String> listIdPath(@Param("resIds") Set<String> resIds, @Param("appIds") Set<String> appIds);
+
+    /**
+     * 获取满足条件的菜单
+     *
+     * @param vo 查询条件
+     * @return 排序好的菜单
+     */
+    List<ResourceTree> listOrderdMenu(OrderedMenuQueryVO vo);
 }

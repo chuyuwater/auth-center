@@ -4,12 +4,16 @@ import com.hbcy.authcenter.api.modules.core.app.dto.AppCardDTO;
 import com.hbcy.authcenter.api.modules.core.app.dto.GrantAppDTO;
 import com.hbcy.authcenter.api.modules.core.app.dto.ResPermDTO;
 import com.hbcy.authcenter.api.modules.core.app.dto.ResTreeDTO;
+import com.hbcy.authcenter.api.modules.core.app.model.ResourceTree;
 import com.hbcy.authcenter.api.modules.core.perm.service.PermUnitResourceService;
 import com.hbcy.authcenter.api.modules.core.perm.service.PermUnitUserService;
 import com.hbcy.authcenter.api.modules.core.perm.vo.ClientResQueryVO;
+import com.hbcy.authcenter.api.modules.minor.user.service.ClientRenderService;
 import com.hbcy.authcenter.sdk.utils.UserContextUtils;
 import com.hbcy.common.base.tree.TreeNode;
 import jakarta.annotation.Resource;
+import jakarta.validation.constraints.NotNull;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -33,15 +37,18 @@ import java.util.stream.Collectors;
  * @date 2025-12-30 08:36
  */
 @RestController
+@Validated
 @RequestMapping("api/portal/v1/client")
 public class ClientRenderController {
     @Resource
     private PermUnitUserService permUnitUserService;
     @Resource
     private PermUnitResourceService permUnitResourceService;
+    @Resource
+    private ClientRenderService clientRenderService;
 
     /**
-     * 获取当前用户有权访问的app列表（不含被禁用）
+     * 获取当前用户有权访问的app列表
      *
      * @return app列表
      */
@@ -49,6 +56,18 @@ public class ClientRenderController {
     public List<AppCardDTO> listApp() {
         List<GrantAppDTO> apps = permUnitUserService.listApp(null, false);
         return new ArrayList<>(apps);
+    }
+
+    /**
+     * 获取当前用户的入口菜单
+     * 如果是PC端，仅返回一级菜单
+     * 如果是移动端，返回一级+二级菜单
+     *
+     * @param clientType 1:PC端 2:移动端
+     */
+    @GetMapping("/entry")
+    public List<TreeNode<ResourceTree>> entry(@NotNull(message = "clientType必须指定") Integer clientType) {
+        return clientRenderService.listEntry(UserContextUtils.getUserId(), UserContextUtils.getUserOrg(), clientType);
     }
 
     /**

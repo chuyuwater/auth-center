@@ -41,4 +41,8 @@ public interface PermUnitUserMapper extends BaseMapper<PermUnitUser> {
 
     //获取用户在指定组织下的所有权限点
     Set<String> listUserPerms(@Param("userId") String userId, @Param("orgIdPath") String orgIdPath);
+
+    //获取用户在指定组织下的所有菜单资源
+    Set<String> listUserRes(@Param("userId") String userId,
+                            @Param("orgIdPath") String orgIdPath);
 }
