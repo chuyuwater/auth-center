@@ -6,12 +6,16 @@ import java.time.LocalDateTime;
 
 /**
  * 审计日志内容
- *
+ * 与AuditLog字段基本一致
  * @author 姚泰然
  * @date 2025-12-17 14:41
  */
 @Data
 public class AuditLogDTO {
+    /**
+     * trace id
+     */
+    private String id;
     /**
      * 用户id
      */

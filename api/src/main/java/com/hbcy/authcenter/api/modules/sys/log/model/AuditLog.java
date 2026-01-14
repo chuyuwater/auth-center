@@ -32,7 +32,7 @@ public class AuditLog {
     public static final String COL_DURATION = "duration";
     public static final String COL_CLIENT_IP = "client_ip";
     public static final String COL_CREATE_TIME = "create_time";
-    @TableId(value = "id", type = IdType.ASSIGN_UUID)
+    @TableId(value = "id", type = IdType.INPUT)
     private String id;
     /**
      * 用户id

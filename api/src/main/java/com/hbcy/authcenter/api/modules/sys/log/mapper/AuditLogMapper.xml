@@ -23,8 +23,22 @@
     </resultMap>
     <sql id="Base_Column_List">
         <!--@mbg.generated-->
-        id, user_id, org_id, src_app, target_app, req_method, req_host, req_path, req_param,
-        req_body, resp_code, resp_body, req_time, duration, client_ip, create_time
+        id,
+        user_id,
+        org_id,
+        src_app,
+        target_app,
+        req_method,
+        req_host,
+        req_path,
+        req_param,
+        req_body,
+        resp_code,
+        resp_body,
+        req_time,
+        duration,
+        client_ip,
+        create_time
     </sql>
 
     <select id="listLog" resultMap="BaseResultMap">
@@ -55,4 +69,16 @@
             </if>
         </where>
     </select>
+
+    <!-- TODO:仅适配MySQL系-->
+    <insert id="insertIgnore">
+        insert ignore into audit_log (id, user_id, org_id, src_app, target_app, req_method, req_host, req_path,
+        req_param, req_body, resp_code, resp_body, req_time, duration, client_ip)
+        values
+        <foreach collection="list" item="item" separator=",">
+            (#{item.id}, #{item.userId}, #{item.orgId}, #{item.srcApp}, #{item.targetApp}, #{item.reqMethod},
+            #{item.reqHost}, #{item.reqPath}, #{item.reqParam}, #{item.reqBody}, #{item.respCode}, #{item.respBody},
+            #{item.reqTime}, #{item.duration}, #{item.clientIp})
+        </foreach>
+    </insert>
 </mapper>

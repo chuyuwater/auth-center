@@ -26,7 +26,7 @@ public class RdsLogServiceImpl implements IAuditLogService {
 
     @Override
     public void save(List<AuditLog> dto) {
-        auditLogMapper.insert(dto);
+        auditLogMapper.insertIgnore(dto);
     }
 
     @Override
