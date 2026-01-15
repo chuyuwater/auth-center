@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * 字典类型（分组）管理
+ * 字典类型管理
  *
  * @module sys
  * @author 姚泰然

@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * 系统字典
+ * 字典项管理
  *
  * @author 姚泰然
  * @module sys
