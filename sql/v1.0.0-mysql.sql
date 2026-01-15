@@ -216,24 +216,6 @@ create index ix_res_tree_id_path
 create index ix_res_tree_node_order
     on resource_tree (parent_id, show_order);
 
-create table sys_dict
-(
-    id          char(26)                               not null comment 'ulid'
-        primary key,
-    feat_code   varchar(100)                           not null comment '字典键',
-    value_str   varchar(100)                           not null comment '字典值',
-    value_cn    varchar(100) default ''                not null comment '中文值',
-    parent_id   varchar(26)  default ''                not null comment '父节点',
-    show_order  int          default 0                 not null comment '显示顺序',
-    create_time datetime     default CURRENT_TIMESTAMP not null,
-    update_time datetime     default CURRENT_TIMESTAMP not null on update current_timestamp,
-    constraint ux_dict_kv
-        unique (feat_code, value_str)
-);
-
-create index ix_sys_dict_parent_id
-    on sys_dict (parent_id, show_order);
-
 create table sys_user
 (
     id            char(26)                               not null comment '用户id'
@@ -376,6 +358,120 @@ create index ix_audit_log_req_time
 create index ix_audit_log_req_user
     on audit_log (user_id);
 
+create table sys_dict
+(
+    id          char(26)                               not null comment 'ulid'
+        primary key,
+    app_id      varchar(20)  default ''                not null comment '应用id，为空标识通用',
+    feat_code   varchar(100)                           not null comment '字典键，为空表示分组',
+    value_str   varchar(100)                           not null comment '字典值',
+    value_cn    varchar(100) default ''                not null comment '中文值',
+    dict_type   tinyint      default 0                 not null comment '0-列表，1-树状',
+    parent_id   varchar(26)  default ''                not null comment '父节点',
+    id_path     varchar(768) default ''                not null,
+    show_order  int          default 0                 not null comment '显示顺序',
+    memo        varchar(200) default ''                not null comment '备注',
+    forbidden   tinyint      default 0                 not null,
+    create_user char(26)     default '0'               not null,
+    update_user char(26)     default '0'               not null,
+    create_time datetime     default CURRENT_TIMESTAMP not null,
+    update_time datetime     default CURRENT_TIMESTAMP not null,
+    delete_time bigint       default 0                 not null,
+    constraint ux_sys_dict_kv
+        unique (feat_code, value_str, delete_time),
+    constraint ux_sys_dict_kv_cn
+        unique (value_cn, feat_code, delete_time)
+);
+
+create index ix_sys_dict_id_path
+    on sys_dict (id_path);
+
+create index ix_sys_dict_parent_id
+    on sys_dict (parent_id, show_order, app_id);
+
+
+INSERT INTO sys_dict (id, app_id, feat_code, value_str, value_cn, dict_type, parent_id, id_path,
+                      show_order, memo, forbidden, create_user, update_user, create_time,
+                      update_time, delete_time)
+VALUES ('01KE8EFFY2XC6ZSX1NKARS72Q0', 'portal', '', 'CLIENT_TYPE', '客户端类型', 0, '', '01KE8EFFY2XC6ZSX1NKARS72Q0', 0,
+        '', 0, '0', '0', '2026-01-06 09:24:26', '2026-01-06 09:24:26', 0);
+INSERT INTO sys_dict (id, app_id, feat_code, value_str, value_cn, dict_type, parent_id, id_path,
+                      show_order, memo, forbidden, create_user, update_user, create_time,
+                      update_time, delete_time)
+VALUES ('01KE8EHWVSM9FQP5C0K0G2SXVV', 'portal', 'CLIENT_TYPE', '0', '全端', 0, '01KE8EFFY2XC6ZSX1NKARS72Q0',
+        '01KE8EFFY2XC6ZSX1NKARS72Q0/01KE8EHWVSM9FQP5C0K0G2SXVV', 0, '', 0, '0', '0', '2026-01-06 09:25:44',
+        '2026-01-06 09:25:44', 0);
+INSERT INTO sys_dict (id, app_id, feat_code, value_str, value_cn, dict_type, parent_id, id_path,
+                      show_order, memo, forbidden, create_user, update_user, create_time,
+                      update_time, delete_time)
+VALUES ('01KE8EJ9WN1WCMC66ET9HGXTFD', 'portal', 'CLIENT_TYPE', '1', 'PC端', 0, '01KE8EFFY2XC6ZSX1NKARS72Q0',
+        '01KE8EFFY2XC6ZSX1NKARS72Q0/01KE8EJ9WN1WCMC66ET9HGXTFD', 0, '', 0, '0', '0', '2026-01-06 09:25:58',
+        '2026-01-06 09:25:58', 0);
+INSERT INTO sys_dict (id, app_id, feat_code, value_str, value_cn, dict_type, parent_id, id_path,
+                      show_order, memo, forbidden, create_user, update_user, create_time,
+                      update_time, delete_time)
+VALUES ('01KE8EJKRHFZAQ9CPZS6PQ2XJ3', 'portal', 'CLIENT_TYPE', '2', '移动端', 0, '01KE8EFFY2XC6ZSX1NKARS72Q0',
+        '01KE8EFFY2XC6ZSX1NKARS72Q0/01KE8EJKRHFZAQ9CPZS6PQ2XJ3', 0, '', 0, '0', '0', '2026-01-06 09:26:08',
+        '2026-01-06 09:26:08', 0);
+INSERT INTO sys_dict (id, app_id, feat_code, value_str, value_cn, dict_type, parent_id, id_path,
+                      show_order, memo, forbidden, create_user, update_user, create_time,
+                      update_time, delete_time)
+VALUES ('01KE8EKGW3W428BJEEB9ATGAFA', 'portal', '', 'MENU_LEVEL', '显示级别', 0, '', '01KE8EKGW3W428BJEEB9ATGAFA', 0,
+        '', 0, '0', '0', '2026-01-06 09:26:38', '2026-01-06 09:26:38', 0);
+INSERT INTO sys_dict (id, app_id, feat_code, value_str, value_cn, dict_type, parent_id, id_path,
+                      show_order, memo, forbidden, create_user, update_user, create_time,
+                      update_time, delete_time)
+VALUES ('01KE8EM552768TQ7AWKFPPS2ZW', 'portal', 'MENU_LEVEL', '0', '全级', 0, '01KE8EKGW3W428BJEEB9ATGAFA',
+        '01KE8EKGW3W428BJEEB9ATGAFA/01KE8EM552768TQ7AWKFPPS2ZW', 0, '', 0, '0', '0', '2026-01-06 09:26:58',
+        '2026-01-06 09:26:58', 0);
+INSERT INTO sys_dict (id, app_id, feat_code, value_str, value_cn, dict_type, parent_id, id_path,
+                      show_order, memo, forbidden, create_user, update_user, create_time,
+                      update_time, delete_time)
+VALUES ('01KE8EMJN3A57J8VFCG55YJEQF', 'portal', 'MENU_LEVEL', '1', '组织级', 0, '01KE8EKGW3W428BJEEB9ATGAFA',
+        '01KE8EKGW3W428BJEEB9ATGAFA/01KE8EMJN3A57J8VFCG55YJEQF', 0, '', 0, '0', '0', '2026-01-06 09:27:12',
+        '2026-01-06 09:27:12', 0);
+INSERT INTO sys_dict (id, app_id, feat_code, value_str, value_cn, dict_type, parent_id, id_path,
+                      show_order, memo, forbidden, create_user, update_user, create_time,
+                      update_time, delete_time)
+VALUES ('01KE8EMSV5T1FW5YXQABJPF6JR', 'portal', 'MENU_LEVEL', '2', '项目级', 0, '01KE8EKGW3W428BJEEB9ATGAFA',
+        '01KE8EKGW3W428BJEEB9ATGAFA/01KE8EMSV5T1FW5YXQABJPF6JR', 0, '', 0, '0', '0', '2026-01-06 09:27:20',
+        '2026-01-06 09:27:20', 0);
+INSERT INTO sys_dict (id, app_id, feat_code, value_str, value_cn, dict_type, parent_id, id_path,
+                      show_order, memo, forbidden, create_user, update_user, create_time,
+                      update_time, delete_time)
+VALUES ('01KE8EP5825600MR5D03YEMNZ9', 'portal', '', 'ORG_CATEGORY', '组织类型', 0, '', '01KE8EP5825600MR5D03YEMNZ9', 0,
+        '', 0, '0', '0', '2026-01-06 09:28:04', '2026-01-06 09:28:04', 0);
+INSERT INTO sys_dict (id, app_id, feat_code, value_str, value_cn, dict_type, parent_id, id_path,
+                      show_order, memo, forbidden, create_user, update_user, create_time,
+                      update_time, delete_time)
+VALUES ('01KE8EQ1H000TNJED9N14AAZD2', 'portal', 'ORG_CATEGORY', '0', '项目部', 0, '01KE8EP5825600MR5D03YEMNZ9',
+        '01KE8EP5825600MR5D03YEMNZ9/01KE8EQ1H000TNJED9N14AAZD2', 0, '', 0, '0', '0', '2026-01-06 09:28:33',
+        '2026-01-06 09:28:33', 0);
+INSERT INTO sys_dict (id, app_id, feat_code, value_str, value_cn, dict_type, parent_id, id_path,
+                      show_order, memo, forbidden, create_user, update_user, create_time,
+                      update_time, delete_time)
+VALUES ('01KE8EQFH86ESG8WQQQC6AGQ85', 'portal', 'ORG_CATEGORY', '1', '集团', 0, '01KE8EP5825600MR5D03YEMNZ9',
+        '01KE8EP5825600MR5D03YEMNZ9/01KE8EQFH86ESG8WQQQC6AGQ85', 0, '', 0, '0', '0', '2026-01-06 09:28:47',
+        '2026-01-06 09:28:47', 0);
+INSERT INTO sys_dict (id, app_id, feat_code, value_str, value_cn, dict_type, parent_id, id_path,
+                      show_order, memo, forbidden, create_user, update_user, create_time,
+                      update_time, delete_time)
+VALUES ('01KE8EQS0SKVNYK6GSNCRDTCV4', 'portal', 'ORG_CATEGORY', '2', '公司', 0, '01KE8EP5825600MR5D03YEMNZ9',
+        '01KE8EP5825600MR5D03YEMNZ9/01KE8EQS0SKVNYK6GSNCRDTCV4', 0, '', 0, '0', '0', '2026-01-06 09:28:57',
+        '2026-01-06 09:28:57', 0);
+INSERT INTO sys_dict (id, app_id, feat_code, value_str, value_cn, dict_type, parent_id, id_path,
+                      show_order, memo, forbidden, create_user, update_user, create_time,
+                      update_time, delete_time)
+VALUES ('01KE8ER1YCF9VJ8ZKPV3KE3KM0', 'portal', 'ORG_CATEGORY', '3', '分公司', 0, '01KE8EP5825600MR5D03YEMNZ9',
+        '01KE8EP5825600MR5D03YEMNZ9/01KE8ER1YCF9VJ8ZKPV3KE3KM0', 0, '', 0, '0', '0', '2026-01-06 09:29:06',
+        '2026-01-06 09:29:06', 0);
+INSERT INTO sys_dict (id, app_id, feat_code, value_str, value_cn, dict_type, parent_id, id_path,
+                      show_order, memo, forbidden, create_user, update_user, create_time,
+                      update_time, delete_time)
+VALUES ('01KE8ERCRSW4G1D9HXC9HY9JRK', 'portal', 'ORG_CATEGORY', '4', '子公司', 0, '01KE8EP5825600MR5D03YEMNZ9',
+        '01KE8EP5825600MR5D03YEMNZ9/01KE8ERCRSW4G1D9HXC9HY9JRK', 0, '', 0, '0', '0', '2026-01-06 09:29:17',
+        '2026-01-06 09:29:17', 0);
+
 
 
 INSERT INTO `app`
@@ -390,33 +486,3 @@ INSERT INTO `sys_user`
 VALUES ('01KE8DW1DK2KPAZJAENJW6SSFE', '18502710984', 'admin', '超级管理员',
         '$2a$10$Kg/w2Tcsqbu1RsmcuZgW4uRseXBFuAADY3Eavl9yplcPRHRZovFHC', NULL, '', 0, NULL, 0, NULL, NULL, '0',
         '2026-01-08 17:48:17', 0, '2026-01-06 09:13:48', '2026-01-06 09:13:48', '0', '0');
-
-INSERT INTO `sys_dict`
-VALUES ('01KE8EFFY2XC6ZSX1NKARS72Q0', 'ROOT', 'CLIENT_TYPE', '客户端类型', '', 0, '2026-01-06 09:24:26',
-        '2026-01-06 09:24:26'),
-       ('01KE8EHWVSM9FQP5C0K0G2SXVV', 'CLIENT_TYPE', '0', '全端', '01KE8EFFY2XC6ZSX1NKARS72Q0', 0,
-        '2026-01-06 09:25:44', '2026-01-06 09:25:44'),
-       ('01KE8EJ9WN1WCMC66ET9HGXTFD', 'CLIENT_TYPE', '1', 'PC端', '01KE8EFFY2XC6ZSX1NKARS72Q0', 0,
-        '2026-01-06 09:25:58', '2026-01-06 09:25:58'),
-       ('01KE8EJKRHFZAQ9CPZS6PQ2XJ3', 'CLIENT_TYPE', '2', '移动端', '01KE8EFFY2XC6ZSX1NKARS72Q0', 0,
-        '2026-01-06 09:26:08', '2026-01-06 09:26:08'),
-       ('01KE8EKGW3W428BJEEB9ATGAFA', 'ROOT', 'MENU_LEVEL', '显示级别', '', 0, '2026-01-06 09:26:38',
-        '2026-01-06 09:26:38'),
-       ('01KE8EM552768TQ7AWKFPPS2ZW', 'MENU_LEVEL', '0', '全级', '01KE8EKGW3W428BJEEB9ATGAFA', 0, '2026-01-06 09:26:58',
-        '2026-01-06 09:26:58'),
-       ('01KE8EMJN3A57J8VFCG55YJEQF', 'MENU_LEVEL', '1', '组织级', '01KE8EKGW3W428BJEEB9ATGAFA', 0,
-        '2026-01-06 09:27:12', '2026-01-06 09:27:12'),
-       ('01KE8EMSV5T1FW5YXQABJPF6JR', 'MENU_LEVEL', '2', '项目级', '01KE8EKGW3W428BJEEB9ATGAFA', 0,
-        '2026-01-06 09:27:20', '2026-01-06 09:27:20'),
-       ('01KE8EP5825600MR5D03YEMNZ9', 'ROOT', 'ORG_CATEGORY', '组织类型', '', 0, '2026-01-06 09:28:04',
-        '2026-01-06 09:28:04'),
-       ('01KE8EQ1H000TNJED9N14AAZD2', 'ORG_CATEGORY', '0', '项目部', '01KE8EP5825600MR5D03YEMNZ9', 0,
-        '2026-01-06 09:28:33', '2026-01-06 09:28:33'),
-       ('01KE8EQFH86ESG8WQQQC6AGQ85', 'ORG_CATEGORY', '1', '集团', '01KE8EP5825600MR5D03YEMNZ9', 0,
-        '2026-01-06 09:28:47', '2026-01-06 09:28:47'),
-       ('01KE8EQS0SKVNYK6GSNCRDTCV4', 'ORG_CATEGORY', '2', '公司', '01KE8EP5825600MR5D03YEMNZ9', 0,
-        '2026-01-06 09:28:57', '2026-01-06 09:28:57'),
-       ('01KE8ER1YCF9VJ8ZKPV3KE3KM0', 'ORG_CATEGORY', '3', '分公司', '01KE8EP5825600MR5D03YEMNZ9', 0,
-        '2026-01-06 09:29:06', '2026-01-06 09:29:06'),
-       ('01KE8ERCRSW4G1D9HXC9HY9JRK', 'ORG_CATEGORY', '4', '子公司', '01KE8EP5825600MR5D03YEMNZ9', 0,
-        '2026-01-06 09:29:17', '2026-01-06 09:29:17');

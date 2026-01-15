@@ -1,11 +1,13 @@
 package com.hbcy.authcenter.sdk.feign;
 
 import com.hbcy.authcenter.sdk.annotation.EnableHeaderPassthrough;
+import com.hbcy.authcenter.sdk.feign.dto.SysDictDTO;
 import com.hbcy.common.base.pojo.ApiResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -25,4 +27,14 @@ public interface AuthCenterClient {
      */
     @GetMapping("/api/portal/v1/client/permCode")
     ApiResponse<Set<String>> listPermCode(@RequestParam String resId);
+
+    /**
+     * 分组下的字典项列表
+     * 用于列表状字典的全量查询，或树状字典的分级展开查询，有缓存
+     * @param featCode 字典类型编码（非id）
+     * @param parentId 父节点ID，为空则查询分组下的所有字典项
+     * @return 字典项列表
+     */
+    @GetMapping("/api/portal/v1/sys/dict/list")
+    ApiResponse<List<SysDictDTO>> listDictByFeatCode(@RequestParam String featCode, @RequestParam String parentId);
 }
