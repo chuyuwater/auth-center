@@ -1,27 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.hbcy.authcenter.api.modules.sys.dict.dao.SysDictMapper">
-    <resultMap id="BaseResultMap" type="com.hbcy.authcenter.api.modules.sys.dict.model.SysDict">
-        <!--@mbg.generated-->
-        <!--@Table sys_dict-->
-        <id column="id" jdbcType="CHAR" property="id"/>
-        <result column="feat_code" jdbcType="VARCHAR" property="featCode"/>
-        <result column="value_str" jdbcType="VARCHAR" property="valueStr"/>
-        <result column="value_cn" jdbcType="VARCHAR" property="valueCn"/>
-        <result column="parent_id" jdbcType="VARCHAR" property="parentId"/>
-        <result column="show_order" jdbcType="INTEGER" property="showOrder"/>
-        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
-        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
-    </resultMap>
-    <sql id="Base_Column_List">
-        <!--@mbg.generated-->
-        id, feat_code, value_str, value_cn, parent_id, show_order, create_time, update_time
-    </sql>
+  <resultMap id="BaseResultMap" type="com.hbcy.authcenter.api.modules.sys.dict.model.SysDict">
+    <!--@mbg.generated-->
+    <!--@Table sys_dict-->
+    <id column="id" jdbcType="CHAR" property="id" />
+    <result column="app_id" jdbcType="VARCHAR" property="appId" />
+    <result column="feat_code" jdbcType="VARCHAR" property="featCode" />
+    <result column="value_str" jdbcType="VARCHAR" property="valueStr" />
+    <result column="value_cn" jdbcType="VARCHAR" property="valueCn" />
+    <result column="dict_type" jdbcType="TINYINT" property="dictType" />
+    <result column="parent_id" jdbcType="VARCHAR" property="parentId" />
+    <result column="show_order" jdbcType="INTEGER" property="showOrder" />
+    <result column="memo" jdbcType="VARCHAR" property="memo" />
+    <result column="forbidden" jdbcType="TINYINT" property="forbidden" />
+    <result column="create_user" jdbcType="CHAR" property="createUser" />
+    <result column="update_user" jdbcType="CHAR" property="updateUser" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+    <result column="delete_time" jdbcType="BIGINT" property="deleteTime" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+    id, app_id, feat_code, value_str, value_cn, dict_type, parent_id, show_order, memo, 
+    forbidden, create_user, update_user, create_time, update_time, delete_time
+  </sql>
 
     <select id="selectChildrenRecursively" resultMap="BaseResultMap">
         WITH RECURSIVE recursive_dict AS (
         SELECT
-        <include refid="Base_Column_List"/>
+        <include refid="Base_Column_List" />
         FROM sys_dict
         WHERE parent_id = #{parentId}
         UNION ALL
@@ -30,7 +38,9 @@
         INNER JOIN recursive_dict rd ON sd.parent_id = rd.id
         )
         SELECT
-        <include refid="Base_Column_List"/>
-        FROM recursive_dict;
+        <include refid="Base_Column_List" />
+        FROM recursive_dict
+        where forbidden = 0
+        and delete_time = 0
     </select>
 </mapper>

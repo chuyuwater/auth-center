@@ -9,7 +9,7 @@ import java.util.List;
 
 /**
  * @author 姚泰然
- * @date 2025-12-22 13:45
+ * @date 2026-01-14 17:02
  */
 @Mapper
 public interface SysDictMapper extends BaseMapper<SysDict> {
