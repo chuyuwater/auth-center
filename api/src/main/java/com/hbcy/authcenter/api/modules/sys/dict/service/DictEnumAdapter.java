@@ -1,10 +1,13 @@
 package com.hbcy.authcenter.api.modules.sys.dict.service;
 
+import com.hbcy.authcenter.api.modules.sys.dict.model.SysDict;
 import com.hbcy.common.db.convertor.IDictService;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * db中的枚举转系统字典适配器
@@ -24,6 +27,7 @@ public class DictEnumAdapter implements IDictService {
 
     @Override
     public Map<String, String> getCodeEnums(String dictCode) {
-        return sysDictService.getDictValueMapByFeatCode(dictCode);
+        List<SysDict> list = sysDictService.listDictByFeatCode(dictCode, "");
+        return list.stream().collect(Collectors.toMap(SysDict::getValueStr, SysDict::getValueCn));
     }
 }

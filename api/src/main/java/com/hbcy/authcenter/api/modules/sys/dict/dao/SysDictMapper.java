@@ -9,9 +9,15 @@ import java.util.List;
 
 /**
  * @author 姚泰然
- * @date 2026-01-14 17:02
+ * @date 2026-01-15 12:53
  */
 @Mapper
 public interface SysDictMapper extends BaseMapper<SysDict> {
     List<SysDict> selectChildrenRecursively(@Param("parentId") String parentId);
+
+    void append(@Param("dict") SysDict dict);
+
+    void updateIdPath(@Param("oldPath") String oldPath, @Param("newPath") String newPath);
+
+    void updateShowOrder(@Param("parentId") String parentId, @Param("targetIdx") int targetIdx);
 }

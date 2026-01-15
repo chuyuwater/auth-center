@@ -45,7 +45,7 @@ create table org_tree
         unique (short_name, tenant_id, parent_id, delete_time)
 );
 
-create unique index ux_org_tree_id_path
+create index ix_org_tree_id_path
     on org_tree (id_path);
 
 create index ix_org_tree_parent_id
@@ -69,7 +69,7 @@ create table perm_tree
     delete_time  bigint       default 0                 not null
 );
 
-create unique index ux_perm_tree_id_path
+create index ix_perm_tree_id_path
     on perm_tree (id_path);
 
 create index ix_perm_tree_tenant_name
@@ -210,7 +210,7 @@ create table resource_tree
         unique (app_id, custom_id)
 );
 
-create unique index ux_res_tree_id_path
+create index ix_res_tree_id_path
     on resource_tree (id_path);
 
 create index ix_res_tree_node_order

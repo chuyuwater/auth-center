@@ -1,19 +1,25 @@
 package com.hbcy.authcenter.api.modules.sys.dict.model;
 
 import com.baomidou.mybatisplus.annotation.*;
+import com.hbcy.authcenter.api.common.bean.BaseEntity;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
 /**
  * @author 姚泰然
- * @date 2026-01-14 17:02
+ * @date 2026-01-15 12:53
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
 @NoArgsConstructor
 @TableName(value = "sys_dict")
-public class SysDict {
+public class SysDict extends BaseEntity {
+    public static final int DICT_TYPE_LIST = 0;
+    public static final int DICT_TYPE_TREE = 1;
+
     public static final String COL_ID = "id";
     public static final String COL_APP_ID = "app_id";
     public static final String COL_FEAT_CODE = "feat_code";
@@ -21,6 +27,7 @@ public class SysDict {
     public static final String COL_VALUE_CN = "value_cn";
     public static final String COL_DICT_TYPE = "dict_type";
     public static final String COL_PARENT_ID = "parent_id";
+    public static final String COL_ID_PATH = "id_path";
     public static final String COL_SHOW_ORDER = "show_order";
     public static final String COL_MEMO = "memo";
     public static final String COL_FORBIDDEN = "forbidden";
@@ -64,6 +71,8 @@ public class SysDict {
      */
     @TableField(value = "parent_id")
     private String parentId;
+    @TableField(value = "id_path")
+    private String idPath;
     /**
      * 显示顺序
      */
