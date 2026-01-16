@@ -27,6 +27,13 @@ public interface UserOrgMapper extends BaseMapper<UserOrg> {
                                   @Param("onlyMain") boolean onlyMain);
 
     /**
+     * 查询用户的主要任职组织
+     * @param userId 用户id
+     * @return 主职组织id
+     */
+    String queryMainOrg(@Param("userId") String userId);
+
+    /**
      * 设置用户的主要任职
      *
      * @param userId 用户id

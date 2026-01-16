@@ -134,11 +134,13 @@ public class UserAuthService {
         //将租户id保存到session中
         StpUtil.getSession(true).set(GatewayConstants.SESSION_TENANT_ID, chosen.getTenantId());
         SaTokenInfo tokenInfo = StpUtil.getTokenInfo();
-
+        String orgId = userOrgMapper.queryMainOrg(chosen.getId());
         LoginRespDTO resp = new LoginRespDTO()
                 .setToken(tokenInfo.tokenValue)
                 .setLastLoginTime(chosen.getLastLogin())
                 .setUserId(chosen.getId())
+                .setTenantId(chosen.getTenantId())
+                .setOrgId(orgId)
                 .setRealName(chosen.getRealName())
                 .setAvatar(chosen.getAvatar());
         // 更新最后登录时间

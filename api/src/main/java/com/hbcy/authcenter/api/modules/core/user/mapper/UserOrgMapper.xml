@@ -57,4 +57,12 @@
     <select id="listAllOrg" resultType="java.lang.String">
         select distinct org_id from user_org where user_id= #{userId}
     </select>
+
+    <select id="queryMainOrg" resultType="java.lang.String">
+        select org_id
+        from user_org
+        where user_id = #{userId}
+        and main_job = 1
+        limit 1
+    </select>
 </mapper>

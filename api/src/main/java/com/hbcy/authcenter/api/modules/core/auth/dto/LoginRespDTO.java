@@ -23,6 +23,14 @@ public class LoginRespDTO {
      */
     private String userId;
     /**
+     * 租户id
+     */
+    private String tenantId;
+    /**
+     * 主职组织
+     */
+    private String orgId;
+    /**
      * 真实姓名
      */
     private String realName;

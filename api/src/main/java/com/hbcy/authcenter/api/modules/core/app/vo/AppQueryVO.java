@@ -1,6 +1,7 @@
 package com.hbcy.authcenter.api.modules.core.app.vo;
 
 import lombok.Data;
+import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.Range;
 
 /**
@@ -14,6 +15,7 @@ public class AppQueryVO {
     /**
      * 模糊查询
      */
+    @Length(max = 50, message = "关键字长度不能超过50个字符")
     private String keyword;
     /**
      * 是否禁用
