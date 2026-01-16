@@ -34,6 +34,7 @@ public class UserAuthController {
 
     /**
      * 登录
+     * http状态码400，且status=100，表明用户有多个租户，需要选择租户，data里为租户列表
      *
      * @param vo 登录参数
      * @return 登录结果

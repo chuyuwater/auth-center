@@ -9,6 +9,8 @@ import com.hbcy.authcenter.api.config.UserAuthConfig;
 import com.hbcy.authcenter.api.modules.core.auth.dto.CaptchaDTO;
 import com.hbcy.authcenter.api.modules.core.auth.dto.LoginRespDTO;
 import com.hbcy.authcenter.api.modules.core.auth.vo.LoginVO;
+import com.hbcy.authcenter.api.modules.core.tenant.dao.TenantMapper;
+import com.hbcy.authcenter.api.modules.core.tenant.model.Tenant;
 import com.hbcy.authcenter.api.modules.core.user.dao.UserMapper;
 import com.hbcy.authcenter.api.modules.core.user.dao.UserOrgMapper;
 import com.hbcy.authcenter.api.modules.core.user.model.User;
@@ -54,6 +56,8 @@ public class UserAuthService {
     private UserAuthConfig authConfig;
     @Resource
     private UserOrgMapper userOrgMapper;
+    @Resource
+    private TenantMapper tenantMapper;
 
     private long checkLockTime(String userId) {
         Long expire = stringRedisTemplate.getExpire(USER_LOCK_KEY_PREFIX + userId, TimeUnit.SECONDS);
@@ -111,7 +115,8 @@ public class UserAuthService {
             throw new AuthError("账号或密码错误");
         }
         if (hitTenant.size() > 1) {
-            throw new ClientError(100, "请选择租户", hitTenant);
+            List<Tenant> tenantList = tenantMapper.selectByIds(hitTenant);
+            throw new ClientError(100, "请选择租户", tenantList);
         }
         chosen = userList.get(0);
         long expire = checkLockTime(chosen.getId());
