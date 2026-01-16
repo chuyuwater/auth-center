@@ -1,6 +1,7 @@
 package com.hbcy.authcenter.api.modules.core.user.vo;
 
 import com.hbcy.authcenter.api.common.constants.G;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.Data;
@@ -29,7 +30,7 @@ public class UserUpdateVO {
     /**
      * 邮箱
      */
-    @Pattern(regexp = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$", message = "邮箱格式不正确")
+    @Email(message = "邮箱格式不正确")
     private String email;
     /**
      * 头像
