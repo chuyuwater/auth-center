@@ -27,7 +27,11 @@ public class LoginRespDTO {
      */
     private String tenantId;
     /**
-     * 主职组织
+     * 是否租户默认管理员
+     */
+    private boolean admin;
+    /**
+     * 主职组织id
      */
     private String orgId;
     /**

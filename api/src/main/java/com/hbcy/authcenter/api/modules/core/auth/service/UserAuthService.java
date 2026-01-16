@@ -135,11 +135,13 @@ public class UserAuthService {
         StpUtil.getSession(true).set(GatewayConstants.SESSION_TENANT_ID, chosen.getTenantId());
         SaTokenInfo tokenInfo = StpUtil.getTokenInfo();
         String orgId = userOrgMapper.queryMainOrg(chosen.getId());
+        Tenant tenant = tenantMapper.selectById(chosen.getTenantId());
         LoginRespDTO resp = new LoginRespDTO()
                 .setToken(tokenInfo.tokenValue)
                 .setLastLoginTime(chosen.getLastLogin())
                 .setUserId(chosen.getId())
                 .setTenantId(chosen.getTenantId())
+                .setAdmin(tenant.getAdminId().equals(chosen.getId()))
                 .setOrgId(orgId)
                 .setRealName(chosen.getRealName())
                 .setAvatar(chosen.getAvatar());
