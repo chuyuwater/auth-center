@@ -22,7 +22,7 @@ public class DictEnumAdapter implements IDictService {
 
     @Override
     public boolean isValidValue(String dictCode, String value) {
-        return sysDictService.checkExist(dictCode, value);
+        return sysDictService.checkExist(dictCode, value) != null;
     }
 
     @Override

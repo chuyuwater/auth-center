@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.github.f4b6a3.ulid.UlidCreator;
+import com.google.common.base.Splitter;
 import com.hbcy.authcenter.api.common.bean.NodeMoveVO;
 import com.hbcy.authcenter.api.common.constants.G;
 import com.hbcy.authcenter.api.modules.sys.dict.dao.SysDictMapper;
@@ -24,12 +25,11 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -54,9 +54,7 @@ public class SysDictService extends ServiceImpl<SysDictMapper, SysDict> {
         SysDict parent = checkExist(vo.getParentId());
         if (!parent.getFeatCode().isBlank()) {
             //父节点不是分组，需要确认分组对应的是list
-            SysDict group = baseMapper.selectOne(new QueryWrapper<SysDict>()
-                    .eq(SysDict.COL_VALUE_STR, parent.getFeatCode())
-                    .eq(SysDict.COL_FEAT_CODE, ""));
+            SysDict group = checkExist("", parent.getFeatCode());
             if (group == null) {
                 throw new ParamError("分组不存在");
             }
@@ -120,11 +118,10 @@ public class SysDictService extends ServiceImpl<SysDictMapper, SysDict> {
         return parent;
     }
 
-    public boolean checkExist(String featCode, String valueStr) {
-        SysDict one = this.getOne(new QueryWrapper<SysDict>()
+    public SysDict checkExist(String featCode, String valueStr) {
+        return this.getOne(new QueryWrapper<SysDict>()
                 .eq(SysDict.COL_FEAT_CODE, featCode)
                 .eq(SysDict.COL_VALUE_STR, valueStr));
-        return one != null;
     }
 
 
@@ -162,9 +159,7 @@ public class SysDictService extends ServiceImpl<SysDictMapper, SysDict> {
         if (node == null) {
             throw new ParamError("指定字典项不存在");
         }
-        SysDict group = baseMapper.selectOne(new QueryWrapper<SysDict>()
-                .eq(SysDict.COL_VALUE_STR, node.getFeatCode())
-                .eq(SysDict.COL_FEAT_CODE, ""));
+        SysDict group = checkExist("", node.getFeatCode());
         if (group == null) {
             throw new ParamError("分组不存在");
         }
@@ -210,12 +205,28 @@ public class SysDictService extends ServiceImpl<SysDictMapper, SysDict> {
     }
 
     public List<TreeNode<SysDict>> getChildrenAsTree(DictQueryVO vo) {
-        List<SysDict> list = baseMapper.selectList(new QueryWrapper<SysDict>()
-                .likeRight(SysDict.COL_ID_PATH, vo.getFeatCode() + G.ID_PATH_SPLITTER)
+        SysDict group = checkExist("", vo.getFeatCode());
+        if (group == null) {
+            return List.of();
+        }
+        List<SysDict> records = baseMapper.selectList(new QueryWrapper<SysDict>()
+                .likeRight(SysDict.COL_ID_PATH, group.getId() + G.ID_PATH_SPLITTER)
                 .and(StringUtils.isNotBlank(vo.getKeyword()),
                         qw -> qw.like(SysDict.COL_VALUE_CN, vo.getKeyword()).or()
                                 .like(SysDict.COL_VALUE_STR, vo.getKeyword())));
-        Map<String, List<SysDict>> childrenMap = list.stream()
+        if (CollectionUtils.isEmpty(records)) {
+            return List.of();
+        }
+        //需要追溯到根节点（不含分组）
+        Set<String> ids = new HashSet<>();
+        for (SysDict r : records) {
+            ids.addAll(Splitter.on(G.ID_PATH_SPLITTER).splitToList(r.getIdPath()));
+        }
+        ids.remove(group.getId());
+        if (ids.size() > records.size()) {
+            records = baseMapper.selectByIds(ids);
+        }
+        Map<String, List<SysDict>> childrenMap = records.stream()
                 .collect(Collectors.groupingBy(
                         SysDict::getParentId,
                         Collectors.collectingAndThen(
