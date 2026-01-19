@@ -1,5 +1,6 @@
 package com.hbcy.authcenter.api.modules.sys.log.service;
 
+import com.hbcy.authcenter.api.common.constants.G;
 import com.hbcy.authcenter.api.modules.sys.log.model.AuditLog;
 import com.hbcy.authcenter.gateway.constants.GatewayConstants;
 import jakarta.annotation.Resource;
@@ -21,7 +22,7 @@ public class AuditLogListener {
     @Resource
     private IAuditLogService auditLogService;
 
-    @KafkaListener(topics = GatewayConstants.KAFKA_TOPIC_AUDIT_LOG)
+    @KafkaListener(topics = GatewayConstants.KAFKA_TOPIC_AUDIT_LOG, groupId = G.SERVICE_NAME)
     public void saveLog(List<ConsumerRecord<String, AuditLog>> records, Acknowledgment ack) {
         auditLogService.save(records.stream().map(ConsumerRecord::value).toList());
         ack.acknowledge();

@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class G {
+    public static final String SERVICE_NAME = "portal-auth-center";
     /**
      * 默认系统租户id
      */

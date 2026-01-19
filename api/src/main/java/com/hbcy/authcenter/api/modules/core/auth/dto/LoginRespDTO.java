@@ -29,7 +29,7 @@ public class LoginRespDTO {
     /**
      * 是否租户默认管理员
      */
-    private boolean admin;
+    private Integer adminFlag;
     /**
      * 主职组织id
      */

@@ -141,7 +141,7 @@ public class UserAuthService {
                 .setLastLoginTime(chosen.getLastLogin())
                 .setUserId(chosen.getId())
                 .setTenantId(chosen.getTenantId())
-                .setAdmin(tenant.getAdminId().equals(chosen.getId()))
+                .setAdminFlag(tenant.getAdminId().equals(chosen.getId()) ? 1 : 0)
                 .setOrgId(orgId)
                 .setRealName(chosen.getRealName())
                 .setAvatar(chosen.getAvatar());

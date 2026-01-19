@@ -52,8 +52,6 @@ public class KafkaConfig implements KafkaListenerConfigurer {
 
     @Value("${spring.kafka.bootstrap-servers}")
     private String servers;
-    @Value("${spring.kafka.consumer.group-id:portal-auth-center}")
-    private String groupName;
 
     @Override
     public void configureKafkaListeners(KafkaListenerEndpointRegistrar registrar) {
@@ -91,7 +89,6 @@ public class KafkaConfig implements KafkaListenerConfigurer {
     public Map<String, Object> consumerConfigs() {
         Map<String, Object> props = new HashMap<>();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, servers);
-        props.put(ConsumerConfig.GROUP_ID_CONFIG, groupName);
         props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, CustomJsonDeserializer.class);
