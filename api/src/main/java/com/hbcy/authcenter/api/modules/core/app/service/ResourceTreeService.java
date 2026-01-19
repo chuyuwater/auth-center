@@ -106,7 +106,7 @@ public class ResourceTreeService extends ServiceImpl<ResourceTreeMapper, Resourc
         }
         try {
             baseMapper.append(entity);
-            resourcePermService.batchCreate(entity.getId(), vo.getSubPerms());
+            resourcePermService.batchCreate(vo.getAppId(), entity.getId(), vo.getSubPerms());
         } catch (DuplicateKeyException e) {
             throw new ParamError("同一应用下菜单唯一ID不能重复");
         }

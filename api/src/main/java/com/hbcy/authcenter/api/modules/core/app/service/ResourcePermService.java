@@ -94,7 +94,7 @@ public class ResourcePermService extends ServiceImpl<ResourcePermMapper, Resourc
      * @param resId    资源id
      * @param subPerms 权限点
      */
-    public void batchCreate(String resId, List<ResourcePermCreateVO> subPerms) {
+    public void batchCreate(String appId, String resId, List<ResourcePermCreateVO> subPerms) {
         if (CollectionUtils.isEmpty(subPerms)) {
             return;
         }
@@ -104,6 +104,7 @@ public class ResourcePermService extends ServiceImpl<ResourcePermMapper, Resourc
             BeanCopyUtils.copy(vo, subPerm);
             subPerm.setId(UlidCreator.getUlid().toString());
             subPerm.setResId(resId);
+            subPerm.setAppId(appId);
             subPerm.setCreateUser(UserContextUtils.getUserId());
             subPerm.setUpdateUser(UserContextUtils.getUserId());
             toInsert.add(subPerm);
@@ -113,6 +114,11 @@ public class ResourcePermService extends ServiceImpl<ResourcePermMapper, Resourc
         } catch (DuplicateKeyException e) {
             throw new ParamError("API路径和方法组合已存在");
         }
+        //权限资源变更
+        eventDispatcher.dispatch(
+                appId,
+                EventConstants.KAFKA_RESOURCE_PERM_CHANGED,
+                new EventResPermChanged().setAppId(appId).setResId(resId));
     }
 
     /**
@@ -164,7 +170,7 @@ public class ResourcePermService extends ServiceImpl<ResourcePermMapper, Resourc
             }
         }
         if (!toCreate.isEmpty()) {
-            batchCreate(resId, toCreate);
+            batchCreate(appId, resId, toCreate);
             isChanged = true;
         }
         if (isChanged) {

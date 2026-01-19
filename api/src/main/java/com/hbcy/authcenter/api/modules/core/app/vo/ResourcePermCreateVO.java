@@ -13,7 +13,7 @@ import lombok.EqualsAndHashCode;
 @Data
 public class ResourcePermCreateVO extends ResourcePermUpdateVO {
     /**
-     * 权限点id
+     * 权限点id，新增时为空，修改时传入
      */
     private String id;
 }
