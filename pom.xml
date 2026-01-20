@@ -13,7 +13,6 @@
     <modules>
         <module>sdk</module>
         <module>api</module>
-        <module>intgr</module>
         <module>gateway</module>
         <module>global</module>
     </modules>
