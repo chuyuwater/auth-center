@@ -1,6 +1,6 @@
 package com.hbcy.authcenter.sdk.feign;
 
-import com.hbcy.authcenter.sdk.annotation.EnableHeaderPassthrough;
+import com.hbcy.authcenter.sdk.config.PortalFeignConfig;
 import com.hbcy.authcenter.sdk.feign.dto.SysDictDTO;
 import com.hbcy.common.base.pojo.ApiResponse;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -14,8 +14,7 @@ import java.util.Set;
  * @author 姚泰然
  * @date 2026-01-13 16:32
  */
-@FeignClient(name = "portal-auth-center")
-@EnableHeaderPassthrough
+@FeignClient(name = "portal-auth-center", configuration = PortalFeignConfig.class)
 public interface AuthCenterClient {
     /**
      * 获取当前用户、当前组织下、当前应用（或指定菜单下）的权限码

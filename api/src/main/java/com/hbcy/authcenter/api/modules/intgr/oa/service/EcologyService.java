@@ -7,6 +7,8 @@ import com.hbcy.authcenter.api.modules.core.user.dao.UserMapper;
 import com.hbcy.authcenter.api.modules.core.user.model.User;
 import com.hbcy.authcenter.api.modules.intgr.oa.dto.OaAccessHeaders;
 import com.hbcy.authcenter.api.modules.intgr.oa.dto.OaApplyTokenResp;
+import com.hbcy.authcenter.api.modules.intgr.oa.feign.OaAuthClient;
+import com.hbcy.authcenter.api.modules.intgr.oa.feign.OaBizClient;
 import com.hbcy.authcenter.sdk.utils.UserContextUtils;
 import com.hbcy.common.base.error.ParamError;
 import com.hbcy.common.base.error.PermissionError;
@@ -33,7 +35,9 @@ public class EcologyService {
     @Resource
     private StringRedisTemplate stringRedisTemplate;
     @Resource
-    private EcologyClient ecologyClient;
+    private OaAuthClient oaAuthClient;
+    @Resource
+    private OaBizClient oaBizClient;
     @Resource
     private RedissonDistributedLock redissonDistributedLock;
     @Resource
@@ -85,7 +89,7 @@ public class EcologyService {
             }
             try {
                 String encryptSecret = rsa.encryptBase64(secret, CharsetUtil.CHARSET_UTF_8, KeyType.PublicKey);
-                String respStr = ecologyClient.applyToken(appId, encryptSecret, "3600");
+                String respStr = oaAuthClient.applyToken(appId, encryptSecret, "3600");
                 OaApplyTokenResp resp = JsonUtils.readValue(respStr, OaApplyTokenResp.class);
                 if (resp == null) {
                     throw new ServerError("服务通信错误，请重试");

@@ -1,12 +1,10 @@
 package com.hbcy.authcenter.sdk.filter;
 
 import com.hbcy.authcenter.global.constants.AuthConstants;
-import com.hbcy.authcenter.sdk.annotation.EnableHeaderPassthrough;
 import com.hbcy.authcenter.sdk.utils.UserContextUtils;
 import feign.RequestInterceptor;
 import feign.RequestTemplate;
 
-import java.lang.reflect.Method;
 import java.util.Map;
 
 /**
@@ -19,20 +17,13 @@ import java.util.Map;
 public class FeignHeaderInterceptor implements RequestInterceptor {
     @Override
     public void apply(RequestTemplate template) {
-        //检查方法或类上是否有注解
-        Method method = template.methodMetadata().method();
-        Class<?> targetClass = method.getDeclaringClass();
-
-        if (method.isAnnotationPresent(EnableHeaderPassthrough.class) ||
-                targetClass.isAnnotationPresent(EnableHeaderPassthrough.class)) {
-            Map<String, String> headers = UserContextUtils.getHeaders();
-            if (headers != null) {
-                //标记SDK版本
-                headers.put(AuthConstants.HEADER_SDK_VERSION, AuthConstants.SDK_VERSION);
-                headers.forEach((key, value) -> {
-                    if (value != null) template.header(key, value);
-                });
-            }
+        Map<String, String> headers = UserContextUtils.getHeaders();
+        if (headers != null) {
+            //标记SDK版本
+            headers.put(AuthConstants.HEADER_SDK_VERSION, AuthConstants.SDK_VERSION);
+            headers.forEach((key, value) -> {
+                if (value != null) template.header(key, value);
+            });
         }
     }
 }
