@@ -1,6 +1,5 @@
 package com.hbcy.authcenter.api.modules.intgr.oa.service;
 
-import com.hbcy.authcenter.api.modules.intgr.oa.dto.OaApplyTokenResp;
 import com.hbcy.authcenter.api.modules.intgr.oa.dto.OaRegisterRespDTO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
@@ -25,9 +24,9 @@ public interface EcologyClient {
 
     /** 获取 Token */
     @PostMapping(value = "/api/ec/dev/auth/applytoken", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-    OaApplyTokenResp applyToken(@RequestHeader("appid") String appid,
-                                @RequestHeader("secret") String encryptedSecret,
-                                @RequestHeader("time") String time);
+    String applyToken(@RequestHeader("appid") String appid,
+                      @RequestHeader("secret") String encryptedSecret,
+                      @RequestHeader("time") String time);
 
 
     @PostMapping(value = "/api/doc/upload/uploadFile2Doc", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

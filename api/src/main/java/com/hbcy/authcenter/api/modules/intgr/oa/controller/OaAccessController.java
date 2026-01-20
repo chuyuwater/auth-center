@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * OA单点登录
  * @author 姚泰然
+ * @module sys
  * @date 2026-01-20 14:02
  */
 @RestController
