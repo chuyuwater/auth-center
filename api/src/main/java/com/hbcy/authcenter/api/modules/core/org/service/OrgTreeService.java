@@ -152,20 +152,7 @@ public class OrgTreeService extends ServiceImpl<OrgTreeMapper, OrgTree> {
                 throw new ParamError("组织名不能重复");
             }
         }
-        String id = redisIdGenerator.generateId(BIZ_KEY.formatted(tenantId, vo.getNodeType()), () -> {
-            Long count = baseMapper.selectCount(new QueryWrapper<OrgTree>()
-                    .eq(OrgTree.COL_TENANT_ID, tenantId)
-                    .eq(OrgTree.COL_NODE_TYPE, vo.getNodeType())
-            );
-            //由于存在虚拟根组织，组织的id是从0开始的
-            return isDept ? count : count - 1;
-        }, key -> {
-            if (isDept) {
-                return OrgTree.DEPT_ID_TEMPLATE.formatted(tenantId, key);
-            } else {
-                return OrgTree.ORG_ID_TEMPLATE.formatted(tenantId, key);
-            }
-        });
+        String id = generateId(vo.getNodeType(), tenantId);
         entity.setId(id);
         entity.setTenantId(tenantId);
         entity.setCreateUser(UserContextUtils.getUserId());
@@ -177,6 +164,24 @@ public class OrgTreeService extends ServiceImpl<OrgTreeMapper, OrgTree> {
             throw new ParamError("同一层级的名称、简称均不能重复");
         }
         return entity;
+    }
+
+    public String generateId(Integer nodeType, String tenantId) {
+        final boolean isDept = OrgNodeTypeEnum.DEPT.getValue().equals(nodeType);
+        return redisIdGenerator.generateId(BIZ_KEY.formatted(tenantId, nodeType), () -> {
+            Long count = baseMapper.selectCount(new QueryWrapper<OrgTree>()
+                    .eq(OrgTree.COL_TENANT_ID, tenantId)
+                    .eq(OrgTree.COL_NODE_TYPE, nodeType)
+            );
+            //由于存在虚拟根组织，组织的id是从0开始的
+            return isDept ? count : count - 1;
+        }, key -> {
+            if (isDept) {
+                return OrgTree.DEPT_ID_TEMPLATE.formatted(tenantId, key);
+            } else {
+                return OrgTree.ORG_ID_TEMPLATE.formatted(tenantId, key);
+            }
+        });
     }
 
     /**

@@ -1,10 +1,13 @@
 package com.hbcy.authcenter.api.modules.intgr.oa.vo;
 
+import lombok.Data;
+
 /**
  * OA用户查询
  * @author 姚泰然
  * @date 2026-01-21 09:48
  */
+@Data
 public class OaPersonQueryVO {
     /**
      * 子公司id

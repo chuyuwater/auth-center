@@ -140,6 +140,10 @@ public class UserService extends ServiceImpl<UserMapper, User> {
         return user.getId();
     }
 
+    public String createPass(String passwd) {
+        return passwordEncoder.encode(passwd);
+    }
+
     /**
      * 用于创建组织的同时创建用户，跳过校验
      *
@@ -154,7 +158,7 @@ public class UserService extends ServiceImpl<UserMapper, User> {
             orgId = OrgTreeService.findDeptDirectOrg(node.getIdPath());
         }
         // 默认密码为手机号
-        user.setPasswd(passwordEncoder.encode(user.getPhone()));
+        user.setPasswd(createPass(user.getPhone()));
         //TODO: 改为随机密码+短信、邮件发送密码
         user.setCreateUser(op);
         user.setUpdateUser(op);
@@ -234,7 +238,7 @@ public class UserService extends ServiceImpl<UserMapper, User> {
     private void updatePass(String uid, String passwd) {
         User toUpdate = new User();
         toUpdate.setId(uid);
-        toUpdate.setPasswd(passwordEncoder.encode(passwd));
+        toUpdate.setPasswd(createPass(passwd));
         toUpdate.setUpdateUser(UserContextUtils.getUserId());
         baseMapper.updateById(toUpdate);
     }
@@ -499,7 +503,7 @@ public class UserService extends ServiceImpl<UserMapper, User> {
             u.setCreateTime(now);
             u.setUpdateTime(now);
             //TODO:改为随机密码+短信通知
-            u.setPasswd(passwordEncoder.encode(d.getPhone()));
+            u.setPasswd(createPass(d.getPhone()));
             users.add(u);
             //用户与组织的关联
             UserOrg uo = new UserOrg();

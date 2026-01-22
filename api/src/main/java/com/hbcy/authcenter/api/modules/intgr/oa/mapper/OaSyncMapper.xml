@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hbcy.authcenter.api.modules.intgr.oa.dao.OaSyncMapper">
+    <update id="batchUpdateOrg">
+        <foreach collection="toUpdate" item="item" separator=";" open="" close="">
+            update portal_auth_center.org_tree
+            set short_name=#{item.shortName},
+            node_type=#{item.nodeType},
+            exist_type=#{item.existType},
+            node_category=#{item.nodeCategory},
+            parent_id=#{item.parentId},
+            id_path=#{item.idPath},
+            show_order=#{item.showOrder},
+            relate_id=#{item.relateId},
+            update_time=#{item.updateTime},
+            update_user='0'
+            where id = #{item.id}
+        </foreach>
+    </update>
+
+    <insert id="batchInsertOrg">
+        insert into portal_auth_center.org_tree(id, node_name, short_name, node_type, exist_type, node_category,
+        parent_id,
+        id_path, show_order, tenant_id, relate_id, create_user,
+        update_user) values
+        <foreach collection="toInsert" item="item" separator="," open="" close="">
+            (#{item.id}, #{item.nodeName}, #{item.shortName}, #{item.nodeType}, #{item.existType}, #{item.nodeCategory},
+            #{item.parentId},
+            #{item.idPath}, #{item.showOrder}, #{item.tenantId}, #{item.relateId}, '0', '0')
+        </foreach>
+    </insert>
+
+    <update id="fillSourceId">
+        <foreach collection="missIdUsers" item="u" open="" close="" separator=";">
+            update portal_auth_center.sys_user
+            set src_type=1,
+            src_id=#{u.srcId}
+            where id = #{u.id}
+        </foreach>
+    </update>
+
+    <select id="listUserPhone" resultType="com.hbcy.common.web.api.NamedId">
+        select id as item_id, phone as item_name
+        from portal_auth_center.sys_user
+        where tenant_id = #{tenantId}
+        and delete_time = 0
+    </select>
+
+    <!--  TODO: MySQL only-->
+    <insert id="upsertUsers">
+        insert into portal_auth_center.sys_user(id, phone, account, real_name, passwd, email, src_type,
+        src_id, tenant_id, create_user, update_user)
+        values
+        <foreach collection="users" item="u" separator="," open="" close="">
+            (#{u.id}, #{u.phone}, #{u.account}, #{u.realName}, #{u.passwd}, #{u.email}, #{u.srcType},
+            #{u.srcId}, #{u.tenantId}, '0', '0')
+        </foreach>
+        on duplicate key update phone = values(phone),
+        account = values(account),
+        real_name = values(real_name),
+        email = values(email),
+        src_type = values(src_type),
+        src_id = values(src_id),
+        update_user = '0',
+        update_time = now()
+    </insert>
+
+    <insert id="upsertUserOrgs">
+        insert into portal_auth_center.user_org(id, user_id, org_id, node_id, tenant_id, main_job, create_user,
+        update_user, update_time)
+        values
+        <foreach collection="userOrgs" item="uo" separator="," open="" close="">
+            (#{uo.id}, #{uo.userId}, #{uo.orgId}, #{uo.nodeId}, #{uo.tenantId}, 1, '0', '0', #{uo.updateTime})
+        </foreach>
+        on duplicate key update main_job=1,
+        update_user = '0',
+        update_time = values(update_time)
+    </insert>
+</mapper>

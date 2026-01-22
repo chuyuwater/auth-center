@@ -1,15 +1,16 @@
 package com.hbcy.authcenter.api.modules.intgr.oa.dto;
 
-import lombok.AllArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
+import lombok.experimental.Accessors;
 
 /**
  * @author 姚泰然
  * @date 2026-01-20 09:46
  */
 @Data
-@AllArgsConstructor
-public class OaAccessHeaders {
+@Accessors(chain = true)
+public class OaAccessDataDTO {
     /**
      * 注册到oa的appid
      */
@@ -22,4 +23,6 @@ public class OaAccessHeaders {
      * 访问oa系统的token
      */
     private String token;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String uri;
 }

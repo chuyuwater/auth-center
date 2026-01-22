@@ -41,4 +41,29 @@ public class OaOrgDTO {
      * 节点类型
      */
     private String type;
+    /****************************************下面是注入的字段**************************************/
+    /**
+     * 我方relate_id
+     */
+    private String myRelateId;
+    /**
+     * 是否我方新建
+     */
+    private boolean myNew;
+    /**
+     * 我方id
+     */
+    private String myId;
+    /**
+     * 我方父级id
+     */
+    private String myParentId;
+    /**
+     * 显示顺序
+     */
+    private Integer myOrder;
+    /**
+     * 我方id_path
+     */
+    private String myIdPath;
 }

@@ -1,7 +1,8 @@
 package com.hbcy.authcenter.api.modules.intgr.oa.feign;
 
-import com.hbcy.authcenter.api.modules.intgr.oa.dto.OaAccessHeaders;
+import com.hbcy.authcenter.api.modules.intgr.oa.dto.OaAccessDataDTO;
 import com.hbcy.authcenter.api.modules.intgr.oa.service.EcologyService;
+import feign.Logger;
 import feign.RequestInterceptor;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,14 +20,19 @@ public class OaReqConfig {
     private String userId;
 
     @Bean
+    public Logger.Level feignLoggerLevel() {
+        return Logger.Level.FULL;
+    }
+
+    @Bean
     public RequestInterceptor requestInterceptor(ObjectProvider<EcologyService> ecologyServiceProvider) {
         return requestTemplate -> {
             EcologyService service = ecologyServiceProvider.getIfAvailable();
             if (service != null) {
-                OaAccessHeaders oaAccessHeaders = service.getOaAccessHeaders(userId);
-                requestTemplate.header("appid", oaAccessHeaders.getAppid());
-                requestTemplate.header("userid", userId);
-                requestTemplate.header("token", oaAccessHeaders.getToken());
+                OaAccessDataDTO dto = service.getOaAccessHeaders(userId);
+                requestTemplate.header("appid", dto.getAppid());
+                requestTemplate.header("userid", dto.getUserid());
+                requestTemplate.header("token", dto.getToken());
             }
         };
     }

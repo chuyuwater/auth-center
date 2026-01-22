@@ -1,9 +1,12 @@
 package com.hbcy.authcenter.api.modules.intgr.oa.controller;
 
-import com.hbcy.authcenter.api.modules.intgr.oa.dto.OaAccessHeaders;
+import com.hbcy.authcenter.api.modules.intgr.oa.dto.OaAccessDataDTO;
 import com.hbcy.authcenter.api.modules.intgr.oa.service.EcologyService;
 import jakarta.annotation.Resource;
+import jakarta.validation.constraints.NotBlank;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -14,7 +17,8 @@ import org.springframework.web.bind.annotation.RestController;
  * @date 2026-01-20 14:02
  */
 @RestController
-@RequestMapping("api/portal/v1/oa")
+@RequestMapping
+@Validated
 public class OaAccessController {
     @Resource
     private EcologyService ecologyService;
@@ -23,8 +27,27 @@ public class OaAccessController {
      * 获取客户端访问oa链接时需要的header
      * @return header信息
      */
-    @GetMapping("/headers")
-    public OaAccessHeaders getOaAccessHeaders() {
+    @GetMapping("api/portal/v1/oa/headers")
+    public OaAccessDataDTO getOaAccessHeaders() {
         return ecologyService.getOaAccessHeaders();
+    }
+
+    /**
+     * 将oa的待办id转为跳转链接
+     * @return 使用ajax请求返回值中的uri，并将其他字段作为header，根据返回值跳转（iframe或打开新页面）
+     */
+    @GetMapping("api/portal/v1/oa/workflow/")
+    public OaAccessDataDTO getTodoPage(@NotBlank(message = "requestId不能为空") String requestId) {
+        return ecologyService.accessWorkflow(requestId);
+    }
+
+    /**
+     * 同步组织信息，内部调用
+     * @param oaOrgId 楚禹公司oa orgId
+     * @param tenantId 楚禹公司租户id
+     */
+    @PostMapping("inner/portal/oa/sync")
+    public void syncOrg(String oaOrgId, String tenantId) {
+        ecologyService.sync(oaOrgId, tenantId);
     }
 }

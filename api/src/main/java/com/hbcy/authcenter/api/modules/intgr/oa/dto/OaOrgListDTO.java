@@ -10,5 +10,7 @@ import java.util.List;
  */
 @Data
 public class OaOrgListDTO {
-    List<OaOrgDTO> datas;
+    private Boolean status;
+    private String msg;
+    private List<OaOrgDTO> datas;
 }

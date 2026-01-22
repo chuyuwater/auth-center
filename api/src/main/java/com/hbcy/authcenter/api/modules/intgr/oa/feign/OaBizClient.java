@@ -1,10 +1,9 @@
 package com.hbcy.authcenter.api.modules.intgr.oa.feign;
 
-import com.hbcy.authcenter.api.modules.intgr.oa.dto.OaOrgListDTO;
-import com.hbcy.authcenter.api.modules.intgr.oa.dto.OaTableSessionDTO;
 import com.hbcy.authcenter.api.modules.intgr.oa.dto.OaTodoDTO;
 import com.hbcy.authcenter.api.modules.intgr.oa.vo.*;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.cloud.openfeign.SpringQueryMap;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -50,7 +49,7 @@ public interface OaBizClient {
      * 查询组织
      */
     @GetMapping(value = "/api/hrm/base/getHrmSearchTree", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-    OaOrgListDTO queryOrg(OaOrgQueryVO vo);
+    String queryOrg(@SpringQueryMap OaOrgQueryVO vo);
 
     /**
      * 查询人员session
@@ -58,7 +57,7 @@ public interface OaBizClient {
      * @return 表单session
      */
     @PostMapping(value = "/api/hrm/search/getHrmSearchResult", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-    OaTableSessionDTO queryPersonSession(@RequestBody OaPersonQueryVO vo);
+    String queryPersonSession(@RequestBody OaPersonQueryVO vo);
 
     /**
      * 查询待办

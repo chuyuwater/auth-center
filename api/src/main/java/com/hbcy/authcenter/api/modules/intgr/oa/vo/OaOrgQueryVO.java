@@ -1,6 +1,5 @@
 package com.hbcy.authcenter.api.modules.intgr.oa.vo;
 
-import feign.form.FormProperty;
 import lombok.Data;
 
 /**
@@ -24,9 +23,4 @@ public class OaOrgQueryVO {
     private int isVirtual = 0;
     private int virtualCompanyid = 1;
     private int isLoadSubDepartment = 1;
-    /**
-     * 时间戳参数
-     */
-    @FormProperty("__random__")
-    private Long random;
 }

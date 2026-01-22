@@ -9,5 +9,6 @@ import lombok.Data;
 @Data
 public class OaTableSessionDTO {
     private Boolean status;
-    private String sessionKey;
+    private String msg;
+    private String sessionkey;
 }

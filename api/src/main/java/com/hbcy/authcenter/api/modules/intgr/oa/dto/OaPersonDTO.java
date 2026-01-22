@@ -37,6 +37,10 @@ public class OaPersonDTO {
      */
     private String departmentid;
     /**
+     * 分部id
+     */
+    private String subcompanyid1;
+    /**
      * 手机号
      */
     private String mobile;

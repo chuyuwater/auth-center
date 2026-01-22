@@ -12,5 +12,5 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public class OaPageSizeModifyVO {
     private String dataKey;
-    private int pageSize;
+    private long pageSize;
 }
