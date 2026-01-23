@@ -1,6 +1,6 @@
 package com.hbcy.authcenter.api.modules.core.app.vo;
 
-import com.hbcy.common.db.dictvalue.DictField;
+import com.hbcy.common.db.dictvalue.DictValid;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
@@ -32,7 +32,7 @@ public class ResourceTreeUpdateVO {
     /**
      * 客户端类型。字典项，key:CLIENT_TYPE
      */
-    @DictField(dictKey = "CLIENT_TYPE")
+    @DictValid(dictKey = "CLIENT_TYPE")
     private Integer clientType = 0;
     /**
      * 图标地址
@@ -52,7 +52,7 @@ public class ResourceTreeUpdateVO {
     /**
      * 显示级别，字典项MENU_LEVEL
      */
-    @DictField(dictKey = "MENU_LEVEL")
+    @DictValid(dictKey = "MENU_LEVEL")
     private Integer showLevel = 0;
     /**
      * 是否禁用，0-否，1-是

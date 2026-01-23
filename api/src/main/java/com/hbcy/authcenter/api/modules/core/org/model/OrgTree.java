@@ -2,6 +2,7 @@ package com.hbcy.authcenter.api.modules.core.org.model;
 
 import com.baomidou.mybatisplus.annotation.*;
 import com.hbcy.authcenter.api.common.bean.BaseEntity;
+import com.hbcy.common.db.dictvalue.DictInject;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -72,6 +73,7 @@ public class OrgTree extends BaseEntity {
      * 类别，组织：0-项目部，1-公司，2-分公司，3-子公司
      */
     @TableField(value = "node_category")
+    @DictInject(value = "ORG_CATEGORY")
     private Integer nodeCategory;
     /**
      * 父节点id

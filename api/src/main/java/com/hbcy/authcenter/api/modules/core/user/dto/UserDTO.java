@@ -1,5 +1,6 @@
 package com.hbcy.authcenter.api.modules.core.user.dto;
 
+import com.hbcy.common.db.dictvalue.DictInject;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -47,6 +48,7 @@ public class UserDTO {
     /**
      * 用工类型，字典EMPLOYEE_TYPE
      */
+    @DictInject(value = "EMPLOYEE_TYPE")
     private Integer employeeType;
     /**
      * 修改时间

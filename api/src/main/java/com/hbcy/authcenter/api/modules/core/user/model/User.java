@@ -2,6 +2,7 @@ package com.hbcy.authcenter.api.modules.core.user.model;
 
 import com.baomidou.mybatisplus.annotation.*;
 import com.hbcy.authcenter.api.common.bean.BaseEntity;
+import com.hbcy.common.db.dictvalue.DictInject;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -93,6 +94,7 @@ public class User extends BaseEntity {
      * 用工类型，0-自有，1-派遣，2-外包，3-外部公司人员
      */
     @TableField(value = "employee_type")
+    @DictInject(value = "EMPLOYEE_TYPE")
     private Integer employeeType;
     /**
      * 密码过期时间，null标识永不过期

@@ -2,6 +2,7 @@ package com.hbcy.authcenter.api.modules.core.app.model;
 
 import com.baomidou.mybatisplus.annotation.*;
 import com.hbcy.authcenter.api.common.bean.BaseEntity;
+import com.hbcy.common.db.dictvalue.DictInject;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -65,6 +66,7 @@ public class ResourceTree extends BaseEntity {
      * 支持的客户端类型，0-全端，1-PC端，2-移动端
      */
     @TableField(value = "client_type")
+    @DictInject(value = "CLIENT_TYPE")
     private Integer clientType;
     /**
      * 图标地址
@@ -90,6 +92,7 @@ public class ResourceTree extends BaseEntity {
      * 显示级别，0-全局，1-组织级，2-项目级
      */
     @TableField(value = "show_level")
+    @DictInject(value = "MENU_LEVEL")
     private Integer showLevel;
     @TableField(value = "create_time", fill = FieldFill.INSERT)
     private LocalDateTime createTime;

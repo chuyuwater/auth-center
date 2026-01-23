@@ -1,7 +1,7 @@
 package com.hbcy.authcenter.api.modules.core.perm.vo;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.hbcy.common.db.dictvalue.DictField;
+import com.hbcy.common.db.dictvalue.DictValid;
 import lombok.Data;
 
 /**
@@ -19,7 +19,7 @@ public class ClientResQueryVO {
     /**
      * 1-pc，2-移动端
      */
-    @DictField(dictKey = "CLIENT_TYPE")
+    @DictValid(dictKey = "CLIENT_TYPE")
     private Integer clientType;
     /**
      * 应用id，后端填充

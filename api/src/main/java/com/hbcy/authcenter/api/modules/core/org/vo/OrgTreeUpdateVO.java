@@ -1,7 +1,7 @@
 package com.hbcy.authcenter.api.modules.core.org.vo;
 
 import com.hbcy.authcenter.api.common.enums.OrgNodeCategoryEnum;
-import com.hbcy.common.db.dictvalue.DictField;
+import com.hbcy.common.db.dictvalue.DictValid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import org.hibernate.validator.constraints.Length;
@@ -32,7 +32,7 @@ public class OrgTreeUpdateVO {
     /**
      * 组织类别，字典ORG_CATEGORY
      */
-    @DictField(dictKey = "ORG_CATEGORY")
+    @DictValid(dictKey = "ORG_CATEGORY")
     private Integer nodeCategory = OrgNodeCategoryEnum.COMPANY.getValue();
 
     /**

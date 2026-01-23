@@ -1,6 +1,6 @@
 package com.hbcy.authcenter.api.modules.core.user.dto;
 
-import com.hbcy.authcenter.api.common.enums.OrgNodeCategoryEnum;
+import com.hbcy.common.db.dictvalue.DictInject;
 import lombok.Data;
 
 /**
@@ -34,7 +34,8 @@ public class UserOrgDTO {
     /**
      * 组织类别
      */
-    private OrgNodeCategoryEnum nodeCategory;
+    @DictInject(value = "ORG_CATEGORY")
+    private Integer nodeCategory;
     /**
      * 是否主职组织
      */
