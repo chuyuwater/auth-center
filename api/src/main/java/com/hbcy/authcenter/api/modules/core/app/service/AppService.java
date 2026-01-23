@@ -19,7 +19,6 @@ import jakarta.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
 import org.springframework.dao.DuplicateKeyException;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,10 +33,6 @@ import java.util.List;
  */
 @Service
 public class AppService extends ServiceImpl<AppMapper, App> {
-    //这个cache主要是给网关用的
-    public static final String APP_STATUS_CACHE = "portal:app:status";
-    @Resource
-    private StringRedisTemplate stringRedisTemplate;
     @Resource
     private TenantAppMapper tenantAppMapper;
 
@@ -66,9 +61,8 @@ public class AppService extends ServiceImpl<AppMapper, App> {
         try {
             baseMapper.append(app);
         } catch (DuplicateKeyException e) {
-            throw new ParamError("请重试");
+            throw new ParamError("应用id不能重复（含被删除的应用）");
         }
-        stringRedisTemplate.opsForHash().put(APP_STATUS_CACHE, app.getId(), "0");
         return app;
     }
 
@@ -106,7 +100,6 @@ public class AppService extends ServiceImpl<AppMapper, App> {
         toUpdate.setId(vo.getAppId());
         toUpdate.setForbidden(vo.getForbidden());
         toUpdate.setUpdateUser(UserContextUtils.getUserId());
-        stringRedisTemplate.opsForHash().delete(APP_STATUS_CACHE, app.getId());
         this.updateById(toUpdate);
         //对应应用授权状态级联变化
         tenantAppMapper.switchAppStatus(
@@ -154,10 +147,10 @@ public class AppService extends ServiceImpl<AppMapper, App> {
             throw new ParamError("该应用下已存在关联配置，请先解除所有关联后再执行删除操作！");
         }
         app.setUpdateUser(UserContextUtils.getUserId());
-        stringRedisTemplate.opsForHash().delete(APP_STATUS_CACHE, app.getId());
         baseMapper.update(new UpdateWrapper<App>()
                 .eq(App.COL_ID, id)
                 .set(App.COL_UPDATE_USER, UserContextUtils.getUserId())
-                .set(App.COL_DELETE_TIME, System.currentTimeMillis()));
+                .set(App.COL_DELETE_TIME, System.currentTimeMillis())
+                .set(App.COL_UPDATE_TIME, LocalDateTime.now()));
     }
 }
