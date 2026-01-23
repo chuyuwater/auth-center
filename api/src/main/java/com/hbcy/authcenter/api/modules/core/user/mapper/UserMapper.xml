@@ -15,6 +15,7 @@
         <result column="wecom_id" jdbcType="VARCHAR" property="wecomId"/>
         <result column="src_type" jdbcType="TINYINT" property="srcType"/>
         <result column="src_id" jdbcType="VARCHAR" property="srcId"/>
+        <result column="employee_type" jdbcType="TINYINT" property="employeeType"/>
         <result column="passwd_expire" jdbcType="TIMESTAMP" property="passwdExpire"/>
         <result column="tenant_id" jdbcType="VARCHAR" property="tenantId"/>
         <result column="last_login" jdbcType="TIMESTAMP" property="lastLogin"/>
@@ -37,6 +38,7 @@
         wecom_id,
         src_type,
         src_id,
+        employee_type,
         passwd_expire,
         tenant_id,
         last_login,
@@ -72,6 +74,7 @@
         u.real_name,
         u.email,
         u.avatar,
+        u.employee_type,
         u.forbidden,
         u.create_time,
         u.create_user,
@@ -124,6 +127,7 @@
         u.account,
         u.real_name,
         u.email,
+        u.employee_type,
         u.avatar,
         u.forbidden,
         uo.node_id,

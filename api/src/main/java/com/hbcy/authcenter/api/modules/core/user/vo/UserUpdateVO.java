@@ -1,6 +1,7 @@
 package com.hbcy.authcenter.api.modules.core.user.vo;
 
 import com.hbcy.authcenter.api.common.constants.G;
+import com.hbcy.common.db.dictvalue.DictField;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -36,4 +37,9 @@ public class UserUpdateVO {
      * 头像
      */
     private String avatar;
+    /**
+     * 用工类型，字典EMPLOYEE_TYPE
+     **/
+    @DictField(dictKey = "EMPLOYEE_TYPE", message = "用工类型错误")
+    private int employeeType;
 }

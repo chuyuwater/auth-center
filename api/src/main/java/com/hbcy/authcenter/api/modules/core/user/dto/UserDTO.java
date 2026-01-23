@@ -45,6 +45,10 @@ public class UserDTO {
      */
     private LocalDateTime createTime;
     /**
+     * 用工类型，字典EMPLOYEE_TYPE
+     */
+    private Integer employeeType;
+    /**
      * 修改时间
      */
     private LocalDateTime updateTime;

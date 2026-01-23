@@ -28,6 +28,7 @@ public class User extends BaseEntity {
     public static final String COL_WECOM_ID = "wecom_id";
     public static final String COL_SRC_TYPE = "src_type";
     public static final String COL_SRC_ID = "src_id";
+    public static final String COL_EMPLOYEE_TYPE = "employee_type";
     public static final String COL_PASSWD_EXPIRE = "passwd_expire";
     public static final String COL_TENANT_ID = "tenant_id";
     public static final String COL_LAST_LOGIN = "last_login";
@@ -88,6 +89,11 @@ public class User extends BaseEntity {
      */
     @TableField(value = "src_id")
     private String srcId;
+    /**
+     * 用工类型，0-自有，1-派遣，2-外包，3-外部公司人员
+     */
+    @TableField(value = "employee_type")
+    private Integer employeeType;
     /**
      * 密码过期时间，null标识永不过期
      */
