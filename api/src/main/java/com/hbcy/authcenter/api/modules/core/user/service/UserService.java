@@ -94,11 +94,15 @@ public class UserService extends ServiceImpl<UserMapper, User> {
     }
 
     private void cleanNameCache(String userId) {
-        stringRedisTemplate.opsForHash().delete(G.USER_NAME_CACHE_KEY, userId);
+        stringRedisTemplate.delete(G.USER_NAME_CACHE_KEY + userId);
     }
 
     private void cleanNameCache(List<String> userIds) {
-        stringRedisTemplate.opsForHash().delete(G.USER_NAME_CACHE_KEY, userIds.toArray());
+        if (CollectionUtils.isEmpty(userIds)) {
+            return;
+        }
+        List<String> keys = userIds.stream().map(userId -> G.USER_NAME_CACHE_KEY + userId).toList();
+        stringRedisTemplate.delete(keys);
     }
 
     private void checkAnyExist(UserCreateVO vo) {
