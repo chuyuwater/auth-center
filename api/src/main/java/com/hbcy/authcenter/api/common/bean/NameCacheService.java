@@ -35,8 +35,14 @@ public class NameCacheService implements INameFillService {
     private Map<String, String> doQuery(Set<String> ids, String cacheKey,
                                         Function<Set<String>, List<NamedId>> queryFunc) {
         //使用kv存储，在redis集群中性能更好
-        List<String> keys = ids.stream().filter(id -> StringUtils.isNoneBlank(id) && !"0".equals(id))
-                .map(id -> cacheKey + id).toList();
+        List<String> keys = new ArrayList<>();
+        List<String> filteredIds = new ArrayList<>();
+        for (String id : ids) {
+            if (StringUtils.isNoneBlank(id) && !"0".equals(id)) {
+                filteredIds.add(id);
+                keys.add(cacheKey + id);
+            }
+        }
         List<String> r = stringRedisTemplate.opsForValue().multiGet(keys);
         if (r == null) r = Collections.emptyList();
         Set<String> missed = new HashSet<>();
@@ -45,16 +51,16 @@ public class NameCacheService implements INameFillService {
         result.put("", "系统");
         for (int i = 0; i < r.size(); i++) {
             if (r.get(i) == null) {
-                missed.add(keys.get(i));
+                missed.add(filteredIds.get(i));
             } else {
-                result.put(keys.get(i), r.get(i));
+                result.put(filteredIds.get(i), r.get(i));
             }
         }
         if (!missed.isEmpty()) {
             List<NamedId> nameIds = queryFunc.apply(missed);
             Map<String, String> toSet = new HashMap<>();
             for (NamedId id : nameIds) {
-                toSet.put(id.getItemId(), id.getItemName());
+                toSet.put(cacheKey + id.getItemId(), id.getItemName());
                 result.put(id.getItemId(), id.getItemName());
             }
             if (!toSet.isEmpty()) {
