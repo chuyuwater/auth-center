@@ -9,7 +9,6 @@ COPY pom.xml .
 COPY api ./api
 COPY gateway ./gateway
 COPY global ./global
-COPY intgr ./intgr
 COPY sdk ./sdk
 
 # 编译打包
