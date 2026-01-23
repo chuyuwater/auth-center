@@ -16,6 +16,7 @@ import com.hbcy.authcenter.gateway.dto.ApiPermDTO;
 import com.hbcy.authcenter.gateway.vo.RefreshUserPermVO;
 import com.hbcy.common.redis.RedisExtendService;
 import jakarta.annotation.Resource;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -47,6 +48,8 @@ public class InnerService {
     private UserAuthConfig userAuthConfig;
     @Resource
     private TenantMapper tenantMapper;
+    @Resource
+    private StringRedisTemplate stringRedisTemplate;
 
     public void refreshUserPerms(RefreshUserPermVO vo) {
         Set<String> resp = new HashSet<>();
@@ -94,6 +97,18 @@ public class InnerService {
     private void refreshAppPerms(String userId, String orgId, Set<String> permIds) {
         String key = GatewayConstants.USER_PERM_CACHE_PREFIX.formatted(userId, orgId);
         redisExtendService.setAll(key, permIds, userAuthConfig.getPermExpire());
+    }
+
+    public int hasAnyPerm(String userId, String orgId, Set<String> permIds) {
+        String key = GatewayConstants.USER_PERM_CACHE_PREFIX.formatted(userId, orgId);
+        if (Boolean.TRUE.equals(stringRedisTemplate.hasKey(key))) {
+            Set<String> intersect = stringRedisTemplate.opsForSet().intersect(key, permIds);
+            if (!CollectionUtils.isEmpty(intersect)) {
+                return 1;
+            }
+            return 0;
+        }
+        return -1;
     }
 
     public List<ApiPermDTO> listAppPerms(String appId) {

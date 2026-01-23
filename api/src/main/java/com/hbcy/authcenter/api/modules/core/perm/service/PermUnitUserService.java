@@ -7,6 +7,8 @@ import com.github.f4b6a3.ulid.UlidCreator;
 import com.hbcy.authcenter.api.modules.core.app.dao.ResourcePermMapper;
 import com.hbcy.authcenter.api.modules.core.app.dto.GrantAppDTO;
 import com.hbcy.authcenter.api.modules.core.app.dto.ResPermDTO;
+import com.hbcy.authcenter.api.modules.core.app.model.ResourcePerm;
+import com.hbcy.authcenter.api.modules.core.inner.service.InnerService;
 import com.hbcy.authcenter.api.modules.core.org.model.OrgTree;
 import com.hbcy.authcenter.api.modules.core.org.service.OrgTreeService;
 import com.hbcy.authcenter.api.modules.core.perm.dao.PermUnitMapper;
@@ -20,6 +22,7 @@ import com.hbcy.authcenter.api.modules.core.perm.vo.PermUserGrantVO;
 import com.hbcy.authcenter.api.modules.core.tenant.dao.TenantAppMapper;
 import com.hbcy.authcenter.api.modules.core.tenant.dao.TenantAppResourceMapper;
 import com.hbcy.authcenter.api.modules.core.tenant.model.TenantApp;
+import com.hbcy.authcenter.api.modules.core.tenant.model.TenantAppResource;
 import com.hbcy.authcenter.api.modules.core.user.dao.UserOrgMapper;
 import com.hbcy.authcenter.api.modules.core.user.model.UserOrg;
 import com.hbcy.authcenter.sdk.utils.UserContextUtils;
@@ -53,6 +56,8 @@ public class PermUnitUserService extends ServiceImpl<PermUnitUserMapper, PermUni
     private PermUnitMapper permUnitMapper;
     @Resource
     private ResourcePermMapper resourcePermMapper;
+    @Resource
+    private InnerService innerService;
 
     @Transactional(rollbackFor = Exception.class)
     public void addUsersToUnit(PermUnitUserUpdateVO vo) {
@@ -187,6 +192,41 @@ public class PermUnitUserService extends ServiceImpl<PermUnitUserMapper, PermUni
             throw new ParamError("用户未加入任何组织");
         }
         return baseMapper.listGrantApps(userId, orgId, withForbidden);
+    }
+
+    public boolean checkPerm(String permCode) {
+        String appId = UserContextUtils.getAppId();
+        List<ResourcePerm> resourcePerms = resourcePermMapper.selectList(new QueryWrapper<ResourcePerm>()
+                .eq(ResourcePerm.COL_APP_ID, appId)
+                .eq(ResourcePerm.COL_PERM_CODE, permCode));
+        if (resourcePerms.isEmpty()) {
+            return false;
+        }
+        Set<String> permIds = resourcePerms.stream().map(ResourcePerm::getId).collect(Collectors.toSet());
+        String userId = UserContextUtils.getUserId();
+        String orgId = UserContextUtils.getUserOrg();
+        int check = innerService.hasAnyPerm(userId, orgId, permIds);
+        if (check > 0) {
+            return true;
+        } else if (check == 0) {
+            return false;
+        }
+        //没缓存了，直接从数据库计算
+        String tenantId = UserContextUtils.getTenantId();
+        if (UserContextUtils.isTenantAdmin()) {
+            TenantApp grant = tenantAppMapper.selectOne(new QueryWrapper<TenantApp>()
+                    .eq(TenantApp.COL_APP_ID, appId)
+                    .eq(TenantApp.COL_TENANT_ID, tenantId));
+            if (grant == null) return false;
+            if (grant.getGrantAll().equals(1)) {
+                return true;
+            }
+            return tenantAppResourceMapper.exists(new QueryWrapper<TenantAppResource>()
+                    .eq(TenantAppResource.COL_APP_ID, appId)
+                    .eq(TenantAppResource.COL_TENANT_ID, tenantId)
+                    .in(TenantAppResource.COL_PERM_ID, permIds));
+        }
+        return baseMapper.hasPerm(userId, orgId, permIds) > 0;
     }
 }
 

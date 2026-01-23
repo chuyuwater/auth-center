@@ -146,4 +146,17 @@
             and puu.forbidden = 0
         </where>
     </select>
+
+    <select id="hasPerm" resultType="int">
+        select count(*)
+        from perm_unit_resource pur
+        join perm_unit_user puu on puu.unit_id = pur.unit_id
+        where puu.user_id = #{userId}
+        and puu.org_id = #{orgId}
+        and puu.forbidden = 0
+        and pur.perm_id in
+        <foreach item="item" collection="permIds" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+    </select>
 </mapper>

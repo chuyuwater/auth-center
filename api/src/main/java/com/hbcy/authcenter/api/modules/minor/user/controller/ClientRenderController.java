@@ -93,6 +93,7 @@ public class ClientRenderController {
 
     /**
      * 获取当前用户、当前组织下、当前应用（或指定菜单下）的权限码
+     * 该结果不会使用缓存，因此可能和网关侧的权限判断结果不一致
      *
      * @param resId 菜单id， 不传则返回整个app的所有权限码
      * @return 权限码
@@ -101,5 +102,17 @@ public class ClientRenderController {
     public Set<String> listPermCode(String resId) {
         List<ResPermDTO> dtos = permUnitUserService.listPerms(null, resId);
         return dtos.stream().map(ResPermDTO::getPermCode).collect(Collectors.toSet());
+    }
+
+    /**
+     * 判断当前用户在当前组织、当前app下是否有某个权限码
+     * 会使用与网关判断权限一致的缓存
+     *
+     * @param permCode 权限码
+     * @return true or false
+     */
+    @GetMapping("/permCheck")
+    public boolean checkPerm(String permCode) {
+        return permUnitUserService.checkPerm(permCode);
     }
 }

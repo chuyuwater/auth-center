@@ -28,6 +28,16 @@ public interface AuthCenterClient {
     ApiResponse<Set<String>> listPermCode(@RequestParam String resId);
 
     /**
+     * 检查当前用户在当前组织、当前app下是否有指定权限码
+     * 该结果会使用与网关侧一致的缓存，因此判断结果与网关放行一致
+     *
+     * @param permCode 权限码，如sys:user:create
+     * @return true/false
+     */
+    @GetMapping("/api/portal/v1/client/permCheck")
+    ApiResponse<Boolean> checkPerm(@RequestParam String permCode);
+
+    /**
      * 分组下的字典项列表
      * 用于列表状字典的全量查询，或树状字典的分级展开查询，有缓存
      * @param featCode 字典类型编码（非id）
