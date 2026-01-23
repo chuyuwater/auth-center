@@ -1,10 +1,12 @@
 package com.hbcy.authcenter.sdk.feign;
 
 import com.hbcy.authcenter.sdk.config.PortalFeignConfig;
+import com.hbcy.authcenter.sdk.feign.dto.OrgNodeDTO;
 import com.hbcy.authcenter.sdk.feign.dto.SysDictDTO;
 import com.hbcy.common.base.pojo.ApiResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
@@ -36,6 +38,14 @@ public interface AuthCenterClient {
      */
     @GetMapping("/api/portal/v1/client/permCheck")
     ApiResponse<Boolean> checkPerm(@RequestParam String permCode);
+
+    /**
+     * 获取组织节点详情
+     * @param id 节点ID
+     * @return 节点信息
+     */
+    @GetMapping("/api/portal/v1/org/node/{id}")
+    ApiResponse<OrgNodeDTO> getOrgNodeInfo(@PathVariable String id);
 
     /**
      * 分组下的字典项列表
