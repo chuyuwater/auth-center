@@ -285,10 +285,11 @@ public class EcologyService {
     public Map<String, String> syncOrg(String oaOrgId, String tenantId) {
         //oa的组织id与我方组织id的双向映射
         Map<String, String> oaId2Id = new HashMap<>();
-        //目前已存在的，从OA同步的部门或子公司
+        //目前已存在的，从OA同步的部门或子公司（排除项目部，项目部的relate_id是项目编号）
         //统一平台里面手动添加的忽略
         List<OrgTree> exists = orgTreeService.list(
                 new QueryWrapper<OrgTree>().eq(OrgTree.COL_TENANT_ID, tenantId)
+                        .ne(OrgTree.COL_NODE_CATEGORY, OrgNodeCategoryEnum.PROJECT.getValue())
                         .isNotNull(OrgTree.COL_RELATE_ID));
         for (OrgTree existsOrg : exists) {
             oaId2Id.put(existsOrg.getRelateId(), existsOrg.getId());

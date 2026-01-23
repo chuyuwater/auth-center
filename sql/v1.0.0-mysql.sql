@@ -522,3 +522,16 @@ INSERT INTO `sys_user`
 VALUES ('01KE8DW1DK2KPAZJAENJW6SSFE', '18502710984', 'admin', '超级管理员',
         '$2a$10$Kg/w2Tcsqbu1RsmcuZgW4uRseXBFuAADY3Eavl9yplcPRHRZovFHC', NULL, '', 0, NULL, 0, NULL, '0', NULL, '0',
         '2026-01-08 17:48:17', 0, '2026-01-06 09:13:48', '2026-01-06 09:13:48', '0', '0');
+INSERT INTO org_tree (id, node_name, short_name, memo, node_type, exist_type, node_category,
+                      parent_id, id_path, show_order, tenant_id, relate_id, delete_time, create_time,
+                      update_time, create_user, update_user)
+VALUES ('0-ORG-000000', '根组织', '根组织', '', 0, 1, 1, '', '0-ORG-000000', 0, '0', null, 0, '2026-01-06 09:13:48',
+        '2026-01-06 09:13:48', '0', '0'),
+       ('0-ORG-000001', '平台管理', '平台管理', '', 0, 1, 1, '0-ORG-000000', '0-ORG-000000/0-ORG-000001', 0, '0', null,
+        0, '2026-01-06 09:13:48',
+        '2026-01-06 09:13:48', '0', '0');
+
+INSERT INTO user_org (id, user_id, org_id, node_id, tenant_id, main_job, create_user, update_user,
+                      create_time, update_time)
+VALUES ('01KE8DW1HB7X41NK3Q9K6QCCHC', '01KE8DW1DK2KPAZJAENJW6SSFE', '0-ORG-000001', '0-ORG-000001', '0', 1, '0', '0',
+        '2026-01-06 09:13:48', '2026-01-06 09:13:48');
