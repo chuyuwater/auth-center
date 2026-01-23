@@ -5,6 +5,10 @@
 spring:
   application:
     name: portal-auth-center
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 50MB
 
 mybatis-plus:
   configuration:
