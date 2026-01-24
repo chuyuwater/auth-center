@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 public class DictEnumAdapter implements IDictService {
     //在一次长列表页中返回，需要内存缓存避免N+1查询
     private final Cache<String, Map<String, String>> dictCache = Caffeine.newBuilder()
-            .expireAfterWrite(Duration.ofSeconds(10))
+            .expireAfterWrite(Duration.ofSeconds(5))
             .build();
     @Resource
     private SysDictService sysDictService;
