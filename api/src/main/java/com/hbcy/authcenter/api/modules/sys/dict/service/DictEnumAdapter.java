@@ -1,10 +1,13 @@
 package com.hbcy.authcenter.api.modules.sys.dict.service;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import com.hbcy.authcenter.api.modules.sys.dict.model.SysDict;
 import com.hbcy.common.db.convertor.IDictService;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -17,6 +20,10 @@ import java.util.stream.Collectors;
  */
 @Service
 public class DictEnumAdapter implements IDictService {
+    //在一次长列表页中返回，需要内存缓存避免N+1查询
+    private final Cache<String, Map<String, String>> dictCache = Caffeine.newBuilder()
+            .expireAfterWrite(Duration.ofSeconds(10))
+            .build();
     @Resource
     private SysDictService sysDictService;
 
@@ -27,7 +34,14 @@ public class DictEnumAdapter implements IDictService {
 
     @Override
     public Map<String, String> getCodeEnums(String dictCode) {
+        Map<String, String> cached = dictCache.getIfPresent(dictCode);
+        if (cached != null) {
+            return cached;
+        }
         List<SysDict> list = sysDictService.listDictByFeatCode(dictCode, "");
-        return list.stream().collect(Collectors.toMap(SysDict::getValueStr, SysDict::getValueCn));
+        Map<String, String> resp = list.stream().collect(
+                Collectors.toMap(SysDict::getValueStr, SysDict::getValueCn));
+        dictCache.put(dictCode, resp);
+        return resp;
     }
 }
