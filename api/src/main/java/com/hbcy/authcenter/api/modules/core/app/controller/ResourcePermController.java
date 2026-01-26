@@ -3,13 +3,12 @@ package com.hbcy.authcenter.api.modules.core.app.controller;
 import com.hbcy.authcenter.api.modules.core.app.model.ResourcePerm;
 import com.hbcy.authcenter.api.modules.core.app.service.ResourcePermService;
 import com.hbcy.authcenter.api.modules.core.app.vo.ResourcePermQueryVO;
+import com.hbcy.authcenter.api.modules.core.app.vo.ResourcePermUpdateVO;
 import com.hbcy.common.web.bean.NameFill;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -39,5 +38,25 @@ public class ResourcePermController {
     @NameFill
     public List<ResourcePerm> list(@Valid ResourcePermQueryVO vo) {
         return resourcePermService.list(vo);
+    }
+
+    /**
+     * 修改权限点
+     * @param id 权限点ID
+     * @param vo 修改信息
+     * @return 修改后的权限点信息
+     */
+    @PutMapping("/{id}")
+    public ResourcePerm update(@PathVariable String id, @RequestBody @Valid ResourcePermUpdateVO vo) {
+        return resourcePermService.update(id, vo);
+    }
+
+    /**
+     * 删除权限点
+     * @param id 权限点ID
+     */
+    @DeleteMapping("/{id}")
+    public void delete(@PathVariable String id) {
+        resourcePermService.delete(id);
     }
 }

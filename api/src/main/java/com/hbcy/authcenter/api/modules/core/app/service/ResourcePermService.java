@@ -8,6 +8,7 @@ import com.hbcy.authcenter.api.modules.core.app.dao.ResourcePermMapper;
 import com.hbcy.authcenter.api.modules.core.app.model.ResourcePerm;
 import com.hbcy.authcenter.api.modules.core.app.vo.ResourcePermCreateVO;
 import com.hbcy.authcenter.api.modules.core.app.vo.ResourcePermQueryVO;
+import com.hbcy.authcenter.api.modules.core.app.vo.ResourcePermUpdateVO;
 import com.hbcy.authcenter.api.modules.core.perm.dao.PermUnitResourceMapper;
 import com.hbcy.authcenter.api.modules.core.perm.model.PermUnitResource;
 import com.hbcy.authcenter.api.modules.core.tenant.dao.TenantAppResourceMapper;
@@ -86,6 +87,20 @@ public class ResourcePermService extends ServiceImpl<ResourcePermMapper, Resourc
         //删除已有的角色/策略授权
         permUnitResourceMapper.delete(new QueryWrapper<PermUnitResource>()
                 .in(PermUnitResource.COL_PERM_ID, permIds));
+    }
+
+    public ResourcePerm update(String id, ResourcePermUpdateVO vo) {
+        ResourcePerm rp = baseMapper.selectById(id);
+        if (rp == null) {
+            throw new ParamError("指定ID不存在");
+        }
+        BeanCopyUtils.copy(vo, rp);
+        try {
+            baseMapper.updateById(rp);
+        } catch (DuplicateKeyException e) {
+            throw new ParamError("API路径和方法组合已存在");
+        }
+        return rp;
     }
 
     /**
