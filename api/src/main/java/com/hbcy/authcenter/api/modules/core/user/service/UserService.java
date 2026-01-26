@@ -395,6 +395,8 @@ public class UserService extends ServiceImpl<UserMapper, User> {
         for (UserOrgDTO userOrg : userOrgs) {
             List<String> nameParts = Splitter.on(G.ID_PATH_SPLITTER).splitToList(userOrg.getIdPath()).stream()
                     .map(k -> idNameMap.getOrDefault(k, "")).toList();
+            //去掉根组织的虚拟节点
+            nameParts = nameParts.subList(1, nameParts.size());
             userOrg.setNamePath(trimSplitter(Joiner.on("/").join(Lists.reverse(nameParts))));
         }
         //按用户分组映射
