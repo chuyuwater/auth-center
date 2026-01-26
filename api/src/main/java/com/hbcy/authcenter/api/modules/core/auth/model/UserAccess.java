@@ -18,8 +18,6 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @TableName(value = "user_access")
 public class UserAccess {
-    public static final String COL_UPTIME_TIME = "uptime_time";
-    public static final String COL_EXPIRE_DATE = "expire_date";
     public static final String COL_ID = "id";
     public static final String COL_KEY_NAME = "key_name";
     public static final String COL_ACCESS_KEY = "access_key";

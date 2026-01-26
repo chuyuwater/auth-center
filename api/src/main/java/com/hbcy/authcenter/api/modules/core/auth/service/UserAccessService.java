@@ -5,12 +5,13 @@ import com.github.f4b6a3.ulid.UlidCreator;
 import com.hbcy.authcenter.api.modules.core.auth.dao.UserAccessMapper;
 import com.hbcy.authcenter.api.modules.core.auth.model.UserAccess;
 import com.hbcy.authcenter.api.modules.core.auth.vo.UserAccessUpsertVO;
+import com.hbcy.authcenter.gateway.constants.GatewayConstants;
 import com.hbcy.authcenter.sdk.utils.UserContextUtils;
+import com.hbcy.common.base.error.ParamError;
 import com.hbcy.common.base.error.PermissionError;
 import com.hbcy.common.base.json.JsonUtils;
 import com.hbcy.common.base.util.BeanCopyUtils;
 import jakarta.annotation.Resource;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -18,9 +19,11 @@ import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Base64;
+import java.util.List;
 
 /**
  * TODO: 目前用户密钥的权限等于用户的权限，未做细化授权
+ *
  * @author 姚泰然
  * @date 2026-01-26 16:56
  */
@@ -47,10 +50,6 @@ public class UserAccessService {
      * @return 详情
      */
     public UserAccess checkUserAccess(String ak) {
-        String s = stringRedisTemplate.opsForValue().get(USER_ACCESS_KEY_PREFIX + ak);
-        if (StringUtils.isNotBlank(s)) {
-            return JsonUtils.readValue(s, UserAccess.class);
-        }
         UserAccess inst = userAccessMapper.selectOne(new QueryWrapper<UserAccess>()
                 .eq(UserAccess.COL_ACCESS_KEY, ak)
                 .eq(UserAccess.COL_FORBIDDEN, 0));
@@ -60,8 +59,8 @@ public class UserAccessService {
                 resp = null;
             }
         }
-        stringRedisTemplate.opsForValue().set(USER_ACCESS_KEY_PREFIX + ak, JsonUtils.toJsonStr(resp),
-                EXPIRE_TIME);
+        stringRedisTemplate.opsForValue().set(
+                GatewayConstants.USER_ACCESS_KEY_PREFIX + ak, JsonUtils.toJsonStr(resp), EXPIRE_TIME);
         return resp;
     }
 
@@ -75,7 +74,7 @@ public class UserAccessService {
         userAccess.setTenantId(UserContextUtils.getTenantId());
         userAccess.setForbidden(vo.getForbidden());
         userAccessMapper.insert(userAccess);
-        stringRedisTemplate.delete(USER_ACCESS_KEY_PREFIX + userAccess.getAccessKey());
+        stringRedisTemplate.delete(GatewayConstants.USER_ACCESS_KEY_PREFIX + userAccess.getAccessKey());
         return userAccess;
     }
 
@@ -83,7 +82,7 @@ public class UserAccessService {
         UserAccess ua = userAccessMapper.selectById(id);
         BeanCopyUtils.copy(vo, ua);
         userAccessMapper.updateById(ua);
-        stringRedisTemplate.delete(USER_ACCESS_KEY_PREFIX + ua.getAccessKey());
+        stringRedisTemplate.delete(GatewayConstants.USER_ACCESS_KEY_PREFIX + ua.getAccessKey());
         return ua;
     }
 
@@ -96,7 +95,23 @@ public class UserAccessService {
         if (!userAccess.getUserId().equals(uid)) {
             throw new PermissionError();
         }
-        stringRedisTemplate.delete(USER_ACCESS_KEY_PREFIX + userAccess.getAccessKey());
+        stringRedisTemplate.delete(GatewayConstants.USER_ACCESS_KEY_PREFIX + userAccess.getAccessKey());
         userAccessMapper.deleteById(id);
+    }
+
+    public UserAccess getById(String id) {
+        UserAccess ua = userAccessMapper.selectById(id);
+        if (ua == null) {
+            throw new ParamError("指定id不存在");
+        }
+        if (!ua.getUserId().equals(UserContextUtils.getUserId())) {
+            throw new PermissionError();
+        }
+        return ua;
+    }
+
+    public List<UserAccess> getUserAKs() {
+        return userAccessMapper.selectList(new QueryWrapper<UserAccess>()
+                .eq(UserAccess.COL_USER_ID, UserContextUtils.getUserId()));
     }
 }

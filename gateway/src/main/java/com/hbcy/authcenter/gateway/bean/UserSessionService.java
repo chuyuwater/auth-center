@@ -5,8 +5,11 @@ import cn.dev33.satoken.stp.StpUtil;
 import com.hbcy.authcenter.gateway.constants.GatewayConstants;
 import com.hbcy.authcenter.gateway.dto.SessionDTO;
 import com.hbcy.authcenter.gateway.dto.UserAccessDTO;
+import com.hbcy.common.base.error.ClientError;
+import com.hbcy.common.base.json.JsonUtils;
 import com.hbcy.common.redis.RedisExtendService;
 import jakarta.annotation.Resource;
+import org.apache.commons.lang3.StringUtils;
 import org.jspecify.annotations.Nullable;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
@@ -84,7 +87,15 @@ public class UserSessionService {
         return 9999L;
     }
 
-    public UserAccessDTO getAccessByAK() {
-
+    public UserAccessDTO getAccessByAK(String ak) {
+        String s = stringRedisTemplate.opsForValue().get(GatewayConstants.USER_ACCESS_KEY_PREFIX + ak);
+        if (StringUtils.isNotBlank(s)) {
+            //防止缓存穿透，直接抛异常
+            UserAccessDTO dto = JsonUtils.readValue(s, UserAccessDTO.class);
+            if (dto == null) {
+                throw new ClientError("用户密钥不存在");
+            }
+        }
+        return null;
     }
 }
