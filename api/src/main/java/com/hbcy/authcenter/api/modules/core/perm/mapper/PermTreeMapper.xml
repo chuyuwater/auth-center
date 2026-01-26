@@ -68,4 +68,10 @@
         and parent_id = #{parentId}
         and show_order &gt;= #{targetIdx}
     </update>
+
+    <select id="getChildMaxShowOrder" resultType="java.lang.Integer">
+        select max(show_order)
+        from perm_tree
+        where tenant_id = #{tenantId} and parent_id = #{parentId}
+    </select>
 </mapper>

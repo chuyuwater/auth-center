@@ -26,4 +26,6 @@ public interface PermTreeMapper extends BaseMapper<PermTree> {
 
     void updateShowOrder(@Param("tenantId") String tenantId, @Param("parentId") String parentId,
                          @Param("targetIdx") int targetIdx);
+
+    Integer getChildMaxShowOrder(@Param("tenantId") String tenantId, @Param("parentId") String parentId);
 }

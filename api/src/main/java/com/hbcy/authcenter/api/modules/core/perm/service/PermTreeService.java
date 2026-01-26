@@ -90,6 +90,10 @@ public class PermTreeService extends ServiceImpl<PermTreeMapper, PermTree> {
         if (!entity.getTenantId().equals(UserContextUtils.getTenantId())) {
             throw new PermissionError();
         }
+        if (!entity.getParentId().equals(vo.getParentId())) {
+            updateParent(entity, vo.getParentId());
+            entity.setShowOrder(baseMapper.getChildMaxShowOrder(entity.getTenantId(), vo.getParentId()) + 1);
+        }
         BeanCopyUtils.copy(vo, entity);
         entity.setUpdateUser(UserContextUtils.getUserId());
         entity.setUpdateTime(LocalDateTime.now());
@@ -187,6 +191,13 @@ public class PermTreeService extends ServiceImpl<PermTreeMapper, PermTree> {
                 .set(PermTree.COL_UPDATE_USER, UserContextUtils.getUserId()));
     }
 
+    private void updateParent(PermTree node, String newParentId) {
+        PermTree parentNode = checkParentId(node.getTenantId(), newParentId);
+        String oldPath = node.getIdPath();
+        String newPath = (parentNode != null ? parentNode.getIdPath() + G.ID_PATH_SPLITTER : "") + node.getId();
+        baseMapper.updateIdPath(node.getTenantId(), oldPath, newPath);
+    }
+
     @Transactional(rollbackFor = Exception.class)
     public void move(@Valid NodeMoveVO vo) {
         PermTree node = getById(vo.getNodeId());
@@ -196,7 +207,6 @@ public class PermTreeService extends ServiceImpl<PermTreeMapper, PermTree> {
         if (!node.getTenantId().equals(UserContextUtils.getTenantId())) {
             throw new PermissionError();
         }
-        PermTree parentNode = checkParentId(node.getTenantId(), vo.getParentId());
         PermTree prevNode = null;
         if (StringUtils.isNotBlank(vo.getPrevId())) {
             prevNode = getById(vo.getPrevId());
@@ -207,11 +217,8 @@ public class PermTreeService extends ServiceImpl<PermTreeMapper, PermTree> {
                 throw new ParamError("前一个节点和当前节点不属于同一个父节点");
             }
         }
-
-        String oldPath = node.getIdPath();
-        String newPath = (parentNode != null ? parentNode.getIdPath() + G.ID_PATH_SPLITTER : "") + node.getId();
         if (!vo.getParentId().equals(node.getParentId())) {
-            baseMapper.updateIdPath(node.getTenantId(), oldPath, newPath);
+            updateParent(node, vo.getParentId());
         }
         int targetIdx = 0;
         if (prevNode != null) {
