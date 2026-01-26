@@ -66,13 +66,14 @@
     </insert>
 
     <insert id="upsertUserOrgs">
-        insert into portal_auth_center.user_org(id, user_id, org_id, node_id, tenant_id, main_job, create_user,
+        insert ignore into portal_auth_center.user_org(id, user_id, org_id, node_id, tenant_id, main_job, create_user,
         update_user, update_time)
         values
         <foreach collection="userOrgs" item="uo" separator="," open="" close="">
-            (#{uo.id}, #{uo.userId}, #{uo.orgId}, #{uo.nodeId}, #{uo.tenantId}, 1, '0', '0', #{uo.updateTime})
+            (#{uo.id}, #{uo.userId}, #{uo.orgId}, #{uo.nodeId}, #{uo.tenantId}, #{uo.mainJob}, '0', '0',
+            #{uo.updateTime})
         </foreach>
-        on duplicate key update main_job=1,
+        on duplicate key update main_job=values(main_job),
         update_user = '0',
         update_time = values(update_time)
     </insert>

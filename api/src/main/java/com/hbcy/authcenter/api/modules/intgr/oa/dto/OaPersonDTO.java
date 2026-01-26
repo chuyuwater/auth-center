@@ -22,6 +22,7 @@ public class OaPersonDTO {
     private String status;
     /**
      * 账号类型
+     * 0-主职，1-兼职
      */
     private String accounttype;
     /**

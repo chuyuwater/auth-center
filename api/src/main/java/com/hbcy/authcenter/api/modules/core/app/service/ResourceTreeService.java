@@ -180,17 +180,25 @@ public class ResourceTreeService extends ServiceImpl<ResourceTreeMapper, Resourc
 
         Set<String> allGrantIds = filterGranted(grantPermList, removeUngrant, resourceTrees, resourcePerms);
         if (vo.isWithCreator()) {
-            //填充创建者信息
-            Set<String> creator = new HashSet<>();
+            //填充人的信息，前端列表页需要
+            Set<String> users = new HashSet<>();
             for (ResourceTree resourceTree : resourceTrees) {
-                creator.add(resourceTree.getCreateUser());
+                users.add(resourceTree.getCreateUser());
+                users.add(resourceTree.getUpdateUser());
             }
             for (ResourcePerm resourcePerm : resourcePerms) {
-                creator.add(resourcePerm.getCreateUser());
+                users.add(resourcePerm.getCreateUser());
+                users.add(resourcePerm.getUpdateUser());
             }
-            Map<String, String> userNameMap = nameCacheService.getUserNameMap(creator);
-            resourceTrees.forEach(t -> t.setCreateUserName(userNameMap.get(t.getCreateUser())));
-            resourcePerms.forEach(t -> t.setCreateUserName(userNameMap.get(t.getCreateUser())));
+            Map<String, String> userNameMap = nameCacheService.getUserNameMap(users);
+            resourceTrees.forEach(t -> {
+                t.setCreateUserName(userNameMap.get(t.getCreateUser()));
+                t.setUpdateUserName(userNameMap.get(t.getUpdateUser()));
+            });
+            resourcePerms.forEach(t -> {
+                t.setCreateUserName(userNameMap.get(t.getCreateUser()));
+                t.setUpdateUserName(userNameMap.get(t.getUpdateUser()));
+            });
         }
         Map<String, List<ResourceTree>> resChildrenMap = resourceTrees.stream()
                 .collect(Collectors.groupingBy(ResourceTree::getParentId, Collectors.collectingAndThen(

@@ -22,7 +22,7 @@ public class AppUpdateVO {
      * 简介
      */
     @Length(max = 200, message = "应用简介长度不能超过200个字符")
-    private String memo;
+    private String memo = "";
     /**
      * 应用图标
      */

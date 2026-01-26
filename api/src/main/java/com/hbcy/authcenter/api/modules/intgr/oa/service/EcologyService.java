@@ -449,7 +449,7 @@ public class EcologyService {
             userOrg.setNodeId(typeIdDict.get(relateId));
             userOrg.setOrgId(typeIdDict.get(orgRelateId));
             userOrg.setTenantId(tenantId);
-            userOrg.setMainJob(1);
+            userOrg.setMainJob(data.getAccounttype().equals("0") ? 1 : 0);
             userOrgs.add(userOrg);
         }
         //逻辑删除之前同步过来的、现在手机号已经不存在于OA中的用户
