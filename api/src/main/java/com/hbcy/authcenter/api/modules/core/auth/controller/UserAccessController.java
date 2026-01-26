@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * AK/SK认证
+ * AK认证
  *
  * @author 姚泰然
  * @module auth
