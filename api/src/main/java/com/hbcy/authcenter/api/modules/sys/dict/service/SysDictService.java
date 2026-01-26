@@ -41,13 +41,12 @@ public class SysDictService extends ServiceImpl<SysDictMapper, SysDict> {
     //缓存有效期
     public static final Duration DICT_EXPIRE = Duration.ofMinutes(10);
     public static final String DICT_CACHE_KEY_LIST = "authcenter:sys:dict:list:";
-    public static final String DICT_CACHE_KEY_TREE = "authcenter:sys:dict:tree:";
 
     @Resource
     private StringRedisTemplate stringRedisTemplate;
 
     private void cleanCache(String featCode) {
-        stringRedisTemplate.delete(List.of(DICT_CACHE_KEY_LIST + featCode, DICT_CACHE_KEY_TREE + featCode));
+        stringRedisTemplate.delete(DICT_CACHE_KEY_LIST + featCode);
     }
 
     public SysDict createSysDict(DictCreateVO vo) {
@@ -144,8 +143,9 @@ public class SysDictService extends ServiceImpl<SysDictMapper, SysDict> {
                 .eq(SysDict.COL_FORBIDDEN, 0)
                 .eq(StringUtils.isNotBlank(parentId), SysDict.COL_PARENT_ID, parentId)
                 .orderByAsc(SysDict.COL_SHOW_ORDER));
-        stringRedisTemplate.opsForValue().set(DICT_CACHE_KEY_LIST + featCode,
-                JsonUtils.toJsonStr(list), DICT_EXPIRE);
+        stringRedisTemplate.opsForHash().put(DICT_CACHE_KEY_LIST + featCode, parentId,
+                JsonUtils.toJsonStr(list));
+        stringRedisTemplate.opsForHash().expire(DICT_CACHE_KEY_LIST + featCode, DICT_EXPIRE, List.of(parentId));
         return list;
     }
 
