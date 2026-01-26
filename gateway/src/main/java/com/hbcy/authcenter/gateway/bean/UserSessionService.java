@@ -4,6 +4,7 @@ import cn.dev33.satoken.session.SaSession;
 import cn.dev33.satoken.stp.StpUtil;
 import com.hbcy.authcenter.gateway.constants.GatewayConstants;
 import com.hbcy.authcenter.gateway.dto.SessionDTO;
+import com.hbcy.authcenter.gateway.dto.UserAccessDTO;
 import com.hbcy.common.redis.RedisExtendService;
 import jakarta.annotation.Resource;
 import org.jspecify.annotations.Nullable;
@@ -81,5 +82,9 @@ public class UserSessionService {
         }
         //永久有效，需要手动删除
         return 9999L;
+    }
+
+    public UserAccessDTO getAccessByAK() {
+
     }
 }

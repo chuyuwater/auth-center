@@ -32,4 +32,14 @@ public class AuthConstants {
     public static final String HEADER_ORG_ID = "X-ORG-ID";
     //当前应用id
     public static final String HEADER_APP_ID = "X-APP-ID";
+
+    /********************************后端AK/SK访问**************************************/
+    //AK，当不使用ip白名单时，需要结合下面的key来校验
+    public static final String HEADER_AK = "X-AUTH-AK";
+    //摘要签名
+    public static final String HEADER_SIGN = "X-AUTH-SIGN";
+    //时间戳
+    public static final String HEADER_TIMESTAMP = "X-AUTH-TIMESTAMP";
+    //随机数
+    public static final String HEADER_NONCE = "X-AUTH-NONCE";
 }

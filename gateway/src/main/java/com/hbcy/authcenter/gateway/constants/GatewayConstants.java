@@ -21,4 +21,10 @@ public class GatewayConstants {
      * 发送审计日志的kafka topic
      */
     public static final String KAFKA_TOPIC_AUDIT_LOG = "audit_log";
+
+    /**
+     * 访问ak缓存
+     */
+    public static final String USER_ACCESS_KEY_PREFIX = "portal:auth:ak:";
+
 }
