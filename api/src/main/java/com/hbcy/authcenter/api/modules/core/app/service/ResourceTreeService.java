@@ -168,13 +168,14 @@ public class ResourceTreeService extends ServiceImpl<ResourceTreeMapper, Resourc
             dto.setRes(node);
         }
         List<ResourceTree> resourceTrees = listResTree(vo);
+        if (resourceTrees.isEmpty()) {
+            return root;
+        }
         List<ResourcePerm> resourcePerms = new ArrayList<>();
         if (vo.isWithPerm()) {
             List<String> ids = resourceTrees.stream().map(ResourceTree::getId).toList();
-            if (!ids.isEmpty()) {
-                resourcePerms = resourcePermService.list(new QueryWrapper<ResourcePerm>()
-                        .in(ResourcePerm.COL_RES_ID, ids));
-            }
+            resourcePerms = resourcePermService.list(new QueryWrapper<ResourcePerm>()
+                    .in(ResourcePerm.COL_RES_ID, ids));
         }
 
         Set<String> allGrantIds = filterGranted(grantPermList, removeUngrant, resourceTrees, resourcePerms);
