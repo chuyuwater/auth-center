@@ -15,12 +15,6 @@ import org.hibernate.validator.constraints.Range;
 @Data
 public class OrgTreeCreateVO extends OrgTreeUpdateVO {
     /**
-     * 父节点
-     * 创建时，节点固定在同级末尾。
-     */
-    private String parentId = "";
-
-    /**
      * 节点类型，0-组织，1-部门
      */
     @Range(min = 0, max = 1, message = "节点类型只能为0-1")

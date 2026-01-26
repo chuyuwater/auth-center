@@ -200,17 +200,21 @@ public class OrgTreeService extends ServiceImpl<OrgTreeMapper, OrgTree> {
         if (!entity.getTenantId().equals(UserContextUtils.getTenantId())) {
             throw new PermissionError();
         }
-        String root = tenantRootId();
-        if (root.equals(entity.getId())) {
+        String rootId = tenantRootId();
+        if (rootId.equals(entity.getId())) {
             throw new PermissionError("禁止更新根节点");
         }
         if (!vo.getNodeName().equals(entity.getNodeName())) {
             cleanNameCache(entity.getId());
         }
-        OrgTree parent = getById(entity.getParentId());
+        if (StringUtils.isBlank(vo.getParentId())) {
+            vo.setParentId(rootId);
+        }
+        if (!entity.getParentId().equals(vo.getParentId())) {
+            updateParent(entity, vo.getParentId());
+            entity.setShowOrder(baseMapper.getChildMaxShowOrder(entity.getTenantId(), vo.getParentId()) + 1);
+        }
         BeanCopyUtils.copy(vo, entity);
-        checkLevelAllow(entity, parent);
-
         entity.setUpdateUser(UserContextUtils.getUserId());
         entity.setUpdateTime(LocalDateTime.now());
         try {
@@ -358,6 +362,41 @@ public class OrgTreeService extends ServiceImpl<OrgTreeMapper, OrgTree> {
                 .set(OrgTree.COL_UPDATE_USER, UserContextUtils.getUserId()));
     }
 
+    //组织树的父节点一定不为空，至少是虚拟节点
+    private void updateParent(OrgTree node, String newParentId) {
+        OrgTree parentNode = getById(newParentId);
+        if (parentNode == null) {
+            throw new ParamError("父节点不存在");
+        }
+        if (!parentNode.getTenantId().equals(node.getTenantId())) {
+            throw new ParamError("当前节点和父节点属于不同的租户");
+        }
+        //校验移动的合法性
+        checkLevelAllow(node, parentNode);
+        // Correct handling of ID Path updates
+        String oldPath = node.getIdPath();
+        String newPath = parentNode.getIdPath() + G.ID_PATH_SPLITTER + node.getId();
+        //部门不能跨组织移动
+        if (node.getNodeType().equals(OrgNodeTypeEnum.DEPT.getValue())) {
+            String directOrg = findDeptDirectOrg(oldPath);
+            String newDirectOrg = findDeptDirectOrg(newPath);
+            if (!Objects.equals(directOrg, newDirectOrg)) {
+                throw new PermissionError("部门不能跨组织移动");
+            }
+        }
+        //确认无同名节点
+        if (exists(new QueryWrapper<OrgTree>()
+                .eq(OrgTree.COL_PARENT_ID, newParentId)
+                .eq(OrgTree.COL_TENANT_ID, node.getTenantId())
+                .and(qw -> qw.eq(OrgTree.COL_NODE_NAME, node.getNodeName())
+                        .or().eq(OrgTree.COL_SHORT_NAME, node.getShortName()))
+        )) {
+            throw new ParamError("同一层级的名称、简称均不能重复");
+        }
+        // Update children's paths
+        baseMapper.updateIdPath(node.getTenantId(), oldPath, newPath);
+    }
+
     /**
      * 移动组织节点
      *
@@ -365,6 +404,10 @@ public class OrgTreeService extends ServiceImpl<OrgTreeMapper, OrgTree> {
      */
     @Transactional(rollbackFor = Exception.class)
     public void move(@Valid NodeMoveVO vo) {
+        String rootId = tenantRootId();
+        if (vo.getNodeId().equals(rootId)) {
+            throw new ParamError("禁止移动根节点");
+        }
         OrgTree node = getById(vo.getNodeId());
         if (node == null) {
             throw new ParamError("节点不存在");
@@ -372,17 +415,7 @@ public class OrgTreeService extends ServiceImpl<OrgTreeMapper, OrgTree> {
         if (!node.getTenantId().equals(UserContextUtils.getTenantId())) {
             throw new PermissionError();
         }
-        OrgTree parentNode = null;
         OrgTree prevNode = null;
-        if (StringUtils.isNotBlank(vo.getParentId())) {
-            parentNode = getById(vo.getParentId());
-            if (parentNode == null) {
-                throw new ParamError("父节点不存在");
-            }
-            if (!parentNode.getTenantId().equals(node.getTenantId())) {
-                throw new ParamError("当前节点和父节点属于不同的租户");
-            }
-        }
         if (StringUtils.isNotBlank(vo.getPrevId())) {
             prevNode = getById(vo.getPrevId());
             if (prevNode == null) {
@@ -392,46 +425,18 @@ public class OrgTreeService extends ServiceImpl<OrgTreeMapper, OrgTree> {
                 throw new ParamError("前一个节点和当前节点不属于同一个父节点");
             }
         }
-        //校验移动的合法性
-        checkLevelAllow(node, parentNode);
-
-        // Correct handling of ID Path updates
-        String oldPath = node.getIdPath();
-        String newPath = node.getId();
-        if (parentNode != null) {
-            newPath = parentNode.getIdPath() + G.ID_PATH_SPLITTER + node.getId();
+        if (StringUtils.isBlank(vo.getParentId())) {
+            vo.setParentId(rootId);
         }
-
         if (!vo.getParentId().equals(node.getParentId())) {
-            //父节点移动，部门不能跨组织移动
-            if (node.getNodeType().equals(OrgNodeTypeEnum.DEPT.getValue())) {
-                String directOrg = findDeptDirectOrg(oldPath);
-                String newDirectOrg = findDeptDirectOrg(newPath);
-                if (!Objects.equals(directOrg, newDirectOrg)) {
-                    throw new PermissionError("部门不能跨组织移动");
-                }
-                //确认无同名节点
-                if (exists(new QueryWrapper<OrgTree>()
-                        .eq(OrgTree.COL_PARENT_ID, vo.getParentId())
-                        .eq(OrgTree.COL_TENANT_ID, node.getTenantId())
-                        .and(qw -> qw.eq(OrgTree.COL_NODE_NAME, node.getNodeName())
-                                .or().eq(OrgTree.COL_SHORT_NAME, node.getShortName()))
-                )) {
-                    throw new ParamError("同一层级的名称、简称均不能重复");
-                }
-            }
-            // Update children's paths
-            baseMapper.updateIdPath(node.getTenantId(), oldPath, newPath);
+            updateParent(node, vo.getParentId());
         }
-
         // Check the previous node to determine order
         int targetIdx = 0;
         if (prevNode != null) {
             targetIdx = prevNode.getShowOrder() + 1;
         }
         baseMapper.updateShowOrder(node.getTenantId(), vo.getParentId(), targetIdx);
-
-        // Update target node
         OrgTree toUpdate = new OrgTree();
         toUpdate.setId(vo.getNodeId());
         toUpdate.setParentId(vo.getParentId());

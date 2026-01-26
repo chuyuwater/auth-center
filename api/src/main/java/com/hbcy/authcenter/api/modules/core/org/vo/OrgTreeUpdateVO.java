@@ -28,6 +28,11 @@ public class OrgTreeUpdateVO {
 
     @Length(max = 200, message = "说明长度不能超过200")
     private String memo;
+    /**
+     * 父节点
+     * 创建或更新父节点时，节点固定在同级末尾。
+     */
+    private String parentId = "";
 
     /**
      * 组织类别，字典ORG_CATEGORY

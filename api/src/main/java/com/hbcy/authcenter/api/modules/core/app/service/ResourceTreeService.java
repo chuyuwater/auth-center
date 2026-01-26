@@ -127,6 +127,12 @@ public class ResourceTreeService extends ServiceImpl<ResourceTreeMapper, Resourc
         if (entity == null) {
             throw new ParamError("指定节点不存在");
         }
+        if (!vo.getParentId().equals(entity.getParentId())) {
+            //父节点被移动
+            ResourceTree newParent = checkNewParent(entity, vo.getParentId());
+            updateChildrenPath(entity, newParent);
+            entity.setShowOrder(baseMapper.getMaxChildShowOrder(entity.getAppId(), newParent.getId()) + 1);
+        }
         BeanCopyUtils.copy(vo, entity);
         entity.setUpdateTime(LocalDateTime.now());
         entity.setUpdateUser(UserContextUtils.getUserId());
@@ -341,6 +347,28 @@ public class ResourceTreeService extends ServiceImpl<ResourceTreeMapper, Resourc
         resourcePermService.delete(node.getAppId(), permIds);
     }
 
+    private ResourceTree checkNewParent(ResourceTree node, String newParentId) {
+        ResourceTree parentNode = null;
+        if (StringUtils.isNotBlank(newParentId)) {
+            parentNode = getById(newParentId);
+            if (parentNode == null) {
+                throw new ParamError("父节点不存在");
+            }
+            if (!parentNode.getAppId().equals(node.getAppId())) {
+                throw new ParamError("当前节点和父节点属于不同的应用");
+            }
+        }
+        return parentNode;
+    }
+
+    private void updateChildrenPath(ResourceTree node, ResourceTree newParent) {
+        //父节点被移动，意味着当前节点及其下级节点的id_path需要更新
+        String oldPath = node.getIdPath();
+        String newPath = newParent == null ? node.getId() : newParent.getIdPath()
+                + G.ID_PATH_SPLITTER + node.getId();
+        baseMapper.updateIdPath(node.getAppId(), oldPath, newPath);
+    }
+
     /**
      * 移动资源节点
      *
@@ -352,17 +380,7 @@ public class ResourceTreeService extends ServiceImpl<ResourceTreeMapper, Resourc
         if (node == null) {
             throw new ParamError("节点不存在");
         }
-        ResourceTree parentNode = null;
         ResourceTree prevNode = null;
-        if (StringUtils.isNotBlank(vo.getParentId())) {
-            parentNode = getById(vo.getParentId());
-            if (parentNode == null) {
-                throw new ParamError("父节点不存在");
-            }
-            if (!parentNode.getAppId().equals(node.getAppId())) {
-                throw new ParamError("当前节点和父节点属于不同的应用");
-            }
-        }
         if (StringUtils.isNotBlank(vo.getPrevId())) {
             prevNode = getById(vo.getPrevId());
             if (prevNode == null) {
@@ -373,11 +391,8 @@ public class ResourceTreeService extends ServiceImpl<ResourceTreeMapper, Resourc
             }
         }
         if (!vo.getParentId().equals(node.getParentId())) {
-            //父节点被移动，意味着当前节点及其下级节点的id_path需要更新
-            String oldPath = node.getIdPath();
-            String newPath = parentNode == null ? node.getId() : parentNode.getIdPath()
-                    + G.ID_PATH_SPLITTER + node.getId();
-            baseMapper.updateIdPath(node.getAppId(), oldPath, newPath);
+            ResourceTree parentNode = checkNewParent(node, vo.getParentId());
+            updateChildrenPath(node, parentNode);
         }
         //检查前节点，修改被移动节点及其之后节点的show_order
         int targetIdx = 0;
@@ -385,7 +400,6 @@ public class ResourceTreeService extends ServiceImpl<ResourceTreeMapper, Resourc
             targetIdx = prevNode.getShowOrder() + 1;
         }
         baseMapper.updateShowOrder(node.getAppId(), vo.getParentId(), targetIdx);
-
         //最后，修改目标节点自身数据
         ResourceTree toUpdate = new ResourceTree();
         toUpdate.setId(vo.getNodeId());

@@ -131,4 +131,12 @@
             </foreach>
         </where>
     </select>
+
+    <select id="getChildMaxShowOrder" resultType="int">
+        select max(show_order)
+        from org_tree
+        where parent_id = #{parentId}
+        and tenant_id = #{tenantId}
+        and delete_time = 0
+    </select>
 </mapper>

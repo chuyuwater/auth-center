@@ -170,4 +170,11 @@
         </where>
         order by app.show_order, rt.show_order
     </select>
+
+    <select id="getMaxChildShowOrder" resultType="java.lang.Integer">
+        select max(show_order)
+        from resource_tree
+        where parent_id = #{parentId}
+        and app_id = #{appId}
+    </select>
 </mapper>

@@ -76,4 +76,12 @@ public interface OrgTreeMapper extends BaseMapper<OrgTree> {
      */
     List<NamedId> selectNameByIds(@Param("orgIds") Set<String> orgIds,
                                   @Param("useFullName") boolean useFullName);
+
+    /**
+     * 获取子节点最大显示顺序
+     *
+     * @param parentId 父节点id
+     * @return 最大显示顺序
+     */
+    int getChildMaxShowOrder(@Param("tenantId") String tenantId, @Param("parentId") String parentId);
 }

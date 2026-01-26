@@ -66,4 +66,13 @@ public interface ResourceTreeMapper extends BaseMapper<ResourceTree> {
      * @return 排序好的菜单
      */
     List<ResourceTree> listOrderdMenu(OrderedMenuQueryVO vo);
+
+    /**
+     * 获取子节点最大show_order
+     *
+     * @param appId     应用id
+     * @param parentId  父节点id
+     * @return 子节点最大show_order
+     */
+    Integer getMaxChildShowOrder(@Param("appId") String appId, @Param("parentId") String parentId);
 }

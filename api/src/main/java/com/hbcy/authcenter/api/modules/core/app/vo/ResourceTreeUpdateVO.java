@@ -18,6 +18,10 @@ import java.util.List;
 @Data
 public class ResourceTreeUpdateVO {
     /**
+     * 父节点，创建时或更新后，节点固定在同级末尾。
+     */
+    private String parentId = "";
+    /**
      * 中文名称
      */
     @Length(max = 50, message = "中文名长度不能超过50")
