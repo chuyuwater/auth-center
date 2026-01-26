@@ -57,6 +57,11 @@ public class InnerController {
         return innerService.getAllTenantAdmin();
     }
 
+    /**
+     * 获取用户密钥详情，用于网关通信
+     * @param ak 前端传入的accessKey
+     * @return 密钥详情
+     */
     @GetMapping("/access-token/check/{ak}")
     public UserAccess checkUserAccess(@PathVariable String ak) {
         return userAccessService.checkUserAccess(ak);
