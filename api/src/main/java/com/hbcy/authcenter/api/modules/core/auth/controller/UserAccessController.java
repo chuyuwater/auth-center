@@ -43,9 +43,4 @@ public class UserAccessController {
     public List<UserAccess> listUserAccess() {
         return userAccessService.getUserAKs();
     }
-
-    @GetMapping("/check/{ak}")
-    public UserAccess checkUserAccess(@PathVariable String ak) {
-        return userAccessService.checkUserAccess(ak);
-    }
 }
