@@ -171,8 +171,10 @@ public class ResourceTreeService extends ServiceImpl<ResourceTreeMapper, Resourc
         List<ResourcePerm> resourcePerms = new ArrayList<>();
         if (vo.isWithPerm()) {
             List<String> ids = resourceTrees.stream().map(ResourceTree::getId).toList();
-            resourcePerms = resourcePermService.list(new QueryWrapper<ResourcePerm>()
-                    .in(ResourcePerm.COL_RES_ID, ids));
+            if (!ids.isEmpty()) {
+                resourcePerms = resourcePermService.list(new QueryWrapper<ResourcePerm>()
+                        .in(ResourcePerm.COL_RES_ID, ids));
+            }
         }
 
         Set<String> allGrantIds = filterGranted(grantPermList, removeUngrant, resourceTrees, resourcePerms);
