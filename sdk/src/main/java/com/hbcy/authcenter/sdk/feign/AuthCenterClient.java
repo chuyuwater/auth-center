@@ -73,6 +73,6 @@ public interface AuthCenterClient {
     /**
      * 更新待办状态
      */
-    @PostMapping("/api/portal/v1/user/todo/update-status")
-    ApiResponse<Object> updateTodoStatus(@RequestBody TodoUpdateVO vo);
+    @PostMapping("/api/portal/v1/user/todo/update-state")
+    ApiResponse<Object> updateTodoState(@RequestBody TodoUpdateVO vo);
 }

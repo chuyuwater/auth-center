@@ -10,7 +10,7 @@ import lombok.Data;
  * @date 2026-01-27
  */
 @Data
-public class UserTodoUpdateStatusVO {
+public class UserTodoUpdateVO {
     @NotNull(message = "处理状态不能为空")
     @DictValid(dictKey = "TODO_PROCESS_STATE", message = "处理状态错误")
     private Integer processState;

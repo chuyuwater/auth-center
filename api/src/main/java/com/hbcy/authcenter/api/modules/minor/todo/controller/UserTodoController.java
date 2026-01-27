@@ -5,7 +5,7 @@ import com.hbcy.authcenter.api.modules.minor.todo.service.UserTodoService;
 import com.hbcy.authcenter.api.modules.minor.todo.vo.UserTodoBatchOpVO;
 import com.hbcy.authcenter.api.modules.minor.todo.vo.UserTodoCreateVO;
 import com.hbcy.authcenter.api.modules.minor.todo.vo.UserTodoQueryVO;
-import com.hbcy.authcenter.api.modules.minor.todo.vo.UserTodoUpdateStatusVO;
+import com.hbcy.authcenter.api.modules.minor.todo.vo.UserTodoUpdateVO;
 import com.hbcy.common.base.pojo.PageResp;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
@@ -51,9 +51,9 @@ public class UserTodoController {
      * 供第三方系统调用
      * @param vo 操作参数
      */
-    @PostMapping("/update-status")
-    public void updateStatus(@Valid @RequestBody UserTodoUpdateStatusVO vo) {
-        userTodoService.updateStatus(vo);
+    @PostMapping("/update-state")
+    public void updateState(@Valid @RequestBody UserTodoUpdateVO vo) {
+        userTodoService.updateState(vo);
     }
 
     /**

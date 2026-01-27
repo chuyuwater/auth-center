@@ -10,7 +10,7 @@ import com.hbcy.authcenter.api.modules.minor.todo.model.UserTodo;
 import com.hbcy.authcenter.api.modules.minor.todo.vo.UserTodoBatchOpVO;
 import com.hbcy.authcenter.api.modules.minor.todo.vo.UserTodoCreateVO;
 import com.hbcy.authcenter.api.modules.minor.todo.vo.UserTodoQueryVO;
-import com.hbcy.authcenter.api.modules.minor.todo.vo.UserTodoUpdateStatusVO;
+import com.hbcy.authcenter.api.modules.minor.todo.vo.UserTodoUpdateVO;
 import com.hbcy.authcenter.sdk.utils.UserContextUtils;
 import com.hbcy.common.base.pojo.PageResp;
 import com.hbcy.common.db.model.PageRespEx;
@@ -61,7 +61,7 @@ public class UserTodoService extends ServiceImpl<UserTodoMapper, UserTodo> {
         return new PageRespEx<>(dbPage);
     }
 
-    public void updateStatus(UserTodoUpdateStatusVO vo) {
+    public void updateState(UserTodoUpdateVO vo) {
         baseMapper.update(new UpdateWrapper<UserTodo>()
                 .eq(UserTodo.COL_TARGET_USER, vo.getUserId())
                 .eq(UserTodo.COL_SRC_ID, vo.getSrcId())
