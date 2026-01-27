@@ -57,7 +57,7 @@ public class UserTodoController {
     }
 
     /**
-     * 更新待办状态
+     * 更新待办处理状态
      * 供第三方系统调用
      * @param vo 操作参数
      */
