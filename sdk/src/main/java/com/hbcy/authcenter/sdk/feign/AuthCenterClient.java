@@ -3,11 +3,11 @@ package com.hbcy.authcenter.sdk.feign;
 import com.hbcy.authcenter.sdk.config.PortalFeignConfig;
 import com.hbcy.authcenter.sdk.feign.dto.OrgNodeDTO;
 import com.hbcy.authcenter.sdk.feign.dto.SysDictDTO;
+import com.hbcy.authcenter.sdk.feign.vo.MsgCreateVO;
+import com.hbcy.authcenter.sdk.feign.vo.TodoCreateVO;
 import com.hbcy.common.base.pojo.ApiResponse;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Set;
@@ -56,4 +56,16 @@ public interface AuthCenterClient {
      */
     @GetMapping("/api/portal/v1/sys/dict/list")
     ApiResponse<List<SysDictDTO>> listDictByFeatCode(@RequestParam String featCode, @RequestParam String parentId);
+
+    /**
+     * 创建消息
+     */
+    @PostMapping("/api/portal/v1/user/inbox")
+    ApiResponse<Object> createMsg(@RequestBody MsgCreateVO vo);
+
+    /**
+     * 创建待办
+     */
+    @PostMapping("/api/portal/v1/user/todo")
+    ApiResponse<Object> createTodo(@RequestBody TodoCreateVO vo);
 }

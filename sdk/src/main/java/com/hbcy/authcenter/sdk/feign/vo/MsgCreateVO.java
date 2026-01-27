@@ -1,0 +1,53 @@
+package com.hbcy.authcenter.sdk.feign.vo;
+
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import lombok.Data;
+
+import java.time.LocalDateTime;
+import java.util.Set;
+
+/**
+ * 发送用户消息
+ * @author 姚泰然
+ * @date 2026-01-27 08:57
+ */
+@Data
+public class MsgCreateVO {
+    /**
+     * 消息源应用
+     */
+    @NotBlank(message = "源应用id不能为空")
+    private String srcApp;
+    /**
+     * 消息源id
+     */
+    @NotBlank(message = "源消息id不能为空")
+    private String srcId;
+    /**
+     * 标题
+     */
+    @NotBlank(message = "标题不能为空")
+    private String title;
+    /**
+     * 内容
+     */
+    private String content;
+    /**
+     * 链接
+     */
+    private String link;
+    /**
+     * 消息类型：0-普通消息，1-预警消息
+     */
+    private int type;
+    /**
+     * 消息产生时间
+     */
+    private LocalDateTime createTime;
+    /**
+     * 目标用户
+     */
+    @NotEmpty(message = "目标用户不能为空")
+    private Set<String> targetUsers;
+}

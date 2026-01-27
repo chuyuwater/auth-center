@@ -11,7 +11,10 @@ import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 /**
+ * 用户消息
+ *
  * @author 姚泰然
+ * @module msg
  * @date 2026-01-27 09:52
  */
 @RestController

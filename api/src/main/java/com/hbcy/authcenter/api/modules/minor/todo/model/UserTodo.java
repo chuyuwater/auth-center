@@ -1,7 +1,6 @@
 package com.hbcy.authcenter.api.modules.minor.todo.model;
 
 import com.baomidou.mybatisplus.annotation.*;
-import com.hbcy.common.db.dictvalue.DictInject;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
@@ -63,7 +62,6 @@ public class UserTodo {
      * 处理状态，字典TODO_PROCESS_STATE
      */
     @TableField(value = "process_state")
-    @DictInject(value = "TODO_PROCESS_STATE")
     private Integer processState;
     /**
      * 待办类型，0-流程待办，1-任务待办
