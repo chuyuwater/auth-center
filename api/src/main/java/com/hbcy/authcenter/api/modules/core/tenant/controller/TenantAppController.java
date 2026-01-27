@@ -39,12 +39,12 @@ public class TenantAppController {
     }
 
     /**
-     * 批量授权应用
+     * 批量覆盖应用授权
      *
      * @param vo 授权信息
      */
-    @PostMapping("/batch")
-    public void batchCreate(@Valid @RequestBody TenantAppBatchGrantVO vo) {
+    @PostMapping("/overwrite")
+    public void overwrite(@Valid @RequestBody TenantAppBatchGrantVO vo) {
         tenantAppService.tryGrantApp(vo);
     }
 
