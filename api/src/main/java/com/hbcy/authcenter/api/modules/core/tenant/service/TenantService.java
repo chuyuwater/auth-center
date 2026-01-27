@@ -133,6 +133,8 @@ public class TenantService extends ServiceImpl<TenantMapper, Tenant> {
         if (tenant == null) {
             throw new ParamError("指定租户不存在");
         }
+        //NOTE: 这里如果修改了租户的名称和联系方式，租户的默认管理员id并不会变，还是原来的那个
+        //只有租户自己修改管理员才会生效
         BeanCopyUtils.copy(vo, tenant);
         tenant.setUpdateUser(UserContextUtils.getUserId());
         tenant.setUpdateTime(LocalDateTime.now());
