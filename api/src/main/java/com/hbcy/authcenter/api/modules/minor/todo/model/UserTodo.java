@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 
 /**
  * @author 姚泰然
- * @date 2026-01-27 10:18
+ * @date 2026-01-27 11:18
  */
 @Data
 @NoArgsConstructor
@@ -24,6 +24,7 @@ public class UserTodo {
     public static final String COL_TARGET_USER = "target_user";
     public static final String COL_SEND_TIME = "send_time";
     public static final String COL_PROCESS_STATE = "process_state";
+    public static final String COL_VIEW_STATE = "view_state";
     public static final String COL_TODO_TYPE = "todo_type";
     public static final String COL_RELATE_LINK = "relate_link";
     public static final String COL_ORIGIN_JSON = "origin_json";
@@ -63,6 +64,11 @@ public class UserTodo {
      */
     @TableField(value = "process_state")
     private Integer processState;
+    /**
+     * 0-未读，1-已读
+     */
+    @TableField(value = "view_state")
+    private Integer viewState;
     /**
      * 待办类型，0-流程待办，1-任务待办
      */

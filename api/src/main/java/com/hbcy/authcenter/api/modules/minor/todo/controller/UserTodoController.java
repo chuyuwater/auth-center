@@ -47,6 +47,16 @@ public class UserTodoController {
     }
 
     /**
+     * 批量标记待办为已读
+     *
+     * @param vo 操作参数
+     */
+    @PostMapping("/mark-as-read")
+    public void markAsRead(@Valid @RequestBody UserTodoBatchOpVO vo) {
+        userTodoService.batchMarkAsRead(vo);
+    }
+
+    /**
      * 更新待办状态
      * 供第三方系统调用
      * @param vo 操作参数

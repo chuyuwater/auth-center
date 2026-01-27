@@ -24,6 +24,10 @@ public class UserTodoQueryVO extends PageVO {
      */
     private Integer processState;
     /**
+     * 查看状态：0-未读，1-已读
+     */
+    private Integer viewState;
+    /**
      * 发送时间起始
      */
     private LocalDateTime sendTimeStart;

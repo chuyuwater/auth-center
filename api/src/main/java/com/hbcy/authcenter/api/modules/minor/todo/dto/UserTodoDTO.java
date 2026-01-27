@@ -43,6 +43,11 @@ public class UserTodoDTO {
     private Integer processState;
 
     /**
+     * 待办查看状态, 0-未读，1-已读
+     */
+    private Integer viewState;
+
+    /**
      * 待办类型
      */
     private Integer todoType;

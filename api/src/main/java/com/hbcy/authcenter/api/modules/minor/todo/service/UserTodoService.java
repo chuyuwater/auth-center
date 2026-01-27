@@ -45,6 +45,7 @@ public class UserTodoService extends ServiceImpl<UserTodoMapper, UserTodo> {
                     .setTodoContent(vo.getContent())
                     .setTargetUser(targetUser)
                     .setSendTime(sendTime)
+                    .setViewState(0)
                     .setProcessState(vo.getProcessState())
                     .setOriginJson(vo.getOriginJson())
                     .setTodoType(vo.getType())
@@ -73,5 +74,12 @@ public class UserTodoService extends ServiceImpl<UserTodoMapper, UserTodo> {
         baseMapper.delete(new UpdateWrapper<UserTodo>()
                 .eq(UserTodo.COL_TARGET_USER, UserContextUtils.getUserId())
                 .in(UserTodo.COL_ID, vo.getTodoIds()));
+    }
+
+    public void batchMarkAsRead(UserTodoBatchOpVO vo) {
+        baseMapper.update(new UpdateWrapper<UserTodo>()
+                .eq(UserTodo.COL_TARGET_USER, UserContextUtils.getUserId())
+                .in(UserTodo.COL_ID, vo.getTodoIds())
+                .set(UserTodo.COL_VIEW_STATE, 1));
     }
 }
