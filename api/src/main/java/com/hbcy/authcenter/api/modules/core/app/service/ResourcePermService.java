@@ -26,10 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -147,7 +144,13 @@ public class ResourcePermService extends ServiceImpl<ResourcePermMapper, Resourc
         List<ResourcePerm> exists = baseMapper.selectList(new QueryWrapper<ResourcePerm>()
                 .eq(ResourcePerm.COL_RES_ID, resId));
         Set<String> existsIds = exists.stream().map(ResourcePerm::getId).collect(Collectors.toSet());
-        Set<String> subIds = subPerms.stream().map(ResourcePermCreateVO::getId).collect(Collectors.toSet());
+        Set<String> subIds = new HashSet<>();
+        if (subPerms == null) {
+            subPerms = new ArrayList<>();
+        }
+        if (!subPerms.isEmpty()) {
+            subIds = subPerms.stream().map(ResourcePermCreateVO::getId).collect(Collectors.toSet());
+        }
         boolean isChanged = false;
         //计算出被删除的条目
         existsIds.removeAll(subIds);
