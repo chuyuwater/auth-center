@@ -5,6 +5,7 @@ import com.hbcy.authcenter.sdk.feign.dto.OrgNodeDTO;
 import com.hbcy.authcenter.sdk.feign.dto.SysDictDTO;
 import com.hbcy.authcenter.sdk.feign.vo.MsgCreateVO;
 import com.hbcy.authcenter.sdk.feign.vo.TodoCreateVO;
+import com.hbcy.authcenter.sdk.feign.vo.TodoUpdateVO;
 import com.hbcy.common.base.pojo.ApiResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
@@ -68,4 +69,10 @@ public interface AuthCenterClient {
      */
     @PostMapping("/api/portal/v1/user/todo")
     ApiResponse<Object> createTodo(@RequestBody TodoCreateVO vo);
+
+    /**
+     * 更新待办状态
+     */
+    @PostMapping("/api/portal/v1/user/todo/update-status")
+    ApiResponse<Object> updateTodoStatus(@RequestBody TodoUpdateVO vo);
 }

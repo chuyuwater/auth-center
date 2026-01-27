@@ -34,7 +34,7 @@ public class UserMsgQueryVO extends PageVO {
     /**
      * 消息类型
      */
-    private String msgType;
+    private Integer msgType;
     /**
      * 消息来源应用
      */

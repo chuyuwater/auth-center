@@ -1,18 +1,19 @@
-package com.hbcy.authcenter.api.modules.minor.todo.vo;
+package com.hbcy.authcenter.sdk.feign.vo;
 
-import com.hbcy.common.db.dictvalue.DictValid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 /**
  * @author 姚泰然
- * @date 2026-01-27
+ * @date 2026-01-27 10:58
  */
 @Data
-public class UserTodoUpdateStatusVO {
+public class TodoUpdateVO {
+    /**
+     * 处理状态，0-待办，2-已办，4-办结，8-抄送
+     */
     @NotNull(message = "处理状态不能为空")
-    @DictValid(dictKey = "TODO_PROCESS_STATE", message = "处理状态错误")
     private Integer processState;
     /**
      * 源系统
@@ -23,7 +24,6 @@ public class UserTodoUpdateStatusVO {
      */
     @NotBlank(message = "源待办id不能为空")
     private String srcId;
-
     /**
      * 更新了待办状态的用户
      */

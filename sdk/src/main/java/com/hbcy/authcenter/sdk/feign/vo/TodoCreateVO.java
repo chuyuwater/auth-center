@@ -43,7 +43,7 @@ public class TodoCreateVO {
      */
     private int type;
     /**
-     * 处理状态
+     * 处理状态，0-待办，2-已办，4-办结，8-抄送
      */
     @NotNull(message = "处理状态不能为空")
     private Integer processState;
