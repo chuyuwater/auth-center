@@ -3,6 +3,7 @@ package com.hbcy.authcenter.api.modules.core.tenant.service;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.github.f4b6a3.ulid.UlidCreator;
 import com.hbcy.authcenter.api.modules.core.app.dao.AppMapper;
 import com.hbcy.authcenter.api.modules.core.app.dao.ResourcePermMapper;
 import com.hbcy.authcenter.api.modules.core.app.dto.GrantAppDTO;
@@ -19,12 +20,14 @@ import com.hbcy.authcenter.api.modules.core.tenant.dao.TenantMapper;
 import com.hbcy.authcenter.api.modules.core.tenant.model.Tenant;
 import com.hbcy.authcenter.api.modules.core.tenant.model.TenantApp;
 import com.hbcy.authcenter.api.modules.core.tenant.model.TenantAppResource;
+import com.hbcy.authcenter.api.modules.core.tenant.vo.TenantAppBatchGrantVO;
 import com.hbcy.authcenter.api.modules.core.tenant.vo.TenantAppGrantStatusUpdateVO;
 import com.hbcy.authcenter.api.modules.core.tenant.vo.TenantAppGrantUpdateVO;
 import com.hbcy.authcenter.api.modules.core.tenant.vo.TenantAppGrantVO;
 import com.hbcy.authcenter.sdk.utils.UserContextUtils;
 import com.hbcy.common.base.error.ParamError;
 import com.hbcy.common.base.error.PermissionError;
+import com.hbcy.common.lock.service.RedissonDistributedLock;
 import jakarta.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.dao.DuplicateKeyException;
@@ -33,10 +36,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -47,6 +48,7 @@ import java.util.stream.Collectors;
  */
 @Service
 public class TenantAppService extends ServiceImpl<TenantAppMapper, TenantApp> {
+    public static final String GRANT_LOCK = "portal:tenant:app:grant:";
     @Resource
     private AppMapper appMapper;
     @Resource
@@ -59,6 +61,8 @@ public class TenantAppService extends ServiceImpl<TenantAppMapper, TenantApp> {
     private OrgTreeMapper orgTreeMapper;
     @Resource
     private TenantAppResourceMapper tenantAppResourceMapper;
+    @Resource
+    private RedissonDistributedLock redissonDistributedLock;
 
     private static List<TenantAppResource> genTenantAppResources(
             String appId, Set<String> permIds, String tenantId) {
@@ -94,16 +98,7 @@ public class TenantAppService extends ServiceImpl<TenantAppMapper, TenantApp> {
         if (tenant.getForbidden() == 1) {
             throw new ParamError("租户已被禁用");
         }
-        String currentBinding = app.getBindingTenant();
-        if (App.BINDING_PLACEHOLDER.equals(currentBinding)) {
-            //单租户应用绑定租户
-            app.setBindingTenant(tenantId);
-            app.setUpdateUser(UserContextUtils.getUserId());
-            app.setUpdateTime(LocalDateTime.now());
-            appMapper.updateById(app);
-        } else if (!"".equals(currentBinding) && !tenantId.equals(currentBinding)) {
-            throw new ParamError("单租户应用已绑定其他租户");
-        }
+        bindAppTenant(app, tenantId);
         TenantApp tenantApp = new TenantApp();
         tenantApp.setTenantId(tenantId);
         tenantApp.setAppId(vo.getAppId());
@@ -271,5 +266,85 @@ public class TenantAppService extends ServiceImpl<TenantAppMapper, TenantApp> {
         permUnitResourceMapper.delete(new QueryWrapper<PermUnitResource>()
                 .eq(PermUnitResource.COL_APP_ID, tenantApp.getAppId())
                 .eq(PermUnitResource.COL_TENANT_ID, tenantApp.getTenantId()));
+    }
+
+    private void bindAppTenant(App app, String tenantId) {
+        String currentBinding = app.getBindingTenant();
+        if (App.BINDING_PLACEHOLDER.equals(currentBinding)) {
+            //单租户应用绑定租户
+            app.setBindingTenant(tenantId);
+            app.setUpdateUser(UserContextUtils.getUserId());
+            app.setUpdateTime(LocalDateTime.now());
+            appMapper.updateById(app);
+        } else if (!"".equals(currentBinding) && !tenantId.equals(currentBinding)) {
+            throw new ParamError("单租户应用已绑定其他租户");
+        }
+    }
+
+    @Transactional
+    public void tryGrantApp(TenantAppBatchGrantVO vo) {
+        boolean ok = redissonDistributedLock.tryLock(GRANT_LOCK + vo.getTenantId(), TimeUnit.SECONDS, 5, 10);
+        if (!ok) {
+            throw new ParamError("其他人正在使用修改授权，请重试");
+        }
+        try {
+            batchGrantApp(vo);
+        } finally {
+            redissonDistributedLock.unlock(GRANT_LOCK + vo.getTenantId());
+        }
+    }
+
+    /**
+     * 批量授权时，授权全部权限
+     * @param vo 授权信息
+     */
+    private void batchGrantApp(TenantAppBatchGrantVO vo) {
+        String tenantId = vo.getTenantId();
+        List<App> appList = appMapper.selectList(new QueryWrapper<App>()
+                .eq(App.COL_FORBIDDEN, 0)
+                .in(App.COL_ID, vo.getAppIds()));
+        Map<String, App> appMap = appList.stream().collect(Collectors.toMap(App::getId, app -> app));
+        if (appList.size() < vo.getAppIds().size()) {
+            throw new ParamError("部分应用不存在或已被禁用");
+        }
+        Tenant tenant = tenantMapper.selectById(tenantId);
+        if (tenant.getForbidden() == 1) {
+            throw new ParamError("租户已被禁用");
+        }
+        Set<String> granted = baseMapper.selectList(new QueryWrapper<TenantApp>()
+                        .eq(TenantApp.COL_TENANT_ID, tenantId)).stream().map(TenantApp::getAppId)
+                .collect(Collectors.toSet());
+        //需要移除的授权
+        Set<String> toDeleteAppIds = new HashSet<>(granted);
+        toDeleteAppIds.removeAll(vo.getAppIds());
+        Set<String> toAddAppIds = new HashSet<>(vo.getAppIds());
+        toAddAppIds.removeAll(granted);
+        if (!toDeleteAppIds.isEmpty()) {
+            baseMapper.update(new UpdateWrapper<TenantApp>()
+                    .eq(TenantApp.COL_TENANT_ID, tenantId)
+                    .in(TenantApp.COL_APP_ID, toDeleteAppIds)
+                    .set(TenantApp.COL_UPDATE_USER, UserContextUtils.getUserId())
+                    .set(TenantApp.COL_DELETE_TIME, System.currentTimeMillis()));
+            tenantAppResourceMapper.delete(new QueryWrapper<TenantAppResource>()
+                    .eq(TenantAppResource.COL_TENANT_ID, tenantId)
+                    .in(TenantAppResource.COL_APP_ID, toDeleteAppIds));
+            permUnitResourceMapper.delete(new QueryWrapper<PermUnitResource>()
+                    .in(PermUnitResource.COL_APP_ID, toDeleteAppIds)
+                    .eq(PermUnitResource.COL_TENANT_ID, tenantId));
+        }
+        List<TenantApp> tenantApps = new ArrayList<>();
+        String userId = UserContextUtils.getUserId();
+        for (String appId : toAddAppIds) {
+            bindAppTenant(appMap.get(appId), tenantId);
+            TenantApp tenantApp = new TenantApp();
+            tenantApp.setId(UlidCreator.getUlid().toString());
+            tenantApp.setTenantId(tenantId);
+            tenantApp.setAppId(appId);
+            tenantApp.setOrgTree(OrgTree.ORG_ID_TEMPLATE.formatted(tenantId, 1));
+            tenantApp.setCreateUser(userId);
+            tenantApp.setUpdateUser(userId);
+            tenantApps.add(tenantApp);
+        }
+        baseMapper.insertIgnore(tenantApps);
     }
 }

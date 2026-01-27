@@ -71,5 +71,15 @@
             and app_id in (select app_id from app where app.delete_time = 0 and app.forbidden = 0)
         </if>
     </update>
+
+    <!--    TODO: MySQL only-->
+    <insert id="insertIgnore">
+        insert ignore into tenant_app (id, app_id, tenant_id, org_tree, grant_all, create_user, update_user)
+        values
+        <foreach collection="tenantApps" item="tenantApp" separator=",">
+            (#{tenantApp.id},#{tenantApp.appId}, #{tenantApp.tenantId}, #{tenantApp.orgTree}, 1,
+            #{tenantApp.createUser}, #{tenantApp.updateUser})
+        </foreach>
+    </insert>
 </mapper>
 

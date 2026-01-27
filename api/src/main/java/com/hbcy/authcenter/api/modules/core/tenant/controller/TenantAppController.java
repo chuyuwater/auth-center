@@ -2,6 +2,7 @@ package com.hbcy.authcenter.api.modules.core.tenant.controller;
 
 import com.hbcy.authcenter.api.modules.core.app.dto.GrantAppDTO;
 import com.hbcy.authcenter.api.modules.core.tenant.service.TenantAppService;
+import com.hbcy.authcenter.api.modules.core.tenant.vo.TenantAppBatchGrantVO;
 import com.hbcy.authcenter.api.modules.core.tenant.vo.TenantAppGrantUpdateVO;
 import com.hbcy.authcenter.api.modules.core.tenant.vo.TenantAppGrantVO;
 import com.hbcy.common.web.bean.NameFill;
@@ -35,6 +36,16 @@ public class TenantAppController {
     @PostMapping
     public void create(@RequestBody @Valid TenantAppGrantVO vo) {
         tenantAppService.grantApp(vo);
+    }
+
+    /**
+     * 批量授权应用
+     *
+     * @param vo 授权信息
+     */
+    @PostMapping("/batch")
+    public void batchCreate(@Valid @RequestBody TenantAppBatchGrantVO vo) {
+        tenantAppService.tryGrantApp(vo);
     }
 
     /**

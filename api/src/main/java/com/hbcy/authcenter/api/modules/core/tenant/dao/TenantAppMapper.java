@@ -39,4 +39,11 @@ public interface TenantAppMapper extends BaseMapper<TenantApp> {
     void switchTenantStatus(@Param("status") int status,
                             @Param("tenantId") String tenantId,
                             @Param("updateUser") String updateUser);
+
+    /**
+     * 批量授权
+     *
+     * @param tenantApps 关联关系
+     */
+    void insertIgnore(@Param("tenantApps") List<TenantApp> tenantApps);
 }
