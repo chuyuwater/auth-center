@@ -5,14 +5,12 @@ import com.google.common.collect.Lists;
 import com.hbcy.authcenter.api.common.constants.G;
 import com.hbcy.authcenter.api.common.enums.ClientTypeEnum;
 import com.hbcy.authcenter.api.common.enums.OrgNodeCategoryEnum;
-import com.hbcy.authcenter.api.common.enums.OrgNodeTypeEnum;
 import com.hbcy.authcenter.api.common.enums.ResourceShowLevelEnum;
 import com.hbcy.authcenter.api.modules.core.app.dao.ResourceTreeMapper;
 import com.hbcy.authcenter.api.modules.core.app.model.ResourceTree;
 import com.hbcy.authcenter.api.modules.core.org.dao.OrgTreeMapper;
 import com.hbcy.authcenter.api.modules.core.org.model.OrgTree;
 import com.hbcy.authcenter.api.modules.core.org.service.OrgTreeService;
-import com.hbcy.authcenter.api.modules.core.org.vo.OrgTreeQueryVO;
 import com.hbcy.authcenter.api.modules.core.perm.dao.PermUnitUserMapper;
 import com.hbcy.authcenter.api.modules.core.tenant.dao.TenantAppMapper;
 import com.hbcy.authcenter.api.modules.core.tenant.dao.TenantAppResourceMapper;
@@ -146,28 +144,51 @@ public class ClientRenderService {
         if (CollectionUtils.isEmpty(userOrgs)) {
             return List.of();
         }
-        Map<String, UserOrgDTO> orgDTOMap = new HashMap<>();
-        Set<String> orgIds = new HashSet<>();
-        for (UserOrgDTO userOrg : userOrgs) {
-            orgDTOMap.put(userOrg.getOrgId(), userOrg);
-            orgIds.add(userOrg.getOrgId());
+        if (userOrgs.size() == 1) {
+            return List.of(new TreeNode<>(userOrgs.get(0)));
         }
-        OrgTreeQueryVO vo = new OrgTreeQueryVO();
-        vo.setNodeType(OrgNodeTypeEnum.ORG.getValue());
-        vo.setNodeIds(orgIds);
-        vo.setForbidden(0);
-        TreeNode<OrgTree> tree = orgTreeService.listOrgTreeRecursively(vo);
-        TreeNode<UserOrgDTO> resp = new TreeNode<>();
-        buildTree(tree, resp, orgDTOMap);
-        return resp.getChildren();
+        //将列表转成树状结构
+        return buildTree(userOrgs);
     }
 
-    private void buildTree(TreeNode<OrgTree> srcTree, TreeNode<UserOrgDTO> root, Map<String, UserOrgDTO> orgDTOMap) {
-        for (TreeNode<OrgTree> srcNode : srcTree.getChildren()) {
-            UserOrgDTO userOrg = orgDTOMap.get(srcNode.getData().getId());
-            TreeNode<UserOrgDTO> childNode = new TreeNode<>(userOrg);
-            root.addChild(childNode);
-            buildTree(srcNode, childNode, orgDTOMap);
+    public List<TreeNode<UserOrgDTO>> buildTree(List<UserOrgDTO> nodes) {
+        if (nodes == null || nodes.isEmpty()) return new ArrayList<>();
+
+        // 1. 建立路径与 Tree 节点的映射
+        Map<String, TreeNode<UserOrgDTO>> treeMap = new HashMap<>();
+        for (UserOrgDTO node : nodes) {
+            treeMap.put(node.getIdPath(), new TreeNode<>(node));
         }
+        List<TreeNode<UserOrgDTO>> roots = new ArrayList<>();
+        // 2. 再次遍历，组装父子关系
+        for (UserOrgDTO node : nodes) {
+            String currentPath = node.getIdPath();
+            TreeNode<UserOrgDTO> currentTree = treeMap.get(currentPath);
+            String parentPath = getClosestAncestorPath(currentPath, treeMap);
+
+            if (parentPath != null) {
+                treeMap.get(parentPath).addChild(currentTree);
+            } else {
+                roots.add(currentTree);
+            }
+        }
+        return roots;
+    }
+
+    /**
+     * 核心逻辑：向上回溯寻找最近的祖先路径
+     */
+    private String getClosestAncestorPath(String path, Map<String, TreeNode<UserOrgDTO>> treeMap) {
+        String tempPath = path;
+        while (tempPath.contains("/")) {
+            // 截掉最后一级，例如 "a/b/c" -> "a/b"
+            tempPath = tempPath.substring(0, tempPath.lastIndexOf("/"));
+            // 如果截取后的路径在 Map 中存在，说明找到了最近的“活”祖先
+            if (treeMap.containsKey(tempPath)) {
+                return tempPath;
+            }
+            // 如果不存在，继续 While 循环往上找，直到找不到 "/"
+        }
+        return null;
     }
 }

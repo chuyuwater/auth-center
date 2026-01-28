@@ -54,12 +54,6 @@
             and id_path like concat(#{parentIdPath}, '%')
             and delete_time = 0
             <if test="vo != null">
-                <if test="vo.nodeIds != null and vo.nodeIds.size() != 0">
-                    and id in
-                    <foreach collection="vo.nodeIds" item="nodeId" open="(" close=")" separator=",">
-                        #{nodeId}
-                    </foreach>
-                </if>
                 <if test="vo.nodeType != null">
                     and node_type = #{vo.nodeType}
                 </if>

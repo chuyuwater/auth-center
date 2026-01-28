@@ -1,9 +1,6 @@
 package com.hbcy.authcenter.api.modules.core.org.vo;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
-
-import java.util.Set;
 
 /**
  * 组织节点查询VO
@@ -37,11 +34,4 @@ public class OrgTreeQueryVO {
      * 关键字
      */
     private String keyword;
-    /**
-     * 仅包含以下节点
-     * 内部使用
-     */
-    @JsonIgnore
-    private Set<String> nodeIds;
-
 }
