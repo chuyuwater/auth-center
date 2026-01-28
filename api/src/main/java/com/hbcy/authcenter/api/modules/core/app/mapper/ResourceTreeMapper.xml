@@ -172,7 +172,7 @@
     </select>
 
     <select id="getMaxChildShowOrder" resultType="java.lang.Integer">
-        select max(show_order)
+        select COALESCE(MAX(show_order), 0)
         from resource_tree
         where parent_id = #{parentId}
         and app_id = #{appId}

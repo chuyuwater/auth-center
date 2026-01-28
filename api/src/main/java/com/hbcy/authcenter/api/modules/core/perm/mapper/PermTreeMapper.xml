@@ -70,7 +70,7 @@
     </update>
 
     <select id="getChildMaxShowOrder" resultType="java.lang.Integer">
-        select max(show_order)
+        select COALESCE(MAX(show_order), 0)
         from perm_tree
         where tenant_id = #{tenantId} and parent_id = #{parentId}
     </select>

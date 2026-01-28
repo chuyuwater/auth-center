@@ -137,7 +137,7 @@
     </select>
 
     <select id="getChildMaxShowOrder" resultType="int">
-        select max(show_order)
+        select COALESCE(MAX(show_order), 0)
         from org_tree
         where parent_id = #{parentId}
         and tenant_id = #{tenantId}

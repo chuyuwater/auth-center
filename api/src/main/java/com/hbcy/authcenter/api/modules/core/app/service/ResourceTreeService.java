@@ -131,7 +131,7 @@ public class ResourceTreeService extends ServiceImpl<ResourceTreeMapper, Resourc
             //父节点被移动
             ResourceTree newParent = checkNewParent(entity, vo.getParentId());
             updateChildrenPath(entity, newParent);
-            entity.setShowOrder(baseMapper.getMaxChildShowOrder(entity.getAppId(), newParent.getId()) + 1);
+            entity.setShowOrder(baseMapper.getMaxChildShowOrder(entity.getAppId(), vo.getParentId()) + 1);
         }
         BeanCopyUtils.copy(vo, entity);
         entity.setUpdateTime(LocalDateTime.now());
