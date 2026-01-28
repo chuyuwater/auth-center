@@ -42,6 +42,7 @@ public interface AuthCenterClient {
 
     /**
      * 获取组织节点详情
+     * 建议缓存
      * @param id 节点ID
      * @return 节点信息
      */

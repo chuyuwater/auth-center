@@ -9,6 +9,9 @@ import lombok.Data;
  */
 @Data
 public class OrgNodeDTO {
+    public static final int TYPE_ORG = 0;
+    public static final int TYPE_DEP = 1;
+    public static final int CATEGORY_PROJECT = 0;
     /**
      * 组织/部门id
      * 组织id内有"-ORG-"，部门id内有"-DEP-"
@@ -35,7 +38,7 @@ public class OrgNodeDTO {
      */
     private Integer existType;
     /**
-     * 类别，组织：0-项目部，1-公司，2-分公司，3-子公司
+     * 类别，组织：0-项目部，其他：字典ORG_CATEGORY
      */
     private Integer nodeCategory;
     /**
