@@ -21,10 +21,12 @@ public interface UserOrgMapper extends BaseMapper<UserOrg> {
      *
      * @param userIds  用户id
      * @param onlyMain 仅需要主职单位
+     * @param forbidden 组织是否禁用
      * @return 用户任职信息
      */
     List<UserOrgDTO> listUserOrgs(@Param("userIds") Collection<String> userIds,
-                                  @Param("onlyMain") boolean onlyMain);
+                                  @Param("onlyMain") boolean onlyMain,
+                                  @Param("forbidden") Integer forbidden);
 
     /**
      * 查询用户的主要任职组织

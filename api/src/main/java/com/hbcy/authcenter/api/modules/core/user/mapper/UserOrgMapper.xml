@@ -16,7 +16,15 @@
     </resultMap>
     <sql id="Base_Column_List">
         <!--@mbg.generated-->
-        id, user_id, org_id, node_id, tenant_id, create_user, update_user, create_time, update_time
+        id,
+        user_id,
+        org_id,
+        node_id,
+        tenant_id,
+        create_user,
+        update_user,
+        create_time,
+        update_time
     </sql>
 
     <select id="listUserOrgs" resultType="com.hbcy.authcenter.api.modules.core.user.dto.UserOrgDTO">
@@ -34,10 +42,20 @@
             group by user_id, org_id, main_job
         </where>
         )
-        select temp.user_id, temp.org_id, temp.main_job, o.node_name as org_name, o.id_path, o.node_category
+        select temp.user_id,
+        temp.org_id,
+        temp.main_job,
+        o.forbidden as org_forbidden,
+        o.node_name as org_name,
+        o.id_path,
+        o.node_category
         from temp
         join org_tree o on temp.org_id = o.id
-        where o.forbidden = 0
+        <where>
+            <if test="forbidden != null">
+                o.forbidden = #{forbidden}
+            </if>
+        </where>
     </select>
 
     <update id="updateMainJob">
@@ -56,7 +74,9 @@
     </update>
 
     <select id="listAllOrg" resultType="java.lang.String">
-        select distinct org_id from user_org where user_id= #{userId}
+        select distinct org_id
+        from user_org
+        where user_id = #{userId}
     </select>
 
     <select id="queryMainOrg" resultType="java.lang.String">

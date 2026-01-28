@@ -140,7 +140,7 @@ public class ClientRenderService {
 
     public List<TreeNode<UserOrgDTO>> listUserOrgTree() {
         List<UserOrgDTO> userOrgs = userOrgMapper.listUserOrgs(
-                List.of(UserContextUtils.getUserId()), false);
+                List.of(UserContextUtils.getUserId()), false, 0);
         if (CollectionUtils.isEmpty(userOrgs)) {
             return List.of();
         }

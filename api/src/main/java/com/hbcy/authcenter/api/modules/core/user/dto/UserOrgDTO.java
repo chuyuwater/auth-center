@@ -28,6 +28,10 @@ public class UserOrgDTO {
      */
     private String idPath;
     /**
+     * 组织是否被禁用
+     */
+    private Integer orgForbidden;
+    /**
      * 全路径（名字）
      */
     private String namePath;

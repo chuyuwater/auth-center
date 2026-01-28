@@ -111,11 +111,11 @@ public class UserOrgService extends ServiceImpl<UserOrgMapper, UserOrg> {
     }
 
     public List<UserOrgDTO> listUserOrgs(Collection<String> userIds, boolean onlyMain) {
-        return baseMapper.listUserOrgs(userIds, onlyMain);
+        return baseMapper.listUserOrgs(userIds, onlyMain, null);
     }
 
     public List<UserOrgDTO> listUserOrgs(Collection<String> userIds) {
-        return baseMapper.listUserOrgs(userIds, false);
+        return baseMapper.listUserOrgs(userIds, false, null);
     }
 
     /**
