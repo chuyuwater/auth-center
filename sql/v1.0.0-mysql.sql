@@ -307,15 +307,15 @@ create table if not exists sys_user
     create_user   char(26)     default '0'               not null,
     update_user   char(26)     default '0'               not null,
     constraint ux_sys_user_src_id
-        unique (src_type, src_id, tenant_id),
+        unique (src_type, src_id, tenant_id, delete_time),
     constraint ux_sys_user_tenant_account
-        unique (account, tenant_id),
+        unique (account, tenant_id, delete_time),
     constraint ux_sys_user_tenant_email
-        unique (email, tenant_id),
+        unique (email, tenant_id, delete_time),
     constraint ux_sys_user_tenant_phone
-        unique (phone, tenant_id),
+        unique (phone, tenant_id, delete_time),
     constraint ux_sys_user_tenant_wecom
-        unique (tenant_id, wecom_id)
+        unique (tenant_id, wecom_id, delete_time)
 );
 
 create table if not exists tenant
@@ -354,7 +354,7 @@ create table if not exists tenant_app
     create_user char(26)    default ''                not null,
     update_user char(26)    default ''                not null,
     constraint ux_tenant_app
-        unique (app_id, tenant_id)
+        unique (app_id, tenant_id, delete_time)
 );
 
 create table if not exists tenant_app_resource
@@ -388,6 +388,55 @@ create table if not exists user_org
     constraint ux_user_org_user_dept
         unique (user_id, node_id)
 );
+
+create table if not exists user_inbox
+(
+    id          char(26)                               not null
+        primary key,
+    src_id      varchar(100)                           not null comment '源消息id，用来去重',
+    src_app     varchar(20)                            not null comment '源应用id',
+    msg_title   varchar(200)                           not null comment '消息标题',
+    msg_content varchar(700) default ''                not null comment '消息内容',
+    target_user char(26)                               not null comment '目标用户',
+    send_time   datetime                               not null comment '发送时间',
+    view_status tinyint      default 0                 not null comment '0-未读，1-已读',
+    msg_type    tinyint      default 0                 not null comment '0-普通消息，1-预警消息',
+    relate_link varchar(256) default ''                not null comment '跳转链接',
+    origin_json text                                   null comment '原始报文',
+    create_time datetime     default CURRENT_TIMESTAMP not null,
+    constraint ux_user_inbox_target_src
+        unique (src_app, src_id, target_user)
+)
+    comment '站内信';
+
+create table if not exists user_todo
+(
+    id            char(26)                               not null
+        primary key,
+    src_app       varchar(20)                            not null comment '源app id',
+    src_id        varchar(100)                           not null comment '源id，用于去重',
+    todo_title    varchar(300)                           not null comment '待办标题',
+    todo_content  varchar(700)                           null comment '待办内容',
+    target_user   char(26)                               not null comment '关联用户',
+    send_time     datetime                               not null,
+    process_state tinyint      default 0                 not null comment '处理状态，字典TODO_PROCESS_STATE',
+    view_state    tinyint      default 0                 not null comment '0-未读，1-已读',
+    todo_type     tinyint      default 0                 not null comment '待办类型，0-流程待办，1-任务待办',
+    relate_link   varchar(255) default ''                not null comment '关联链接',
+    origin_json   text                                   null comment '用于调试',
+    create_time   datetime     default CURRENT_TIMESTAMP not null,
+    update_time   datetime     default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP,
+    constraint ux_user_todo_target_src
+        unique (src_app, src_id, target_user)
+);
+
+create index ix_user_todo_title
+    on user_todo (todo_title);
+
+create index ix_user_todo_user_time_status
+    on user_todo (target_user, view_state, process_state, todo_type);
+
+
 
 create index ix_user_org_main_job
     on user_org (org_id, tenant_id, main_job);
@@ -508,6 +557,35 @@ INSERT INTO portal_auth_center.sys_dict (id, app_id, feat_code, value_str, value
 VALUES ('01KFMAS9WS88ZFZRHB83ZTEZ78', 'portal', 'EMPLOYEE_TYPE', '4', '外部单位人员', 0, '01KFM9R6GS6BA56YYC2FFEH757',
         '01KFM9R6GS6BA56YYC2FFEH757/01KFMAS9WS88ZFZRHB83ZTEZ78', 0, '', 0, '0', '0', '2026-01-23 10:29:34',
         '2026-01-23 10:29:52', 0);
+INSERT INTO portal_auth_center.sys_dict (id, app_id, feat_code, value_str, value_cn, dict_type, parent_id, id_path,
+                                         show_order, memo, forbidden, create_user, update_user, create_time,
+                                         update_time, delete_time)
+VALUES ('01KFYM0AV5ED1X686525888CZS', 'portal', '', 'TODO_PROCESS_STATE', '待办处理状态', 0, '',
+        '01KFYM0AV5ED1X686525888CZS', 0, '', 0, '0', '0', '2026-01-27 10:21:44', '2026-01-27 10:21:44', 0);
+INSERT INTO portal_auth_center.sys_dict (id, app_id, feat_code, value_str, value_cn, dict_type, parent_id, id_path,
+                                         show_order, memo, forbidden, create_user, update_user, create_time,
+                                         update_time, delete_time)
+VALUES ('01KFYM40NPEER546ZZZKT96W7N', 'portal', 'TODO_PROCESS_STATE', '0', '待办', 0, '01KFYM0AV5ED1X686525888CZS',
+        '01KFYM0AV5ED1X686525888CZS/01KFYM40NPEER546ZZZKT96W7N', 0, '', 0, '0', '0', '2026-01-27 10:23:02',
+        '2026-01-27 10:23:02', 0);
+INSERT INTO portal_auth_center.sys_dict (id, app_id, feat_code, value_str, value_cn, dict_type, parent_id, id_path,
+                                         show_order, memo, forbidden, create_user, update_user, create_time,
+                                         update_time, delete_time)
+VALUES ('01KFYM46Y3EHDBQNR8DWN0MZ51', 'portal', 'TODO_PROCESS_STATE', '2', '已办', 0, '01KFYM0AV5ED1X686525888CZS',
+        '01KFYM0AV5ED1X686525888CZS/01KFYM46Y3EHDBQNR8DWN0MZ51', 0, '', 0, '0', '0', '2026-01-27 10:23:02',
+        '2026-01-27 10:23:02', 0);
+INSERT INTO portal_auth_center.sys_dict (id, app_id, feat_code, value_str, value_cn, dict_type, parent_id, id_path,
+                                         show_order, memo, forbidden, create_user, update_user, create_time,
+                                         update_time, delete_time)
+VALUES ('01KFYM4ANAKN48HNKKFDMRB22J', 'portal', 'TODO_PROCESS_STATE', '4', '办结', 0, '01KFYM0AV5ED1X686525888CZS',
+        '01KFYM0AV5ED1X686525888CZS/01KFYM4ANAKN48HNKKFDMRB22J', 0, '', 0, '0', '0', '2026-01-27 10:23:02',
+        '2026-01-27 10:23:02', 0);
+INSERT INTO portal_auth_center.sys_dict (id, app_id, feat_code, value_str, value_cn, dict_type, parent_id, id_path,
+                                         show_order, memo, forbidden, create_user, update_user, create_time,
+                                         update_time, delete_time)
+VALUES ('01KFYM4E91TFYAFSP6CFMP3A9Z', 'portal', 'TODO_PROCESS_STATE', '8', '抄送', 0, '01KFYM0AV5ED1X686525888CZS',
+        '01KFYM0AV5ED1X686525888CZS/01KFYM4E91TFYAFSP6CFMP3A9Z', 0, '', 0, '0', '0', '2026-01-27 10:23:02',
+        '2026-01-27 10:23:02', 0);
 
 
 INSERT INTO `app`
