@@ -255,7 +255,11 @@ public class OrgTreeService extends ServiceImpl<OrgTreeMapper, OrgTree> {
                 ids.addAll(Splitter.on(G.ID_PATH_SPLITTER).splitToList(orgTree.getIdPath()));
             }
             ids.remove(tenantRootId());
-            orgTrees = baseMapper.selectByIds(ids);
+            if (ids.isEmpty()) {
+                orgTrees = new ArrayList<>();
+            } else {
+                orgTrees = baseMapper.selectByIds(ids);
+            }
         }
         //fill user
         Set<String> userIds = orgTrees.stream().map(OrgTree::getCreateUser).collect(Collectors.toSet());
