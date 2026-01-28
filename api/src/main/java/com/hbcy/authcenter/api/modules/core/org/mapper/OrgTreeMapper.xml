@@ -14,6 +14,7 @@
         <result column="parent_id" jdbcType="VARCHAR" property="parentId"/>
         <result column="id_path" jdbcType="VARCHAR" property="idPath"/>
         <result column="show_order" jdbcType="INTEGER" property="showOrder"/>
+        <result column="forbidden" jdbcType="TINYINT" property="forbidden"/>
         <result column="tenant_id" jdbcType="VARCHAR" property="tenantId"/>
         <result column="relate_id" jdbcType="VARCHAR" property="relateId"/>
         <result column="delete_time" jdbcType="BIGINT" property="deleteTime"/>
@@ -34,6 +35,7 @@
         parent_id,
         id_path,
         show_order,
+        forbidden,
         tenant_id,
         relate_id,
         delete_time,
@@ -52,11 +54,20 @@
             and id_path like concat(#{parentIdPath}, '%')
             and delete_time = 0
             <if test="vo != null">
+                <if test="vo.nodeIds != null and vo.nodeIds.size() != 0">
+                    and id in
+                    <foreach collection="vo.nodeIds" item="nodeId" open="(" close=")" separator=",">
+                        #{nodeId}
+                    </foreach>
+                </if>
                 <if test="vo.nodeType != null">
                     and node_type = #{vo.nodeType}
                 </if>
                 <if test="vo.nodeCategory != null">
                     and node_category = #{vo.nodeCategory}
+                </if>
+                <if test="vo.forbidden != null">
+                    and forbidden = #{vo.forbidden}
                 </if>
                 <if test="vo.keyword != null">
                     and (node_name like concat('%', #{vo.keyword}, '%')
@@ -64,7 +75,6 @@
                 </if>
             </if>
         </where>
-        order by id desc
     </select>
 
     <insert id="append">

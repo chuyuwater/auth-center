@@ -32,7 +32,7 @@ public class UserOrgDTO {
      */
     private String namePath;
     /**
-     * 组织类别
+     * 组织类别，字典：ORG_CATEGORY
      */
     @DictInject(value = "ORG_CATEGORY")
     private Integer nodeCategory;

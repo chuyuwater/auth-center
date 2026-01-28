@@ -37,6 +37,7 @@
         select temp.user_id, temp.org_id, temp.main_job, o.node_name as org_name, o.id_path, o.node_category
         from temp
         join org_tree o on temp.org_id = o.id
+        where o.forbidden = 0
     </select>
 
     <update id="updateMainJob">
@@ -60,9 +61,11 @@
 
     <select id="queryMainOrg" resultType="java.lang.String">
         select org_id
-        from user_org
-        where user_id = #{userId}
-        and main_job = 1
+        from user_org uo
+        join org_tree o on uo.org_id = o.id
+        where uo.user_id = #{userId}
+        and uo.main_job = 1
+        and o.forbidden = 0
         limit 1
     </select>
 </mapper>

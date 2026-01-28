@@ -11,6 +11,7 @@ import com.hbcy.authcenter.api.common.enums.OrgNodeCategoryEnum;
 import com.hbcy.authcenter.api.common.enums.OrgNodeTypeEnum;
 import com.hbcy.authcenter.api.modules.core.org.dao.OrgTreeMapper;
 import com.hbcy.authcenter.api.modules.core.org.model.OrgTree;
+import com.hbcy.authcenter.api.modules.core.org.vo.OrgSwitchStatusVO;
 import com.hbcy.authcenter.api.modules.core.org.vo.OrgTreeCreateVO;
 import com.hbcy.authcenter.api.modules.core.org.vo.OrgTreeQueryVO;
 import com.hbcy.authcenter.api.modules.core.org.vo.OrgTreeUpdateVO;
@@ -46,9 +47,9 @@ public class OrgTreeService extends ServiceImpl<OrgTreeMapper, OrgTree> {
     public static final String BIZ_KEY = "portal:orgtree:tenant:%s:%d:";
     public static final String NAME_CACHE_KEY = "portal:orgtree:name:%s";
     /**
-     * 节点类型规则
+     * 节点类型规则，key：父节点，value：允许的子节点类型
      */
-    public static final Map<Integer, Set<Integer>> ALLOW_PARENT_NODE_TYPE = Map.of(
+    public static final Map<Integer, Set<Integer>> ALLOW_CHILD_NODE_TYPE = Map.of(
             OrgNodeTypeEnum.ORG.getValue(), Set.of(OrgNodeTypeEnum.ORG.getValue(), OrgNodeTypeEnum.DEPT.getValue()),
             OrgNodeTypeEnum.DEPT.getValue(), Set.of(OrgNodeTypeEnum.DEPT.getValue())
     );
@@ -115,7 +116,7 @@ public class OrgTreeService extends ServiceImpl<OrgTreeMapper, OrgTree> {
             }
             return;
         }
-        if (!ALLOW_PARENT_NODE_TYPE.getOrDefault(parent.getNodeType(), Set.of()).contains(node.getNodeType())) {
+        if (!ALLOW_CHILD_NODE_TYPE.getOrDefault(parent.getNodeType(), Set.of()).contains(node.getNodeType())) {
             throw new ParamError("父节点类型不允许挂载该节点类型");
         }
         //项目部下面不能挂其他组织
@@ -322,6 +323,7 @@ public class OrgTreeService extends ServiceImpl<OrgTreeMapper, OrgTree> {
                 .eq(OrgTree.COL_TENANT_ID, UserContextUtils.getTenantId())
                 .eq(vo.getNodeType() != null, OrgTree.COL_NODE_TYPE, vo.getNodeType())
                 .eq(vo.getNodeCategory() != null, OrgTree.COL_NODE_CATEGORY, vo.getNodeCategory())
+                .eq(vo.getForbidden() != null, OrgTree.COL_FORBIDDEN, vo.getForbidden())
                 .and(StringUtils.isNotBlank(vo.getKeyword()),
                         qw -> qw.like(OrgTree.COL_NODE_NAME, vo.getKeyword()).or()
                                 .like(OrgTree.COL_SHORT_NAME, vo.getKeyword()))
@@ -451,5 +453,30 @@ public class OrgTreeService extends ServiceImpl<OrgTreeMapper, OrgTree> {
     public Map<String, String> getOrgNameMap(Set<String> orgIds, boolean useFullName) {
         List<NamedId> namedIds = baseMapper.selectNameByIds(orgIds, useFullName);
         return namedIds.stream().collect(Collectors.toMap(NamedId::getItemId, NamedId::getItemName));
+    }
+
+    //禁用组织对权限不造成影响
+    @Transactional(rollbackFor = Exception.class)
+    public void switchStatus(OrgSwitchStatusVO vo) {
+        String rootId = tenantRootId();
+        if (vo.getNodeId().equals(rootId)) {
+            throw new ParamError("禁止操作根节点");
+        }
+        OrgTree node = baseMapper.selectById(vo.getNodeId());
+        if (node == null) {
+            throw new ParamError("节点不存在");
+        }
+        if (!node.getTenantId().equals(UserContextUtils.getTenantId())) {
+            throw new PermissionError();
+        }
+        if (node.getForbidden().equals(vo.getForbidden())) {
+            return;
+        }
+        if (node.getParentId().equals(rootId)) {
+            throw new ParamError("无法禁用根组织");
+        }
+        baseMapper.update(new UpdateWrapper<OrgTree>()
+                .likeRight(OrgTree.COL_ID_PATH, node.getIdPath())
+                .set(OrgTree.COL_FORBIDDEN, vo.getForbidden()));
     }
 }

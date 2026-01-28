@@ -66,6 +66,7 @@ create table if not exists org_tree
     parent_id     varchar(50)  default ''                not null comment '父节点id',
     id_path       varchar(768) default ''                not null comment '全路径，方便查询',
     show_order    int          default 0                 not null,
+    forbidden     tinyint      default 0                 not null comment '0-启用，1-禁用',
     tenant_id     varchar(20)                            not null comment '租户id',
     relate_id     varchar(50)                            null comment '关联代码，如项目id、第三方平台id',
     delete_time   bigint       default 0                 not null comment '逻辑删除',

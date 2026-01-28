@@ -5,15 +5,20 @@ import com.google.common.collect.Lists;
 import com.hbcy.authcenter.api.common.constants.G;
 import com.hbcy.authcenter.api.common.enums.ClientTypeEnum;
 import com.hbcy.authcenter.api.common.enums.OrgNodeCategoryEnum;
+import com.hbcy.authcenter.api.common.enums.OrgNodeTypeEnum;
 import com.hbcy.authcenter.api.common.enums.ResourceShowLevelEnum;
 import com.hbcy.authcenter.api.modules.core.app.dao.ResourceTreeMapper;
 import com.hbcy.authcenter.api.modules.core.app.model.ResourceTree;
 import com.hbcy.authcenter.api.modules.core.org.dao.OrgTreeMapper;
 import com.hbcy.authcenter.api.modules.core.org.model.OrgTree;
+import com.hbcy.authcenter.api.modules.core.org.service.OrgTreeService;
+import com.hbcy.authcenter.api.modules.core.org.vo.OrgTreeQueryVO;
 import com.hbcy.authcenter.api.modules.core.perm.dao.PermUnitUserMapper;
 import com.hbcy.authcenter.api.modules.core.tenant.dao.TenantAppMapper;
 import com.hbcy.authcenter.api.modules.core.tenant.dao.TenantAppResourceMapper;
 import com.hbcy.authcenter.api.modules.core.tenant.model.TenantApp;
+import com.hbcy.authcenter.api.modules.core.user.dao.UserOrgMapper;
+import com.hbcy.authcenter.api.modules.core.user.dto.UserOrgDTO;
 import com.hbcy.authcenter.api.modules.minor.user.vo.OrderedMenuQueryVO;
 import com.hbcy.authcenter.sdk.utils.UserContextUtils;
 import com.hbcy.common.base.tree.TreeNode;
@@ -41,6 +46,10 @@ public class ClientRenderService {
     private OrgTreeMapper orgTreeMapper;
     @Resource
     private ResourceTreeMapper resourceTreeMapper;
+    @Resource
+    private OrgTreeService orgTreeService;
+    @Resource
+    private UserOrgMapper userOrgMapper;
 
     /**
      * 获取当前用户有权访问的一级菜单、二级菜单（移动端）
@@ -129,5 +138,36 @@ public class ClientRenderService {
             }
         }
         return root.getChildren();
+    }
+
+    public List<TreeNode<UserOrgDTO>> listUserOrgTree() {
+        List<UserOrgDTO> userOrgs = userOrgMapper.listUserOrgs(
+                List.of(UserContextUtils.getUserId()), false);
+        if (CollectionUtils.isEmpty(userOrgs)) {
+            return List.of();
+        }
+        Map<String, UserOrgDTO> orgDTOMap = new HashMap<>();
+        Set<String> orgIds = new HashSet<>();
+        for (UserOrgDTO userOrg : userOrgs) {
+            orgDTOMap.put(userOrg.getOrgId(), userOrg);
+            orgIds.add(userOrg.getOrgId());
+        }
+        OrgTreeQueryVO vo = new OrgTreeQueryVO();
+        vo.setNodeType(OrgNodeTypeEnum.ORG.getValue());
+        vo.setNodeIds(orgIds);
+        vo.setForbidden(0);
+        TreeNode<OrgTree> tree = orgTreeService.listOrgTreeRecursively(vo);
+        TreeNode<UserOrgDTO> resp = new TreeNode<>();
+        buildTree(tree, resp, orgDTOMap);
+        return resp.getChildren();
+    }
+
+    private void buildTree(TreeNode<OrgTree> srcTree, TreeNode<UserOrgDTO> root, Map<String, UserOrgDTO> orgDTOMap) {
+        for (TreeNode<OrgTree> srcNode : srcTree.getChildren()) {
+            UserOrgDTO userOrg = orgDTOMap.get(srcNode.getData().getId());
+            TreeNode<UserOrgDTO> childNode = new TreeNode<>(userOrg);
+            root.addChild(childNode);
+            buildTree(srcNode, childNode, orgDTOMap);
+        }
     }
 }

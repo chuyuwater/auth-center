@@ -32,6 +32,7 @@ public class OrgTree extends BaseEntity {
     public static final String COL_PARENT_ID = "parent_id";
     public static final String COL_ID_PATH = "id_path";
     public static final String COL_SHOW_ORDER = "show_order";
+    public static final String COL_FORBIDDEN = "forbidden";
     public static final String COL_TENANT_ID = "tenant_id";
     public static final String COL_RELATE_ID = "relate_id";
     public static final String COL_DELETE_TIME = "delete_time";
@@ -70,7 +71,7 @@ public class OrgTree extends BaseEntity {
     @TableField(value = "exist_type")
     private Integer existType;
     /**
-     * 类别，组织：0-项目部，1-公司，2-分公司，3-子公司
+     * 类别，组织：0-项目部，其他：字典ORG_CATEGORY
      */
     @TableField(value = "node_category")
     @DictInject(value = "ORG_CATEGORY")
@@ -87,6 +88,11 @@ public class OrgTree extends BaseEntity {
     private String idPath;
     @TableField(value = "show_order")
     private Integer showOrder;
+    /**
+     * 状态：0-正常，1-禁用
+     */
+    @TableField(value = "forbidden")
+    private Integer forbidden;
     /**
      * 租户id
      */

@@ -8,6 +8,7 @@ import com.hbcy.authcenter.api.modules.core.app.model.ResourceTree;
 import com.hbcy.authcenter.api.modules.core.perm.service.PermUnitResourceService;
 import com.hbcy.authcenter.api.modules.core.perm.service.PermUnitUserService;
 import com.hbcy.authcenter.api.modules.core.perm.vo.ClientResQueryVO;
+import com.hbcy.authcenter.api.modules.core.user.dto.UserOrgDTO;
 import com.hbcy.authcenter.api.modules.minor.user.service.ClientRenderService;
 import com.hbcy.authcenter.sdk.utils.UserContextUtils;
 import com.hbcy.common.base.tree.TreeNode;
@@ -68,6 +69,17 @@ public class ClientRenderController {
     @GetMapping("/entry")
     public List<TreeNode<ResourceTree>> entry(@NotNull(message = "clientType必须指定") Integer clientType) {
         return clientRenderService.listEntry(UserContextUtils.getUserId(), UserContextUtils.getUserOrg(), clientType);
+    }
+
+    /**
+     * 获取用户可以切换的组织
+     * 仅返回用户加入的组织级别数据，且移除了已被禁用的组织
+     *
+     * @return 组织树
+     */
+    @GetMapping("/orgTree")
+    public List<TreeNode<UserOrgDTO>> listOrgTree() {
+        return clientRenderService.listUserOrgTree();
     }
 
     /**

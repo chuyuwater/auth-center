@@ -126,7 +126,12 @@ public class UserAuthService {
         if (Integer.valueOf(1).equals(chosen.getForbidden())) {
             throw new AuthError("账号已被禁用，请联系管理员");
         }
-        // 执行登录
+        //主职组织
+        String orgId = userOrgMapper.queryMainOrg(chosen.getId());
+        if (StringUtils.isBlank(orgId)) {
+            throw new AuthError("您所在的组织已被禁用，请联系管理员！");
+        }
+        //执行登录
         StpUtil.login(chosen.getId(), new SaLoginParameter()
                 .setTimeout(authConfig.getTokenExpire().toSeconds())
                 .setActiveTimeout(authConfig.getTokenExpire().toSeconds())
@@ -134,7 +139,6 @@ public class UserAuthService {
         //将租户id保存到session中
         StpUtil.getSession(true).set(GatewayConstants.SESSION_TENANT_ID, chosen.getTenantId());
         SaTokenInfo tokenInfo = StpUtil.getTokenInfo();
-        String orgId = userOrgMapper.queryMainOrg(chosen.getId());
         Tenant tenant = tenantMapper.selectById(chosen.getTenantId());
         LoginRespDTO resp = new LoginRespDTO()
                 .setToken(tokenInfo.tokenValue)

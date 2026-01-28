@@ -80,7 +80,7 @@ public class InnerService {
         }
         //普通用户
         OrgTree org = orgTreeMapper.selectById(vo.getOrgId());
-        if (org == null) {
+        if (org == null || org.getForbidden() > 0) {
             refreshAppPerms(vo.getUserId(), vo.getOrgId(), resp);
             return;
         }
