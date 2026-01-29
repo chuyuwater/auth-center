@@ -65,6 +65,10 @@ public class UserQueryVO extends PageVO {
      * 默认简称
      */
     private boolean useFullName;
+    /**
+     * 用工形式，字典EMPLOYEE_TYPE
+     */
+    private Integer employeeType;
 
     /**
      * 后端填充

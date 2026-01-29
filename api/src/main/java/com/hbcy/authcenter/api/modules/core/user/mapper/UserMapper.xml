@@ -118,6 +118,9 @@
             <if test="vo.userId != null and vo.userId != ''">
                 and uo.user_id = #{vo.userId}
             </if>
+            <if test="vo.employeeType != null">
+                and u.employee_type = #{vo.employeeType}
+            </if>
         </where>
     </select>
 
@@ -164,6 +167,9 @@
             </if>
             <if test="vo.idPathPrefix != null and vo.idPathPrefix != ''">
                 and o.id_path like concat(#{vo.idPathPrefix}, '%')
+            </if>
+            <if test="vo.employeeType != null">
+                and u.employee_type = #{vo.employeeType}
             </if>
         </where>
     </select>
