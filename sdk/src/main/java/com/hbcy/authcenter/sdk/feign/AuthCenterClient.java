@@ -11,6 +11,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -48,6 +49,15 @@ public interface AuthCenterClient {
      */
     @GetMapping("/api/portal/v1/org/node/{id}")
     ApiResponse<OrgNodeDTO> getOrgNodeInfo(@PathVariable String id);
+
+    /**
+     * 获取组织（部门）名称
+     * @param orgIds 组织ID列表
+     * @param fullName 是否返回全称
+     * @return 组织id与名称的映射
+     */
+    @GetMapping("/inner/portal/v1/org/names")
+    ApiResponse<Map<String, String>> getOrgNames(@RequestParam List<String> orgIds, @RequestParam boolean fullName);
 
     /**
      * 分组下的字典项列表

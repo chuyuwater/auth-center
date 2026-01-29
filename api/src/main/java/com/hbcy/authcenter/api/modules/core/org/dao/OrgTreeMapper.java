@@ -7,8 +7,8 @@ import com.hbcy.common.web.api.NamedId;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 /**
  * @author 姚泰然
@@ -74,7 +74,7 @@ public interface OrgTreeMapper extends BaseMapper<OrgTree> {
      * @param useFullName 全称还是简称
      * @return 组织/部门名称
      */
-    List<NamedId> selectNameByIds(@Param("orgIds") Set<String> orgIds,
+    List<NamedId> selectNameByIds(@Param("orgIds") Collection<String> orgIds,
                                   @Param("useFullName") boolean useFullName);
 
     /**

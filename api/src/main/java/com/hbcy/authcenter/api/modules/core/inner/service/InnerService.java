@@ -15,6 +15,7 @@ import com.hbcy.authcenter.gateway.constants.GatewayConstants;
 import com.hbcy.authcenter.gateway.dto.ApiPermDTO;
 import com.hbcy.authcenter.gateway.vo.RefreshUserPermVO;
 import com.hbcy.common.redis.RedisExtendService;
+import com.hbcy.common.web.api.NamedId;
 import jakarta.annotation.Resource;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
@@ -120,5 +121,11 @@ public class InnerService {
         return tenants.stream()
                 .filter(tenant -> tenant.getAdminId() != null)
                 .collect(Collectors.toMap(Tenant::getId, Tenant::getAdminId));
+    }
+
+    public Map<String, String> getOrgNames(List<String> orgIds, boolean fullName) {
+        List<NamedId> namedIds = orgTreeMapper.selectNameByIds(orgIds, fullName);
+        return namedIds.stream()
+                .collect(Collectors.toMap(NamedId::getItemId, NamedId::getItemName));
     }
 }

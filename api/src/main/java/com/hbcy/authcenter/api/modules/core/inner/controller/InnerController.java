@@ -66,4 +66,12 @@ public class InnerController {
     public UserAccess checkUserAccess(@PathVariable String ak) {
         return userAccessService.checkUserAccess(ak);
     }
+
+    /**
+     * 获取组织id对应的组织名称
+     */
+    @GetMapping("/org/names")
+    public Map<String, String> getOrgNames(@RequestParam List<String> orgIds, boolean fullName) {
+        return innerService.getOrgNames(orgIds, fullName);
+    }
 }
