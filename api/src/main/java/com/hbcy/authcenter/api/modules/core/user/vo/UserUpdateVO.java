@@ -41,5 +41,5 @@ public class UserUpdateVO {
      * 用工类型，字典EMPLOYEE_TYPE
      **/
     @DictValid(dictKey = "EMPLOYEE_TYPE", message = "用工类型错误")
-    private int employeeType;
+    private Integer employeeType = 0;
 }
