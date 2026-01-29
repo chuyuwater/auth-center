@@ -491,9 +491,10 @@ public class UserService extends ServiceImpl<UserMapper, User> {
         //账号、手机号、邮箱都要验重
         List<User> existUsers = baseMapper.selectList(new QueryWrapper<User>()
                 .eq(User.COL_TENANT_ID, tenantId)
-                .and(qw -> qw.in(User.COL_ACCOUNT, accountSet).or()
-                        .in(User.COL_PHONE, phoneSet).or()
-                        .in(User.COL_EMAIL, emailSet)));
+                .and(qw -> qw
+                        .in(!accountSet.isEmpty(), User.COL_ACCOUNT, accountSet).or()
+                        .in(!phoneSet.isEmpty(), User.COL_PHONE, phoneSet).or()
+                        .in(!emailSet.isEmpty(), User.COL_EMAIL, emailSet)));
         if (!CollectionUtils.isEmpty(existUsers)) {
             StringBuilder sb = new StringBuilder();
             sb.append("以下手机号对应的用户已存在:");
