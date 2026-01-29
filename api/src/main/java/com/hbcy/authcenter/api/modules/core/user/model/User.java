@@ -92,6 +92,7 @@ public class User extends BaseEntity {
     private String srcId;
     /**
      * 用工类型，0-自有，1-派遣，2-外包，3-外部公司人员
+     * 允许为null
      */
     @TableField(value = "employee_type")
     @DictInject(value = "EMPLOYEE_TYPE")

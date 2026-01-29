@@ -1,6 +1,7 @@
 package com.hbcy.authcenter.api.modules.core.user.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -193,10 +194,16 @@ public class UserService extends ServiceImpl<UserMapper, User> {
         if (vo.getRealName() != null && !vo.getRealName().equals(user.getRealName())) {
             cleanNameCache(userId);
         }
-        BeanCopyUtils.copy(vo, user);
-        user.setUpdateUser(UserContextUtils.getUserId());
-        user.setUpdateTime(LocalDateTime.now());
-        updateById(user);
+        LambdaUpdateWrapper<User> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.eq(User::getId, userId);
+        updateWrapper.set(User::getRealName, vo.getRealName());
+        updateWrapper.set(User::getPhone, vo.getPhone());
+        updateWrapper.set(User::getEmail, vo.getEmail());
+        updateWrapper.set(User::getAvatar, vo.getAvatar());
+        updateWrapper.set(User::getEmployeeType, vo.getEmployeeType());
+        updateWrapper.set(User::getUpdateUser, UserContextUtils.getUserId());
+        updateWrapper.set(User::getUpdateTime, LocalDateTime.now());
+        baseMapper.update(updateWrapper);
     }
 
     public void deleteUser(String userId) {
