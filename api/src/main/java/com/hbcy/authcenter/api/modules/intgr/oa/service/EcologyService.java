@@ -283,7 +283,7 @@ public class EcologyService {
      * @param tenantId 楚禹公司在统一平台中的租户id
      */
     public Map<String, String> syncOrg(String oaOrgId, String tenantId) {
-        //oa的组织id与我方组织id的双向映射
+        //oa的组织id与我方组织id的映射（含部门）
         Map<String, String> oaId2Id = new HashMap<>();
         //目前已存在的，从OA同步的部门或子公司（排除项目部，项目部的relate_id是项目编号）
         //统一平台里面手动添加的忽略
@@ -356,11 +356,11 @@ public class EcologyService {
     /**
      * 从OA按组织同步人员
      * 1. 获取OA中全量的人员（包括关联的组织）
-     * 2. 根据OA的手机号查询统一平台人员，过滤出没有用户id的人，为这些人更新用户id（on duplicate key update的方式批量更新）
-     *    此时可以统计出本次同步影响的所有存量用户id（统一平台侧）
+     * 2. 根据OA的手机号查询统一平台人员，过滤出没有用户id的人，为这些人更新用户id（on duplicate key update的方式批量更新）,
+     * 注意OA中兼职和主职使用不同的userId，此时可以统计出本次同步影响的所有存量用户id（统一平台侧）
      * 3. 以insert...on duplicate update的方式插入人员，如果存在则更新手机号或其他字段(此时冲突的就是用户id了）
      * 4. 逻辑删除oa中不存在的且src_id不为空人员，以及授权
-     * 5. 删除2中存量用户的任职关系(main_job=1)，然后在user_org中以insert ignore的方式批量插入用户与部门的关联关系
+     * 5. 删除2中存量用户的任职关系(main_job=1)，然后在user_org中以insert ignore的方式批量插入用户与组织的关联关系
      *
      * @param oaOrgId 楚禹公司在OA的组织id
      * @param tenantId 楚禹公司在统一平台的租户id
@@ -391,12 +391,33 @@ public class EcologyService {
         if (personList == null || !personList.getStatus()) {
             throw new ServerError("获取OA用户失败");
         }
+        //将子账号的信息更新为主账号的
+        Map<String, OaPersonDTO> oaIdPersonMap = personList.getDatas().stream().collect(
+                Collectors.toMap(OaPersonDTO::getId, dto -> dto));
+        for (OaPersonDTO data : personList.getDatas()) {
+            //子账号使用主账号的手机号
+            if (StringUtils.isNotBlank(data.getBelongto())) {
+                OaPersonDTO main = oaIdPersonMap.get(data.getBelongto());
+                if (main != null) {
+                    data.setMobile(main.getId());
+                    data.setEmail(main.getEmail());
+                } else {
+                    data.setMobile(null);
+                    data.setEmail(null);
+                }
+            }
+        }
         //FIXME: 领导班子手机号脱敏了，需要想办法拿到完整的手机号
         personList.getDatas().removeIf(
                 dto -> StringUtils.isBlank(dto.getMobile()) || dto.getMobile().contains("*"));
         Map<String, String> phoneSrcIdMap = new HashMap<>();
         for (OaPersonDTO dto : personList.getDatas()) {
-            phoneSrcIdMap.put(dto.getMobile(), dto.getId());
+            if (phoneSrcIdMap.containsKey(dto.getMobile())) {
+                //主子账号使用不同的用户id，需要合并
+                phoneSrcIdMap.put(dto.getMobile(), phoneSrcIdMap.get(dto.getMobile()) + "," + dto.getId());
+            } else {
+                phoneSrcIdMap.put(dto.getMobile(), dto.getId());
+            }
         }
         //如果手机号已经存在，但是没有用户id，则填充用户id，一般不会太多
         List<User> missIdUsers = userService.list(new QueryWrapper<User>()
@@ -428,16 +449,21 @@ public class EcologyService {
                 user.setId(existId);
                 updatedUsers.add(existId);
             }
-            user.setPhone(data.getMobile());
-            user.setTenantId(tenantId);
-            user.setPasswd(userService.createPass(user.getPhone()));
-            user.setRealName(data.getLastname());
-            user.setEmail(StringUtils.isBlank(data.getEmail()) ? null : data.getEmail());
-            user.setSrcType(G.USER_SOURCE_OA);
-            user.setSrcId(data.getId());
-            user.setAccount(user.getPhone());
-            user.setUpdateTime(now);
-            toUpsert.add(user);
+            //仅为主账号建立账户
+            if (StringUtils.isBlank(data.getBelongto())) {
+                user.setPhone(data.getMobile());
+                user.setTenantId(tenantId);
+                user.setPasswd(userService.createPass(user.getPhone()));
+                user.setRealName(data.getLastname());
+                user.setEmail(StringUtils.isBlank(data.getEmail()) ? null : data.getEmail());
+                user.setSrcType(G.USER_SOURCE_OA);
+                //主账号和子账号合并的userId
+                user.setSrcId(phoneSrcIdMap.get(user.getPhone()));
+                user.setAccount(user.getPhone());
+                user.setUpdateTime(now);
+                toUpsert.add(user);
+            }
+            //但是子账号的组织关系需要记录下来
             UserOrg userOrg = new UserOrg();
             userOrg.setId(UlidCreator.getUlid().toString());
             userOrg.setUserId(user.getId());
@@ -462,7 +488,7 @@ public class EcologyService {
                 .set(User.COL_UPDATE_USER, "0"));
         //更新用户信息
         if (!toUpsert.isEmpty()) oaSyncMapper.upsertUsers(toUpsert);
-        //更新用户部门
+        //更新用户
         if (!updatedUsers.isEmpty()) {
             userOrgMapper.delete(new QueryWrapper<UserOrg>()
                     .eq(UserOrg.COL_TENANT_ID, tenantId)

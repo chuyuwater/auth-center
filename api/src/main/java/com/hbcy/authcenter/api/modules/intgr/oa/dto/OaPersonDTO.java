@@ -13,6 +13,10 @@ public class OaPersonDTO {
      */
     private String id;
     /**
+     * 主账号
+     */
+    private String belongto;
+    /**
      * 姓名
      */
     private String lastname;
