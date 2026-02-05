@@ -91,6 +91,9 @@ public class PermTreeService extends ServiceImpl<PermTreeMapper, PermTree> {
             throw new PermissionError();
         }
         if (!entity.getParentId().equals(vo.getParentId())) {
+            if (vo.getParentId().equals(id)) {
+                throw new ParamError("父节点不能是自身");
+            }
             updateParent(entity, vo.getParentId());
             entity.setShowOrder(baseMapper.getChildMaxShowOrder(entity.getTenantId(), vo.getParentId()) + 1);
         }

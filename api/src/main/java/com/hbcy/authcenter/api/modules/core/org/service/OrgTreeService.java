@@ -212,6 +212,9 @@ public class OrgTreeService extends ServiceImpl<OrgTreeMapper, OrgTree> {
             vo.setParentId(rootId);
         }
         if (!entity.getParentId().equals(vo.getParentId())) {
+            if (vo.getParentId().equals(id)) {
+                throw new ParamError("父节点不能是自身");
+            }
             updateParent(entity, vo.getParentId());
             entity.setShowOrder(baseMapper.getChildMaxShowOrder(entity.getTenantId(), vo.getParentId()) + 1);
         }

@@ -128,6 +128,9 @@ public class ResourceTreeService extends ServiceImpl<ResourceTreeMapper, Resourc
             throw new ParamError("指定节点不存在");
         }
         if (!vo.getParentId().equals(entity.getParentId())) {
+            if (vo.getParentId().equals(id)) {
+                throw new ParamError("父节点不能是自身");
+            }
             //父节点被移动
             ResourceTree newParent = checkNewParent(entity, vo.getParentId());
             updateChildrenPath(entity, newParent);
