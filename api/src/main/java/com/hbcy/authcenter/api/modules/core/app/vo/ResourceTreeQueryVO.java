@@ -40,9 +40,9 @@ public class ResourceTreeQueryVO {
      */
     private Integer showLevel;
     /**
-     * 是否需要被隐藏的菜单
+     * 是否隐藏菜单，0-显式，1-隐藏
      */
-    private Boolean withHidden;
+    private Integer hidden;
     /**
      * 是否需要创建者信息
      * api侧默认需要

@@ -70,8 +70,8 @@
                     </when>
                 </choose>
             </if>
-            <if test="vo.withHidden != null and !vo.withHidden">
-                and hidden = 0
+            <if test="vo.hidden != null">
+                and hidden = #{vo.hidden}
             </if>
             <if test="vo.keyword != null and vo.keyword != ''">
                 and (
