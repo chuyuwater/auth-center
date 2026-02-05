@@ -26,4 +26,6 @@ public interface UserMapper extends BaseMapper<User> {
     Page<UserQueryResultDTO> queryUser(Page<?> dbPage, @Param("vo") UserQueryVO vo);
 
     Page<OrgUserDTO> filterUser4Select(Page<?> page, @Param("vo") UserQueryVO vo);
+
+    void insertIgnore(@Param("list") List<User> toInsert);
 }

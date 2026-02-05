@@ -1,6 +1,15 @@
 package com.hbcy.authcenter.api.modules.intgr.oa.dto;
 
+import com.google.common.collect.Lists;
+import com.hbcy.authcenter.api.modules.intgr.oa.constants.OaConstants;
 import lombok.Data;
+import org.apache.commons.lang3.StringUtils;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static com.hbcy.authcenter.api.modules.intgr.oa.constants.OaConstants.OA_ORG_KEY;
 
 /**
  * @author 姚泰然
@@ -53,4 +62,42 @@ public class OaPersonDTO {
      * 排序
      */
     private String dsporder;
+    /**
+     * 子账号，计算出来的
+     */
+    private List<OaPersonDTO> subAccounts = new ArrayList<>();
+
+    public String getEmail() {
+        if (StringUtils.isBlank(email) || !email.contains("@")) {
+            return null;
+        }
+        return email;
+    }
+
+    public boolean isMainAccount() {
+        return "0".equals(accounttype);
+    }
+
+    //关联账号合并
+    public String getSrcIds() {
+        if (subAccounts.isEmpty()) return id;
+        List<String> srcIds = Lists.newArrayList(id);
+        for (OaPersonDTO subAccount : subAccounts) {
+            srcIds.add(subAccount.getId());
+        }
+        return srcIds.stream().sorted().collect(Collectors.joining(","));
+    }
+
+    //组织节点id
+    public String getOrgRelateId() {
+        return OA_ORG_KEY.formatted(OaConstants.ORG_TYPE_SUBCOMPANY, subcompanyid1);
+    }
+
+    //部门节点id，部门为空则使用组织节点id
+    public String getRelateId() {
+        if (StringUtils.isNotBlank(departmentid)) {
+            return OA_ORG_KEY.formatted(OaConstants.ORG_TYPE_DEPARTMENT, departmentid);
+        }
+        return getOrgRelateId();
+    }
 }

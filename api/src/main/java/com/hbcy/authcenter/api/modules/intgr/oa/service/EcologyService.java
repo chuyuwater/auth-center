@@ -7,6 +7,8 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.f4b6a3.ulid.UlidCreator;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import com.hbcy.authcenter.api.common.constants.G;
 import com.hbcy.authcenter.api.common.enums.OrgNodeCategoryEnum;
 import com.hbcy.authcenter.api.common.enums.OrgNodeTypeEnum;
@@ -14,6 +16,7 @@ import com.hbcy.authcenter.api.modules.core.org.model.OrgTree;
 import com.hbcy.authcenter.api.modules.core.org.service.OrgTreeService;
 import com.hbcy.authcenter.api.modules.core.perm.dao.PermUnitUserMapper;
 import com.hbcy.authcenter.api.modules.core.perm.model.PermUnitUser;
+import com.hbcy.authcenter.api.modules.core.user.dao.UserMapper;
 import com.hbcy.authcenter.api.modules.core.user.dao.UserOrgMapper;
 import com.hbcy.authcenter.api.modules.core.user.model.User;
 import com.hbcy.authcenter.api.modules.core.user.model.UserOrg;
@@ -34,23 +37,26 @@ import com.hbcy.common.base.error.PermissionError;
 import com.hbcy.common.base.error.ServerError;
 import com.hbcy.common.base.json.JsonUtils;
 import com.hbcy.common.lock.service.RedissonDistributedLock;
-import com.hbcy.common.web.api.NamedId;
 import com.xxl.job.core.handler.annotation.XxlJob;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+
+import static com.hbcy.authcenter.api.modules.intgr.oa.constants.OaConstants.OA_ORG_KEY;
 
 /**
  * @author 姚泰然
@@ -62,7 +68,6 @@ public class EcologyService {
     public static final String LOCK_KEY = "portal:oa:token:lock";
     public static final String TOKEN_KEY = "portal:oa:token";
     public static final int EXPIRE_TIME = 3540;
-    public static final String OA_ORG_KEY = "%s_%s";
     public static final String SYNC_LOCK = "portal:oa:sync:lock";
     @Resource
     private StringRedisTemplate stringRedisTemplate;
@@ -104,6 +109,8 @@ public class EcologyService {
     private PermUnitUserMapper permUnitUserMapper;
     @Resource
     private UserOrgMapper userOrgMapper;
+    @Resource
+    private UserMapper userMapper;
 
     @PostConstruct
     public void init() {
@@ -353,19 +360,7 @@ public class EcologyService {
         return oaId2Id;
     }
 
-    /**
-     * 从OA按组织同步人员
-     * 1. 获取OA中全量的人员（包括关联的组织）
-     * 2. 根据OA的手机号查询统一平台人员，过滤出没有用户id的人，为这些人更新用户id（on duplicate key update的方式批量更新）,
-     * 注意OA中兼职和主职使用不同的userId，此时可以统计出本次同步影响的所有存量用户id（统一平台侧）
-     * 3. 以insert...on duplicate update的方式插入人员，如果存在则更新手机号或其他字段(此时冲突的就是用户id了）
-     * 4. 逻辑删除oa中不存在的且src_id不为空人员，以及授权
-     * 5. 删除2中存量用户的任职关系(main_job=1)，然后在user_org中以insert ignore的方式批量插入用户与组织的关联关系
-     *
-     * @param oaOrgId 楚禹公司在OA的组织id
-     * @param tenantId 楚禹公司在统一平台的租户id
-     */
-    public void syncUser(String oaOrgId, String tenantId, Map<String, String> typeIdDict) {
+    private List<OaPersonDTO> fetchOaPerson(String oaOrgId) {
         OaPersonQueryVO vo = new OaPersonQueryVO();
         vo.setSubcompanyid1(oaOrgId);
         String sessionStr = oaBizClient.queryPersonSession(vo);
@@ -379,7 +374,7 @@ public class EcologyService {
         OaTableCountDTO countDTO = JsonUtils.readValue(s, OaTableCountDTO.class);
         if (countDTO == null || countDTO.getCount() == null || countDTO.getCount() == 0) {
             log.info("no oa user to sync");
-            return;
+            return Collections.emptyList();
         }
         OaPageSizeModifyVO pageSizeModifyVO = new OaPageSizeModifyVO();
         pageSizeModifyVO.setDataKey(session.getSessionkey());
@@ -391,110 +386,212 @@ public class EcologyService {
         if (personList == null || !personList.getStatus()) {
             throw new ServerError("获取OA用户失败");
         }
-        //将子账号的信息更新为主账号的
+        //合并主子账号
         Map<String, OaPersonDTO> oaIdPersonMap = personList.getDatas().stream().collect(
                 Collectors.toMap(OaPersonDTO::getId, dto -> dto));
+        List<OaPersonDTO> resp = new ArrayList<>();
         for (OaPersonDTO data : personList.getDatas()) {
-            //子账号使用主账号的手机号
-            if (StringUtils.isNotBlank(data.getBelongto())) {
-                OaPersonDTO main = oaIdPersonMap.get(data.getBelongto());
-                if (main != null) {
-                    data.setMobile(main.getId());
-                    data.setEmail(main.getEmail());
-                } else {
-                    data.setMobile(null);
-                    data.setEmail(null);
+            if (data.isMainAccount()) {
+                //FIXME: 领导班子手机号脱敏了，需要想办法拿到完整的手机号
+                if (StringUtils.isNotBlank(data.getMobile()) && !data.getMobile().contains("*")) {
+                    resp.add(data);
+                }
+            } else {
+                OaPersonDTO mainAccount = oaIdPersonMap.get(data.getBelongto());
+                mainAccount.getSubAccounts().add(data);
+            }
+        }
+        return resp;
+    }
+
+    private void fillUserOrg(OaPersonDTO person, String userId, String tenantId,
+                             Map<String, String> typeIdDict, List<UserOrg> userOrgs) {
+        UserOrg userOrg = new UserOrg();
+        userOrg.setId(UlidCreator.getUlid().toString());
+        userOrg.setUserId(userId);
+        userOrg.setTenantId(tenantId);
+        userOrg.setOrgId(typeIdDict.get(person.getOrgRelateId()));
+        userOrg.setNodeId(typeIdDict.get(person.getRelateId()));
+        userOrg.setMainJob(1);
+        userOrgs.add(userOrg);
+        for (OaPersonDTO subAccount : person.getSubAccounts()) {
+            UserOrg subUserOrg = new UserOrg();
+            subUserOrg.setUserId(userId);
+            subUserOrg.setTenantId(tenantId);
+            subUserOrg.setOrgId(typeIdDict.get(subAccount.getOrgRelateId()));
+            subUserOrg.setNodeId(typeIdDict.get(subAccount.getRelateId()));
+            subUserOrg.setMainJob(subAccount.getSubcompanyid1().equals(person.getSubcompanyid1()) ? 1 : 0);
+            userOrgs.add(subUserOrg);
+        }
+    }
+
+    /**
+     * 从OA按组织同步人员
+     * 1. 获取OA中全量的人员（包括关联的组织）
+     * 2. 获取数据库中全量的OA同步的成员，根据OA主账号ID映射，确认增、删、改。
+     *  OA子账号影响user_org表的任职和perm_unit_user表里面的授权，需要注意的是后者按组织（而非部门），因此需要计算组织变动。
+     *  对于user_org表，可以直接清空update用户后重新插入，perm_unit_user则计算出移除的用户组织映射后删除对应的权限即可。
+     * 3. OA的用户系统核心是一个主职多个兼职，使用不同的id，待办、消息都是拆开的，所以我们需要记录所有的用户id才能完成数据的同步。
+     *
+     * @param oaOrgId 楚禹公司在OA的组织id
+     * @param tenantId 楚禹公司在统一平台的租户id
+     */
+    public void syncUser(String oaOrgId, String tenantId, Map<String, String> typeIdDict) {
+        List<OaPersonDTO> personList = fetchOaPerson(oaOrgId);
+        if (CollectionUtils.isEmpty(personList)) {
+            return;
+        }
+        Map<String, OaPersonDTO> oaIdPersonMap = personList.stream().collect(
+                Collectors.toMap(OaPersonDTO::getId, dto -> dto));
+        //获取已有的所有同步过来的用户，判断用户是否更新了手机号（情况比较罕见）
+        List<User> users = oaSyncMapper.listOaUsers(tenantId);
+        Map<String, User> oaIdUserMap = new HashMap<>();
+        //用户oa主账号id和用户id的双向映射
+        BiMap<String, String> oaId2Id = HashBiMap.create();
+        for (User user : users) {
+            if (user.getSrcId().contains(",")) {
+                String[] split = user.getSrcId().split(",");
+                oaIdUserMap.put(split[0], user);
+                oaId2Id.put(split[0], user.getId());
+            } else {
+                oaIdUserMap.put(user.getSrcId(), user);
+                oaId2Id.put(user.getSrcId(), user.getId());
+            }
+        }
+        //不存在的oaId，直接删除用户
+        Set<String> toDeleteOaIds = new HashSet<>(oaIdUserMap.keySet());
+        toDeleteOaIds.removeAll(oaIdPersonMap.keySet());
+        Set<String> toDeleteIds = new HashSet<>();
+        for (String toDeleteOaId : toDeleteOaIds) {
+            toDeleteIds.add(oaIdUserMap.get(toDeleteOaId).getId());
+        }
+        if (!toDeleteIds.isEmpty()) {
+            userService.update(new UpdateWrapper<User>()
+                    .eq(User.COL_TENANT_ID, tenantId)
+                    .in(User.COL_ID, toDeleteIds)
+                    .set(User.COL_DELETE_TIME, System.currentTimeMillis())
+                    .set(User.COL_UPDATE_TIME, LocalDateTime.now())
+                    .set(User.COL_UPDATE_USER, "0"));
+            userOrgMapper.delete(new QueryWrapper<UserOrg>()
+                    .in(UserOrg.COL_USER_ID, toDeleteIds));
+            permUnitUserMapper.delete(new QueryWrapper<PermUnitUser>()
+                    .in(PermUnitUser.COL_USER_ID, toDeleteIds));
+            log.info("oa sync user, delete user count:{}", toDeleteIds.size());
+        }
+        //需要更新用户资料的用户
+        Set<String> toUpdateOaIds = new HashSet<>(oaIdUserMap.keySet());
+        toUpdateOaIds.retainAll(oaIdPersonMap.keySet());
+        Set<String> toUpdateIds = toUpdateOaIds.stream().map(
+                oaId2Id::get).collect(Collectors.toSet());
+        List<UserOrg> toUpsertUserOrgs = new ArrayList<>();
+        //逐个更新，一般不会太多
+        int updateUserCnt = 0;
+        for (String oid : toUpdateOaIds) {
+            User user = oaIdUserMap.get(oid);
+            OaPersonDTO person = oaIdPersonMap.get(oid);
+            boolean update = false;
+            if (!user.getPhone().equals(person.getMobile())) {
+                user.setPhone(person.getMobile());
+                user.setAccount(person.getMobile());
+                update = true;
+            }
+            if (!user.getRealName().equals(person.getLastname())) {
+                user.setRealName(person.getLastname());
+                update = true;
+            }
+            if (!Objects.equals(user.getEmail(), person.getEmail())) {
+                user.setEmail(person.getEmail());
+                update = true;
+            }
+            String srcIds = person.getSrcIds();
+            if (!user.getSrcId().equals(srcIds)) {
+                user.setSrcId(srcIds);
+                update = true;
+            }
+            if (update) {
+                user.setUpdateTime(LocalDateTime.now());
+                user.setUpdateUser("0");
+                try {
+                    userService.updateById(user);
+                } catch (DuplicateKeyException e) {
+                    log.error("update user error:{}", user);
+                    continue;
+                }
+                updateUserCnt++;
+            }
+            fillUserOrg(person, user.getId(), tenantId, typeIdDict, toUpsertUserOrgs);
+        }
+        log.info("oa sync user, update user count:{}", updateUserCnt);
+        if (!toUpdateIds.isEmpty()) {
+            //已有用户的任职统计
+            Map<String, Set<String>> userOrgMap = new HashMap<>();
+            //oa用户的任职统计
+            Map<String, Set<String>> userOaOrgMap = new HashMap<>();
+            List<UserOrg> userOrgs = oaSyncMapper.fetchUserOrgs(toUpdateIds);
+            for (UserOrg userOrg : userOrgs) {
+                userOrgMap.computeIfAbsent(userOrg.getUserId(),
+                        k -> new HashSet<>()).add(userOrg.getOrgId());
+            }
+            for (OaPersonDTO dto : personList) {
+                String orgRelateId = OA_ORG_KEY.formatted(
+                        OaConstants.ORG_TYPE_SUBCOMPANY, dto.getSubcompanyid1());
+                userOaOrgMap.computeIfAbsent(oaId2Id.get(dto.getId()),
+                        k -> new HashSet<>()).add(typeIdDict.get(orgRelateId));
+            }
+            //对比任职公司有变化的人，移除其权限
+            for (Map.Entry<String, Set<String>> entry : userOrgMap.entrySet()) {
+                entry.getValue().removeAll(userOaOrgMap.get(entry.getKey()));
+                if (!entry.getValue().isEmpty()) {
+                    permUnitUserMapper.delete(new UpdateWrapper<PermUnitUser>()
+                            .eq(PermUnitUser.COL_USER_ID, entry.getKey())
+                            .in(PermUnitUser.COL_ORG_ID, entry.getValue()));
+                    log.info("oa sync user, delete perm for user {} in org {}", entry.getKey(), entry.getValue());
                 }
             }
+            //删除存量用户的所有任职，重新插入
+            userOrgMapper.delete(new QueryWrapper<UserOrg>()
+                    .in(UserOrg.COL_USER_ID, toUpdateIds));
+            log.info("oa sync user, delete user org count:{}", toUpdateIds.size());
         }
-        //FIXME: 领导班子手机号脱敏了，需要想办法拿到完整的手机号
-        personList.getDatas().removeIf(
-                dto -> StringUtils.isBlank(dto.getMobile()) || dto.getMobile().contains("*"));
-        Map<String, String> phoneSrcIdMap = new HashMap<>();
-        for (OaPersonDTO dto : personList.getDatas()) {
-            if (phoneSrcIdMap.containsKey(dto.getMobile())) {
-                //主子账号使用不同的用户id，需要合并
-                phoneSrcIdMap.put(dto.getMobile(), phoneSrcIdMap.get(dto.getMobile()) + "," + dto.getId());
-            } else {
-                phoneSrcIdMap.put(dto.getMobile(), dto.getId());
-            }
-        }
-        //如果手机号已经存在，但是没有用户id，则填充用户id，一般不会太多
-        List<User> missIdUsers = userService.list(new QueryWrapper<User>()
-                .eq(User.COL_TENANT_ID, tenantId)
-                .in(User.COL_PHONE, phoneSrcIdMap.keySet())
-                .isNull(User.COL_SRC_ID));
-        if (!missIdUsers.isEmpty()) {
-            for (User user : missIdUsers) {
-                user.setSrcType(G.USER_SOURCE_OA);
-                user.setSrcId(phoneSrcIdMap.get(user.getPhone()));
-            }
-            oaSyncMapper.fillSourceId(missIdUsers);
-            log.info("fill user oa count:{}", missIdUsers.size());
-        }
-        List<NamedId> userPhoneIds = oaSyncMapper.listUserPhone(tenantId);
-        Map<String, String> phoneIdMap = userPhoneIds.stream().
-                collect(Collectors.toMap(NamedId::getItemName, NamedId::getItemId));
-        List<UserOrg> userOrgs = new ArrayList<>();
-        Set<String> updatedUsers = new HashSet<>();
-        //获取所有有用户id的用户
-        List<User> toUpsert = new ArrayList<>();
-        LocalDateTime now = LocalDateTime.now();
-        for (OaPersonDTO data : personList.getDatas()) {
-            User user = new User();
-            String existId = phoneIdMap.get(data.getMobile());
-            if (existId == null) {
+
+        //新增的用户
+        Set<String> toInsertOaIds = new HashSet<>(oaIdPersonMap.keySet());
+        toInsertOaIds.removeAll(toUpdateOaIds);
+        Set<String> newIds = new HashSet<>();
+        if (!toInsertOaIds.isEmpty()) {
+            List<User> toInsert = new ArrayList<>();
+            for (String oid : toInsertOaIds) {
+                OaPersonDTO person = oaIdPersonMap.get(oid);
+                User user = new User();
                 user.setId(UlidCreator.getUlid().toString());
-            } else {
-                user.setId(existId);
-                updatedUsers.add(existId);
-            }
-            //仅为主账号建立账户
-            if (StringUtils.isBlank(data.getBelongto())) {
-                user.setPhone(data.getMobile());
+                newIds.add(user.getId());
+                user.setPhone(person.getMobile());
+                user.setAccount(person.getMobile());
                 user.setTenantId(tenantId);
                 user.setPasswd(userService.createPass(user.getPhone()));
-                user.setRealName(data.getLastname());
-                user.setEmail(StringUtils.isBlank(data.getEmail()) ? null : data.getEmail());
+                user.setRealName(person.getLastname());
+                user.setEmail(person.getEmail());
                 user.setSrcType(G.USER_SOURCE_OA);
-                //主账号和子账号合并的userId
-                user.setSrcId(phoneSrcIdMap.get(user.getPhone()));
-                user.setAccount(user.getPhone());
-                user.setUpdateTime(now);
-                toUpsert.add(user);
+                user.setSrcId(person.getSrcIds());
+                user.setForbidden(0);
+                user.setCreateUser("0");
+                user.setUpdateUser("0");
+                toInsert.add(user);
+                fillUserOrg(person, user.getId(), tenantId, typeIdDict, toUpsertUserOrgs);
             }
-            //但是子账号的组织关系需要记录下来
-            UserOrg userOrg = new UserOrg();
-            userOrg.setId(UlidCreator.getUlid().toString());
-            userOrg.setUserId(user.getId());
-            String relateId = OA_ORG_KEY.formatted(OaConstants.ORG_TYPE_DEPARTMENT, data.getDepartmentid());
-            String orgRelateId = OA_ORG_KEY.formatted(OaConstants.ORG_TYPE_SUBCOMPANY, data.getSubcompanyid1());
-            if (StringUtils.isBlank(data.getDepartmentid())) {
-                relateId = orgRelateId;
+            userMapper.insertIgnore(toInsert);
+            //确认一下哪些插入失败了
+            Set<String> inserted = oaSyncMapper.ensureIds(newIds);
+            log.info("oa sync user, insert user count:{}, success count:{}", toInsert.size(), inserted.size());
+            if (inserted.size() < newIds.size()) {
+                //没有插入成功的用户，需要移除掉任职关系
+                newIds.removeAll(inserted);
+                toUpsertUserOrgs.removeIf(uo -> newIds.contains(uo.getUserId()));
             }
-            userOrg.setNodeId(typeIdDict.get(relateId));
-            userOrg.setOrgId(typeIdDict.get(orgRelateId));
-            userOrg.setTenantId(tenantId);
-            userOrg.setMainJob(data.getAccounttype().equals("0") ? 1 : 0);
-            userOrgs.add(userOrg);
         }
-        //逻辑删除之前同步过来的、现在手机号已经不存在于OA中的用户
-        userService.update(new UpdateWrapper<User>()
-                .eq(User.COL_TENANT_ID, tenantId)
-                .notIn(User.COL_PHONE, phoneIdMap.keySet())
-                .isNotNull(User.COL_SRC_ID)
-                .set(User.COL_DELETE_TIME, System.currentTimeMillis())
-                .set(User.COL_UPDATE_TIME, LocalDateTime.now())
-                .set(User.COL_UPDATE_USER, "0"));
-        //更新用户信息
-        if (!toUpsert.isEmpty()) oaSyncMapper.upsertUsers(toUpsert);
-        //更新用户
-        if (!updatedUsers.isEmpty()) {
-            userOrgMapper.delete(new QueryWrapper<UserOrg>()
-                    .eq(UserOrg.COL_TENANT_ID, tenantId)
-                    .in(UserOrg.COL_USER_ID, updatedUsers)
-                    .eq(UserOrg.COL_MAIN_JOB, 1));
+        if (!toUpsertUserOrgs.isEmpty()) {
+            oaSyncMapper.upsertUserOrgs(toUpsertUserOrgs);
+            log.info("oa sync user, upsert user org count:{}", toUpsertUserOrgs.size());
         }
-        if (!userOrgs.isEmpty()) oaSyncMapper.upsertUserOrgs(userOrgs);
     }
 }

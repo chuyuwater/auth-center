@@ -46,25 +46,6 @@
         and delete_time = 0
     </select>
 
-    <!--  TODO: MySQL only-->
-    <insert id="upsertUsers">
-        insert into portal_auth_center.sys_user(id, phone, account, real_name, passwd, email, src_type,
-        src_id, tenant_id, create_user, update_user)
-        values
-        <foreach collection="users" item="u" separator="," open="" close="">
-            (#{u.id}, #{u.phone}, #{u.account}, #{u.realName}, #{u.passwd}, #{u.email}, #{u.srcType},
-            #{u.srcId}, #{u.tenantId}, '0', '0')
-        </foreach>
-        on duplicate key update phone = values(phone),
-        account = values(account),
-        real_name = values(real_name),
-        email = values(email),
-        src_type = values(src_type),
-        src_id = values(src_id),
-        update_user = '0',
-        update_time = now()
-    </insert>
-
     <insert id="upsertUserOrgs">
         insert ignore into portal_auth_center.user_org(id, user_id, org_id, node_id, tenant_id, main_job, create_user,
         update_user, update_time)
@@ -77,4 +58,26 @@
         update_user = '0',
         update_time = values(update_time)
     </insert>
+
+    <select id="listOaUsers" resultType="com.hbcy.authcenter.api.modules.core.user.model.User">
+        select id, phone, account, real_name, email, src_id
+        from portal_auth_center.sys_user
+        where tenant_id = #{tenantId} and src_type=1
+    </select>
+
+    <select id="fetchUserOrgs" resultType="com.hbcy.authcenter.api.modules.core.user.model.UserOrg">
+        select distinct user_id, org_id from user_org where user_id in
+        <foreach item="id" collection="toUpdateIds" separator="," close=")" open="(">
+            #{id}
+        </foreach>
+    </select>
+
+    <select id="ensureIds" resultType="java.lang.String">
+        select id
+        from sys_user
+        where id in
+        <foreach item="id" collection="newIds" separator="," close=")" open="(">
+            #{id}
+        </foreach>
+    </select>
 </mapper>

@@ -9,6 +9,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author 姚泰然
@@ -26,7 +27,11 @@ public interface OaSyncMapper {
 
     List<NamedId> listUserPhone(@Param("tenantId") String tenantId);
 
-    void upsertUsers(@Param("users") List<User> users);
-
     void upsertUserOrgs(@Param("userOrgs") List<UserOrg> userOrgs);
+
+    List<User> listOaUsers(@Param("tenantId") String tenantId);
+
+    List<UserOrg> fetchUserOrgs(@Param("toUpdateIds") Set<String> toUpdateIds);
+
+    Set<String> ensureIds(@Param("newIds") Set<String> newIds);
 }

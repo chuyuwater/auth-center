@@ -173,4 +173,16 @@
             </if>
         </where>
     </select>
+
+    <!--    TODO:MySQL Only-->
+    <insert id="insertIgnore">
+        insert ignore into sys_user(id, phone, account, real_name, passwd, email, avatar, src_type,
+        src_id, employee_type, tenant_id, create_user,update_user)
+        values
+        <foreach collection="list" item="item" separator=",">
+            (#{item.id}, #{item.phone}, #{item.account}, #{item.realName}, #{item.passwd}, #{item.email},
+            #{item.avatar}, #{item.srcType}, #{item.srcId}, #{item.employeeType}, #{item.tenantId},
+            #{item.createUser}, #{item.updateUser})
+        </foreach>
+    </insert>
 </mapper>
