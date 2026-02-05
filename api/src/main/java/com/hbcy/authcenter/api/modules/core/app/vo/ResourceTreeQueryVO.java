@@ -28,7 +28,7 @@ public class ResourceTreeQueryVO {
      */
     private String parentId = "";
     /**
-     * 是否查询权限资源
+     * 是否附带权限点信息，默认true
      */
     private boolean withPerm = true;
     /**
@@ -40,13 +40,15 @@ public class ResourceTreeQueryVO {
      */
     private Integer showLevel;
     /**
-     * 是否隐藏菜单，0-显式，1-隐藏
+     * 是否隐藏菜单，0-显示，1-隐藏
      */
     private Integer hidden;
     /**
      * 是否需要创建者信息
      * api侧默认需要
+     *
      */
+    @JsonIgnore
     private boolean withCreator;
     /**
      * 父节点idPath,后端填充
