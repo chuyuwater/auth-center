@@ -1,13 +1,16 @@
 package com.hbcy.authcenter.api.modules.core.tenant.controller;
 
 import com.hbcy.authcenter.api.modules.core.app.dto.GrantAppDTO;
+import com.hbcy.authcenter.api.modules.core.app.dto.ResTreeDTO;
 import com.hbcy.authcenter.api.modules.core.tenant.service.TenantAppService;
 import com.hbcy.authcenter.api.modules.core.tenant.vo.TenantAppBatchGrantVO;
 import com.hbcy.authcenter.api.modules.core.tenant.vo.TenantAppGrantUpdateVO;
 import com.hbcy.authcenter.api.modules.core.tenant.vo.TenantAppGrantVO;
+import com.hbcy.common.base.tree.TreeNode;
 import com.hbcy.common.web.bean.NameFill;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -79,5 +82,17 @@ public class TenantAppController {
     @NameFill
     public List<GrantAppDTO> listGrantApps(@PathVariable String tenantId) {
         return tenantAppService.listGrantApps(tenantId);
+    }
+
+    /**
+     * 查询租户应用授权树
+     * @param tenantId 租户id
+     * @param appId 应用id
+     * @return 授权树
+     */
+    @GetMapping("/tree")
+    public List<TreeNode<ResTreeDTO>> listGrantAppTree(@NotBlank(message = "租户id不能为空") @RequestParam String tenantId,
+                                                       @NotBlank(message = "应用id不能为空") @RequestParam String appId) {
+        return tenantAppService.listGrantAppTree(tenantId, appId);
     }
 }

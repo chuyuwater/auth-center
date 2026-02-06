@@ -18,6 +18,7 @@ import com.hbcy.authcenter.api.modules.core.app.vo.ResourcePermCreateVO;
 import com.hbcy.authcenter.api.modules.core.app.vo.ResourceTreeCreateVO;
 import com.hbcy.authcenter.api.modules.core.app.vo.ResourceTreeQueryVO;
 import com.hbcy.authcenter.api.modules.core.app.vo.ResourceTreeUpdateVO;
+import com.hbcy.authcenter.api.modules.core.tenant.dao.TenantAppMapper;
 import com.hbcy.authcenter.sdk.utils.UserContextUtils;
 import com.hbcy.common.base.error.ParamError;
 import com.hbcy.common.base.log.JsonLogUtils;
@@ -27,6 +28,7 @@ import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
 import org.jspecify.annotations.Nullable;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,6 +51,8 @@ public class ResourceTreeService extends ServiceImpl<ResourceTreeMapper, Resourc
     private ResourcePermService resourcePermService;
     @Resource
     private NameCacheService nameCacheService;
+    @Autowired
+    private TenantAppMapper tenantAppMapper;
 
     private ResourceTree checkParentId(String appId, String parentId) {
         App app = appMapper.selectById(appId);

@@ -7,9 +7,13 @@ import com.github.f4b6a3.ulid.UlidCreator;
 import com.hbcy.authcenter.api.modules.core.app.dao.AppMapper;
 import com.hbcy.authcenter.api.modules.core.app.dao.ResourcePermMapper;
 import com.hbcy.authcenter.api.modules.core.app.dto.GrantAppDTO;
+import com.hbcy.authcenter.api.modules.core.app.dto.ResPermDTO;
+import com.hbcy.authcenter.api.modules.core.app.dto.ResTreeDTO;
 import com.hbcy.authcenter.api.modules.core.app.model.App;
 import com.hbcy.authcenter.api.modules.core.app.model.ResourcePerm;
+import com.hbcy.authcenter.api.modules.core.app.service.ResourceTreeService;
 import com.hbcy.authcenter.api.modules.core.app.vo.BindOrgTreeVO;
+import com.hbcy.authcenter.api.modules.core.app.vo.ResourceTreeQueryVO;
 import com.hbcy.authcenter.api.modules.core.org.dao.OrgTreeMapper;
 import com.hbcy.authcenter.api.modules.core.org.model.OrgTree;
 import com.hbcy.authcenter.api.modules.core.perm.dao.PermUnitResourceMapper;
@@ -27,9 +31,11 @@ import com.hbcy.authcenter.api.modules.core.tenant.vo.TenantAppGrantVO;
 import com.hbcy.authcenter.sdk.utils.UserContextUtils;
 import com.hbcy.common.base.error.ParamError;
 import com.hbcy.common.base.error.PermissionError;
+import com.hbcy.common.base.tree.TreeNode;
 import com.hbcy.common.lock.service.RedissonDistributedLock;
 import jakarta.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -63,6 +69,8 @@ public class TenantAppService extends ServiceImpl<TenantAppMapper, TenantApp> {
     private TenantAppResourceMapper tenantAppResourceMapper;
     @Resource
     private RedissonDistributedLock redissonDistributedLock;
+    @Autowired
+    private ResourceTreeService resourceTreeService;
 
     private static List<TenantAppResource> genTenantAppResources(
             String appId, Set<String> permIds, String tenantId) {
@@ -132,6 +140,12 @@ public class TenantAppService extends ServiceImpl<TenantAppMapper, TenantApp> {
         }
     }
 
+    private void cleanTenantAppPerm(String tenantId, String appId) {
+        tenantAppResourceMapper.delete(new QueryWrapper<TenantAppResource>()
+                .eq(TenantAppResource.COL_TENANT_ID, tenantId)
+                .eq(TenantAppResource.COL_APP_ID, appId));
+    }
+
     /**
      * 修改授权
      * 1. 原来是全部授权，现在也是 -> 无权限影响，直接返回
@@ -151,13 +165,13 @@ public class TenantAppService extends ServiceImpl<TenantAppMapper, TenantApp> {
         if (inst.getGrantAll() > 0 && vo.isGrantAll()) {
             return;
         }
+        inst.setUpdateUser(UserContextUtils.getUserId());
+        inst.setUpdateTime(LocalDateTime.now());
         //情况2
         if (inst.getGrantAll() == 0 && vo.isGrantAll()) {
-            tenantAppResourceMapper.delete(new QueryWrapper<TenantAppResource>()
-                    .eq(TenantAppResource.COL_TENANT_ID, inst.getTenantId())
-                    .eq(TenantAppResource.COL_APP_ID, inst.getAppId()));
             inst.setGrantAll(1);
-            save(inst);
+            cleanTenantAppPerm(inst.getTenantId(), inst.getAppId());
+            baseMapper.updateById(inst);
             return;
         }
         //情况3/4
@@ -174,7 +188,7 @@ public class TenantAppService extends ServiceImpl<TenantAppMapper, TenantApp> {
         } else {
             oldPermIds = tenantAppResourceMapper.getGrantedPermIds(inst.getTenantId(), inst.getAppId());
             // 清空授权
-            tenantAppResourceMapper.deleteByIds(oldPermIds);
+            cleanTenantAppPerm(inst.getTenantId(), inst.getAppId());
         }
         if (!newPermIds.isEmpty()) {
             List<TenantAppResource> tenantAppResources = genTenantAppResources(
@@ -284,7 +298,8 @@ public class TenantAppService extends ServiceImpl<TenantAppMapper, TenantApp> {
 
     @Transactional
     public void tryGrantApp(TenantAppBatchGrantVO vo) {
-        boolean ok = redissonDistributedLock.tryLock(GRANT_LOCK + vo.getTenantId(), TimeUnit.SECONDS, 5, 10);
+        boolean ok = redissonDistributedLock.tryLock(GRANT_LOCK + vo.getTenantId(),
+                TimeUnit.SECONDS, 5, 10);
         if (!ok) {
             throw new ParamError("其他人正在使用修改授权，请重试");
         }
@@ -347,5 +362,25 @@ public class TenantAppService extends ServiceImpl<TenantAppMapper, TenantApp> {
             tenantApps.add(tenantApp);
         }
         baseMapper.insertIgnore(tenantApps);
+    }
+
+
+    public List<TreeNode<ResTreeDTO>> listGrantAppTree(String tenantId, String appId) {
+        TenantApp tenantApp = baseMapper.selectOne(new QueryWrapper<TenantApp>()
+                .eq(TenantApp.COL_TENANT_ID, tenantId)
+                .eq(TenantApp.COL_APP_ID, appId));
+        if (tenantApp == null) {
+            return new ArrayList<>();
+        }
+        List<ResPermDTO> perms;
+        if (tenantApp.getGrantAll().equals(1)) {
+            perms = resourcePermMapper.listAppPerms(appId);
+        } else {
+            perms = tenantAppResourceMapper.getGrantedPerms(tenantId, appId);
+        }
+        ResourceTreeQueryVO vo = new ResourceTreeQueryVO();
+        vo.setAppId(appId);
+        TreeNode<ResTreeDTO> node = resourceTreeService.listResTreeRecursively(vo, perms, false);
+        return node.getChildren();
     }
 }
