@@ -1,6 +1,5 @@
 package com.hbcy.authcenter.api.modules.intgr.oa.dto;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -23,6 +22,4 @@ public class OaAccessDataDTO {
      * 访问oa系统的token
      */
     private String token;
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    private String uri;
 }

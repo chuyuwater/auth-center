@@ -74,10 +74,10 @@
                 and view_state = #{vo.viewState}
             </if>
             <if test="vo.sendTimeStart != null">
-                and send_time >= #{vo.sendTimeStart}
+                and send_time &gt;= #{vo.sendTimeStart}
             </if>
             <if test="vo.sendTimeEnd != null">
-                and #{vo.sendTimeEnd} >= send_time
+                and #{vo.sendTimeEnd} &gt;= send_time
             </if>
             <if test="vo.srcApp != null">
                 and src_app = #{vo.srcApp}

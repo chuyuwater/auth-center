@@ -1,7 +1,9 @@
 package com.hbcy.authcenter.api.modules.intgr.oa.feign;
 
-import com.hbcy.authcenter.api.modules.intgr.oa.dto.OaTodoDTO;
-import com.hbcy.authcenter.api.modules.intgr.oa.vo.*;
+import com.hbcy.authcenter.api.modules.intgr.oa.vo.OaOrgQueryVO;
+import com.hbcy.authcenter.api.modules.intgr.oa.vo.OaPageSizeModifyVO;
+import com.hbcy.authcenter.api.modules.intgr.oa.vo.OaPersonQueryVO;
+import com.hbcy.authcenter.api.modules.intgr.oa.vo.OaQueryTableVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.cloud.openfeign.SpringQueryMap;
 import org.springframework.http.MediaType;
@@ -9,10 +11,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import java.util.List;
-
 /**
- * OA业务接口
+ * 使用固定账号访问的OA业务接口
  * @author 姚泰然
  * @date 2026-01-20 14:49
  */
@@ -58,12 +58,4 @@ public interface OaBizClient {
      */
     @PostMapping(value = "/api/hrm/search/getHrmSearchResult", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     String queryPersonSession(@RequestBody OaPersonQueryVO vo);
-
-    /**
-     * 查询待办
-     */
-    @PostMapping(value = "/api/workflow/paService/getToDoWorkflowRequestList",
-            consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-    List<OaTodoDTO> queryTodo(@RequestBody OaQueryTodoVO vo);
-
 }

@@ -26,6 +26,7 @@ public class OaAccessController {
 
     /**
      * 获取客户端访问oa链接时需要的header
+     * @ignore
      * @return header信息
      */
     @GetMapping("api/portal/v1/oa/headers")
@@ -38,7 +39,7 @@ public class OaAccessController {
      * @return 使用ajax请求返回值中的uri，并将其他字段作为header，根据返回值跳转（iframe或打开新页面）
      */
     @GetMapping("api/portal/v1/oa/workflow")
-    public OaAccessDataDTO getTodoPage(@NotBlank(message = "requestId不能为空") String requestId) {
+    public String getTodoPage(@NotBlank(message = "requestId不能为空") String requestId) {
         return ecologyService.accessWorkflow(requestId);
     }
 

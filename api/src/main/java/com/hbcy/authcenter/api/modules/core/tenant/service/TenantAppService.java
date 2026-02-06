@@ -69,6 +69,7 @@ public class TenantAppService extends ServiceImpl<TenantAppMapper, TenantApp> {
         List<TenantAppResource> tenantAppResources = new ArrayList<>();
         for (String filteredId : permIds) {
             TenantAppResource tenantAppResource = new TenantAppResource();
+            tenantAppResource.setId(UlidCreator.getUlid().toString());
             tenantAppResource.setTenantId(tenantId);
             tenantAppResource.setAppId(appId);
             tenantAppResource.setPermId(filteredId);
@@ -113,7 +114,7 @@ public class TenantAppService extends ServiceImpl<TenantAppMapper, TenantApp> {
         tenantAppResourceMapper.delete(new QueryWrapper<TenantAppResource>()
                 .eq(TenantAppResource.COL_TENANT_ID, tenantId)
                 .eq(TenantAppResource.COL_APP_ID, vo.getAppId()));
-        if (!vo.isGrantAll()) {
+        if (!vo.isGrantAll() && !CollectionUtils.isEmpty(vo.getPermIds())) {
             //手动勾选的资源
             Set<String> filteredIds = resourcePermMapper.selectList(new QueryWrapper<ResourcePerm>()
                             .eq(ResourcePerm.COL_APP_ID, vo.getAppId())

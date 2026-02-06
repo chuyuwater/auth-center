@@ -49,7 +49,6 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -102,8 +101,8 @@ public class EcologyService {
     private String appId;
     @Value("${oa.url:}")
     private String oaUri;
-    @Value("${oa.client-id:}")
-    private String oaOauthClientId;
+    @Value("${oa.sso-id:}")
+    private String ssoId;
 
     @Resource
     private PermUnitUserMapper permUnitUserMapper;
@@ -117,7 +116,7 @@ public class EcologyService {
         rsa = new RSA(null, spk);
     }
 
-    public OaAccessDataDTO getOaAccessHeaders() {
+    private User getUser() {
         String uid = UserContextUtils.getUserId();
         User user = userService.getById(uid);
         if (user == null || user.getForbidden() == 1) {
@@ -126,7 +125,34 @@ public class EcologyService {
         if (StringUtils.isBlank(user.getSrcId())) {
             throw new ParamError("用户未绑定oa账号");
         }
-        return getOaAccessHeaders(user.getSrcId());
+        return user;
+    }
+
+    /**
+     * 获取OA系统访问header
+     * 由于浏览器的限制，打开页面不能携带header，所以这个功能主要用于后端调用API
+     * @return header数据
+     */
+    public OaAccessDataDTO getOaAccessHeaders() {
+        User user = getUser();
+        String srcId = user.getSrcId();
+        if (srcId.contains(",")) {
+            srcId = srcId.split(",")[0];
+        }
+        return getOaAccessHeaders(srcId);
+    }
+
+    /**
+     * 获取单点登录访问的SSO Token，单次有效
+     * see: https://www.e-cology.com.cn/sp/ebdcus/ktree/help/freepass?pathKey=aW50ZWdyYXRpb24vb2F1dGgyX3NlcnZlcg==&lang=7
+     */
+    public String getSSOToken() {
+        User user = getUser();
+        String token = oaAuthClient.getSSOToken(ssoId, user.getPhone());
+        if (token.startsWith("Token")) {
+            throw new ServerError(token);
+        }
+        return token;
     }
 
     /**
@@ -134,18 +160,13 @@ public class EcologyService {
      * @param requestId 待办关联流程的requestId
      * @return 地址和header
      */
-    public OaAccessDataDTO accessWorkflow(String requestId) {
-        OaAccessDataDTO dto = getOaAccessHeaders();
-        String page = UriComponentsBuilder.fromUriString(oaUri)
-                .path("/spa/workflow/static4form/index.html#/main/workflow/req")
-                .queryParam("requestid", requestId).toUriString();
-        String target = UriComponentsBuilder.fromUriString(oaUri)
-                .path("/sso/oauth2.0/authorize")
-                .queryParam("client_id", oaOauthClientId)
-                .queryParam("response_type", "code")
-                .queryParam("redirect_uri", page).toUriString();
-        dto.setUri(target);
-        return dto;
+    public String accessWorkflow(String requestId) {
+        String token = getSSOToken();
+        String uri = oaUri + "/spa/workflow/static4form/index.html";
+        uri += "?ssoToken=" + token;
+        uri += "#/main/workflow/req";
+        uri += "?requestid=" + requestId;
+        return uri;
     }
 
     private String tryFetchToken() {
