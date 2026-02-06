@@ -43,7 +43,7 @@ public class TenantAppController {
 
     /**
      * 批量覆盖应用授权
-     *
+     * 用于多个app全量授权
      * @param vo 授权信息
      */
     @PostMapping("/overwrite")

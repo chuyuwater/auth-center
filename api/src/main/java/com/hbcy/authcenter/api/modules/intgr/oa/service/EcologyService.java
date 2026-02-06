@@ -143,29 +143,26 @@ public class EcologyService {
     }
 
     /**
-     * 获取单点登录访问的SSO Token，单次有效
-     * see: https://www.e-cology.com.cn/sp/ebdcus/ktree/help/freepass?pathKey=aW50ZWdyYXRpb24vb2F1dGgyX3NlcnZlcg==&lang=7
+     * 结合服务端认证和OAUTH跳转
+     * @param srcId 待办关联流程的requestId
+     * @param srcUser 待办关联流程的用户id
+     * @return 地址和header
      */
-    public String getSSOToken() {
+    public String accessWorkflow(String srcId, String srcUser) {
         User user = getUser();
+        //see: https://www.e-cology.com.cn/sp/ebdcus/ktree/help/freepass?pathKey=aW50ZWdyYXRpb24vb2F1dGgyX3NlcnZlcg==&lang=7
         String token = oaAuthClient.getSSOToken(ssoId, user.getPhone());
         if (token.startsWith("Token")) {
             throw new ServerError(token);
         }
-        return token;
-    }
-
-    /**
-     * 结合服务端认证和OAUTH跳转
-     * @param requestId 待办关联流程的requestId
-     * @return 地址和header
-     */
-    public String accessWorkflow(String requestId) {
-        String token = getSSOToken();
         String uri = oaUri + "/spa/workflow/static4form/index.html";
         uri += "?ssoToken=" + token;
         uri += "#/main/workflow/req";
-        uri += "?requestid=" + requestId;
+        uri += "?requestid=" + srcId;
+        String allSrcId = user.getSrcId();
+        if (!allSrcId.equals(srcId)) {
+            uri += "&f_weaver_belongto_usertype=0&f_weaver_belongto_userid=" + srcUser;
+        }
         return uri;
     }
 

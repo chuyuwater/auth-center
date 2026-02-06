@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 
 /**
  * @author 姚泰然
- * @date 2026-02-06 12:53
+ * @date 2026-02-06 17:41
  */
 @Data
 @NoArgsConstructor
@@ -19,6 +19,7 @@ public class UserTodo {
     public static final String COL_ID = "id";
     public static final String COL_SRC_APP = "src_app";
     public static final String COL_SRC_ID = "src_id";
+    public static final String COL_SRC_USER = "src_user";
     public static final String COL_TODO_TITLE = "todo_title";
     public static final String COL_TODO_CONTENT = "todo_content";
     public static final String COL_TARGET_USER = "target_user";
@@ -42,6 +43,11 @@ public class UserTodo {
      */
     @TableField(value = "src_id")
     private String srcId;
+    /**
+     * 源系统的用户id
+     */
+    @TableField(value = "src_user")
+    private String srcUser;
     /**
      * 待办标题
      */
