@@ -190,7 +190,7 @@ public class TenantAppService extends ServiceImpl<TenantAppMapper, TenantApp> {
         }
         inst.setGrantAll(vo.isGrantAll() ? 1 : 0);
         inst.setUpdateUser(UserContextUtils.getUserId());
-        save(inst);
+        updateById(inst);
     }
 
     /**
