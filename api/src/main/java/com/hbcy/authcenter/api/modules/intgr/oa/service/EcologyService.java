@@ -160,7 +160,8 @@ public class EcologyService {
         uri += "#/main/workflow/req";
         uri += "?requestid=" + srcId;
         String allSrcId = user.getSrcId();
-        if (!allSrcId.equals(srcId)) {
+        //如果不是主账号，需要跳转
+        if (!allSrcId.equals(srcId) && !allSrcId.startsWith(srcId + ",")) {
             uri += "&f_weaver_belongto_usertype=0&f_weaver_belongto_userid=" + srcUser;
         }
         return uri;
