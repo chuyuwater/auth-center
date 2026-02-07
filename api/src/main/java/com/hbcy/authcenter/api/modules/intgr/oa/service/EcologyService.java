@@ -411,6 +411,7 @@ public class EcologyService {
         for (OaPersonDTO data : personList.getDatas()) {
             if (data.isMainAccount()) {
                 //FIXME: 领导班子手机号脱敏了，需要想办法拿到完整的手机号
+                //目前可以通过手动增加领导班子账号，并在数据库里标记srcId的方法变相使用
                 if (StringUtils.isNotBlank(data.getMobile()) && !data.getMobile().contains("*")) {
                     resp.add(data);
                 }
@@ -521,9 +522,10 @@ public class EcologyService {
                 user.setEmail(person.getEmail());
                 update = true;
             }
-            String srcIds = person.getSrcIds();
-            if (!user.getSrcId().equals(srcIds)) {
-                user.setSrcId(srcIds);
+            //只记录主账号的id
+            String srcId = person.getId();
+            if (!user.getSrcId().equals(srcId)) {
+                user.setSrcId(srcId);
                 update = true;
             }
             if (update) {
@@ -590,7 +592,7 @@ public class EcologyService {
                 user.setRealName(person.getLastname());
                 user.setEmail(person.getEmail());
                 user.setSrcType(G.USER_SOURCE_OA);
-                user.setSrcId(person.getSrcIds());
+                user.setSrcId(person.getId());
                 user.setForbidden(0);
                 user.setCreateUser("0");
                 user.setUpdateUser("0");

@@ -1,13 +1,11 @@
 package com.hbcy.authcenter.api.modules.intgr.oa.dto;
 
-import com.google.common.collect.Lists;
 import com.hbcy.authcenter.api.modules.intgr.oa.constants.OaConstants;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static com.hbcy.authcenter.api.modules.intgr.oa.constants.OaConstants.OA_ORG_KEY;
 
@@ -76,16 +74,6 @@ public class OaPersonDTO {
 
     public boolean isMainAccount() {
         return "0".equals(accounttype);
-    }
-
-    //关联账号合并
-    public String getSrcIds() {
-        if (subAccounts.isEmpty()) return id;
-        List<String> srcIds = Lists.newArrayList(id);
-        for (OaPersonDTO subAccount : subAccounts) {
-            srcIds.add(subAccount.getId());
-        }
-        return srcIds.stream().sorted().collect(Collectors.joining(","));
     }
 
     //组织节点id
