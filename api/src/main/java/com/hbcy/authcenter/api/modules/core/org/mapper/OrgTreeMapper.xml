@@ -119,19 +119,21 @@
 
     <select id="selectNameByIds" resultType="com.hbcy.common.web.api.NamedId">
         select id as item_id,
-        <choose>
-            <when test="useFullName">
-                node_name as item_name,
-            </when>
-            <otherwise>
-                short_name as item_name
-            </otherwise>
-        </choose>
+        <trim suffixOverrides=",">
+            <choose>
+                <when test="useFullName">
+                    node_name as item_name,
+                </when>
+                <otherwise>
+                    short_name as item_name,
+                </otherwise>
+            </choose>
+        </trim>
         from org_tree
         <where>
             id in
-            <foreach collection="orgIds" open="(" close=")" separator="," item="oid">
-                #{oid}
+            <foreach item="item" collection="orgIds" separator="," close=")" open="(" index="">
+                #{item}
             </foreach>
         </where>
     </select>
