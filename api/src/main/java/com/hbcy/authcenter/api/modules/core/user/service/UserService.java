@@ -199,11 +199,15 @@ public class UserService extends ServiceImpl<UserMapper, User> {
         updateWrapper.set(User::getRealName, vo.getRealName());
         updateWrapper.set(User::getPhone, vo.getPhone());
         updateWrapper.set(User::getEmail, vo.getEmail());
-        updateWrapper.set(User::getAvatar, vo.getAvatar());
+        updateWrapper.set(User::getAvatar, vo.getAvatar() == null ? "" : vo.getAvatar());
         updateWrapper.set(User::getEmployeeType, vo.getEmployeeType());
         updateWrapper.set(User::getUpdateUser, UserContextUtils.getUserId());
         updateWrapper.set(User::getUpdateTime, LocalDateTime.now());
-        baseMapper.update(updateWrapper);
+        try {
+            baseMapper.update(updateWrapper);
+        } catch (DuplicateKeyException e) {
+            throw new ParamError("用户的账号、手机号或邮箱与其他用户冲突，请检查");
+        }
     }
 
     public void deleteUser(String userId) {

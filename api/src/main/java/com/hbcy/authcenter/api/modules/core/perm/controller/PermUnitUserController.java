@@ -30,9 +30,9 @@ public class PermUnitUserController {
     private PermUnitUserService permUnitUserService;
 
     /**
-     * 添加用户到权限单元
+     * 添加用户到任意角色（仅授予管理员）
      *
-     * @param vo 添加用户到单位请求参数
+     * @param vo 请求参数
      */
     @PostMapping
     public void addUsersToUnit(@Valid @RequestBody PermUnitUserUpdateVO vo) {
