@@ -10,6 +10,7 @@ import com.hbcy.common.base.pojo.ApiResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -57,7 +58,15 @@ public interface AuthCenterClient {
      * @return 组织id与名称的映射
      */
     @GetMapping("/inner/portal/v1/org/names")
-    ApiResponse<Map<String, String>> getOrgNames(@RequestParam List<String> orgIds, @RequestParam boolean fullName);
+    ApiResponse<Map<String, String>> getOrgNames(@RequestParam Collection<String> orgIds, @RequestParam boolean fullName);
+
+    /**
+     * 获取用户名称
+     * @param userIds 用户id
+     * @return 用户id与名称的映射
+     */
+    @GetMapping("/inner/portal/v1/user/names")
+    ApiResponse<Map<String, String>> getUserNames(@RequestParam Collection<String> userIds);
 
     /**
      * 分组下的字典项列表

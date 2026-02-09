@@ -1,6 +1,7 @@
 package com.hbcy.authcenter.api.modules.core.inner.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.hbcy.authcenter.api.common.bean.NameCacheService;
 import com.hbcy.authcenter.api.config.UserAuthConfig;
 import com.hbcy.authcenter.api.modules.core.app.dao.ResourcePermMapper;
 import com.hbcy.authcenter.api.modules.core.org.dao.OrgTreeMapper;
@@ -51,6 +52,9 @@ public class InnerService {
     private TenantMapper tenantMapper;
     @Resource
     private StringRedisTemplate stringRedisTemplate;
+
+    @Resource
+    private NameCacheService nameCacheService;
 
     public void refreshUserPerms(RefreshUserPermVO vo) {
         Set<String> resp = new HashSet<>();
@@ -127,5 +131,9 @@ public class InnerService {
         List<NamedId> namedIds = orgTreeMapper.selectNameByIds(orgIds, fullName);
         return namedIds.stream()
                 .collect(Collectors.toMap(NamedId::getItemId, NamedId::getItemName));
+    }
+
+    public Map<String, String> getUserNames(Set<String> userIds) {
+        return nameCacheService.getUserNameMap(userIds);
     }
 }

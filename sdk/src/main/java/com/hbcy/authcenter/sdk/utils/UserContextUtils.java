@@ -63,6 +63,14 @@ public class UserContextUtils {
     }
 
     /**
+     * 获取当前用户姓名
+     * @return 用户姓名
+     */
+    public static String getUserName() {
+        return getHeader(AuthConstants.HEADER_USER_NAME);
+    }
+
+    /**
      * 获取当前请求用户切换的组织
      *
      * @return 组织id

@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * 供网关访问的内部API
@@ -69,9 +70,22 @@ public class InnerController {
 
     /**
      * 获取组织id对应的组织名称
+     * @param orgIds 组织id
+     * @param fullName 是否返回全称
+     * @return 字典
      */
     @GetMapping("/org/names")
     public Map<String, String> getOrgNames(@RequestParam List<String> orgIds, boolean fullName) {
         return innerService.getOrgNames(orgIds, fullName);
+    }
+
+    /**
+     * 获取用户id对应的名称
+     * @param userIds 组织id
+     * @return 字典
+     */
+    @GetMapping("/user/names")
+    public Map<String, String> getOrgNames(@RequestParam Set<String> userIds) {
+        return innerService.getUserNames(userIds);
     }
 }

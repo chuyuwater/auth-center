@@ -18,6 +18,8 @@ public class AuthConstants {
     /***************************以下为网关注入header************************************/
     //当前用户id
     public static final String HEADER_USER_ID = "X-USER-ID";
+    //当前用户名称
+    public static final String HEADER_USER_NAME = "X-USER-NAME";
     //当前租户id
     public static final String HEADER_TENANT_ID = "X-TENANT-ID";
     //当前用户是租户默认管理员，用于特殊权限校验
