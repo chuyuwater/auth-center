@@ -14,6 +14,10 @@ public class GatewayConstants {
      */
     public static final String SESSION_TENANT_ID = "tenantId";
     /**
+     * session中用户姓名key
+     */
+    public static final String SESSION_USER_NAME = "userName";
+    /**
      * 用户权限缓存（按userId:orgId）
      */
     public static final String USER_PERM_CACHE_PREFIX = "portal:auth:user:perm:%s:%s";

@@ -136,8 +136,11 @@ public class UserAuthService {
                 .setTimeout(authConfig.getTokenExpire().toSeconds())
                 .setActiveTimeout(authConfig.getTokenExpire().toSeconds())
         );
-        //将租户id保存到session中
-        StpUtil.getSession(true).set(GatewayConstants.SESSION_TENANT_ID, chosen.getTenantId());
+        //将租户id和用户名字保存到session中
+        StpUtil.getSession(true)
+                .set(GatewayConstants.SESSION_TENANT_ID, chosen.getTenantId())
+                .set(GatewayConstants.SESSION_USER_NAME, chosen.getRealName());
+
         SaTokenInfo tokenInfo = StpUtil.getTokenInfo();
         Tenant tenant = tenantMapper.selectById(chosen.getTenantId());
         LoginRespDTO resp = new LoginRespDTO()
