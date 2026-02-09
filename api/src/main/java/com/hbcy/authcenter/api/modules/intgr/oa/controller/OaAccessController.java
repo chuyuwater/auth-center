@@ -1,9 +1,8 @@
 package com.hbcy.authcenter.api.modules.intgr.oa.controller;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.hbcy.authcenter.api.modules.intgr.oa.dto.OaAccessDataDTO;
 import com.hbcy.authcenter.api.modules.intgr.oa.service.EcologyService;
-import com.hbcy.common.base.json.JsonUtils;
+import com.hbcy.authcenter.api.modules.intgr.oa.vo.OaMsgVO;
 import jakarta.annotation.Resource;
 import jakarta.validation.constraints.NotBlank;
 import lombok.extern.slf4j.Slf4j;
@@ -60,7 +59,7 @@ public class OaAccessController {
      * 参考https://www.e-cology.com.cn/sp/ebdcus/ktree/help/freepass?pathKey=ZWNBbmRFTS9tZXNzYWdldHlwZWNvbmZpZz9rZXkwPTA=&lang=7
      */
     @PostMapping("api/portal/v1/oa/msg")
-    public void notifyMsg(@RequestBody JsonNode body) {
-        log.info("==========receive oa msg push:{}", JsonUtils.toJsonStr(body));
+    public void notifyMsg(@RequestBody OaMsgVO body) {
+        log.info("==========receive oa msg push:{}", body);
     }
 }
