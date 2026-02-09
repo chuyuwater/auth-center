@@ -387,6 +387,7 @@ public class OrgTreeService extends ServiceImpl<OrgTreeMapper, OrgTree> {
         // Correct handling of ID Path updates
         String oldPath = node.getIdPath();
         String newPath = parentNode.getIdPath() + G.ID_PATH_SPLITTER + node.getId();
+        node.setIdPath(newPath);
         //部门不能跨组织移动
         if (node.getNodeType().equals(OrgNodeTypeEnum.DEPT.getValue())) {
             String directOrg = findDeptDirectOrg(oldPath);

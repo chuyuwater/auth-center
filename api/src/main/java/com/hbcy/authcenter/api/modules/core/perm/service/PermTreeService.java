@@ -199,6 +199,7 @@ public class PermTreeService extends ServiceImpl<PermTreeMapper, PermTree> {
         String oldPath = node.getIdPath();
         String newPath = (parentNode != null ? parentNode.getIdPath() + G.ID_PATH_SPLITTER : "") + node.getId();
         baseMapper.updateIdPath(node.getTenantId(), oldPath, newPath);
+        node.setIdPath(newPath);
     }
 
     @Transactional(rollbackFor = Exception.class)

@@ -374,6 +374,7 @@ public class ResourceTreeService extends ServiceImpl<ResourceTreeMapper, Resourc
         String newPath = newParent == null ? node.getId() : newParent.getIdPath()
                 + G.ID_PATH_SPLITTER + node.getId();
         baseMapper.updateIdPath(node.getAppId(), oldPath, newPath);
+        node.setIdPath(newPath);
     }
 
     /**
