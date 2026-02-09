@@ -12,4 +12,5 @@ import lombok.experimental.Accessors;
 public class SessionDTO {
     private String userId;
     private String tenantId;
+    private String userName;
 }

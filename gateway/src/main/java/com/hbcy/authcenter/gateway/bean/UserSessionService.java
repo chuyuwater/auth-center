@@ -40,7 +40,8 @@ public class UserSessionService {
             SaSession session = StpUtil.getSessionByLoginId(loginId);
             return new SessionDTO()
                     .setUserId(loginId)
-                    .setTenantId((String) session.get(GatewayConstants.SESSION_TENANT_ID));
+                    .setTenantId((String) session.get(GatewayConstants.SESSION_TENANT_ID))
+                    .setUserName((String) session.get(GatewayConstants.SESSION_USER_NAME));
         } catch (Exception e) {
             return null;
         }
