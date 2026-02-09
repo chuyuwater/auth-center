@@ -383,6 +383,7 @@ public class ResourceTreeService extends ServiceImpl<ResourceTreeMapper, Resourc
      */
     @Transactional(rollbackFor = Exception.class)
     public void move(@Valid NodeMoveVO vo) {
+        vo.check();
         ResourceTree node = getById(vo.getNodeId());
         if (node == null) {
             throw new ParamError("节点不存在");

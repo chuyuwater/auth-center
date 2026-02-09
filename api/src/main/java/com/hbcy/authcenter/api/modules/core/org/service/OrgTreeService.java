@@ -26,6 +26,7 @@ import com.hbcy.common.redis.RedisIdGenerator;
 import com.hbcy.common.web.api.NamedId;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -42,6 +43,7 @@ import java.util.stream.Collectors;
  * @author 姚泰然
  * @date 2025-12-25
  */
+@Slf4j
 @Service
 public class OrgTreeService extends ServiceImpl<OrgTreeMapper, OrgTree> {
     public static final String BIZ_KEY = "portal:orgtree:tenant:%s:%d:";
@@ -404,6 +406,7 @@ public class OrgTreeService extends ServiceImpl<OrgTreeMapper, OrgTree> {
         }
         // Update children's paths
         baseMapper.updateIdPath(node.getTenantId(), oldPath, newPath);
+        log.info("update org path {}->{} for tenant {}", oldPath, newPath, node.getTenantId());
     }
 
     /**
@@ -413,6 +416,7 @@ public class OrgTreeService extends ServiceImpl<OrgTreeMapper, OrgTree> {
      */
     @Transactional(rollbackFor = Exception.class)
     public void move(@Valid NodeMoveVO vo) {
+        vo.check();
         String rootId = tenantRootId();
         if (vo.getNodeId().equals(rootId)) {
             throw new ParamError("禁止移动根节点");

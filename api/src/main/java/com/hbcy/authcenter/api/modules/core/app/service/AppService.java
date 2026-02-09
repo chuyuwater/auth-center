@@ -119,6 +119,7 @@ public class AppService extends ServiceImpl<AppMapper, App> {
 
     @Transactional(rollbackFor = Exception.class)
     public void move(NodeMoveVO vo) {
+        vo.check();
         App node = baseMapper.selectById(vo.getNodeId());
         if (node == null) {
             throw new ParamError("指定应用已被删除");

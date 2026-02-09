@@ -1,5 +1,6 @@
 package com.hbcy.authcenter.api.common.bean;
 
+import com.hbcy.common.base.error.ParamError;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
@@ -24,4 +25,10 @@ public class NodeMoveVO {
      * 移动之后的前一个节点，为空标识置顶
      */
     private String prevId = "";
+
+    public void check() {
+        if (nodeId.equals(parentId) || nodeId.equals(prevId)) {
+            throw new ParamError("参数错误");
+        }
+    }
 }

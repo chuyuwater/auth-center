@@ -203,6 +203,7 @@ public class PermTreeService extends ServiceImpl<PermTreeMapper, PermTree> {
 
     @Transactional(rollbackFor = Exception.class)
     public void move(@Valid NodeMoveVO vo) {
+        vo.check();
         PermTree node = getById(vo.getNodeId());
         if (node == null) {
             throw new ParamError("节点不存在");
