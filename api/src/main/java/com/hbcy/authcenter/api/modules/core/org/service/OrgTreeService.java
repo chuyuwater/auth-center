@@ -407,7 +407,6 @@ public class OrgTreeService extends ServiceImpl<OrgTreeMapper, OrgTree> {
         }
         // Update children's paths
         baseMapper.updateIdPath(node.getTenantId(), oldPath, newPath);
-        log.info("update org path {}->{} for tenant {}", oldPath, newPath, node.getTenantId());
     }
 
     /**
