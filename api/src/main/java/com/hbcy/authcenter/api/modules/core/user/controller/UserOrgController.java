@@ -5,6 +5,8 @@ import com.hbcy.authcenter.api.modules.core.user.vo.SwitchDefaultOrgVO;
 import com.hbcy.authcenter.api.modules.core.user.vo.UserAddOrgVO;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
  */
 @RestController
 @RequestMapping("/api/portal/v1/user/org")
+@Validated
 public class UserOrgController {
 
     @Resource
@@ -35,7 +38,8 @@ public class UserOrgController {
      * @param nodeId 用户实际挂载的节点（部门或组织）id
      */
     @DeleteMapping
-    public void deleteUserOrg(@RequestParam String nodeId, @RequestParam String userId) {
+    public void deleteUserOrg(@NotBlank(message = "节点id不能为空") @RequestParam String nodeId,
+                              @NotBlank(message = "用户id不能为空") @RequestParam String userId) {
         userOrgService.removeUserOrg(userId, nodeId);
     }
 
