@@ -43,14 +43,14 @@
         </where>
         )
         select temp.user_id,
-        temp.org_id,
-        temp.main_job,
-        o.forbidden as org_forbidden,
-        o.node_name as org_name,
-        o.id_path,
-        o.node_category
+               temp.org_id,
+               temp.main_job,
+               o.forbidden as org_forbidden,
+               o.node_name as org_name,
+               o.id_path,
+               o.node_category
         from temp
-        join org_tree o on temp.org_id = o.id
+                 join org_tree o on temp.org_id = o.id
         <where>
             <if test="forbidden != null">
                 o.forbidden = #{forbidden}
@@ -62,15 +62,15 @@
         update user_org
         set main_job=1
         where user_id = #{userId}
-        and org_id = #{orgId}
+          and org_id = #{orgId}
     </update>
 
     <update id="updatePartJob">
         update user_org
         set main_job=0
         where user_id = #{userId}
-        and org_id != #{orgId}
-        and main_job = 1
+          and org_id != #{orgId}
+          and main_job = 1
     </update>
 
     <select id="listAllOrg" resultType="java.lang.String">
@@ -82,10 +82,10 @@
     <select id="queryMainOrg" resultType="java.lang.String">
         select org_id
         from user_org uo
-        join org_tree o on uo.org_id = o.id
+                 join org_tree o on uo.org_id = o.id
         where uo.user_id = #{userId}
-        and uo.main_job = 1
-        and o.forbidden = 0
+          and uo.main_job = 1
+          and o.forbidden = 0
         limit 1
     </select>
 
@@ -93,11 +93,11 @@
     <insert id="insertIgnore">
         insert ignore into user_org (id, user_id, org_id, node_id, tenant_id, main_job, create_user, update_user)
         values
-        <foreach collection="userOrgs" item="userOrg">
+        <foreach collection="userOrgs" item="userOrg" separator=",">
             (#{userOrg.id}, #{userOrg.userId},
-            #{userOrg.orgId}, #{userOrg.nodeId},
-            #{userOrg.tenantId}, #{userOrg.mainJob},
-            #{userOrg.createUser}, #{userOrg.updateUser})
+             #{userOrg.orgId}, #{userOrg.nodeId},
+             #{userOrg.tenantId}, #{userOrg.mainJob},
+             #{userOrg.createUser}, #{userOrg.updateUser})
         </foreach>
     </insert>
 </mapper>
