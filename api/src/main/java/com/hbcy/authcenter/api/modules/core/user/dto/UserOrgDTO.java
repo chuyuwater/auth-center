@@ -24,6 +24,10 @@ public class UserOrgDTO {
      */
     private String nodeId;
     /**
+     * 组织类型，0-组织，1-部门
+     */
+    private Integer nodeType;
+    /**
      * 组织名称
      */
     private String orgName;
