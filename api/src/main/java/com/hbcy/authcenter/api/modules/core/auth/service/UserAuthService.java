@@ -116,7 +116,9 @@ public class UserAuthService {
         }
         if (hitTenant.size() > 1) {
             List<Tenant> tenantList = tenantMapper.selectByIds(hitTenant);
-            throw new ClientError(100, "请选择租户", tenantList);
+            ClientError error = new ClientError(100, "请选择租户");
+            error.setData(tenantList);
+            throw error;
         }
         chosen = userList.get(0);
         long expire = checkLockTime(chosen.getId());
@@ -180,8 +182,8 @@ public class UserAuthService {
         Captcha captcha = new ArithmeticCaptcha(130, 48);
         String verCode = captcha.text();
         String key = UlidCreator.getUlid().toString();
-        // 存入redis并设置过期时间为30分钟
-        stringRedisTemplate.opsForValue().set(CAPTCHA_KEY_PREFIX + key, verCode, 1, TimeUnit.MINUTES);
+        // 存入redis并设置过期时间为2分钟
+        stringRedisTemplate.opsForValue().set(CAPTCHA_KEY_PREFIX + key, verCode, 2, TimeUnit.MINUTES);
         // 将key和base64返回给前端
         return new CaptchaDTO(key, captcha.toBase64());
     }

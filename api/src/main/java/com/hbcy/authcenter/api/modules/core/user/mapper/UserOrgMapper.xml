@@ -59,8 +59,16 @@
     </select>
 
     <select id="listUserOrgNodes" resultType="com.hbcy.authcenter.api.modules.core.user.dto.UserOrgDTO">
-        select user_id, org_id, node_id, main_job
-        from user_org
+        select uo.user_id,
+        uo.org_id,
+        uo.node_id,
+        uo.main_job,
+        o.node_name as org_name,
+        o.forbidden as org_forbidden,
+        o.id_path,
+        o.node_category
+        from user_org uo
+        join org_tree o on uo.node_id = o.id
         <where>
             user_id in
             <foreach collection="userIds" open="(" close=")" separator="," item="uid">
