@@ -88,4 +88,16 @@
         and o.forbidden = 0
         limit 1
     </select>
+
+    <!--    TODO: MySQL Only-->
+    <insert id="insertIgnore">
+        insert ignore into user_org (id, user_id, org_id, node_id, tenant_id, main_job, create_user, update_user)
+        values
+        <foreach collection="userOrgs" item="userOrg">
+            (#{userOrg.id}, #{userOrg.userId},
+            #{userOrg.orgId}, #{userOrg.nodeId},
+            #{userOrg.tenantId}, #{userOrg.mainJob},
+            #{userOrg.createUser}, #{userOrg.updateUser})
+        </foreach>
+    </insert>
 </mapper>

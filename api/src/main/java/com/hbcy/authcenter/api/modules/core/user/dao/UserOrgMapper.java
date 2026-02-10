@@ -58,4 +58,11 @@ public interface UserOrgMapper extends BaseMapper<UserOrg> {
      * @return 组织id集合
      */
     Set<String> listAllOrg(@Param("userId") String userId);
+
+    /**
+     * 批量插入用户任职信息
+     *
+     * @param userOrgs 用户任职信息
+     */
+    void insertIgnore(@Param("userOrgs") List<UserOrg> userOrgs);
 }

@@ -12,7 +12,7 @@ import java.util.List;
 
 /**
  * @author 姚泰然
- * @date 2026-01-27 08:55
+ * @date 2026-02-10 11:04
  */
 @Mapper
 public interface UserInboxMapper extends BaseMapper<UserInbox> {

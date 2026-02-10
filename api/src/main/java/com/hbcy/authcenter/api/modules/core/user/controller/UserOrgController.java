@@ -26,7 +26,7 @@ public class UserOrgController {
      */
     @PostMapping("/add")
     public void addOrg(@Valid @RequestBody UserAddOrgVO vo) {
-        userOrgService.addUserNode(vo.getUserId(), vo.getNodeId(), null);
+        userOrgService.addUserNode(vo.getUserId(), vo.getNodeIds());
     }
 
     /**

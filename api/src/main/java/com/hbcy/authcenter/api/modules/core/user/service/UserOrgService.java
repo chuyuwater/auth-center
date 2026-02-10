@@ -2,6 +2,7 @@ package com.hbcy.authcenter.api.modules.core.user.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.github.f4b6a3.ulid.UlidCreator;
 import com.hbcy.authcenter.api.common.enums.OrgNodeTypeEnum;
 import com.hbcy.authcenter.api.modules.core.org.dao.OrgTreeMapper;
 import com.hbcy.authcenter.api.modules.core.org.model.OrgTree;
@@ -24,6 +25,7 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -40,23 +42,39 @@ public class UserOrgService extends ServiceImpl<UserOrgMapper, UserOrg> {
     @Resource
     private PermUnitUserMapper permUnitUserMapper;
 
-    public void addUserNode(String userId, String nodeId, Boolean mainJob) {
-        OrgTree node = orgTreeMapper.selectById(nodeId);
-        if (node == null) {
-            throw new ParamError("指定组织/部门不存在");
-        }
+
+    @Transactional
+    public void addUserNode(String userId, List<String> nodeIds) {
         String tenantId = UserContextUtils.getTenantId();
-        if (!tenantId.equals(node.getTenantId())) {
-            throw new PermissionError();
-        }
-        String orgId = node.getId();
-        if (node.getNodeType().equals(OrgNodeTypeEnum.DEPT.getValue())) {
-            orgId = OrgTreeService.findDeptDirectOrg(node.getIdPath());
-        }
-        if (orgId == null) {
+        String createUser = UserContextUtils.getUserId();
+        List<OrgTree> nodes = orgTreeMapper.selectList(new QueryWrapper<OrgTree>()
+                .eq(OrgTree.COL_TENANT_ID, tenantId)
+                .in(OrgTree.COL_ID, nodeIds));
+        if (nodes.size() < nodeIds.size()) {
             throw new ParamError("组织选择错误");
         }
-        addUserNode(userId, orgId, node, mainJob);
+        String mainOrg = getMainJobOrg(userId);
+        List<UserOrg> userOrgs = new ArrayList<>();
+        for (OrgTree node : nodes) {
+            String orgId = node.getId();
+            if (node.getNodeType().equals(OrgNodeTypeEnum.DEPT.getValue())) {
+                orgId = OrgTreeService.findDeptDirectOrg(node.getIdPath());
+            }
+            if (orgId == null) {
+                throw new ParamError("组织选择错误");
+            }
+            UserOrg userOrg = new UserOrg();
+            userOrg.setId(UlidCreator.getUlid().toString());
+            userOrg.setOrgId(orgId);
+            userOrg.setNodeId(node.getId());
+            userOrg.setUserId(userId);
+            userOrg.setTenantId(node.getTenantId());
+            userOrg.setMainJob(orgId.equals(mainOrg) ? 1 : 0);
+            userOrg.setCreateUser(createUser);
+            userOrg.setUpdateUser(createUser);
+            userOrgs.add(userOrg);
+        }
+        baseMapper.insertIgnore(userOrgs);
     }
 
     public String getMainJobOrg(String userId) {

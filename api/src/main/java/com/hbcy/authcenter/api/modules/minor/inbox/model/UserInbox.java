@@ -3,26 +3,24 @@ package com.hbcy.authcenter.api.modules.minor.inbox.model;
 import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.Accessors;
 
 import java.time.LocalDateTime;
 
-/**
- * 站内信，即消息提醒
+/** 站内信
  * @author 姚泰然
- * @date 2026-01-27 08:55
+ * @date 2026-02-10 11:04
  */
 
 @Data
 @NoArgsConstructor
 @TableName(value = "user_inbox")
-@Accessors(chain = true)
 public class UserInbox {
     public static final int STATUS_UNREAD = 0;
     public static final int STATUS_READ = 1;
     public static final String COL_ID = "id";
     public static final String COL_SRC_ID = "src_id";
     public static final String COL_SRC_APP = "src_app";
+    public static final String COL_SRC_USER = "src_user";
     public static final String COL_MSG_TITLE = "msg_title";
     public static final String COL_MSG_CONTENT = "msg_content";
     public static final String COL_TARGET_USER = "target_user";
@@ -44,6 +42,11 @@ public class UserInbox {
      */
     @TableField(value = "src_app")
     private String srcApp;
+    /**
+     * 源系统用户标识
+     */
+    @TableField(value = "src_user")
+    private String srcUser;
     /**
      * 消息标题
      */
@@ -84,7 +87,7 @@ public class UserInbox {
      */
     @TableField(value = "origin_json")
     private String originJson;
-
+    
     @TableField(value = "create_time", fill = FieldFill.INSERT)
     private LocalDateTime createTime;
 }

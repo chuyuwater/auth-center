@@ -6,14 +6,12 @@ import lombok.Data;
 import java.util.List;
 
 /**
- * 将用户加到组织中
- * 传入叶子结点id即可
- *
+ * 覆盖用户的组织关系
  * @author 姚泰然
- * @date 2025-12-26 19:42
+ * @date 2026-02-10 11:17
  */
 @Data
-public class UserAddOrgVO {
+public class UserOrgOverwriteVO {
     /**
      * 用户id
      */
@@ -22,6 +20,5 @@ public class UserAddOrgVO {
     /**
      * 组织id或部门id
      */
-    @NotBlank
-    private List<String> nodeIds;
+    private List<String> nodeId;
 }

@@ -74,7 +74,7 @@ public class OrgTreeService extends ServiceImpl<OrgTreeMapper, OrgTree> {
         List<String> parts = Splitter.on(G.ID_PATH_SPLITTER).splitToList(idPath);
         for (int i = parts.size() - 1; i >= 0; i--) {
             String part = parts.get(i);
-            if (part.contains("ORG")) {
+            if (part.contains("-ORG-")) {
                 return part;
             }
         }
