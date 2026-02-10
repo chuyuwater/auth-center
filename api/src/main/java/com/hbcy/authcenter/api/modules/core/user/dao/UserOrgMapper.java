@@ -29,6 +29,15 @@ public interface UserOrgMapper extends BaseMapper<UserOrg> {
                                   @Param("forbidden") Integer forbidden);
 
     /**
+     * 获取用户的所有任职信息，精确到部门
+     * @param userIds 用户id
+     * @param onlyMain 仅需要主职单位
+     * @return 所有任职信息
+     */
+    List<UserOrgDTO> listUserOrgNodes(@Param("userIds") Collection<String> userIds,
+                                      @Param("onlyMain") boolean onlyMain);
+
+    /**
      * 查询用户的主要任职组织
      * @param userId 用户id
      * @return 主职组织id

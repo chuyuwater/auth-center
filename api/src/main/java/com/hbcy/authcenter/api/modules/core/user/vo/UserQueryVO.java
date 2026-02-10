@@ -88,4 +88,11 @@ public class UserQueryVO extends PageVO {
      */
     @JsonIgnore
     private String tenantId;
+
+    /**
+     * 任职是否具体到部门
+     * 默认只显示到组织
+     */
+    @JsonIgnore
+    private boolean deptJob;
 }

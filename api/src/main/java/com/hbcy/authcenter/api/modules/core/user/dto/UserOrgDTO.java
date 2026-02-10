@@ -20,6 +20,10 @@ public class UserOrgDTO {
      */
     private String orgId;
     /**
+     * 实际挂载的组织或部门id
+     */
+    private String nodeId;
+    /**
      * 组织名称
      */
     private String orgName;

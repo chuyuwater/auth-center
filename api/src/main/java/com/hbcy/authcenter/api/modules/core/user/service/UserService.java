@@ -302,6 +302,7 @@ public class UserService extends ServiceImpl<UserMapper, User> {
         checkUser(userId);
         UserQueryVO vo = new UserQueryVO();
         vo.setUserId(userId);
+        vo.setDeptJob(true);
         PageResp<UserQueryResultDTO> resp = queryUser(vo);
         if (resp.getTotal() == 0) {
             return null;
@@ -395,7 +396,12 @@ public class UserService extends ServiceImpl<UserMapper, User> {
         Set<String> userIds = page.getRecords().stream().map(
                 UserQueryResultDTO::getId).collect(Collectors.toSet());
         //然后查询每个人的所有任职组织及其概况
-        List<UserOrgDTO> userOrgs = userOrgService.listUserOrgs(userIds);
+        List<UserOrgDTO> userOrgs;
+        if (vo.isDeptJob()) {
+            userOrgs = userOrgService.listUserOrgNodes(userIds);
+        } else {
+            userOrgs = userOrgService.listUserOrgs(userIds);
+        }
         //根据orgId查询orgName
         Set<String> orgIds = new HashSet<>();
         for (UserOrgDTO userOrg : userOrgs) {

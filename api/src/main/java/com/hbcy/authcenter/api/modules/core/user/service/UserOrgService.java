@@ -28,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author 姚泰然
@@ -136,14 +137,20 @@ public class UserOrgService extends ServiceImpl<UserOrgMapper, UserOrg> {
         return baseMapper.listUserOrgs(userIds, false, null);
     }
 
+    public List<UserOrgDTO> listUserOrgNodes(Set<String> userIds) {
+        return baseMapper.listUserOrgNodes(userIds, false);
+    }
+
     /**
      * 将用户从组织/部门中移除
      *
-     * @param userOrgId 关联关系的id
+     * @param nodeId 关联关系的id
      */
     @Transactional(rollbackFor = Exception.class)
-    public void removeUserOrg(String userOrgId) {
-        UserOrg userOrg = baseMapper.selectById(userOrgId);
+    public void removeUserOrg(String nodeId) {
+        UserOrg userOrg = baseMapper.selectOne(new QueryWrapper<UserOrg>()
+                .eq(UserOrg.COL_USER_ID, UserContextUtils.getUserId())
+                .eq(UserOrg.COL_NODE_ID, nodeId));
         if (userOrg == null) {
             return;
         }
@@ -168,6 +175,6 @@ public class UserOrgService extends ServiceImpl<UserOrgMapper, UserOrg> {
                     .eq(PermUnitUser.COL_USER_ID, userOrg.getUserId())
                     .eq(PermUnitUser.COL_ORG_ID, userOrg.getOrgId()));
         }
-        removeById(userOrgId);
+        removeById(userOrg.getId());
     }
 }
