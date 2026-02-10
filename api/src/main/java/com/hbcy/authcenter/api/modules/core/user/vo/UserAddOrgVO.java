@@ -1,6 +1,7 @@
 package com.hbcy.authcenter.api.modules.core.user.vo;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
 
 import java.util.List;
@@ -17,11 +18,11 @@ public class UserAddOrgVO {
     /**
      * 用户id
      */
-    @NotBlank
+    @NotBlank(message = "用户id不能为空")
     private String userId;
     /**
      * 组织id或部门id
      */
-    @NotBlank
+    @NotEmpty(message = "组织id或部门id不能为空")
     private List<String> nodeIds;
 }
