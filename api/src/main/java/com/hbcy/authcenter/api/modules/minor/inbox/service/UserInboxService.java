@@ -41,6 +41,7 @@ public class UserInboxService extends ServiceImpl<UserInboxMapper, UserInbox> {
             UserInbox msg = new UserInbox()
                     .setId(UlidCreator.getUlid().toString())
                     .setSrcId(vo.getSrcId())
+                    .setSrcUser(vo.getSrcUser())
                     .setSrcApp(vo.getSrcApp())
                     .setMsgTitle(vo.getTitle())
                     .setMsgContent(vo.getContent())

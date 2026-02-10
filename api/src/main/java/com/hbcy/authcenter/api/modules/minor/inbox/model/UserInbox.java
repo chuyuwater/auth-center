@@ -3,6 +3,7 @@ package com.hbcy.authcenter.api.modules.minor.inbox.model;
 import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 
 import java.time.LocalDateTime;
 
@@ -14,6 +15,7 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @TableName(value = "user_inbox")
+@Accessors(chain = true)
 public class UserInbox {
     public static final int STATUS_UNREAD = 0;
     public static final int STATUS_READ = 1;
@@ -87,7 +89,7 @@ public class UserInbox {
      */
     @TableField(value = "origin_json")
     private String originJson;
-    
+
     @TableField(value = "create_time", fill = FieldFill.INSERT)
     private LocalDateTime createTime;
 }

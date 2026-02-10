@@ -25,6 +25,11 @@ public class UserMsgCreateVO {
     @NotBlank(message = "源消息id不能为空")
     private String srcId;
     /**
+     * 源用户id，一般不需要传入
+     * 异构系统创建消息时，可以传入
+     */
+    private String srcUser;
+    /**
      * 标题
      */
     @NotBlank(message = "标题不能为空")
