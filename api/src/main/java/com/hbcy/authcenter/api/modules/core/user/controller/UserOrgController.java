@@ -31,12 +31,12 @@ public class UserOrgController {
 
     /**
      * 从组织/部门中移除用户
-     *
+     * @param userId 用户id
      * @param nodeId 用户实际挂载的节点（部门或组织）id
      */
-    @DeleteMapping("/{nodeId}")
-    public void deleteUserOrg(@PathVariable String nodeId) {
-        userOrgService.removeUserOrg(nodeId);
+    @DeleteMapping
+    public void deleteUserOrg(@RequestParam String nodeId, @RequestParam String userId) {
+        userOrgService.removeUserOrg(userId, nodeId);
     }
 
 

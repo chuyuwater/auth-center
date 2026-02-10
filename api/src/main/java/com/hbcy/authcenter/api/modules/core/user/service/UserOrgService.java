@@ -147,9 +147,9 @@ public class UserOrgService extends ServiceImpl<UserOrgMapper, UserOrg> {
      * @param nodeId 关联关系的id
      */
     @Transactional(rollbackFor = Exception.class)
-    public void removeUserOrg(String nodeId) {
+    public void removeUserOrg(String userId, String nodeId) {
         UserOrg userOrg = baseMapper.selectOne(new QueryWrapper<UserOrg>()
-                .eq(UserOrg.COL_USER_ID, UserContextUtils.getUserId())
+                .eq(UserOrg.COL_USER_ID, userId)
                 .eq(UserOrg.COL_NODE_ID, nodeId));
         if (userOrg == null) {
             return;
