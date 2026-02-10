@@ -125,8 +125,16 @@ public class UserOrgService extends ServiceImpl<UserOrgMapper, UserOrg> {
         if (!any) {
             throw new ServerError("用户不在此组织中");
         }
-        baseMapper.updateMainJob(vo.getUserId(), vo.getOrgId());
-        baseMapper.updatePartJob(vo.getUserId(), vo.getOrgId());
+        String orgId = vo.getOrgId();
+        OrgTree orgTree = orgTreeMapper.selectById(vo.getOrgId());
+        if (orgTree.getNodeType().equals(OrgNodeTypeEnum.DEPT.getValue())) {
+            orgId = OrgTreeService.findDeptDirectOrg(orgTree.getIdPath());
+            if (orgId == null) {
+                throw new ParamError("需要传入组织id而非部门id");
+            }
+        }
+        baseMapper.updateMainJob(vo.getUserId(), orgId);
+        baseMapper.updatePartJob(vo.getUserId(), orgId);
     }
 
     public List<UserOrgDTO> listUserOrgs(Collection<String> userIds, boolean onlyMain) {
