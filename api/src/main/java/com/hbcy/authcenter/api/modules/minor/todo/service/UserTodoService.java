@@ -50,7 +50,8 @@ public class UserTodoService extends ServiceImpl<UserTodoMapper, UserTodo> {
                     .setProcessState(vo.getProcessState())
                     .setOriginJson(vo.getOriginJson())
                     .setTodoType(vo.getType())
-                    .setRelateLink(vo.getLink());
+                    .setRelateLink(vo.getLink())
+                    .setTenantId(UserContextUtils.getTenantId());
             todos.add(todo);
         }
         baseMapper.insertIgnore(todos);

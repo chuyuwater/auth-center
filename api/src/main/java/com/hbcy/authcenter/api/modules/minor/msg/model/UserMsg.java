@@ -32,6 +32,8 @@ public class UserMsg {
     public static final String COL_RELATE_LINK = "relate_link";
     public static final String COL_ORIGIN_JSON = "origin_json";
     public static final String COL_CREATE_TIME = "create_time";
+    public static final String COL_TENANT_ID = "tenant_id";
+
     @TableId(value = "id", type = IdType.ASSIGN_UUID)
     private String id;
     /**
@@ -92,4 +94,7 @@ public class UserMsg {
 
     @TableField(value = "create_time", fill = FieldFill.INSERT)
     private LocalDateTime createTime;
+
+    @TableField(value = "tenant_id")
+    private String tenantId;
 }

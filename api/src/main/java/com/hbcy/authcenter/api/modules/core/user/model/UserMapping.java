@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 
 /**
  * @author 姚泰然
- * @date 2026-02-11 19:22
+ * @date 2026-02-11 19:37
  */
 
 /**
@@ -43,6 +43,12 @@ public class UserMapping {
     @TableField(value = "src_id")
     private String srcId;
 
+    /**
+     * 多账号系统同步，0-主账号，1-子账号
+     */
+    @TableField(value = "account_type")
+    private Integer accountType;
+
     @TableField(value = "create_time", fill = FieldFill.INSERT)
     private LocalDateTime createTime;
 
@@ -53,6 +59,8 @@ public class UserMapping {
     public static final String COL_SRC_TYPE = "src_type";
 
     public static final String COL_SRC_ID = "src_id";
+
+    public static final String COL_ACCOUNT_TYPE = "account_type";
 
     public static final String COL_CREATE_TIME = "create_time";
 }

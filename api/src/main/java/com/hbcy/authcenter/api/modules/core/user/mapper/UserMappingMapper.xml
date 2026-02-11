@@ -8,10 +8,11 @@
     <result column="user_id" property="userId" />
     <result column="src_type" property="srcType" />
     <result column="src_id" property="srcId" />
+    <result column="account_type" property="accountType" />
     <result column="create_time" property="createTime" />
   </resultMap>
   <sql id="Base_Column_List">
     <!--@mbg.generated-->
-    id, user_id, src_type, src_id, create_time
+    id, user_id, src_type, src_id, account_type, create_time
   </sql>
 </mapper>

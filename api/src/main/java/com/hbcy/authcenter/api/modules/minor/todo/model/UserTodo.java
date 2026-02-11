@@ -29,6 +29,7 @@ public class UserTodo {
     public static final String COL_TODO_TYPE = "todo_type";
     public static final String COL_RELATE_LINK = "relate_link";
     public static final String COL_ORIGIN_JSON = "origin_json";
+    public static final String COL_TENANT_ID = "tenant_id";
     public static final String COL_CREATE_TIME = "create_time";
     public static final String COL_UPDATE_TIME = "update_time";
     @TableId(value = "id", type = IdType.ASSIGN_UUID)
@@ -90,6 +91,8 @@ public class UserTodo {
      */
     @TableField(value = "origin_json")
     private String originJson;
+    @TableField(value = "tenant_id")
+    private String tenantId;
     @TableField(value = "create_time", fill = FieldFill.INSERT)
     private LocalDateTime createTime;
     @TableField(value = "update_time", fill = FieldFill.INSERT_UPDATE)

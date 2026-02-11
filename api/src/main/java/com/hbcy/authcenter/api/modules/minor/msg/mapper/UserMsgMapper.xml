@@ -17,21 +17,22 @@
         <result column="relate_link" jdbcType="VARCHAR" property="relateLink"/>
         <result column="origin_json" jdbcType="LONGVARCHAR" property="originJson"/>
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="tenant_id" jdbcType="VARCHAR" property="tenantId"/>
     </resultMap>
     <sql id="Base_Column_List">
         <!--@mbg.generated-->
         id, src_id, src_app, src_user, msg_title, msg_content, target_user, send_time, view_status,
-        msg_type, relate_link, origin_json, create_time
+        msg_type, relate_link, origin_json, create_time, tenant_id
     </sql>
 
     <!--    TODO: MySQL Only-->
     <insert id="insertIgnore">
         insert ignore into user_msg (id, src_id, src_app, msg_title, msg_content, target_user,
-        send_time, view_status, msg_type, relate_link, origin_json)
+        send_time, view_status, msg_type, relate_link, origin_json, tenant_id)
         values
         <foreach collection="msgs" item="msg" separator=",">
             (#{msg.id}, #{msg.srcId}, #{msg.srcApp}, #{msg.msgTitle}, #{msg.msgContent}, #{msg.targetUser},
-            #{msg.sendTime}, #{msg.viewStatus}, #{msg.msgType}, #{msg.relateLink}, #{msg.originJson})
+            #{msg.sendTime}, #{msg.viewStatus}, #{msg.msgType}, #{msg.relateLink}, #{msg.originJson}, #{msg.tenantId})
         </foreach>
     </insert>
 

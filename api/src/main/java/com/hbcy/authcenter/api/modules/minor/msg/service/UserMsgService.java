@@ -49,7 +49,8 @@ public class UserMsgService extends ServiceImpl<UserMsgMapper, UserMsg> {
                     .setSendTime(sendTime)
                     .setViewStatus(UserMsg.STATUS_UNREAD)
                     .setOriginJson(vo.getOriginJson())
-                    .setMsgType(vo.getType());
+                    .setMsgType(vo.getType())
+                    .setTenantId(UserContextUtils.getTenantId());
             msgs.add(msg);
         }
         baseMapper.insertIgnore(msgs);
