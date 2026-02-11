@@ -24,6 +24,10 @@ public class OaTodoDTO {
     private String currentnodetype;
     private String isbereject;
     private String isprocessed;
+    /**
+     * 待办状态
+     * 0-待办，2-已办，4-办结，4-抄送（待阅）
+     */
     private String isremark;
     private String lastOperateTime;
     private String lastOperatorId;
@@ -46,6 +50,9 @@ public class OaTodoDTO {
     private String userSubcompanyName;
     private String userid;
     private String usertype;
+    /**
+     *  0-未读，1-已读
+     */
     private String viewtype;
-    private OaWorkflowDTO workflowBaseInfo;
+    private OaWorkflowBasicDTO workflowBaseInfo;
 }

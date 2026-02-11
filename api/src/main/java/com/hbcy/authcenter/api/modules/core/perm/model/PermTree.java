@@ -1,7 +1,9 @@
 package com.hbcy.authcenter.api.modules.core.perm.model;
 
 import com.baomidou.mybatisplus.annotation.*;
+import com.hbcy.authcenter.api.common.bean.BaseEntity;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
@@ -10,10 +12,11 @@ import java.time.LocalDateTime;
  * @author 姚泰然
  * @date 2025-12-28 10:04
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
 @NoArgsConstructor
 @TableName(value = "perm_tree")
-public class PermTree {
+public class PermTree extends BaseEntity {
     public static final String RBAC_ID_TEMPLATE = "%s-ROLEGRP-%06d";
     public static final String ABAC_ID_TEMPLATE = "%s-POLICYGRP-%06d";
     public static final String COL_ID = "id";

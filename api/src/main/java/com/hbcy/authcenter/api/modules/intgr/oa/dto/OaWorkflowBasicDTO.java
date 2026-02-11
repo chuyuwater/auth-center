@@ -8,7 +8,7 @@ import lombok.Data;
  * @date 2026-01-21 12:05
  */
 @Data
-public class OaWorkflowDTO {
+public class OaWorkflowBasicDTO {
     private String formId;
     private String workflowId;
     private String workflowName;

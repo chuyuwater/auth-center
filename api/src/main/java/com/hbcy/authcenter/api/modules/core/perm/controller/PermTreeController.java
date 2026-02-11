@@ -7,6 +7,7 @@ import com.hbcy.authcenter.api.modules.core.perm.vo.PermTreeCreateVO;
 import com.hbcy.authcenter.api.modules.core.perm.vo.PermTreeQueryVO;
 import com.hbcy.authcenter.api.modules.core.perm.vo.PermTreeUpdateVO;
 import com.hbcy.common.base.tree.TreeNode;
+import com.hbcy.common.web.bean.NameFill;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import org.springframework.validation.annotation.Validated;
@@ -36,6 +37,7 @@ public class PermTreeController {
      * @return 节点信息
      */
     @GetMapping("/node/{id}")
+    @NameFill
     public PermTree getById(@PathVariable String id) {
         return permTreeService.getById(id);
     }
