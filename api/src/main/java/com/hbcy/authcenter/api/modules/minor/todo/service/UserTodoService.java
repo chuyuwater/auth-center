@@ -18,7 +18,6 @@ import com.hbcy.common.base.error.ParamError;
 import com.hbcy.common.base.pojo.PageResp;
 import com.hbcy.common.db.model.PageRespEx;
 import jakarta.annotation.Resource;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -83,7 +82,7 @@ public class UserTodoService extends ServiceImpl<UserTodoMapper, UserTodo> {
         baseMapper.update(new UpdateWrapper<UserTodo>()
                 .in(UserTodo.COL_TARGET_USER, vo.getUserIds())
                 .eq(UserTodo.COL_SRC_ID, vo.getSrcId())
-                .eq(StringUtils.isNotBlank(vo.getSrcApp()), UserTodo.COL_SRC_APP, vo.getSrcApp())
+                .eq(UserTodo.COL_SRC_APP, vo.getSrcApp())
                 .set(UserTodo.COL_PROCESS_STATE, vo.getProcessState()));
     }
 

@@ -18,8 +18,9 @@ public class UserTodoUpdateVO {
     @DictValid(dictKey = "TODO_PROCESS_STATE", message = "处理状态错误")
     private Integer processState;
     /**
-     * 源系统
+     * 源应用id
      */
+    @NotBlank(message = "源应用id不能为空")
     private String srcApp;
     /**
      * 源系统id

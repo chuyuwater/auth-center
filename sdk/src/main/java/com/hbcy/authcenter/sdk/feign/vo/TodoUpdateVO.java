@@ -19,8 +19,9 @@ public class TodoUpdateVO {
     @NotNull(message = "处理状态不能为空")
     private Integer processState;
     /**
-     * 源系统
+     * 源应用id
      */
+    @NotBlank(message = "源应用id不能为空")
     private String srcApp;
     /**
      * 源系统id
