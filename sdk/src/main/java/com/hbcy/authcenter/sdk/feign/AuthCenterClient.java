@@ -85,13 +85,13 @@ public interface AuthCenterClient {
     ApiResponse<Object> createMsg(@RequestBody MsgCreateVO vo);
 
     /**
-     * 创建待办
+     * 创建待办，一般是流程引擎调用
      */
     @PostMapping("/api/portal/v1/user/todo")
     ApiResponse<Object> createTodo(@RequestBody TodoCreateVO vo);
 
     /**
-     * 更新待办状态
+     * 更新待办状态，一般是流程引擎调用
      */
     @PostMapping("/api/portal/v1/user/todo/update-state")
     ApiResponse<Object> updateTodoState(@RequestBody TodoUpdateVO vo);

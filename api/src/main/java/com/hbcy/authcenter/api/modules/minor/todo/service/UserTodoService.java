@@ -81,7 +81,7 @@ public class UserTodoService extends ServiceImpl<UserTodoMapper, UserTodo> {
 
     public void updateState(UserTodoUpdateVO vo) {
         baseMapper.update(new UpdateWrapper<UserTodo>()
-                .eq(UserTodo.COL_TARGET_USER, vo.getUserId())
+                .in(UserTodo.COL_TARGET_USER, vo.getUserIds())
                 .eq(UserTodo.COL_SRC_ID, vo.getSrcId())
                 .eq(StringUtils.isNotBlank(vo.getSrcApp()), UserTodo.COL_SRC_APP, vo.getSrcApp())
                 .set(UserTodo.COL_PROCESS_STATE, vo.getProcessState()));

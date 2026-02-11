@@ -1,8 +1,11 @@
 package com.hbcy.authcenter.sdk.feign.vo;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
+
+import java.util.List;
 
 /**
  * @author 姚泰然
@@ -27,6 +30,6 @@ public class TodoUpdateVO {
     /**
      * 更新了待办状态的用户
      */
-    @NotBlank(message = "用户id不能为空")
-    private String userId;
+    @NotEmpty(message = "用户id不能为空")
+    private List<String> userIds;
 }

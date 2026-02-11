@@ -21,7 +21,7 @@ public class TodoCreateVO {
     @NotBlank(message = "源应用id不能为空")
     private String srcApp;
     /**
-     * 源待办id
+     * 源待办id，用来去重
      */
     @NotBlank(message = "源待办id不能为空")
     private String srcId;
