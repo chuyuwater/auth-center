@@ -8,9 +8,24 @@ import lombok.Data;
  */
 @Data
 public class OaMsgVO {
+    /**
+     * 消息标题
+     */
     private String title;
+    /**
+     * 用户id
+     */
     private String userId;
-    private String appUrl;
+    /**
+     * 关联流程的链接
+     */
     private String pcUrl;
+    /**
+     * 消息内容
+     */
     private String content;
+    /**
+     * 通信密钥
+     */
+    private String ak;
 }

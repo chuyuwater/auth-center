@@ -55,7 +55,6 @@ public class OaAccessController {
 
     /**
      * 接收oa消息推送
-     * 该功能应使用ak+白名单功能，开放给OA系统调用
      * 参考https://www.e-cology.com.cn/sp/ebdcus/ktree/help/freepass?pathKey=ZWNBbmRFTS9tZXNzYWdldHlwZWNvbmZpZz9rZXkwPTA=&lang=7
      */
     @PostMapping("api/portal/v1/oa/msg")

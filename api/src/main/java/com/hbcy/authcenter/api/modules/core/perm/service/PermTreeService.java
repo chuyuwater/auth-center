@@ -8,6 +8,7 @@ import com.hbcy.authcenter.api.common.bean.NodeMoveVO;
 import com.hbcy.authcenter.api.common.constants.G;
 import com.hbcy.authcenter.api.modules.core.perm.dao.PermTreeMapper;
 import com.hbcy.authcenter.api.modules.core.perm.dao.PermUnitMapper;
+import com.hbcy.authcenter.api.modules.core.perm.dto.PermGroupDetailDTO;
 import com.hbcy.authcenter.api.modules.core.perm.model.PermTree;
 import com.hbcy.authcenter.api.modules.core.perm.model.PermUnit;
 import com.hbcy.authcenter.api.modules.core.perm.vo.PermTreeCreateVO;
@@ -236,5 +237,21 @@ public class PermTreeService extends ServiceImpl<PermTreeMapper, PermTree> {
         toUpdate.setParentId(vo.getParentId());
         toUpdate.setShowOrder(targetIdx);
         updateById(toUpdate);
+    }
+
+    public PermGroupDetailDTO getDetail(String id) {
+        PermTree permTree = baseMapper.selectById(id);
+        if (permTree == null) {
+            return null;
+        }
+        if (!permTree.getTenantId().equals(UserContextUtils.getTenantId())) {
+            throw new PermissionError();
+        }
+        PermGroupDetailDTO dto = BeanCopyUtils.copy(permTree, PermGroupDetailDTO.class);
+        if (StringUtils.isNotBlank(permTree.getParentId())) {
+            PermTree parent = baseMapper.selectById(permTree.getParentId());
+            dto.setParentName(parent.getNodeName());
+        }
+        return dto;
     }
 }

@@ -3,6 +3,7 @@ package com.hbcy.authcenter.api.modules.intgr.oa.feign;
 import com.hbcy.authcenter.api.modules.intgr.oa.dto.OaTodoDTO;
 import com.hbcy.authcenter.api.modules.intgr.oa.dto.OaWorkflowDetailDTO;
 import com.hbcy.authcenter.api.modules.intgr.oa.dto.OaWorkflowResp;
+import com.hbcy.authcenter.api.modules.intgr.oa.dto.OaWorkflowStatusDTO;
 import com.hbcy.authcenter.api.modules.intgr.oa.vo.OaQueryTodoVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
@@ -30,6 +31,14 @@ public interface OaUserClient {
      * 获取流程详情
      */
     @GetMapping(value = "/api/workflow/paService/getWorkflowRequest")
-    OaWorkflowResp<OaWorkflowDetailDTO> getWorkflowStatus(@RequestHeader String appid, @RequestHeader String userid,
+    OaWorkflowResp<OaWorkflowDetailDTO> getWorkflowDetail(@RequestHeader String appid, @RequestHeader String userid,
+                                                          @RequestHeader String token, @RequestParam String requestId);
+
+
+    /**
+     * 获取流程（待办）状态
+     */
+    @GetMapping(value = "/api/workflow/paService/getRequestStatus")
+    OaWorkflowResp<OaWorkflowStatusDTO> getWorkflowStatus(@RequestHeader String appid, @RequestHeader String userid,
                                                           @RequestHeader String token, @RequestParam String requestId);
 }

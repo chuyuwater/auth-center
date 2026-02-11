@@ -1,6 +1,7 @@
 package com.hbcy.authcenter.api.modules.core.perm.controller;
 
 import com.hbcy.authcenter.api.common.bean.NodeMoveVO;
+import com.hbcy.authcenter.api.modules.core.perm.dto.PermGroupDetailDTO;
 import com.hbcy.authcenter.api.modules.core.perm.model.PermTree;
 import com.hbcy.authcenter.api.modules.core.perm.service.PermTreeService;
 import com.hbcy.authcenter.api.modules.core.perm.vo.PermTreeCreateVO;
@@ -38,8 +39,8 @@ public class PermTreeController {
      */
     @GetMapping("/node/{id}")
     @NameFill
-    public PermTree getById(@PathVariable String id) {
-        return permTreeService.getById(id);
+    public PermGroupDetailDTO getById(@PathVariable String id) {
+        return permTreeService.getDetail(id);
     }
 
     /**
