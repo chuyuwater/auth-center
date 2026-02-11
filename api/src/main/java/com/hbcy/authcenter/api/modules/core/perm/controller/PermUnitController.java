@@ -6,6 +6,7 @@ import com.hbcy.authcenter.api.modules.core.perm.vo.PermUnitCreateVO;
 import com.hbcy.authcenter.api.modules.core.perm.vo.PermUnitForbidVO;
 import com.hbcy.authcenter.api.modules.core.perm.vo.PermUnitQueryVO;
 import com.hbcy.authcenter.api.modules.core.perm.vo.PermUnitUpdateVO;
+import com.hbcy.common.base.pojo.BatchDeleteVO;
 import com.hbcy.common.base.pojo.PageResp;
 import com.hbcy.common.web.bean.NameFill;
 import jakarta.annotation.Resource;
@@ -91,5 +92,14 @@ public class PermUnitController {
     @DeleteMapping("/{id}")
     public void delete(@PathVariable String id) {
         permUnitService.delete(id);
+    }
+
+    /**
+     * 批量删除权限单元
+     * @param vo 参数
+     */
+    @PostMapping("/batch-delete")
+    public void batchDelete(@Valid @RequestBody BatchDeleteVO vo) {
+        permUnitService.delete(vo);
     }
 }

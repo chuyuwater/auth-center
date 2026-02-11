@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.hbcy.authcenter.api.common.constants.G;
+import com.hbcy.authcenter.api.common.enums.TreeQueryLevelEnum;
 import com.hbcy.authcenter.api.modules.core.perm.dao.PermTreeMapper;
 import com.hbcy.authcenter.api.modules.core.perm.dao.PermUnitMapper;
 import com.hbcy.authcenter.api.modules.core.perm.dao.PermUnitUserMapper;
@@ -17,6 +19,7 @@ import com.hbcy.authcenter.api.modules.core.perm.vo.PermUnitUpdateVO;
 import com.hbcy.authcenter.sdk.utils.UserContextUtils;
 import com.hbcy.common.base.error.ParamError;
 import com.hbcy.common.base.error.PermissionError;
+import com.hbcy.common.base.pojo.BatchDeleteVO;
 import com.hbcy.common.base.pojo.PageResp;
 import com.hbcy.common.base.util.BeanCopyUtils;
 import com.hbcy.common.db.model.PageRespEx;
@@ -29,6 +32,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class PermUnitService extends ServiceImpl<PermUnitMapper, PermUnit> {
@@ -95,29 +99,51 @@ public class PermUnitService extends ServiceImpl<PermUnitMapper, PermUnit> {
     public PageResp<PermUnit> list(PermUnitQueryVO vo) {
         Page<PermUnit> dbPage = vo.getDbPage();
         String tenantId = UserContextUtils.getTenantId();
-        Page<PermUnit> page = baseMapper.selectPage(dbPage, new QueryWrapper<PermUnit>()
-                .eq(PermUnit.COL_TENANT_ID, tenantId)
-                .eq(StringUtils.isNotBlank(vo.getBelongTo()), PermUnit.COL_BELONG_TO, vo.getBelongTo())
-                .like(StringUtils.isNotBlank(vo.getName()), PermUnit.COL_NAME_CN, vo.getName()));
+        vo.setTenantId(tenantId);
+        if (StringUtils.isNotBlank(vo.getBelongTo()) && vo.getLevel() > 0) {
+            PermTree permTree = permTreeMapper.selectById(vo.getBelongTo());
+            if (permTree == null) return new PageResp<>();
+            if (vo.getLevel() == TreeQueryLevelEnum.CHILD.getCode()) {
+                vo.setGroupIdPath(permTree.getIdPath() + G.ID_PATH_SPLITTER);
+            } else {
+                vo.setGroupIdPath(permTree.getIdPath());
+            }
+            vo.setBelongTo(null);
+        }
+        Page<PermUnit> page = baseMapper.listPermUnit(dbPage, vo);
         return new PageRespEx<>(page);
     }
 
     @Transactional(rollbackFor = Exception.class)
     public void delete(String id) {
-        PermUnit entity = getById(id);
-        if (entity == null) {
+        BatchDeleteVO vo = new BatchDeleteVO();
+        vo.setIds(List.of(id));
+        batchDelete(vo);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public void delete(BatchDeleteVO vo) {
+        batchDelete(vo);
+    }
+
+    private void batchDelete(BatchDeleteVO vo) {
+        String tenantId = UserContextUtils.getTenantId();
+        List<PermUnit> permUnits = baseMapper.selectByIds(vo.getIds());
+        if (permUnits.isEmpty()) {
             return;
         }
-        if (!entity.getTenantId().equals(UserContextUtils.getTenantId())) {
-            throw new PermissionError();
+        for (PermUnit permUnit : permUnits) {
+            if (!permUnit.getTenantId().equals(tenantId)) {
+                throw new PermissionError();
+            }
         }
-        boolean any = permUnitUserMapper.exists(new QueryWrapper<PermUnitUser>().
-                eq(PermUnitUser.COL_UNIT_ID, id));
+        boolean any = permUnitUserMapper.exists(new QueryWrapper<PermUnitUser>()
+                .in(PermUnitUser.COL_UNIT_ID, vo.getIds()));
         if (any) {
             throw new ParamError("请先移除关联的用户");
         }
         baseMapper.update(new UpdateWrapper<PermUnit>()
-                .eq(PermUnit.COL_ID, id)
+                .in(PermUnit.COL_ID, vo.getIds())
                 .set(PermUnit.COL_UPDATE_USER, UserContextUtils.getUserId())
                 .set(PermUnit.COL_DELETE_TIME, System.currentTimeMillis()));
     }

@@ -1,8 +1,10 @@
 package com.hbcy.authcenter.api.modules.core.perm.vo;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.hbcy.common.db.model.PageVO;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.hibernate.validator.constraints.Range;
 
 /**
  * 权限单元查询VO
@@ -21,4 +23,21 @@ public class PermUnitQueryVO extends PageVO {
      * 归属分组
      */
     private String belongTo;
+
+    /**
+     * 是否禁用,0-启用，1-禁用
+     */
+    private Integer forbidden;
+
+    /**
+     * 查询级别，0-本级，1-下级，2-本下
+     */
+    @Range(min = 0, max = 2, message = "查询级别错误")
+    private int level = 2;
+
+    @JsonIgnore
+    private String tenantId;
+
+    @JsonIgnore
+    private String groupIdPath;
 }

@@ -37,7 +37,7 @@
         from perm_tree
         <where>
             tenant_id = #{tenantId}
-              and delete_time = 0
+            and delete_time = 0
             <if test="parentIdPath != null and parentIdPath != ''">
                 and id_path like concat(#{parentIdPath}, '%')
             </if>
@@ -51,40 +51,40 @@
 
     <insert id="append">
         insert into perm_tree (id, node_name, memo, parent_id, id_path, tenant_id,
-                               create_user, update_user, show_order)
+        create_user, update_user, show_order)
         select #{entity.id},
-               #{entity.nodeName},
-               #{entity.memo},
-               #{entity.parentId},
-               #{entity.idPath},
-               #{entity.tenantId},
-               #{entity.createUser},
-               #{entity.updateUser},
-               (SELECT COALESCE(MAX(show_order), 0) + 1
-                from perm_tree
-                where parent_id = #{entity.parentId}
-                  and tenant_id = #{entity.tenantId})
+        #{entity.nodeName},
+        #{entity.memo},
+        #{entity.parentId},
+        #{entity.idPath},
+        #{entity.tenantId},
+        #{entity.createUser},
+        #{entity.updateUser},
+        (SELECT COALESCE(MAX(show_order), 0) + 1
+        from perm_tree
+        where parent_id = #{entity.parentId}
+        and tenant_id = #{entity.tenantId})
     </insert>
 
     <update id="updateIdPath">
         update perm_tree
         set id_path = replace(id_path, #{oldPath}, #{newPath})
         where tenant_id = #{tenantId}
-          and id_path like concat(#{oldPath}, '%')
+        and id_path like concat(#{oldPath}, '%')
     </update>
 
     <update id="updateShowOrder">
         update perm_tree
         set show_order = show_order + 1
         where tenant_id = #{tenantId}
-          and parent_id = #{parentId}
-          and show_order &gt;= #{targetIdx}
+        and parent_id = #{parentId}
+        and show_order &gt;= #{targetIdx}
     </update>
 
     <select id="getChildMaxShowOrder" resultType="java.lang.Integer">
         select COALESCE(MAX(show_order), 0)
         from perm_tree
         where tenant_id = #{tenantId}
-          and parent_id = #{parentId}
+        and parent_id = #{parentId}
     </select>
 </mapper>

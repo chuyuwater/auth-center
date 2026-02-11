@@ -32,4 +32,37 @@
         update_time,
         delete_time
     </sql>
+
+    <select id="listPermUnit" resultMap="BaseResultMap">
+        select pu.id,
+               pu.name_cn,
+               pu.policy_model,
+               pu.belong_to,
+               pu.memo,
+               pu.forbidden,
+               pu.tenant_id,
+               pu.create_user,
+               pu.update_user,
+               pu.create_time,
+               pu.update_time
+        from perm_unit pu
+                 join perm_tree pt on pu.belong_to = pt.id
+        <where>
+            pt.delete_time = 0
+              and pu.delete_time = 0
+              and pt.tenant_id = #{vo.tenantId}
+            <if test="vo.name != null and vo.name != ''">
+                and pu.name_cn like concat('%', #{vo.name}, '%')
+            </if>
+            <if test="vo.belongTo != null and vo.belongTo != ''">
+                and pu.belong_to = #{vo.belongTo}
+            </if>
+            <if test="vo.groupIdPath != null and vo.groupIdPath != ''">
+                and pt.id_path like concat(#{vo.groupIdPath}, '%')
+            </if>
+            <if test="vo.forbidden != null">
+                and pu.forbidden = #{vo.forbidden}
+            </if>
+        </where>
+    </select>
 </mapper>
