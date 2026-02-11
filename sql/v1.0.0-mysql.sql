@@ -390,12 +390,16 @@ create table if not exists user_org
         unique (user_id, node_id)
 );
 
-create table if not exists user_inbox
+create index ix_user_org_main_job
+    on user_org (org_id, tenant_id, main_job);
+
+create table if not exists user_msg
 (
     id          char(26)                               not null
         primary key,
-    src_id      varchar(100)                           not null comment '源消息id，用来去重',
+    src_id      varchar(100)                           null comment '源消息id，用来去重',
     src_app     varchar(20)                            not null comment '源应用id',
+    src_user    varchar(100)                           null comment '源系统用户标识',
     msg_title   varchar(200)                           not null comment '消息标题',
     msg_content varchar(700) default ''                not null comment '消息内容',
     target_user char(26)                               not null comment '目标用户',
@@ -410,12 +414,20 @@ create table if not exists user_inbox
 )
     comment '站内信';
 
+create index ix_user_inbox_msg_title
+    on user_msg (msg_title);
+
+create index ix_user_inbox_user_time_status
+    on user_msg (target_user, view_status, msg_type, send_time);
+
+
 create table if not exists user_todo
 (
     id            char(26)                               not null
         primary key,
     src_app       varchar(20)                            not null comment '源app id',
     src_id        varchar(100)                           not null comment '源id，用于去重',
+    src_user      varchar(100)                           null comment '源系统的用户id',
     todo_title    varchar(300)                           not null comment '待办标题',
     todo_content  varchar(700)                           null comment '待办内容',
     target_user   char(26)                               not null comment '关联用户',
@@ -437,10 +449,6 @@ create index ix_user_todo_title
 create index ix_user_todo_user_time_status
     on user_todo (target_user, view_state, process_state, todo_type);
 
-
-
-create index ix_user_org_main_job
-    on user_org (org_id, tenant_id, main_job);
 
 INSERT INTO portal_auth_center.sys_dict (id, app_id, feat_code, value_str, value_cn, dict_type, parent_id, id_path,
                                          show_order, memo, forbidden, create_user, update_user, create_time,
