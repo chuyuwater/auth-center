@@ -11,8 +11,4 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class UserSelectVO extends UserBasicQueryVO {
-    /**
-     * 合并人员就职信息, 0-按组织合并，1-保留部门信息
-     */
-    private int nodeType;
 }

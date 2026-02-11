@@ -4,14 +4,14 @@
   <resultMap id="BaseResultMap" type="com.hbcy.authcenter.api.modules.core.user.model.UserMapping">
     <!--@mbg.generated-->
     <!--@Table sys_user_mapping-->
-    <id column="id" jdbcType="CHAR" property="id" />
-    <result column="user_id" jdbcType="CHAR" property="userId" />
-    <result column="third_party" jdbcType="VARCHAR" property="thirdParty" />
-    <result column="third_id" jdbcType="VARCHAR" property="thirdId" />
-    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <id column="id" property="id" />
+    <result column="user_id" property="userId" />
+    <result column="src_type" property="srcType" />
+    <result column="src_id" property="srcId" />
+    <result column="create_time" property="createTime" />
   </resultMap>
   <sql id="Base_Column_List">
     <!--@mbg.generated-->
-    id, user_id, third_party, third_id, create_time
+    id, user_id, src_type, src_id, create_time
   </sql>
 </mapper>

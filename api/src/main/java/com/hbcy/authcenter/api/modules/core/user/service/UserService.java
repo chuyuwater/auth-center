@@ -442,7 +442,7 @@ public class UserService extends ServiceImpl<UserMapper, User> {
     public PageResp<OrgUserDTO> filterUser4Select(UserSelectVO vo) {
         checkParams(vo);
         Page<?> page = vo.getDbPage();
-        Page<OrgUserDTO> result = baseMapper.filterDeptUser4Select(page, vo);
+        Page<OrgUserDTO> result = baseMapper.filterUser4Select(page, vo);
         //填充namePath
         Set<String> nodeIds = new HashSet<>();
         for (OrgUserDTO r : result.getRecords()) {

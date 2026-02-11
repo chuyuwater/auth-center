@@ -11,8 +11,9 @@ import lombok.NoArgsConstructor;
 
 /**
  * @author 姚泰然
- * @date 2026-02-11 16:16
+ * @date 2026-02-11 19:22
  */
+
 /**
  * 用户映射
  */
@@ -20,6 +21,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @TableName(value = "sys_user_mapping")
 public class UserMapping {
+    public static final String COL_THIRD_ID = "third_id";
     @TableId(value = "id", type = IdType.ASSIGN_UUID)
     private String id;
 
@@ -32,25 +34,25 @@ public class UserMapping {
     /**
      * 第三方平台，字典项
      */
-    @TableField(value = "third_party")
-    private String thirdParty;
+    @TableField(value = "src_type")
+    private Integer srcType;
 
     /**
      * 第三方平台id
      */
-    @TableField(value = "third_id")
-    private String thirdId;
+    @TableField(value = "src_id")
+    private String srcId;
 
-    @TableField(value = "create_time",fill = FieldFill.INSERT)
+    @TableField(value = "create_time", fill = FieldFill.INSERT)
     private LocalDateTime createTime;
 
     public static final String COL_ID = "id";
 
     public static final String COL_USER_ID = "user_id";
 
-    public static final String COL_THIRD_PARTY = "third_party";
+    public static final String COL_SRC_TYPE = "src_type";
 
-    public static final String COL_THIRD_ID = "third_id";
+    public static final String COL_SRC_ID = "src_id";
 
     public static final String COL_CREATE_TIME = "create_time";
 }

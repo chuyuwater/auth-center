@@ -122,7 +122,7 @@
         </where>
     </select>
 
-    <select id="filterDeptUser4Select" resultType="com.hbcy.authcenter.api.modules.core.user.dto.OrgUserDTO">
+    <select id="filterUser4Select" resultType="com.hbcy.authcenter.api.modules.core.user.dto.OrgUserDTO">
         select u.id,
         u.phone,
         u.account,

@@ -26,5 +26,5 @@ public interface UserMapper extends BaseMapper<User> {
 
     Page<UserQueryResultDTO> queryUser(Page<?> dbPage, @Param("vo") UserFilterVO vo);
 
-    Page<OrgUserDTO> filterDeptUser4Select(Page<?> page, @Param("vo") UserSelectVO vo);
+    Page<OrgUserDTO> filterUser4Select(Page<?> page, @Param("vo") UserSelectVO vo);
 }
