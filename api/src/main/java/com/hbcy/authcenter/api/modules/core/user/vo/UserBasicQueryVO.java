@@ -18,7 +18,7 @@ import java.util.Set;
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class UserQueryVO extends PageVO {
+public class UserBasicQueryVO extends PageVO {
     /**
      * 本级
      */
@@ -49,14 +49,6 @@ public class UserQueryVO extends PageVO {
      */
     private String keyword;
     /**
-     * 是否禁用（选人界面固定为0）
-     */
-    private Integer forbidden;
-    /**
-     * 指定用户（选人界面不适用）
-     */
-    private String userId;
-    /**
      * 0-兼职，1-主职
      */
     private Integer mainJob;
@@ -69,7 +61,6 @@ public class UserQueryVO extends PageVO {
      * 用工形式，字典EMPLOYEE_TYPE
      */
     private Integer employeeType;
-
     /**
      * 后端填充
      * NAME-姓名（如果keyword既没有数字也没有字母和@）
@@ -88,11 +79,4 @@ public class UserQueryVO extends PageVO {
      */
     @JsonIgnore
     private String tenantId;
-
-    /**
-     * 任职是否具体到部门
-     * 默认只显示到组织
-     */
-    @JsonIgnore
-    private boolean deptJob;
 }

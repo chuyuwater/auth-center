@@ -80,4 +80,15 @@
         from resource_perm rp
         where app_id = #{appId}
     </select>
+
+    <select id="getPermResIdPaths" resultType="java.lang.String">
+        select rt.id_path
+        from resource_tree rt join resource_perm rp on rt.id=rp.res_id
+        <where>
+            rp.id in
+            <foreach collection="permIds" open="(" item="item" close=")" separator=",">
+                #{item}
+            </foreach>
+        </where>
+    </select>
 </mapper>

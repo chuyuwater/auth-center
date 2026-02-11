@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hbcy.authcenter.api.modules.core.user.dao.UserMappingMapper">
+  <resultMap id="BaseResultMap" type="com.hbcy.authcenter.api.modules.core.user.model.UserMapping">
+    <!--@mbg.generated-->
+    <!--@Table sys_user_mapping-->
+    <id column="id" jdbcType="CHAR" property="id" />
+    <result column="user_id" jdbcType="CHAR" property="userId" />
+    <result column="third_party" jdbcType="VARCHAR" property="thirdParty" />
+    <result column="third_id" jdbcType="VARCHAR" property="thirdId" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+    id, user_id, third_party, third_id, create_time
+  </sql>
+</mapper>

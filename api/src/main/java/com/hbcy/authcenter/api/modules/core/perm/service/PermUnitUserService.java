@@ -132,6 +132,9 @@ public class PermUnitUserService extends ServiceImpl<PermUnitUserMapper, PermUni
                 return resourcePermMapper.listAppPerms(appId);
             } else {
                 Set<String> grantedPermIds = tenantAppResourceMapper.getGrantedPermIds(tenantId, appId);
+                if (grantedPermIds.isEmpty()) {
+                    return new ArrayList<>();
+                }
                 return baseMapper.listPermInfo(grantedPermIds);
             }
         }

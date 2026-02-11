@@ -14,7 +14,6 @@
         <result column="forbidden" jdbcType="TINYINT" property="forbidden"/>
         <result column="wecom_id" jdbcType="VARCHAR" property="wecomId"/>
         <result column="src_type" jdbcType="TINYINT" property="srcType"/>
-        <result column="src_id" jdbcType="VARCHAR" property="srcId"/>
         <result column="employee_type" jdbcType="TINYINT" property="employeeType"/>
         <result column="passwd_expire" jdbcType="TIMESTAMP" property="passwdExpire"/>
         <result column="tenant_id" jdbcType="VARCHAR" property="tenantId"/>
@@ -37,7 +36,6 @@
         forbidden,
         wecom_id,
         src_type,
-        src_id,
         employee_type,
         passwd_expire,
         tenant_id,
@@ -124,7 +122,7 @@
         </where>
     </select>
 
-    <select id="filterUser4Select" resultType="com.hbcy.authcenter.api.modules.core.user.dto.OrgUserDTO">
+    <select id="filterDeptUser4Select" resultType="com.hbcy.authcenter.api.modules.core.user.dto.OrgUserDTO">
         select u.id,
         u.phone,
         u.account,
@@ -133,8 +131,8 @@
         u.employee_type,
         u.avatar,
         u.forbidden,
+        uo.org_id,
         uo.node_id,
-        uo.main_job,
         uo.main_job,
         o.id_path
         from user_org uo
@@ -173,16 +171,4 @@
             </if>
         </where>
     </select>
-
-    <!--    TODO:MySQL Only-->
-    <insert id="insertIgnore">
-        insert ignore into sys_user(id, phone, account, real_name, passwd, email, avatar, src_type,
-        src_id, employee_type, tenant_id, create_user,update_user)
-        values
-        <foreach collection="list" item="item" separator=",">
-            (#{item.id}, #{item.phone}, #{item.account}, #{item.realName}, #{item.passwd}, #{item.email},
-            #{item.avatar}, #{item.srcType}, #{item.srcId}, #{item.employeeType}, #{item.tenantId},
-            #{item.createUser}, #{item.updateUser})
-        </foreach>
-    </insert>
 </mapper>

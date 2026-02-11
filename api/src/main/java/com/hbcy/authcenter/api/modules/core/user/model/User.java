@@ -28,7 +28,6 @@ public class User extends BaseEntity {
     public static final String COL_FORBIDDEN = "forbidden";
     public static final String COL_WECOM_ID = "wecom_id";
     public static final String COL_SRC_TYPE = "src_type";
-    public static final String COL_SRC_ID = "src_id";
     public static final String COL_EMPLOYEE_TYPE = "employee_type";
     public static final String COL_PASSWD_EXPIRE = "passwd_expire";
     public static final String COL_TENANT_ID = "tenant_id";
@@ -85,11 +84,6 @@ public class User extends BaseEntity {
      */
     @TableField(value = "src_type")
     private Integer srcType;
-    /**
-     * 源系统id
-     */
-    @TableField(value = "src_id")
-    private String srcId;
     /**
      * 用工类型，0-自有，1-派遣，2-外包，3-外部公司人员
      * 允许为null

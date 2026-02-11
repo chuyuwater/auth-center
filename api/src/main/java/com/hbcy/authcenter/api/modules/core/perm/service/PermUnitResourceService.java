@@ -3,8 +3,11 @@ package com.hbcy.authcenter.api.modules.core.perm.service;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.f4b6a3.ulid.UlidCreator;
+import com.google.common.base.Splitter;
+import com.hbcy.authcenter.api.common.constants.G;
 import com.hbcy.authcenter.api.common.enums.OrgNodeCategoryEnum;
 import com.hbcy.authcenter.api.common.enums.ResourceShowLevelEnum;
+import com.hbcy.authcenter.api.modules.core.app.dao.ResourcePermMapper;
 import com.hbcy.authcenter.api.modules.core.app.dto.GrantAppDTO;
 import com.hbcy.authcenter.api.modules.core.app.dto.ResPermDTO;
 import com.hbcy.authcenter.api.modules.core.app.dto.ResTreeDTO;
@@ -28,6 +31,7 @@ import com.hbcy.common.base.error.ParamError;
 import com.hbcy.common.base.error.PermissionError;
 import com.hbcy.common.base.tree.TreeNode;
 import jakarta.annotation.Resource;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -53,6 +57,8 @@ public class PermUnitResourceService extends ServiceImpl<PermUnitResourceMapper,
     private ResourceTreeService resourceTreeService;
     @Resource
     private OrgTreeMapper orgTreeMapper;
+    @Autowired
+    private ResourcePermMapper resourcePermMapper;
 
     @Transactional(rollbackFor = Exception.class)
     public void addCodesToUnit(PermUnitResourceSaveVO vo) {
@@ -155,23 +161,48 @@ public class PermUnitResourceService extends ServiceImpl<PermUnitResourceMapper,
         if (CollectionUtils.isEmpty(currentUserPerms)) {
             return List.of();
         }
-        //权限单元已勾选的APP权限
+        //已授权的节点
         Set<String> grantIds = baseMapper.selectList(new QueryWrapper<PermUnitResource>()
                         .eq(PermUnitResource.COL_UNIT_ID, vo.getUnitId())
                         .eq(PermUnitResource.COL_APP_ID, vo.getAppId())
                         .select(PermUnitResource.COL_PERM_ID))
                 .stream().map(PermUnitResource::getPermId).collect(Collectors.toSet());
-        //取交集
-        currentUserPerms.removeIf(perm -> !grantIds.contains(perm.getId()));
-        if (CollectionUtils.isEmpty(currentUserPerms)) {
-            return List.of();
-        }
         ResourceTreeQueryVO queryVO = new ResourceTreeQueryVO();
         queryVO.setAppId(vo.getAppId());
         queryVO.setWithPerm(true);
+
+        if (vo.isOnlyPacked()) {
+            //计算交集
+            currentUserPerms.removeIf(perm -> !grantIds.contains(perm.getId()));
+            if (currentUserPerms.isEmpty()) {
+                return List.of();
+            }
+        }
+        //基于用户权限封装的权限树，移除无权限的节点
         TreeNode<ResTreeDTO> tree = resourceTreeService.listResTreeRecursively(
-                queryVO, currentUserPerms, vo.isOnlyPacked());
+                queryVO, currentUserPerms, true);
+        if (vo.isOnlyPacked()) {
+            return tree.getChildren();
+        }
+        if (!grantIds.isEmpty()) {
+            List<String> granted = resourcePermMapper.getPermResIdPaths(grantIds);
+            for (String s : granted) {
+                grantIds.addAll(Splitter.on(G.ID_PATH_SPLITTER).splitToList(s));
+            }
+        }
+        remarkTree(tree, grantIds);
         return tree.getChildren();
+    }
+
+    private void remarkTree(TreeNode<ResTreeDTO> tree, Set<String> grantIds) {
+        if (tree.getData().getPerm() != null) {
+            tree.getData().setGranted(grantIds.contains(tree.getData().getPerm().getId()));
+        } else if (tree.getData().getRes() != null) {
+            tree.getData().setGranted(grantIds.contains(tree.getData().getRes().getId()));
+        }
+        for (TreeNode<ResTreeDTO> child : tree.getChildren()) {
+            remarkTree(child, grantIds);
+        }
     }
 
     /**

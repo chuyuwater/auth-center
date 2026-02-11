@@ -5,7 +5,8 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.hbcy.authcenter.api.modules.core.user.dto.OrgUserDTO;
 import com.hbcy.authcenter.api.modules.core.user.dto.UserQueryResultDTO;
 import com.hbcy.authcenter.api.modules.core.user.model.User;
-import com.hbcy.authcenter.api.modules.core.user.vo.UserQueryVO;
+import com.hbcy.authcenter.api.modules.core.user.vo.UserFilterVO;
+import com.hbcy.authcenter.api.modules.core.user.vo.UserSelectVO;
 import com.hbcy.common.web.api.NamedId;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -23,9 +24,7 @@ public interface UserMapper extends BaseMapper<User> {
 
     String selectNameById(@Param("userId") String userId);
 
-    Page<UserQueryResultDTO> queryUser(Page<?> dbPage, @Param("vo") UserQueryVO vo);
+    Page<UserQueryResultDTO> queryUser(Page<?> dbPage, @Param("vo") UserFilterVO vo);
 
-    Page<OrgUserDTO> filterUser4Select(Page<?> page, @Param("vo") UserQueryVO vo);
-
-    void insertIgnore(@Param("list") List<User> toInsert);
+    Page<OrgUserDTO> filterDeptUser4Select(Page<?> page, @Param("vo") UserSelectVO vo);
 }

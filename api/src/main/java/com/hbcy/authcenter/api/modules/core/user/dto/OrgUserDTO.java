@@ -14,9 +14,13 @@ import lombok.EqualsAndHashCode;
 @Data
 public class OrgUserDTO extends UserDTO {
     /**
-     * 节点
+     * 组织或部门id
      */
     private String nodeId;
+    /**
+     * 组织id
+     */
+    private String orgId;
     /**
      * 节点全路径
      */

@@ -7,6 +7,7 @@ import com.hbcy.authcenter.gateway.dto.ApiPermDTO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -54,4 +55,12 @@ public interface ResourcePermMapper extends BaseMapper<ResourcePerm> {
      * @return 权限信息
      */
     List<ResPermDTO> listAppPerms(@Param("appId") String appId);
+
+    /**
+     * 根据权限点id，获取所有权限点所关联的资源path
+     *
+     * @param permIds 权限点id
+     * @return idPath
+     */
+    List<String> getPermResIdPaths(@Param("permIds") Collection<String> permIds);
 }

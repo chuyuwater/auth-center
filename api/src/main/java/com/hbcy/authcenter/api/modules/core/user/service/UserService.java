@@ -300,7 +300,7 @@ public class UserService extends ServiceImpl<UserMapper, User> {
 
     public UserQueryResultDTO getUser(String userId) {
         checkUser(userId);
-        UserQueryVO vo = new UserQueryVO();
+        UserFilterVO vo = new UserFilterVO();
         vo.setUserId(userId);
         vo.setDeptJob(true);
         PageResp<UserQueryResultDTO> resp = queryUser(vo);
@@ -356,7 +356,7 @@ public class UserService extends ServiceImpl<UserMapper, User> {
         return result;
     }
 
-    private void checkParams(UserQueryVO vo) {
+    private void checkParams(UserBasicQueryVO vo) {
         if (StringUtils.isNotBlank(vo.getNodeId())) {
             //过滤了组织
             OrgTree org = orgTreeService.getById(vo.getNodeId());
@@ -366,10 +366,10 @@ public class UserService extends ServiceImpl<UserMapper, User> {
             if (!org.getTenantId().equals(UserContextUtils.getTenantId())) {
                 throw new PermissionError();
             }
-            if (vo.getLevel() == UserQueryVO.LEVEL_ALL) {
+            if (vo.getLevel() == UserBasicQueryVO.LEVEL_ALL) {
                 vo.setIdPathPrefix(org.getIdPath());
                 vo.setNodeId(null);
-            } else if (vo.getLevel() == UserQueryVO.LEVEL_FOLLOWER) {
+            } else if (vo.getLevel() == UserBasicQueryVO.LEVEL_FOLLOWER) {
                 vo.setIdPathPrefix(org.getIdPath() + G.ID_PATH_SPLITTER);
                 vo.setNodeId(null);
             }
@@ -386,7 +386,7 @@ public class UserService extends ServiceImpl<UserMapper, User> {
      * @param vo 查询条件
      * @return 列表结果
      */
-    public PageResp<UserQueryResultDTO> queryUser(UserQueryVO vo) {
+    public PageResp<UserQueryResultDTO> queryUser(UserFilterVO vo) {
         checkParams(vo);
         Page<UserQueryResultDTO> dbPage = vo.getDbPage();
         Page<UserQueryResultDTO> page = baseMapper.queryUser(dbPage, vo);
@@ -439,10 +439,10 @@ public class UserService extends ServiceImpl<UserMapper, User> {
      * @param vo 筛选条件
      * @return 分页结果
      */
-    public PageResp<OrgUserDTO> filterUser4Select(UserQueryVO vo) {
+    public PageResp<OrgUserDTO> filterUser4Select(UserSelectVO vo) {
         checkParams(vo);
         Page<?> page = vo.getDbPage();
-        Page<OrgUserDTO> result = baseMapper.filterUser4Select(page, vo);
+        Page<OrgUserDTO> result = baseMapper.filterDeptUser4Select(page, vo);
         //填充namePath
         Set<String> nodeIds = new HashSet<>();
         for (OrgUserDTO r : result.getRecords()) {
@@ -554,7 +554,7 @@ public class UserService extends ServiceImpl<UserMapper, User> {
         }
     }
 
-    public List<UserExportDTO> export(UserQueryVO vo) {
+    public List<UserExportDTO> export(UserFilterVO vo) {
         checkParams(vo);
         Page<?> dbPage = vo.getDbPage();
         Page<UserQueryResultDTO> result = baseMapper.queryUser(dbPage, vo);

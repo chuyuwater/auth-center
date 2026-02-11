@@ -26,9 +26,9 @@
     </sql>
 
     <select id="getGrantedPermIds" resultType="java.lang.String">
-        select perm_id
+        select tar.perm_id
         from tenant_app_resource tar
-        join tenant_app ta on tar.app_id = ta.id
+        join tenant_app ta on (tar.tenant_id = ta.tenant_id and tar.app_id = ta.app_id)
         where tar.tenant_id = #{tenantId}
         and ta.forbidden = 0
         <if test="appId != null and appId != ''">

@@ -83,7 +83,7 @@ public class UserController {
      */
     @GetMapping("")
     @NameFill
-    public PageResp<UserQueryResultDTO> listUser(UserQueryVO vo) {
+    public PageResp<UserQueryResultDTO> listUser(UserFilterVO vo) {
         return userService.queryUser(vo);
     }
 
@@ -95,7 +95,7 @@ public class UserController {
      * @return 用户及其关联的组织信息
      */
     @GetMapping("/for-select")
-    public PageResp<OrgUserDTO> listOrgUser(UserQueryVO vo) {
+    public PageResp<OrgUserDTO> listOrgUser(UserSelectVO vo) {
         return userService.filterUser4Select(vo);
     }
 
@@ -108,7 +108,7 @@ public class UserController {
     @PostMapping("/export")
     @IgnoreResponseWrapper
     @ResponseExcel(name = "用户清单")
-    public List<UserExportDTO> exportUser(UserQueryVO vo) {
+    public List<UserExportDTO> exportUser(UserFilterVO vo) {
         return userService.export(vo);
     }
 
