@@ -3,7 +3,7 @@
 <mapper namespace="com.hbcy.authcenter.api.modules.minor.msg.dao.UserMsgMapper">
     <resultMap id="BaseResultMap" type="com.hbcy.authcenter.api.modules.minor.msg.model.UserMsg">
         <!--@mbg.generated-->
-        <!--@Table user_inbox-->
+        <!--@Table user_msg-->
         <id column="id" jdbcType="CHAR" property="id"/>
         <result column="src_id" jdbcType="VARCHAR" property="srcId"/>
         <result column="src_app" jdbcType="VARCHAR" property="srcApp"/>
@@ -26,7 +26,7 @@
 
     <!--    TODO: MySQL Only-->
     <insert id="insertIgnore">
-        insert ignore into user_inbox (id, src_id, src_app, msg_title, msg_content, target_user,
+        insert ignore into user_msg (id, src_id, src_app, msg_title, msg_content, target_user,
         send_time, view_status, msg_type, relate_link, origin_json)
         values
         <foreach collection="msgs" item="msg" separator=",">
@@ -43,7 +43,7 @@
         view_status,
         msg_type,
         relate_link
-        from user_inbox
+        from user_msg
         <where>
             target_user = #{vo.userId}
             <if test="vo.keyword != null and vo.keyword != ''">
