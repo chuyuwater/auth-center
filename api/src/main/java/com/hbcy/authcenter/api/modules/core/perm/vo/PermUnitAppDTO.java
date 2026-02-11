@@ -17,6 +17,10 @@ public class PermUnitAppDTO {
      */
     private String appId;
     /**
+     * 应用图标
+     */
+    private String appIcon;
+    /**
      * 应用名
      */
     private String appName;

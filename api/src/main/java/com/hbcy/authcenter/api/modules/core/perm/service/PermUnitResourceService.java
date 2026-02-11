@@ -129,6 +129,7 @@ public class PermUnitResourceService extends ServiceImpl<PermUnitResourceMapper,
                 continue;
             }
             resp.add(new PermUnitAppDTO()
+                    .setAppIcon(app.getIcon())
                     .setAppName(app.getNameCn())
                     .setAppMemo(app.getMemo())
                     .setAppId(app.getAppId())
