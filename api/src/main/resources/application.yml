@@ -12,15 +12,31 @@ spring:
   config:
     import:
       - nacos:${spring.application.name}.yml
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    druid:
+      initial-size: 4
+      max-active: 20
+      min-idle: 4
+      max-wait: 60000
+      time-between-eviction-runs-millis: 60000
+      minEvictableIdleTimeMillis: 300000
+      maxEvictableIdleTimeMillis: 600000
+      test-on-borrow: false
+      test-on-return: false
+      remove-abandoned: false
+      test-while-idle: true
+      validation-query: SELECT
+      pool-prepared-statements: true
+      max-pool-prepared-statement-per-connection-size: 20
+      filters: stat
 
 mybatis-plus:
   configuration:
     cache-enabled: false
     jdbc-type-for-null: 'null'
     lazy-loading-enabled: false
-    # 生产环境需要关闭log
-    # log-impl: org.apache.ibatis.logging.nologging.NoLoggingImpl
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    log-impl: org.apache.ibatis.logging.nologging.NoLoggingImpl
     map-underscore-to-camel-case: true
     multiple-result-sets-enabled: true
     default-enum-type-handler: org.apache.ibatis.type.EnumOrdinalTypeHandler
