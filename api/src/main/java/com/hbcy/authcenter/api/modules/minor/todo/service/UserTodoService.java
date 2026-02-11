@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.f4b6a3.ulid.UlidCreator;
+import com.hbcy.authcenter.api.modules.core.user.dao.UserMapper;
+import com.hbcy.authcenter.api.modules.core.user.model.User;
 import com.hbcy.authcenter.api.modules.minor.todo.dao.UserTodoMapper;
 import com.hbcy.authcenter.api.modules.minor.todo.dto.UserTodoDTO;
 import com.hbcy.authcenter.api.modules.minor.todo.model.UserTodo;
@@ -12,8 +14,10 @@ import com.hbcy.authcenter.api.modules.minor.todo.vo.UserTodoCreateVO;
 import com.hbcy.authcenter.api.modules.minor.todo.vo.UserTodoQueryVO;
 import com.hbcy.authcenter.api.modules.minor.todo.vo.UserTodoUpdateVO;
 import com.hbcy.authcenter.sdk.utils.UserContextUtils;
+import com.hbcy.common.base.error.ParamError;
 import com.hbcy.common.base.pojo.PageResp;
 import com.hbcy.common.db.model.PageRespEx;
+import jakarta.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +25,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author 姚泰然
@@ -28,6 +34,8 @@ import java.util.List;
  */
 @Service
 public class UserTodoService extends ServiceImpl<UserTodoMapper, UserTodo> {
+    @Resource
+    private UserMapper userMapper;
 
     @Transactional(rollbackFor = Exception.class)
     public void batchCreateTodo(UserTodoCreateVO vo) {
@@ -35,6 +43,13 @@ public class UserTodoService extends ServiceImpl<UserTodoMapper, UserTodo> {
         if (sendTime == null) {
             sendTime = LocalDateTime.now();
         }
+        List<User> users = userMapper.selectByIds(vo.getTargetUsers());
+        if (users.size() < vo.getTargetUsers().size()) {
+            throw new ParamError("部分用户不存在");
+        }
+        Map<String, User> userMap = users.stream().collect(
+                Collectors.toMap(User::getId, v -> v)
+        );
         List<UserTodo> todos = new ArrayList<>();
         for (String targetUser : vo.getTargetUsers()) {
             UserTodo todo = new UserTodo()
@@ -51,7 +66,7 @@ public class UserTodoService extends ServiceImpl<UserTodoMapper, UserTodo> {
                     .setOriginJson(vo.getOriginJson())
                     .setTodoType(vo.getType())
                     .setRelateLink(vo.getLink())
-                    .setTenantId(UserContextUtils.getTenantId());
+                    .setTenantId(userMap.get(targetUser).getTenantId());
             todos.add(todo);
         }
         baseMapper.insertIgnore(todos);
