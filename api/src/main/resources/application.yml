@@ -9,6 +9,9 @@ spring:
     multipart:
       max-file-size: 20MB
       max-request-size: 50MB
+  config:
+    import:
+      - nacos:${spring.application.name}.yml
 
 mybatis-plus:
   configuration:

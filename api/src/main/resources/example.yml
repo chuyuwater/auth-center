@@ -62,9 +62,3 @@ oss:
   bucket-name: digital
   endpoint: http://127.0.0.1:19000
   custom-domain: https://dev.chuyuwater.cn:32008
-
-oa:
-  url: http://www.chuyuwater.cn:8088
-  app-id: ChuyuPortalDev
-  secret: 39472554-4513-46e8-9910-d64de60549b1
-  public-key: "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0bDrmazR/mUgufJOjAD6h4SZbG5n98yxAsF33GvAC41LB3/hFeUU5x1Xqhgzjh5HEprvhO09z19T6H1Avl6akkIU/h7AqnBWdLxprOCUHAEqZJ2Rh1mfWb9l1xWJdHT2ZVe3A3B4YHajJYdiEWPqGEZrrhw7YuhvL9j8lyNBC+JdXi0pkxMInfadMueb9Vu6tNMJc6XF6RmPcFDhPfOlCeXFnCtNUwBKQUfbOkT6wLeBYrMl/fAbNTW7HPJzK1G25wMTgUZmnHnXnP5TFt9/nKf05mO6BqSM4TpmefQBt7E6aGecyuQyrmqxX7UxNgAUepuSkjHGDLiMB/K1rTQLswIDAQAB"
