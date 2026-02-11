@@ -38,4 +38,16 @@
         from perm_unit_resource
         where unit_id = #{unitId}
     </select>
+
+    <select id="selectUnitApp" resultType="com.hbcy.authcenter.api.modules.core.perm.dto.PermUnitAppDTO">
+        select distinct pur.unit_id, pur.app_id, app.name_cn as app_name
+        from perm_unit_resource pur
+        join app on pur.app_id = app.id
+        <where>
+            pur.unit_id in
+            <foreach collection="unitIds" open="(" item="item" close=")" separator=",">
+                #{item}
+            </foreach>
+        </where>
+    </select>
 </mapper>

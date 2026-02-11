@@ -8,7 +8,10 @@ import com.hbcy.authcenter.api.common.constants.G;
 import com.hbcy.authcenter.api.common.enums.TreeQueryLevelEnum;
 import com.hbcy.authcenter.api.modules.core.perm.dao.PermTreeMapper;
 import com.hbcy.authcenter.api.modules.core.perm.dao.PermUnitMapper;
+import com.hbcy.authcenter.api.modules.core.perm.dao.PermUnitResourceMapper;
 import com.hbcy.authcenter.api.modules.core.perm.dao.PermUnitUserMapper;
+import com.hbcy.authcenter.api.modules.core.perm.dto.PermUnitAppDTO;
+import com.hbcy.authcenter.api.modules.core.perm.dto.PermUnitDTO;
 import com.hbcy.authcenter.api.modules.core.perm.model.PermTree;
 import com.hbcy.authcenter.api.modules.core.perm.model.PermUnit;
 import com.hbcy.authcenter.api.modules.core.perm.model.PermUnitUser;
@@ -33,6 +36,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class PermUnitService extends ServiceImpl<PermUnitMapper, PermUnit> {
@@ -43,6 +49,8 @@ public class PermUnitService extends ServiceImpl<PermUnitMapper, PermUnit> {
     private PermUnitUserMapper permUnitUserMapper;
     @Resource
     private PermTreeMapper permTreeMapper;
+    @Resource
+    private PermUnitResourceMapper permUnitResourceMapper;
 
     @Transactional(rollbackFor = Exception.class)
     public PermUnit create(PermUnitCreateVO vo) {
@@ -96,8 +104,8 @@ public class PermUnitService extends ServiceImpl<PermUnitMapper, PermUnit> {
         return entity;
     }
 
-    public PageResp<PermUnit> list(PermUnitQueryVO vo) {
-        Page<PermUnit> dbPage = vo.getDbPage();
+    public PageResp<PermUnitDTO> list(PermUnitQueryVO vo) {
+        Page<PermUnitDTO> dbPage = vo.getDbPage();
         String tenantId = UserContextUtils.getTenantId();
         vo.setTenantId(tenantId);
         if (StringUtils.isNotBlank(vo.getBelongTo()) && vo.getLevel() > 0) {
@@ -110,7 +118,17 @@ public class PermUnitService extends ServiceImpl<PermUnitMapper, PermUnit> {
             }
             vo.setBelongTo(null);
         }
-        Page<PermUnit> page = baseMapper.listPermUnit(dbPage, vo);
+        Page<PermUnitDTO> page = baseMapper.listPermUnit(dbPage, vo);
+        if (!page.getRecords().isEmpty()) {
+            List<String> list = page.getRecords().stream().map(PermUnitDTO::getId).toList();
+            List<PermUnitAppDTO> unitApps = permUnitResourceMapper.selectUnitApp(list);
+            Map<String, Set<String>> appNames = unitApps.stream()
+                    .collect(Collectors.groupingBy(
+                            PermUnitAppDTO::getUnitId,
+                            Collectors.mapping(PermUnitAppDTO::getAppName, Collectors.toSet())
+                    ));
+            page.getRecords().forEach(dto -> dto.setAppNames(appNames.get(dto.getId())));
+        }
         return new PageRespEx<>(page);
     }
 

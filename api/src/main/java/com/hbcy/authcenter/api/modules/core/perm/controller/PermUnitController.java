@@ -1,5 +1,6 @@
 package com.hbcy.authcenter.api.modules.core.perm.controller;
 
+import com.hbcy.authcenter.api.modules.core.perm.dto.PermUnitDTO;
 import com.hbcy.authcenter.api.modules.core.perm.model.PermUnit;
 import com.hbcy.authcenter.api.modules.core.perm.service.PermUnitService;
 import com.hbcy.authcenter.api.modules.core.perm.vo.PermUnitCreateVO;
@@ -49,7 +50,7 @@ public class PermUnitController {
      */
     @GetMapping
     @NameFill
-    public PageResp<PermUnit> list(@Valid PermUnitQueryVO vo) {
+    public PageResp<PermUnitDTO> list(@Valid PermUnitQueryVO vo) {
         return permUnitService.list(vo);
     }
 

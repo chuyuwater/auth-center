@@ -1,10 +1,12 @@
 package com.hbcy.authcenter.api.modules.core.perm.dao;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.hbcy.authcenter.api.modules.core.perm.dto.PermUnitAppDTO;
 import com.hbcy.authcenter.api.modules.core.perm.model.PermUnitResource;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -28,4 +30,12 @@ public interface PermUnitResourceMapper extends BaseMapper<PermUnitResource> {
      * @return 资源ID
      */
     Set<String> listGrantPermIds(@Param("unitId") String unitId);
+
+    /**
+     * 列出权限单元关联的app
+     *
+     * @param unitIds 权限单元ID
+     * @return 关联数据
+     */
+    List<PermUnitAppDTO> selectUnitApp(@Param("unitIds") List<String> unitIds);
 }
