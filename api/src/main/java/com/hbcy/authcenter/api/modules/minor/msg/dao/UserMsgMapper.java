@@ -15,7 +15,7 @@ import java.util.List;
  * @date 2026-02-10 11:04
  */
 @Mapper
-public interface UserInboxMapper extends BaseMapper<UserMsg> {
+public interface UserMsgMapper extends BaseMapper<UserMsg> {
     void insertIgnore(@Param("msgs") List<UserMsg> msgs);
 
     Page<UserInboxDTO> query(Page<?> dbPage, @Param("vo") UserMsgQueryVO vo);

@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.f4b6a3.ulid.UlidCreator;
-import com.hbcy.authcenter.api.modules.minor.msg.dao.UserInboxMapper;
+import com.hbcy.authcenter.api.modules.minor.msg.dao.UserMsgMapper;
 import com.hbcy.authcenter.api.modules.minor.msg.dto.UserInboxDTO;
 import com.hbcy.authcenter.api.modules.minor.msg.model.UserMsg;
 import com.hbcy.authcenter.api.modules.minor.msg.vo.UserMsgBatchOpVO;
@@ -25,7 +25,7 @@ import java.util.List;
  * @date 2026-01-27 08:56
  */
 @Service
-public class UserInboxService extends ServiceImpl<UserInboxMapper, UserMsg> {
+public class UserMsgService extends ServiceImpl<UserMsgMapper, UserMsg> {
     /**
      * NOTE: 创建消息和待办（以及更新待办）是portal平台侧的权限
      * 可以在平台侧创建一个用户，仅授予此权限，然后创建ak/sk给外部系统使用

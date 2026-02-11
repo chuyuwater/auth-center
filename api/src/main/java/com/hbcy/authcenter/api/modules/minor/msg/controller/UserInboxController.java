@@ -1,7 +1,7 @@
 package com.hbcy.authcenter.api.modules.minor.msg.controller;
 
 import com.hbcy.authcenter.api.modules.minor.msg.dto.UserInboxDTO;
-import com.hbcy.authcenter.api.modules.minor.msg.service.UserInboxService;
+import com.hbcy.authcenter.api.modules.minor.msg.service.UserMsgService;
 import com.hbcy.authcenter.api.modules.minor.msg.vo.UserMsgBatchOpVO;
 import com.hbcy.authcenter.api.modules.minor.msg.vo.UserMsgCreateVO;
 import com.hbcy.authcenter.api.modules.minor.msg.vo.UserMsgQueryVO;
@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("api/portal/v1/user/inbox")
 public class UserInboxController {
     @Resource
-    private UserInboxService userInboxService;
+    private UserMsgService userMsgService;
 
 
     /**
@@ -32,7 +32,7 @@ public class UserInboxController {
      */
     @GetMapping
     public PageResp<UserInboxDTO> queryMsg(UserMsgQueryVO vo) {
-        return userInboxService.queryMsg(vo);
+        return userMsgService.queryMsg(vo);
     }
 
     /**
@@ -43,7 +43,7 @@ public class UserInboxController {
      */
     @PostMapping
     public void batchCreateMsg(@Valid @RequestBody UserMsgCreateVO vo) {
-        userInboxService.batchCreateMsg(vo);
+        userMsgService.batchCreateMsg(vo);
     }
 
     /**
@@ -53,7 +53,7 @@ public class UserInboxController {
      */
     @PostMapping("/mark-as-read")
     public void markAsRead(@Valid @RequestBody UserMsgBatchOpVO vo) {
-        userInboxService.markAsRead(vo);
+        userMsgService.markAsRead(vo);
     }
 
     /**
@@ -63,6 +63,6 @@ public class UserInboxController {
      */
     @PostMapping("/batch-delete")
     public void batchDelete(@Valid @RequestBody UserMsgBatchOpVO vo) {
-        userInboxService.batchDelete(vo);
+        userMsgService.batchDelete(vo);
     }
 }
