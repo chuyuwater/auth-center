@@ -14,6 +14,7 @@ import com.hbcy.authcenter.api.modules.core.perm.dto.PermUnitAppDTO;
 import com.hbcy.authcenter.api.modules.core.perm.dto.PermUnitDTO;
 import com.hbcy.authcenter.api.modules.core.perm.model.PermTree;
 import com.hbcy.authcenter.api.modules.core.perm.model.PermUnit;
+import com.hbcy.authcenter.api.modules.core.perm.model.PermUnitResource;
 import com.hbcy.authcenter.api.modules.core.perm.model.PermUnitUser;
 import com.hbcy.authcenter.api.modules.core.perm.vo.PermUnitCreateVO;
 import com.hbcy.authcenter.api.modules.core.perm.vo.PermUnitForbidVO;
@@ -152,17 +153,16 @@ public class PermUnitService extends ServiceImpl<PermUnitMapper, PermUnit> {
         }
         for (PermUnit permUnit : permUnits) {
             if (permUnit.getForbidden().equals(0)) {
-                throw new ParamError("请先禁用权限单元");
+                throw new ParamError("删除前请先禁用");
             }
             if (!permUnit.getTenantId().equals(tenantId)) {
                 throw new PermissionError();
             }
         }
-        boolean any = permUnitUserMapper.exists(new QueryWrapper<PermUnitUser>()
+        permUnitUserMapper.delete(new QueryWrapper<PermUnitUser>()
                 .in(PermUnitUser.COL_UNIT_ID, vo.getIds()));
-        if (any) {
-            throw new ParamError("请先移除关联的用户");
-        }
+        permUnitResourceMapper.delete(new QueryWrapper<PermUnitResource>()
+                .in(PermUnitResource.COL_UNIT_ID, vo.getIds()));
         baseMapper.update(new UpdateWrapper<PermUnit>()
                 .in(PermUnit.COL_ID, vo.getIds())
                 .set(PermUnit.COL_UPDATE_USER, UserContextUtils.getUserId())
