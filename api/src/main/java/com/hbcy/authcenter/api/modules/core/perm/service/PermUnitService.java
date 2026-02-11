@@ -151,6 +151,9 @@ public class PermUnitService extends ServiceImpl<PermUnitMapper, PermUnit> {
             return;
         }
         for (PermUnit permUnit : permUnits) {
+            if (permUnit.getForbidden().equals(0)) {
+                throw new ParamError("请先禁用权限单元");
+            }
             if (!permUnit.getTenantId().equals(tenantId)) {
                 throw new PermissionError();
             }
