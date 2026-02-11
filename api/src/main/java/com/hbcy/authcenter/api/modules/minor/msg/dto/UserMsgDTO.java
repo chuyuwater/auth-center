@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
  * @date 2026-01-27 09:42
  */
 @Data
-public class UserInboxDTO {
+public class UserMsgDTO {
     /**
      * 消息ID
      */

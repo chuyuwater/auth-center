@@ -5,7 +5,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.f4b6a3.ulid.UlidCreator;
 import com.hbcy.authcenter.api.modules.minor.msg.dao.UserMsgMapper;
-import com.hbcy.authcenter.api.modules.minor.msg.dto.UserInboxDTO;
+import com.hbcy.authcenter.api.modules.minor.msg.dto.UserMsgDTO;
 import com.hbcy.authcenter.api.modules.minor.msg.model.UserMsg;
 import com.hbcy.authcenter.api.modules.minor.msg.vo.UserMsgBatchOpVO;
 import com.hbcy.authcenter.api.modules.minor.msg.vo.UserMsgCreateVO;
@@ -55,8 +55,8 @@ public class UserMsgService extends ServiceImpl<UserMsgMapper, UserMsg> {
         baseMapper.insertIgnore(msgs);
     }
 
-    public PageResp<UserInboxDTO> queryMsg(UserMsgQueryVO vo) {
-        Page<UserInboxDTO> dbPage = vo.getDbPage();
+    public PageResp<UserMsgDTO> queryMsg(UserMsgQueryVO vo) {
+        Page<UserMsgDTO> dbPage = vo.getDbPage();
         vo.setUserId(UserContextUtils.getUserId());
         dbPage = baseMapper.query(dbPage, vo);
         return new PageRespEx<>(dbPage);

@@ -1,6 +1,6 @@
 package com.hbcy.authcenter.api.modules.minor.msg.controller;
 
-import com.hbcy.authcenter.api.modules.minor.msg.dto.UserInboxDTO;
+import com.hbcy.authcenter.api.modules.minor.msg.dto.UserMsgDTO;
 import com.hbcy.authcenter.api.modules.minor.msg.service.UserMsgService;
 import com.hbcy.authcenter.api.modules.minor.msg.vo.UserMsgBatchOpVO;
 import com.hbcy.authcenter.api.modules.minor.msg.vo.UserMsgCreateVO;
@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
  */
 @RestController
 @RequestMapping("api/portal/v1/user/inbox")
-public class UserInboxController {
+public class UserMsgController {
     @Resource
     private UserMsgService userMsgService;
 
@@ -31,7 +31,7 @@ public class UserInboxController {
      * @return 消息分页结果
      */
     @GetMapping
-    public PageResp<UserInboxDTO> queryMsg(UserMsgQueryVO vo) {
+    public PageResp<UserMsgDTO> queryMsg(UserMsgQueryVO vo) {
         return userMsgService.queryMsg(vo);
     }
 
