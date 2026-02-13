@@ -120,7 +120,12 @@ public class UserAuthService {
             error.setData(tenantList);
             throw error;
         }
-        chosen = userList.get(0);
+        for (User user : userList) {
+            if (user.getTenantId().equals(hitTenant.get(0))) {
+                chosen = user;
+                break;
+            }
+        }
         long expire = checkLockTime(chosen.getId());
         if (expire > 0) {
             throw new AuthError("登录被锁定，请等待%d秒".formatted(expire));
