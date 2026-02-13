@@ -7,7 +7,6 @@
         <id column="id" jdbcType="CHAR" property="id"/>
         <result column="src_id" jdbcType="VARCHAR" property="srcId"/>
         <result column="src_app" jdbcType="VARCHAR" property="srcApp"/>
-        <result column="src_user" jdbcType="VARCHAR" property="srcUser"/>
         <result column="msg_title" jdbcType="VARCHAR" property="msgTitle"/>
         <result column="msg_content" jdbcType="VARCHAR" property="msgContent"/>
         <result column="target_user" jdbcType="CHAR" property="targetUser"/>
@@ -21,7 +20,7 @@
     </resultMap>
     <sql id="Base_Column_List">
         <!--@mbg.generated-->
-        id, src_id, src_app, src_user, msg_title, msg_content, target_user, send_time, view_status,
+        id, src_id, src_app, msg_title, msg_content, target_user, send_time, view_status,
         msg_type, relate_link, origin_json, create_time, tenant_id
     </sql>
 

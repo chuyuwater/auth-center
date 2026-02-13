@@ -54,7 +54,6 @@ public class UserTodoService extends ServiceImpl<UserTodoMapper, UserTodo> {
             UserTodo todo = new UserTodo()
                     .setId(UlidCreator.getUlid().toString())
                     .setSrcId(vo.getSrcId())
-                    .setSrcUser(vo.getSrcUser())
                     .setSrcApp(vo.getSrcApp())
                     .setTodoTitle(vo.getTitle())
                     .setTodoContent(vo.getContent())

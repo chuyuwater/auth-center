@@ -22,7 +22,6 @@ public class UserMsg {
     public static final String COL_ID = "id";
     public static final String COL_SRC_ID = "src_id";
     public static final String COL_SRC_APP = "src_app";
-    public static final String COL_SRC_USER = "src_user";
     public static final String COL_MSG_TITLE = "msg_title";
     public static final String COL_MSG_CONTENT = "msg_content";
     public static final String COL_TARGET_USER = "target_user";
@@ -46,11 +45,6 @@ public class UserMsg {
      */
     @TableField(value = "src_app")
     private String srcApp;
-    /**
-     * 源系统用户标识
-     */
-    @TableField(value = "src_user")
-    private String srcUser;
     /**
      * 消息标题
      */

@@ -57,7 +57,6 @@ public class UserMsgService extends ServiceImpl<UserMsgMapper, UserMsg> {
             UserMsg msg = new UserMsg()
                     .setId(UlidCreator.getUlid().toString())
                     .setSrcId(vo.getSrcId())
-                    .setSrcUser(vo.getSrcUser())
                     .setSrcApp(vo.getSrcApp())
                     .setMsgTitle(vo.getTitle())
                     .setMsgContent(vo.getContent())

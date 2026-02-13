@@ -27,10 +27,6 @@ public class UserTodoCreateVO {
     @NotBlank(message = "源待办id不能为空")
     private String srcId;
     /**
-     * 源系统用户id
-     */
-    private String srcUser;
-    /**
      * 标题
      */
     @NotBlank(message = "标题不能为空")
