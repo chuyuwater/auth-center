@@ -6,14 +6,14 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hbcy.authcenter.api.common.constants.G;
 import com.hbcy.authcenter.api.common.enums.TreeQueryLevelEnum;
-import com.hbcy.authcenter.api.modules.core.perm.dao.PermTreeMapper;
+import com.hbcy.authcenter.api.modules.core.perm.dao.PermUnitGroupMapper;
 import com.hbcy.authcenter.api.modules.core.perm.dao.PermUnitMapper;
 import com.hbcy.authcenter.api.modules.core.perm.dao.PermUnitResourceMapper;
 import com.hbcy.authcenter.api.modules.core.perm.dao.PermUnitUserMapper;
 import com.hbcy.authcenter.api.modules.core.perm.dto.PermUnitAppDTO;
 import com.hbcy.authcenter.api.modules.core.perm.dto.PermUnitDTO;
-import com.hbcy.authcenter.api.modules.core.perm.model.PermTree;
 import com.hbcy.authcenter.api.modules.core.perm.model.PermUnit;
+import com.hbcy.authcenter.api.modules.core.perm.model.PermUnitGroup;
 import com.hbcy.authcenter.api.modules.core.perm.model.PermUnitResource;
 import com.hbcy.authcenter.api.modules.core.perm.model.PermUnitUser;
 import com.hbcy.authcenter.api.modules.core.perm.vo.PermUnitCreateVO;
@@ -49,7 +49,7 @@ public class PermUnitService extends ServiceImpl<PermUnitMapper, PermUnit> {
     @Resource
     private PermUnitUserMapper permUnitUserMapper;
     @Resource
-    private PermTreeMapper permTreeMapper;
+    private PermUnitGroupMapper permUnitGroupMapper;
     @Resource
     private PermUnitResourceMapper permUnitResourceMapper;
 
@@ -57,7 +57,7 @@ public class PermUnitService extends ServiceImpl<PermUnitMapper, PermUnit> {
     public PermUnit create(PermUnitCreateVO vo) {
         String tenantId = UserContextUtils.getTenantId();
         PermUnit entity = new PermUnit();
-        PermTree groupId = permTreeMapper.selectById(vo.getBelongTo());
+        PermUnitGroup groupId = permUnitGroupMapper.selectById(vo.getBelongTo());
         if (groupId == null || !groupId.getTenantId().equals(tenantId)) {
             throw new ParamError("指定分组不存在");
         }
@@ -89,7 +89,7 @@ public class PermUnitService extends ServiceImpl<PermUnitMapper, PermUnit> {
             throw new PermissionError();
         }
         if (!vo.getBelongTo().equals(entity.getBelongTo())) {
-            PermTree groupId = permTreeMapper.selectById(vo.getBelongTo());
+            PermUnitGroup groupId = permUnitGroupMapper.selectById(vo.getBelongTo());
             if (groupId == null || !groupId.getTenantId().equals(tenantId)) {
                 throw new ParamError("指定分组不存在");
             }
@@ -110,12 +110,12 @@ public class PermUnitService extends ServiceImpl<PermUnitMapper, PermUnit> {
         String tenantId = UserContextUtils.getTenantId();
         vo.setTenantId(tenantId);
         if (StringUtils.isNotBlank(vo.getBelongTo()) && vo.getLevel() > 0) {
-            PermTree permTree = permTreeMapper.selectById(vo.getBelongTo());
-            if (permTree == null) return new PageResp<>();
+            PermUnitGroup permUnitGroup = permUnitGroupMapper.selectById(vo.getBelongTo());
+            if (permUnitGroup == null) return new PageResp<>();
             if (vo.getLevel() == TreeQueryLevelEnum.CHILD.getCode()) {
-                vo.setGroupIdPath(permTree.getIdPath() + G.ID_PATH_SPLITTER);
+                vo.setGroupIdPath(permUnitGroup.getIdPath() + G.ID_PATH_SPLITTER);
             } else {
-                vo.setGroupIdPath(permTree.getIdPath());
+                vo.setGroupIdPath(permUnitGroup.getIdPath());
             }
             vo.setBelongTo(null);
         }

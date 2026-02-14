@@ -1,6 +1,6 @@
 package com.hbcy.authcenter.api.modules.core.perm.dto;
 
-import com.hbcy.authcenter.api.modules.core.perm.model.PermTree;
+import com.hbcy.authcenter.api.modules.core.perm.model.PermUnitGroup;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -10,6 +10,6 @@ import lombok.EqualsAndHashCode;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class PermGroupDetailDTO extends PermTree {
+public class PermGroupDetailDTO extends PermUnitGroup {
     private String parentName;
 }

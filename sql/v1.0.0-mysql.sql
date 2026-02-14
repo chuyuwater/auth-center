@@ -88,7 +88,7 @@ create index ix_org_tree_id_path
 create index ix_org_tree_parent_id
     on org_tree (parent_id, show_order);
 
-create table if not exists perm_tree
+create table if not exists perm_unit_group
 (
     id           varchar(25)                            not null
         primary key,
@@ -106,14 +106,14 @@ create table if not exists perm_tree
     delete_time  bigint       default 0                 not null
 );
 
-create index ix_perm_tree_id_path
-    on perm_tree (id_path);
+create index ix_perm_unit_group_id_path
+    on perm_unit_group (id_path);
 
-create index ix_perm_tree_tenant_name
-    on perm_tree (tenant_id, show_order, node_name);
+create index ix_perm_unit_group_tenant_name
+    on perm_unit_group (tenant_id, show_order, node_name);
 
-create index ux_perm_tree_level_name
-    on perm_tree (parent_id, node_name);
+create index ux_perm_unit_group_level_name
+    on perm_unit_group (parent_id, node_name);
 
 create table if not exists perm_unit
 (
@@ -397,9 +397,8 @@ create table if not exists user_msg
 (
     id          char(26)                               not null
         primary key,
-    src_id      varchar(100)                           null comment '源消息id，用来去重',
+    src_id      varchar(100)                           not null comment '源消息id，用来去重',
     src_app     varchar(20)                            not null comment '源应用id',
-    src_user    varchar(100)                           null comment '源系统用户标识',
     msg_title   varchar(200)                           not null comment '消息标题',
     msg_content varchar(700) default ''                not null comment '消息内容',
     target_user char(26)                               not null comment '目标用户',
@@ -427,7 +426,6 @@ create table if not exists user_todo
         primary key,
     src_app       varchar(20)                            not null comment '源app id',
     src_id        varchar(100)                           not null comment '源id，用于去重',
-    src_user      varchar(100)                           null comment '源系统的用户id',
     todo_title    varchar(300)                           not null comment '待办标题',
     todo_content  varchar(700)                           null comment '待办内容',
     target_user   char(26)                               not null comment '关联用户',

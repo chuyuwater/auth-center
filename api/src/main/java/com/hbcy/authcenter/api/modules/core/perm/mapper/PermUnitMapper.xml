@@ -45,13 +45,13 @@
         pu.update_user,
         pu.create_time,
         pu.update_time,
-        pt.node_name as group_name
+        pug.node_name as group_name
         from perm_unit pu
-        join perm_tree pt on pu.belong_to = pt.id
+        join perm_unit_group pug on pu.belong_to = pug.id
         <where>
-            pt.delete_time = 0
+            pug.delete_time = 0
             and pu.delete_time = 0
-            and pt.tenant_id = #{vo.tenantId}
+            and pug.tenant_id = #{vo.tenantId}
             <if test="vo.name != null and vo.name != ''">
                 and pu.name_cn like concat('%', #{vo.name}, '%')
             </if>
@@ -59,7 +59,7 @@
                 and pu.belong_to = #{vo.belongTo}
             </if>
             <if test="vo.groupIdPath != null and vo.groupIdPath != ''">
-                and pt.id_path like concat(#{vo.groupIdPath}, '%')
+                and pug.id_path like concat(#{vo.groupIdPath}, '%')
             </if>
             <if test="vo.forbidden != null">
                 and pu.forbidden = #{vo.forbidden}

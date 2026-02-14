@@ -6,14 +6,14 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.common.base.Splitter;
 import com.hbcy.authcenter.api.common.bean.NodeMoveVO;
 import com.hbcy.authcenter.api.common.constants.G;
-import com.hbcy.authcenter.api.modules.core.perm.dao.PermTreeMapper;
+import com.hbcy.authcenter.api.modules.core.perm.dao.PermUnitGroupMapper;
 import com.hbcy.authcenter.api.modules.core.perm.dao.PermUnitMapper;
 import com.hbcy.authcenter.api.modules.core.perm.dto.PermGroupDetailDTO;
-import com.hbcy.authcenter.api.modules.core.perm.model.PermTree;
 import com.hbcy.authcenter.api.modules.core.perm.model.PermUnit;
-import com.hbcy.authcenter.api.modules.core.perm.vo.PermTreeCreateVO;
-import com.hbcy.authcenter.api.modules.core.perm.vo.PermTreeQueryVO;
-import com.hbcy.authcenter.api.modules.core.perm.vo.PermTreeUpdateVO;
+import com.hbcy.authcenter.api.modules.core.perm.model.PermUnitGroup;
+import com.hbcy.authcenter.api.modules.core.perm.vo.PermUnitGroupCreateVO;
+import com.hbcy.authcenter.api.modules.core.perm.vo.PermUnitGroupQueryVO;
+import com.hbcy.authcenter.api.modules.core.perm.vo.PermUnitGroupUpdateVO;
 import com.hbcy.authcenter.sdk.utils.UserContextUtils;
 import com.hbcy.common.base.error.ParamError;
 import com.hbcy.common.base.error.PermissionError;
@@ -32,16 +32,16 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
-public class PermTreeService extends ServiceImpl<PermTreeMapper, PermTree> {
+public class PermUnitGroupService extends ServiceImpl<PermUnitGroupMapper, PermUnitGroup> {
     public static final String BIZ_KEY = "portal:perm:group:%s:";
     @Resource
     private PermUnitMapper permUnitMapper;
     @Resource
     private RedisIdGenerator redisIdGenerator;
 
-    private PermTree checkParentId(String tenantId, String parentId) {
+    private PermUnitGroup checkParentId(String tenantId, String parentId) {
         if (StringUtils.isNotBlank(parentId)) {
-            PermTree parent = getById(parentId);
+            PermUnitGroup parent = getById(parentId);
             if (parent == null) {
                 throw new ParamError("父节点不存在");
             }
@@ -54,20 +54,20 @@ public class PermTreeService extends ServiceImpl<PermTreeMapper, PermTree> {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public PermTree create(PermTreeCreateVO vo) {
+    public PermUnitGroup create(PermUnitGroupCreateVO vo) {
         String tenantId = UserContextUtils.getTenantId();
-        PermTree parent = checkParentId(tenantId, vo.getParentId());
+        PermUnitGroup parent = checkParentId(tenantId, vo.getParentId());
         final String parentId = parent == null ? "" : parent.getId();
         String parentIdPath = parent == null ? "" : parent.getIdPath();
 
-        PermTree entity = new PermTree();
+        PermUnitGroup entity = new PermUnitGroup();
         BeanCopyUtils.copy(vo, entity);
         String id = redisIdGenerator.generateId(BIZ_KEY.formatted(tenantId),
-                () -> baseMapper.selectCount(new QueryWrapper<PermTree>()
-                        .eq(PermTree.COL_TENANT_ID, tenantId)),
+                () -> baseMapper.selectCount(new QueryWrapper<PermUnitGroup>()
+                        .eq(PermUnitGroup.COL_TENANT_ID, tenantId)),
                 k -> vo.getPolicyModel() == 0 ?
-                        PermTree.RBAC_ID_TEMPLATE.formatted(tenantId, k) :
-                        PermTree.ABAC_ID_TEMPLATE.formatted(tenantId, k));
+                        PermUnitGroup.RBAC_ID_TEMPLATE.formatted(tenantId, k) :
+                        PermUnitGroup.ABAC_ID_TEMPLATE.formatted(tenantId, k));
         entity.setId(id);
         entity.setParentId(parentId);
         entity.setTenantId(tenantId);
@@ -83,8 +83,8 @@ public class PermTreeService extends ServiceImpl<PermTreeMapper, PermTree> {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public PermTree update(PermTreeUpdateVO vo, String id) {
-        PermTree entity = getById(id);
+    public PermUnitGroup update(PermUnitGroupUpdateVO vo, String id) {
+        PermUnitGroup entity = getById(id);
         if (entity == null) {
             throw new ParamError("指定节点不存在");
         }
@@ -109,13 +109,13 @@ public class PermTreeService extends ServiceImpl<PermTreeMapper, PermTree> {
         return entity;
     }
 
-    public TreeNode<PermTree> listPermTreeRecursively(PermTreeQueryVO vo) {
+    public TreeNode<PermUnitGroup> listPermTreeRecursively(PermUnitGroupQueryVO vo) {
         String tenantId = UserContextUtils.getTenantId();
         String parentId = vo.getParentId();
         String pathPrefix;
-        PermTree rootData = checkParentId(tenantId, parentId);
+        PermUnitGroup rootData = checkParentId(tenantId, parentId);
         if (rootData == null) {
-            rootData = new PermTree();
+            rootData = new PermUnitGroup();
             rootData.setId(parentId);
             rootData.setIdPath("");
             rootData.setParentId("");
@@ -123,20 +123,20 @@ public class PermTreeService extends ServiceImpl<PermTreeMapper, PermTree> {
         } else {
             pathPrefix = rootData.getIdPath() + G.ID_PATH_SPLITTER;
         }
-        TreeNode<PermTree> root = new TreeNode<>(rootData);
-        List<PermTree> permTrees = baseMapper.listChildren(tenantId, pathPrefix, vo);
+        TreeNode<PermUnitGroup> root = new TreeNode<>(rootData);
+        List<PermUnitGroup> permUnitGroups = baseMapper.listChildren(tenantId, pathPrefix, vo);
         Set<String> ids = new HashSet<>();
-        for (PermTree permTree : permTrees) {
-            ids.addAll(Splitter.on(G.ID_PATH_SPLITTER).splitToList(permTree.getIdPath()));
+        for (PermUnitGroup permUnitGroup : permUnitGroups) {
+            ids.addAll(Splitter.on(G.ID_PATH_SPLITTER).splitToList(permUnitGroup.getIdPath()));
         }
-        if (ids.size() > permTrees.size()) {
-            permTrees = baseMapper.selectByIds(ids);
+        if (ids.size() > permUnitGroups.size()) {
+            permUnitGroups = baseMapper.selectByIds(ids);
         }
-        Map<String, List<PermTree>> childrenMap = permTrees.stream()
-                .collect(Collectors.groupingBy(PermTree::getParentId,
+        Map<String, List<PermUnitGroup>> childrenMap = permUnitGroups.stream()
+                .collect(Collectors.groupingBy(PermUnitGroup::getParentId,
                         Collectors.collectingAndThen(
                                 Collectors.toList(), l -> {
-                                    l.sort(Comparator.comparingInt(PermTree::getShowOrder));
+                                    l.sort(Comparator.comparingInt(PermUnitGroup::getShowOrder));
                                     return l;
                                 })));
 
@@ -145,13 +145,13 @@ public class PermTreeService extends ServiceImpl<PermTreeMapper, PermTree> {
         return root;
     }
 
-    private void buildTree(TreeNode<PermTree> current,
-                           Map<String, List<PermTree>> childrenMap,
+    private void buildTree(TreeNode<PermUnitGroup> current,
+                           Map<String, List<PermUnitGroup>> childrenMap,
                            String parentId) {
-        List<PermTree> children = childrenMap.get(parentId);
+        List<PermUnitGroup> children = childrenMap.get(parentId);
         if (children != null) {
-            for (PermTree t : children) {
-                TreeNode<PermTree> node = new TreeNode<>();
+            for (PermUnitGroup t : children) {
+                TreeNode<PermUnitGroup> node = new TreeNode<>();
                 node.setData(t);
                 current.addChild(node);
                 buildTree(node, childrenMap, t.getId());
@@ -159,44 +159,44 @@ public class PermTreeService extends ServiceImpl<PermTreeMapper, PermTree> {
         }
     }
 
-    public List<PermTree> listDirectChildren(PermTreeQueryVO vo) {
+    public List<PermUnitGroup> listDirectChildren(PermUnitGroupQueryVO vo) {
         String tenantId = UserContextUtils.getTenantId();
         if (StringUtils.isNotBlank(vo.getParentId())) {
             checkParentId(tenantId, vo.getParentId());
         }
-        return baseMapper.selectList(new QueryWrapper<PermTree>()
-                .eq(PermTree.COL_PARENT_ID, vo.getParentId())
-                .eq(PermTree.COL_TENANT_ID, tenantId)
-                .like(StringUtils.isNotBlank(vo.getKeyword()), PermTree.COL_NODE_NAME, vo.getKeyword())
-                .orderByAsc(PermTree.COL_SHOW_ORDER)
+        return baseMapper.selectList(new QueryWrapper<PermUnitGroup>()
+                .eq(PermUnitGroup.COL_PARENT_ID, vo.getParentId())
+                .eq(PermUnitGroup.COL_TENANT_ID, tenantId)
+                .like(StringUtils.isNotBlank(vo.getKeyword()), PermUnitGroup.COL_NODE_NAME, vo.getKeyword())
+                .orderByAsc(PermUnitGroup.COL_SHOW_ORDER)
         );
     }
 
     public void delete(String id) {
-        PermTree node = getById(id);
+        PermUnitGroup node = getById(id);
         if (node == null) {
             return;
         }
         if (!node.getTenantId().equals(UserContextUtils.getTenantId())) {
             throw new PermissionError();
         }
-        List<PermTree> related = baseMapper.listChildren(
+        List<PermUnitGroup> related = baseMapper.listChildren(
                 node.getTenantId(), node.getIdPath(), null);
-        Set<String> ids = related.stream().map(PermTree::getId).collect(Collectors.toSet());
+        Set<String> ids = related.stream().map(PermUnitGroup::getId).collect(Collectors.toSet());
         ids.add(id);
         boolean any = permUnitMapper.exists(new QueryWrapper<PermUnit>()
                 .in(PermUnit.COL_BELONG_TO, ids));
         if (any) {
             throw new ParamError("必须先删除分组及其子分组内的角色");
         }
-        baseMapper.update(new UpdateWrapper<PermTree>()
-                .in(PermTree.COL_ID, ids)
-                .set(PermTree.COL_DELETE_TIME, System.currentTimeMillis())
-                .set(PermTree.COL_UPDATE_USER, UserContextUtils.getUserId()));
+        baseMapper.update(new UpdateWrapper<PermUnitGroup>()
+                .in(PermUnitGroup.COL_ID, ids)
+                .set(PermUnitGroup.COL_DELETE_TIME, System.currentTimeMillis())
+                .set(PermUnitGroup.COL_UPDATE_USER, UserContextUtils.getUserId()));
     }
 
-    private void updateParent(PermTree node, String newParentId) {
-        PermTree parentNode = checkParentId(node.getTenantId(), newParentId);
+    private void updateParent(PermUnitGroup node, String newParentId) {
+        PermUnitGroup parentNode = checkParentId(node.getTenantId(), newParentId);
         String oldPath = node.getIdPath();
         String newPath = (parentNode != null ? parentNode.getIdPath() + G.ID_PATH_SPLITTER : "") + node.getId();
         baseMapper.updateIdPath(node.getTenantId(), oldPath, newPath);
@@ -206,14 +206,14 @@ public class PermTreeService extends ServiceImpl<PermTreeMapper, PermTree> {
     @Transactional(rollbackFor = Exception.class)
     public void move(@Valid NodeMoveVO vo) {
         vo.check();
-        PermTree node = getById(vo.getNodeId());
+        PermUnitGroup node = getById(vo.getNodeId());
         if (node == null) {
             throw new ParamError("节点不存在");
         }
         if (!node.getTenantId().equals(UserContextUtils.getTenantId())) {
             throw new PermissionError();
         }
-        PermTree prevNode = null;
+        PermUnitGroup prevNode = null;
         if (StringUtils.isNotBlank(vo.getPrevId())) {
             prevNode = getById(vo.getPrevId());
             if (prevNode == null) {
@@ -232,7 +232,7 @@ public class PermTreeService extends ServiceImpl<PermTreeMapper, PermTree> {
         }
         baseMapper.updateShowOrder(node.getTenantId(), vo.getParentId(), targetIdx);
 
-        PermTree toUpdate = new PermTree();
+        PermUnitGroup toUpdate = new PermUnitGroup();
         toUpdate.setId(vo.getNodeId());
         toUpdate.setParentId(vo.getParentId());
         toUpdate.setShowOrder(targetIdx);
@@ -240,16 +240,16 @@ public class PermTreeService extends ServiceImpl<PermTreeMapper, PermTree> {
     }
 
     public PermGroupDetailDTO getDetail(String id) {
-        PermTree permTree = baseMapper.selectById(id);
-        if (permTree == null) {
+        PermUnitGroup permUnitGroup = baseMapper.selectById(id);
+        if (permUnitGroup == null) {
             return null;
         }
-        if (!permTree.getTenantId().equals(UserContextUtils.getTenantId())) {
+        if (!permUnitGroup.getTenantId().equals(UserContextUtils.getTenantId())) {
             throw new PermissionError();
         }
-        PermGroupDetailDTO dto = BeanCopyUtils.copy(permTree, PermGroupDetailDTO.class);
-        if (StringUtils.isNotBlank(permTree.getParentId())) {
-            PermTree parent = baseMapper.selectById(permTree.getParentId());
+        PermGroupDetailDTO dto = BeanCopyUtils.copy(permUnitGroup, PermGroupDetailDTO.class);
+        if (StringUtils.isNotBlank(permUnitGroup.getParentId())) {
+            PermUnitGroup parent = baseMapper.selectById(permUnitGroup.getParentId());
             dto.setParentName(parent.getNodeName());
         }
         return dto;

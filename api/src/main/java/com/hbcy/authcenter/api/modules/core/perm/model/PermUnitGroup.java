@@ -15,8 +15,8 @@ import java.time.LocalDateTime;
 @EqualsAndHashCode(callSuper = true)
 @Data
 @NoArgsConstructor
-@TableName(value = "perm_tree")
-public class PermTree extends BaseEntity {
+@TableName(value = "perm_unit_group")
+public class PermUnitGroup extends BaseEntity {
     public static final String RBAC_ID_TEMPLATE = "%s-ROLEGRP-%06d";
     public static final String ABAC_ID_TEMPLATE = "%s-POLICYGRP-%06d";
     public static final String COL_ID = "id";

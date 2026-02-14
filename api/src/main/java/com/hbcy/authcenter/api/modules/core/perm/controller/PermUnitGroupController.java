@@ -2,11 +2,11 @@ package com.hbcy.authcenter.api.modules.core.perm.controller;
 
 import com.hbcy.authcenter.api.common.bean.NodeMoveVO;
 import com.hbcy.authcenter.api.modules.core.perm.dto.PermGroupDetailDTO;
-import com.hbcy.authcenter.api.modules.core.perm.model.PermTree;
-import com.hbcy.authcenter.api.modules.core.perm.service.PermTreeService;
-import com.hbcy.authcenter.api.modules.core.perm.vo.PermTreeCreateVO;
-import com.hbcy.authcenter.api.modules.core.perm.vo.PermTreeQueryVO;
-import com.hbcy.authcenter.api.modules.core.perm.vo.PermTreeUpdateVO;
+import com.hbcy.authcenter.api.modules.core.perm.model.PermUnitGroup;
+import com.hbcy.authcenter.api.modules.core.perm.service.PermUnitGroupService;
+import com.hbcy.authcenter.api.modules.core.perm.vo.PermUnitGroupCreateVO;
+import com.hbcy.authcenter.api.modules.core.perm.vo.PermUnitGroupQueryVO;
+import com.hbcy.authcenter.api.modules.core.perm.vo.PermUnitGroupUpdateVO;
 import com.hbcy.common.base.tree.TreeNode;
 import com.hbcy.common.web.bean.NameFill;
 import jakarta.annotation.Resource;
@@ -26,10 +26,10 @@ import java.util.List;
 @RestController
 @RequestMapping("api/portal/v1/perm/group")
 @Validated
-public class PermTreeController {
+public class PermUnitGroupController {
 
     @Resource
-    private PermTreeService permTreeService;
+    private PermUnitGroupService permUnitGroupService;
 
     /**
      * 节点详情
@@ -40,7 +40,7 @@ public class PermTreeController {
     @GetMapping("/node/{id}")
     @NameFill
     public PermGroupDetailDTO getById(@PathVariable String id) {
-        return permTreeService.getDetail(id);
+        return permUnitGroupService.getDetail(id);
     }
 
     /**
@@ -50,8 +50,8 @@ public class PermTreeController {
      * @return 权限树
      */
     @GetMapping("/tree")
-    public List<TreeNode<PermTree>> getTree(@Valid PermTreeQueryVO vo) {
-        TreeNode<PermTree> root = permTreeService.listPermTreeRecursively(vo);
+    public List<TreeNode<PermUnitGroup>> getTree(@Valid PermUnitGroupQueryVO vo) {
+        TreeNode<PermUnitGroup> root = permUnitGroupService.listPermTreeRecursively(vo);
         //不必返回根节点
         return root.getChildren();
     }
@@ -64,10 +64,10 @@ public class PermTreeController {
      * @return 节点列表
      */
     @GetMapping("/child")
-    public List<PermTree> getDirectChildren(String parentId) {
-        PermTreeQueryVO vo = new PermTreeQueryVO();
+    public List<PermUnitGroup> getDirectChildren(String parentId) {
+        PermUnitGroupQueryVO vo = new PermUnitGroupQueryVO();
         vo.setParentId(parentId == null ? "" : parentId);
-        return permTreeService.listDirectChildren(vo);
+        return permUnitGroupService.listDirectChildren(vo);
     }
 
     /**
@@ -77,8 +77,8 @@ public class PermTreeController {
      * @return 创建后的节点信息
      */
     @PostMapping
-    public PermTree create(@RequestBody @Valid PermTreeCreateVO vo) {
-        return permTreeService.create(vo);
+    public PermUnitGroup create(@RequestBody @Valid PermUnitGroupCreateVO vo) {
+        return permUnitGroupService.create(vo);
     }
 
     /**
@@ -89,8 +89,8 @@ public class PermTreeController {
      * @return 更新后的节点信息
      */
     @PutMapping("/{id}")
-    public PermTree update(@PathVariable String id, @RequestBody @Valid PermTreeUpdateVO vo) {
-        return permTreeService.update(vo, id);
+    public PermUnitGroup update(@PathVariable String id, @RequestBody @Valid PermUnitGroupUpdateVO vo) {
+        return permUnitGroupService.update(vo, id);
     }
 
     /**
@@ -100,7 +100,7 @@ public class PermTreeController {
      */
     @PostMapping("/move")
     public void move(@RequestBody @Valid NodeMoveVO vo) {
-        permTreeService.move(vo);
+        permUnitGroupService.move(vo);
     }
 
     /**
@@ -110,6 +110,6 @@ public class PermTreeController {
      */
     @DeleteMapping("/{id}")
     public void delete(@PathVariable String id) {
-        permTreeService.delete(id);
+        permUnitGroupService.delete(id);
     }
 }

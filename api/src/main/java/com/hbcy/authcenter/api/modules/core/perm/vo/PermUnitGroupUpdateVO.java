@@ -5,13 +5,13 @@ import lombok.Data;
 import org.hibernate.validator.constraints.Length;
 
 /**
- * 角色分组更新VO
+ * 权限单元分组更新VO
  *
  * @author 姚泰然
  * @date 2025-12-28
  */
 @Data
-public class PermTreeUpdateVO {
+public class PermUnitGroupUpdateVO {
     /**
      * 节点名称
      */
