@@ -40,7 +40,7 @@ import java.util.stream.Collectors;
 public class SysDictService extends ServiceImpl<SysDictMapper, SysDict> {
     //缓存有效期
     public static final Duration DICT_EXPIRE = Duration.ofMinutes(10);
-    public static final String DICT_CACHE_KEY_LIST = "authcenter:sys:dict:list:";
+    public static final String DICT_CACHE_KEY_LIST = "portal:sys:dict:list:";
 
     @Resource
     private StringRedisTemplate stringRedisTemplate;
@@ -107,6 +107,7 @@ public class SysDictService extends ServiceImpl<SysDictMapper, SysDict> {
                 .like(SysDict.COL_ID_PATH, dict.getIdPath())
                 .set(SysDict.COL_DELETE_TIME, System.currentTimeMillis())
                 .set(SysDict.COL_UPDATE_USER, UserContextUtils.getUserId()));
+        cleanCache(dict.getFeatCode());
     }
 
     private SysDict checkExist(String parentId) {
@@ -151,6 +152,7 @@ public class SysDictService extends ServiceImpl<SysDictMapper, SysDict> {
 
     /**
      * 移动字典项
+     * 只能在本级内调整显示顺序
      * @param vo 移动详情
      */
     @Transactional(rollbackFor = Exception.class)
@@ -159,49 +161,24 @@ public class SysDictService extends ServiceImpl<SysDictMapper, SysDict> {
         if (node == null) {
             throw new ParamError("指定字典项不存在");
         }
-        SysDict group = checkExist("", node.getFeatCode());
-        if (group == null) {
-            throw new ParamError("分组不存在");
+        //字典不能修改parentId，所以无需检查
+        if (StringUtils.isBlank(vo.getPrevId())) {
+            return;
         }
-        SysDict parent = group;
-        //对于字典项而言，移动到顶级意味着parentId为分组的id
-        if (StringUtils.isBlank(vo.getParentId())) {
-            vo.setParentId(group.getId());
-        } else {
-            parent = baseMapper.selectById(vo.getParentId());
-            if (parent == null) {
-                throw new ParamError("父节点不存在");
-            }
-            if (!parent.getFeatCode().equals(group.getValueStr())) {
-                throw new ParamError("节点不能跨字典类型移动");
-            }
+        SysDict prevNode = baseMapper.selectById(vo.getPrevId());
+        if (prevNode == null) {
+            throw new ParamError("前节点不存在");
         }
-        SysDict prevNode = null;
-        if (StringUtils.isNotBlank(vo.getPrevId())) {
-            prevNode = baseMapper.selectById(vo.getPrevId());
-            if (prevNode == null) {
-                throw new ParamError("前节点不存在");
-            }
-            if (!prevNode.getParentId().equals(vo.getParentId())) {
-                throw new ParamError("前节点和当前节点的父节点不一致");
-            }
-            if (!prevNode.getFeatCode().equals(node.getFeatCode())) {
-                throw new ParamError("前节点不是同一个分组下的字典项");
-            }
+        if (!prevNode.getParentId().equals(node.getParentId())) {
+            throw new ParamError("前节点和当前节点的父节点不一致");
         }
-        String oldPath = node.getIdPath();
-        String newPath = parent.getIdPath() + G.ID_PATH_SPLITTER + node.getId();
-        baseMapper.updateIdPath(oldPath, newPath);
-        int targetIdx = 0;
-        if (prevNode != null) {
-            targetIdx = prevNode.getShowOrder() + 1;
-        }
-        baseMapper.updateShowOrder(vo.getParentId(), targetIdx);
+        int targetIdx = prevNode.getShowOrder() + 1;
+        baseMapper.updateShowOrder(node.getParentId(), targetIdx);
         SysDict toUpdate = new SysDict();
         toUpdate.setId(node.getId());
-        toUpdate.setParentId(parent.getId());
         toUpdate.setShowOrder(targetIdx);
         baseMapper.updateById(toUpdate);
+        cleanCache(node.getFeatCode());
     }
 
     public List<TreeNode<SysDict>> getChildrenAsTree(DictQueryVO vo) {
