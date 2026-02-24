@@ -162,17 +162,20 @@ public class SysDictService extends ServiceImpl<SysDictMapper, SysDict> {
             throw new ParamError("指定字典项不存在");
         }
         //字典不能修改parentId，所以无需检查
-        if (StringUtils.isBlank(vo.getPrevId())) {
+        if (vo.getPrevId() == null) {
             return;
         }
-        SysDict prevNode = baseMapper.selectById(vo.getPrevId());
-        if (prevNode == null) {
-            throw new ParamError("前节点不存在");
+        SysDict prevNode = null;
+        if (StringUtils.isNotBlank(vo.getPrevId())) {
+            prevNode = baseMapper.selectById(vo.getPrevId());
+            if (prevNode == null) {
+                throw new ParamError("前节点不存在");
+            }
+            if (!prevNode.getParentId().equals(node.getParentId())) {
+                throw new ParamError("前节点和当前节点的父节点不一致");
+            }
         }
-        if (!prevNode.getParentId().equals(node.getParentId())) {
-            throw new ParamError("前节点和当前节点的父节点不一致");
-        }
-        int targetIdx = prevNode.getShowOrder() + 1;
+        int targetIdx = prevNode == null ? 1 : prevNode.getShowOrder() + 1;
         baseMapper.updateShowOrder(node.getParentId(), targetIdx);
         SysDict toUpdate = new SysDict();
         toUpdate.setId(node.getId());

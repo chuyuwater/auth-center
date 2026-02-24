@@ -104,7 +104,7 @@ public class SysDictController {
 
     /**
      * 移动字典项
-     *
+     * 只能在同级移动，后端忽略parentId参数
      * @param vo 移动详情
      */
     @PostMapping("/move")
