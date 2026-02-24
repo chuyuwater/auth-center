@@ -79,7 +79,7 @@ public class PermUnitUserController {
      * @param vo 查询条件
      * @return 用户关联的授权信息
      */
-    @GetMapping("user/units")
+    @GetMapping("/user/units")
     @NameFill
     public List<UserUnitDTO> listUserUnits(@Valid PermUserUnitQueryVO vo) {
         return permUnitUserService.listUserUnits(vo);
