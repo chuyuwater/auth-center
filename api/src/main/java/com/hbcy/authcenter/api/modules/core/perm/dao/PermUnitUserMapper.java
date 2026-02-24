@@ -7,6 +7,7 @@ import com.hbcy.authcenter.api.modules.core.app.dto.ResPermDTO;
 import com.hbcy.authcenter.api.modules.core.perm.dto.UnitUserDTO;
 import com.hbcy.authcenter.api.modules.core.perm.model.PermUnitUser;
 import com.hbcy.authcenter.api.modules.core.perm.vo.PermUnitUserQueryVO;
+import com.hbcy.authcenter.api.modules.core.perm.vo.PermUnitUserUpdateVO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -47,4 +48,7 @@ public interface PermUnitUserMapper extends BaseMapper<PermUnitUser> {
     //判断用户是否有某个权限
     int hasPerm(@Param("userId") String userId, @Param("orgId") String orgId,
                 @Param("permIds") Set<String> permIds);
+
+    //按用户身份移除授权
+    void batchDelete(@Param("vo") PermUnitUserUpdateVO vo, @Param("tenantId") String tenantId);
 }

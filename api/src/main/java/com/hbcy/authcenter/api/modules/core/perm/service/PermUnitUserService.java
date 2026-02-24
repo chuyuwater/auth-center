@@ -27,7 +27,6 @@ import com.hbcy.authcenter.api.modules.core.user.dao.UserOrgMapper;
 import com.hbcy.authcenter.api.modules.core.user.model.UserOrg;
 import com.hbcy.authcenter.sdk.utils.UserContextUtils;
 import com.hbcy.common.base.error.ParamError;
-import com.hbcy.common.base.error.PermissionError;
 import com.hbcy.common.base.pojo.PageResp;
 import com.hbcy.common.db.model.PageRespEx;
 import jakarta.annotation.Resource;
@@ -60,15 +59,15 @@ public class PermUnitUserService extends ServiceImpl<PermUnitUserMapper, PermUni
     private InnerService innerService;
 
     @Transactional(rollbackFor = Exception.class)
-    public void addUsersToUnit(PermUnitUserUpdateVO vo) {
+    public void addUsersToUnits(PermUnitUserUpdateVO vo) {
         String tenantId = UserContextUtils.getTenantId();
         String currentUserId = UserContextUtils.getUserId();
-        PermUnit permUnit = permUnitMapper.selectById(vo.getUnitId());
-        if (permUnit == null) {
-            throw new ParamError("权限单元已被删除");
-        }
-        if (!permUnit.getTenantId().equals(tenantId)) {
-            throw new PermissionError("权限单元不属于当前租户");
+        List<PermUnit> permUnitList = permUnitMapper.selectList(new QueryWrapper<PermUnit>()
+                .select(PermUnit.COL_ID)
+                .in(PermUnit.COL_ID, vo.getUnitIdList())
+                .eq(PermUnit.COL_TENANT_ID, tenantId));
+        if (permUnitList.size() < vo.getUnitIdList().size()) {
+            throw new ParamError("权限单元选择错误");
         }
         //校验数据，在user_org表里找到对应
         //为减少io，直接取出用户所有的org整理成map
@@ -82,30 +81,28 @@ public class PermUnitUserService extends ServiceImpl<PermUnitUserMapper, PermUni
                 Collectors.mapping(UserOrg::getOrgId, Collectors.toSet())
         ));
         List<PermUnitUser> list = new ArrayList<>();
-        for (PermUserGrantVO g : vo.getUserList()) {
-            if (!userOrgSet.containsKey(g.getUserId()) || !userOrgSet.get(g.getUserId()).contains(g.getOrgId())) {
-                throw new ParamError("用户或组织信息错误");
+        for (PermUnit permUnit : permUnitList) {
+            for (PermUserGrantVO g : vo.getUserList()) {
+                if (!userOrgSet.containsKey(g.getUserId()) || !userOrgSet.get(g.getUserId()).contains(g.getOrgId())) {
+                    throw new ParamError("用户或组织信息错误");
+                }
+                PermUnitUser u = new PermUnitUser();
+                u.setId(UlidCreator.getUlid().toString());
+                u.setUnitId(permUnit.getId());
+                u.setUserId(g.getUserId());
+                u.setOrgId(g.getOrgId());
+                u.setTenantId(tenantId);
+                u.setCreateUser(currentUserId);
+                u.setUpdateUser(currentUserId);
+                list.add(u);
             }
-            PermUnitUser u = new PermUnitUser();
-            u.setId(UlidCreator.getUlid().toString());
-            u.setUnitId(vo.getUnitId());
-            u.setUserId(g.getUserId());
-            u.setOrgId(g.getOrgId());
-            u.setTenantId(tenantId);
-            u.setCreateUser(currentUserId);
-            u.setUpdateUser(currentUserId);
-            list.add(u);
         }
         baseMapper.insertIgnore(list);
     }
 
-    @Transactional(rollbackFor = Exception.class)
-    public void removeUsersFromUnit(String unitId, List<String> userIds, String orgId) {
-        remove(new QueryWrapper<PermUnitUser>()
-                .eq(PermUnitUser.COL_UNIT_ID, unitId)
-                .in(PermUnitUser.COL_USER_ID, userIds)
-                .eq(PermUnitUser.COL_ORG_ID, orgId)
-        );
+    public void removeUsersFromUnit(PermUnitUserUpdateVO vo) {
+        String tenantId = UserContextUtils.getTenantId();
+        baseMapper.batchDelete(vo, tenantId);
     }
 
     /**

@@ -159,4 +159,20 @@
             #{item}
         </foreach>
     </select>
+
+    <delete id="batchDelete">
+        delete
+        from perm_unit_user
+        <where>
+            tenant_id = #{tenantId}
+            and unit_id in
+            <foreach collection="vo.unitIdList" item="item" separator="," open="(" close=")">
+                #{item}
+            </foreach>
+            and
+            <foreach collection="vo.userList" item="u" separator=" or ">
+                (user_id = #{u.userId} and org_id = #{u.orgId})
+            </foreach>
+        </where>
+    </delete>
 </mapper>
