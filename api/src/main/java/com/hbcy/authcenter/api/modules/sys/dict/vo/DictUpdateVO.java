@@ -1,6 +1,7 @@
 package com.hbcy.authcenter.api.modules.sys.dict.vo;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import org.hibernate.validator.constraints.Length;
 
@@ -14,7 +15,7 @@ public class DictUpdateVO {
     /**
      * 字典编码
      */
-    @NotBlank(message = "valueStr不能为空")
+    @NotNull(message = "valueStr不能为null")
     @Length(max = 100, message = "valueStr长度不能超过100")
     private String valueStr;
     /**
