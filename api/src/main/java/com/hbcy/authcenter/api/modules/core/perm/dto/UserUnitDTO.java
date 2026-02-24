@@ -21,6 +21,10 @@ public class UserUnitDTO {
      */
     private String unitId;
     /**
+     * 角色禁用状态
+     */
+    private Integer forbidden;
+    /**
      * 角色名称
      */
     private String unitName;

@@ -181,6 +181,7 @@
         puu.user_id,
         puu.unit_id,
         pu.name_cn as unit_name,
+        pu.forbidden,
         puu.org_id,
         ot.node_name as org_name,
         puu.create_user,
@@ -189,7 +190,8 @@
         join perm_unit pu on puu.unit_id = pu.id
         join org_tree ot on puu.org_id = ot.id
         <where>
-            puu.user_id = #{vo.userId} and puu.tenant_id= #{vo.tenantId}
+            puu.user_id = #{vo.userId}
+            and puu.tenant_id = #{vo.tenantId}
             <if test="vo.orgId != null and vo.orgId != ''">
                 and puu.org_id = #{vo.orgId}
             </if>
