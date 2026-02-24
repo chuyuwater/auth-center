@@ -37,6 +37,10 @@ public class UserUnitDTO {
      */
     private String createUser;
     /**
+     * 授权人名称
+     */
+    private String createUserName;
+    /**
      * 授权时间
      */
     private String createTime;
