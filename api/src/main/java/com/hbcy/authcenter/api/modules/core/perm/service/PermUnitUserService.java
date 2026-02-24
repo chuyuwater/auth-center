@@ -237,6 +237,7 @@ public class PermUnitUserService extends ServiceImpl<PermUnitUserMapper, PermUni
      * @return 满足条件的权限单元列表
      */
     public List<UserUnitDTO> listUserUnits(PermUserUnitQueryVO vo) {
+        vo.setTenantId(UserContextUtils.getTenantId());
         return baseMapper.listUserUnits(vo);
     }
 }

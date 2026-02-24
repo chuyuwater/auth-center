@@ -1,5 +1,6 @@
 package com.hbcy.authcenter.api.modules.core.perm.vo;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
@@ -22,4 +23,10 @@ public class PermUserUnitQueryVO {
      * 权限单元ID
      */
     private String unitId;
+
+    /**
+     * 租户ID
+     */
+    @JsonIgnore
+    private String tenantId;
 }

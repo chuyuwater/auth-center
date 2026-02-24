@@ -189,7 +189,7 @@
         join perm_unit pu on puu.unit_id = pu.id
         join org_tree ot on puu.org_id = ot.id
         <where>
-            puu.user_id = #{vo.userId}
+            puu.user_id = #{vo.userId} and puu.tenant_id= #{vo.tenantId}
             <if test="vo.orgId != null and vo.orgId != ''">
                 and puu.org_id = #{vo.orgId}
             </if>
