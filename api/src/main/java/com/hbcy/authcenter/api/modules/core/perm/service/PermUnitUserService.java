@@ -14,11 +14,13 @@ import com.hbcy.authcenter.api.modules.core.org.service.OrgTreeService;
 import com.hbcy.authcenter.api.modules.core.perm.dao.PermUnitMapper;
 import com.hbcy.authcenter.api.modules.core.perm.dao.PermUnitUserMapper;
 import com.hbcy.authcenter.api.modules.core.perm.dto.UnitUserDTO;
+import com.hbcy.authcenter.api.modules.core.perm.dto.UserUnitDTO;
 import com.hbcy.authcenter.api.modules.core.perm.model.PermUnit;
 import com.hbcy.authcenter.api.modules.core.perm.model.PermUnitUser;
 import com.hbcy.authcenter.api.modules.core.perm.vo.PermUnitUserQueryVO;
 import com.hbcy.authcenter.api.modules.core.perm.vo.PermUnitUserUpdateVO;
 import com.hbcy.authcenter.api.modules.core.perm.vo.PermUserGrantVO;
+import com.hbcy.authcenter.api.modules.core.perm.vo.PermUserUnitQueryVO;
 import com.hbcy.authcenter.api.modules.core.tenant.dao.TenantAppMapper;
 import com.hbcy.authcenter.api.modules.core.tenant.dao.TenantAppResourceMapper;
 import com.hbcy.authcenter.api.modules.core.tenant.model.TenantApp;
@@ -227,6 +229,15 @@ public class PermUnitUserService extends ServiceImpl<PermUnitUserMapper, PermUni
                     .in(TenantAppResource.COL_PERM_ID, permIds));
         }
         return baseMapper.hasPerm(userId, orgId, permIds) > 0;
+    }
+
+    /**
+     * 查询用户关联的权限单元
+     * @param vo 查询条件
+     * @return 满足条件的权限单元列表
+     */
+    public List<UserUnitDTO> listUserUnits(PermUserUnitQueryVO vo) {
+        return baseMapper.listUserUnits(vo);
     }
 }
 

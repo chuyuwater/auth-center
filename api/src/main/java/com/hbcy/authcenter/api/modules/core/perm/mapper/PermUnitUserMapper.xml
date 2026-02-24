@@ -175,4 +175,27 @@
             </foreach>
         </where>
     </delete>
+
+    <select id="listUserUnits" resultType="com.hbcy.authcenter.api.modules.core.perm.dto.UserUnitDTO">
+        select puu.id as grant_id,
+        puu.user_id,
+        puu.unit_id,
+        pu.name_cn as unit_name,
+        puu.org_id,
+        ot.node_name as org_name,
+        puu.create_user,
+        puu.create_time
+        from perm_unit_user puu
+        join perm_unit pu on puu.unit_id = pu.id
+        join org_tree ot on puu.org_id = ot.id
+        <where>
+            puu.user_id = #{vo.userId}
+            <if test="vo.orgId != null and vo.orgId != ''">
+                and puu.org_id = #{vo.orgId}
+            </if>
+            <if test="vo.unitId != null and vo.unitId != ''">
+                and puu.unit_id = #{vo.unitId}
+            </if>
+        </where>
+    </select>
 </mapper>

@@ -5,9 +5,11 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.hbcy.authcenter.api.modules.core.app.dto.GrantAppDTO;
 import com.hbcy.authcenter.api.modules.core.app.dto.ResPermDTO;
 import com.hbcy.authcenter.api.modules.core.perm.dto.UnitUserDTO;
+import com.hbcy.authcenter.api.modules.core.perm.dto.UserUnitDTO;
 import com.hbcy.authcenter.api.modules.core.perm.model.PermUnitUser;
 import com.hbcy.authcenter.api.modules.core.perm.vo.PermUnitUserQueryVO;
 import com.hbcy.authcenter.api.modules.core.perm.vo.PermUnitUserUpdateVO;
+import com.hbcy.authcenter.api.modules.core.perm.vo.PermUserUnitQueryVO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -51,4 +53,7 @@ public interface PermUnitUserMapper extends BaseMapper<PermUnitUser> {
 
     //按用户身份移除授权
     void batchDelete(@Param("vo") PermUnitUserUpdateVO vo, @Param("tenantId") String tenantId);
+
+    //获取用户已授权的权限单元
+    List<UserUnitDTO> listUserUnits(@Param("vo") PermUserUnitQueryVO vo);
 }
