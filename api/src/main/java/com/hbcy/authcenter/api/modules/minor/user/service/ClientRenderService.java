@@ -10,7 +10,6 @@ import com.hbcy.authcenter.api.modules.core.app.dao.ResourceTreeMapper;
 import com.hbcy.authcenter.api.modules.core.app.model.ResourceTree;
 import com.hbcy.authcenter.api.modules.core.org.dao.OrgTreeMapper;
 import com.hbcy.authcenter.api.modules.core.org.model.OrgTree;
-import com.hbcy.authcenter.api.modules.core.org.service.OrgTreeService;
 import com.hbcy.authcenter.api.modules.core.perm.dao.PermUnitUserMapper;
 import com.hbcy.authcenter.api.modules.core.tenant.dao.TenantAppMapper;
 import com.hbcy.authcenter.api.modules.core.tenant.dao.TenantAppResourceMapper;
@@ -45,32 +44,18 @@ public class ClientRenderService {
     @Resource
     private ResourceTreeMapper resourceTreeMapper;
     @Resource
-    private OrgTreeService orgTreeService;
-    @Resource
     private UserOrgMapper userOrgMapper;
 
-    /**
-     * 获取当前用户有权访问的一级菜单、二级菜单（移动端）
-     * 缓存1分钟，避免频繁查询数据库
-     *
-     * @param clientType 1:PC端 2:移动端
-     * @return 菜单树（1或2级）
-     */
-    @Cacheable(value = "@1m")
-    public List<TreeNode<ResourceTree>> listEntry(String userId, String orgId, int clientType) {
+    //过滤用户有权限访问的菜单id
+    public Set<String> grantResIds(String userId, OrgTree org, int maxDepth) {
         // 叶子节点资源集合
         Set<String> resIds = new HashSet<>();
         // 全权app
         Set<String> appIds = new HashSet<>();
-        //一级菜单和二级菜单节点
+        //过滤后的节点
         Set<String> filteredResIds = new HashSet<>();
 
         String tenantId = UserContextUtils.getTenantId();
-        OrgTree org = orgTreeMapper.selectById(orgId);
-        if (org == null) {
-            return List.of();
-        }
-        boolean isPrj = org.getNodeCategory().equals(OrgNodeCategoryEnum.PROJECT.getValue());
         if (UserContextUtils.isTenantAdmin()) {
             //管理员特殊逻辑
             List<TenantApp> tenantApps = tenantAppMapper.selectList(new QueryWrapper<TenantApp>()
@@ -86,20 +71,39 @@ public class ClientRenderService {
             resIds.addAll(permUnitUserMapper.listUserRes(userId, org.getIdPath()));
         }
         if (resIds.isEmpty() && appIds.isEmpty()) {
-            return List.of();
+            return Set.of();
         }
         //获取满足条件的idPath
         Set<String> idPaths = resourceTreeMapper.listIdPath(resIds, appIds);
-        //通过idPath剥离出一级菜单和二级菜单
+        //通过idPath按菜单深度剥离菜单
         for (String idPath : idPaths) {
             String[] split = idPath.split(G.ID_PATH_SPLITTER);
-            if (split.length >= 1) {
-                filteredResIds.add(split[0]);
-            }
-            if (clientType == ClientTypeEnum.MOBILE && split.length >= 2) {
-                filteredResIds.add(split[1]);
+            if (maxDepth > 0) {
+                for (int i = 0; i < maxDepth && i < split.length; i++) {
+                    filteredResIds.add(split[i]);
+                }
+            } else {
+                filteredResIds.addAll(Arrays.asList(split));
             }
         }
+        return filteredResIds;
+    }
+
+    /**
+     * 获取当前用户有权访问的菜单树
+     * 缓存1分钟，避免频繁查询数据库
+     *
+     * @param maxDepth 菜单最大层级，0标识无限制
+     * @return 菜单树
+     */
+    @Cacheable(value = "@1m")
+    public List<TreeNode<ResourceTree>> listUserMenu(String userId, String orgId, int clientType, int maxDepth) {
+        OrgTree org = orgTreeMapper.selectById(orgId);
+        if (org == null) {
+            return List.of();
+        }
+        Set<String> filteredResIds = grantResIds(userId, org, maxDepth);
+        boolean isPrj = org.getNodeCategory().equals(OrgNodeCategoryEnum.PROJECT.getValue());
         List<Integer> showLevels = Lists.newArrayList(ResourceShowLevelEnum.GLOBAL.getValue());
         List<Integer> clientTypes = Lists.newArrayList(ClientTypeEnum.ALL, clientType);
         if (isPrj) {
@@ -113,29 +117,34 @@ public class ClientRenderService {
         vo.setShowLevels(showLevels);
         vo.setResIds(filteredResIds);
         //应用之间的一级菜单按appId的show_order排序
-        //应用之内的一级菜单、二级菜单按resId的show_order排序
+        //应用之内的菜单按resId的show_order排序
         List<ResourceTree> nodes = resourceTreeMapper.listOrderdMenu(vo);
-        Map<String, List<ResourceTree>> children = new HashMap<>();
         //虚拟根节点
         TreeNode<ResourceTree> root = new TreeNode<>(new ResourceTree());
+        Map<String, List<ResourceTree>> children = new HashMap<>();
         for (ResourceTree node : nodes) {
             if (StringUtils.isBlank(node.getParentId())) {
+                //一级菜单
                 root.addChild(new TreeNode<>(node));
             } else {
+                //其他菜单
                 children.computeIfAbsent(node.getParentId(), k -> new ArrayList<>()).add(node);
             }
         }
-        if (!children.isEmpty()) {
-            for (TreeNode<ResourceTree> child : root.getChildren()) {
-                List<ResourceTree> lv2 = children.get(child.getData().getId());
-                if (!CollectionUtils.isEmpty(lv2)) {
-                    for (ResourceTree rt : lv2) {
-                        child.addChild(new TreeNode<>(rt));
-                    }
-                }
-            }
+        for (TreeNode<ResourceTree> node : root.getChildren()) {
+            buildResTree(node, children);
         }
         return root.getChildren();
+    }
+
+    private void buildResTree(TreeNode<ResourceTree> node, Map<String, List<ResourceTree>> children) {
+        if (children.containsKey(node.getData().getId())) {
+            for (ResourceTree child : children.get(node.getData().getId())) {
+                TreeNode<ResourceTree> sub = new TreeNode<>(child);
+                node.addChild(sub);
+                buildResTree(sub, children);
+            }
+        }
     }
 
     public List<TreeNode<UserOrgDTO>> listUserOrgTree() {

@@ -29,7 +29,7 @@ public interface AuthCenterClient {
      * @param resId 资源id，传入null则返回整个app的所有权限码
      * @return 权限码集合
      */
-    @GetMapping("/api/portal/v1/client/permCode")
+    @GetMapping("/api/portal/v1/client/perm-code")
     ApiResponse<Set<String>> listPermCode(@RequestParam String resId);
 
     /**
@@ -39,7 +39,7 @@ public interface AuthCenterClient {
      * @param permCode 权限码，如sys:user:create
      * @return true/false
      */
-    @GetMapping("/api/portal/v1/client/permCheck")
+    @GetMapping("/api/portal/v1/client/perm-check")
     ApiResponse<Boolean> checkPerm(@RequestParam String permCode);
 
     /**

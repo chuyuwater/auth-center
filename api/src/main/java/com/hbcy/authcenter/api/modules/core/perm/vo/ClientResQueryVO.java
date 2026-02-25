@@ -22,9 +22,8 @@ public class ClientResQueryVO {
     @DictValid(dictKey = "CLIENT_TYPE")
     private Integer clientType;
     /**
-     * 应用id，后端填充
+     * 应用id，不传则搜索所有应用
      */
-    @JsonIgnore
     private String appId;
     /**
      * 组织id，后端填充

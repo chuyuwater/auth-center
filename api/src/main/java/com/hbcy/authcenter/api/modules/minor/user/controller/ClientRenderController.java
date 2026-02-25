@@ -1,5 +1,6 @@
 package com.hbcy.authcenter.api.modules.minor.user.controller;
 
+import com.hbcy.authcenter.api.common.enums.ClientTypeEnum;
 import com.hbcy.authcenter.api.modules.core.app.dto.AppCardDTO;
 import com.hbcy.authcenter.api.modules.core.app.dto.GrantAppDTO;
 import com.hbcy.authcenter.api.modules.core.app.dto.ResPermDTO;
@@ -68,7 +69,22 @@ public class ClientRenderController {
      */
     @GetMapping("/entry")
     public List<TreeNode<ResourceTree>> entry(@NotNull(message = "clientType必须指定") Integer clientType) {
-        return clientRenderService.listEntry(UserContextUtils.getUserId(), UserContextUtils.getUserOrg(), clientType);
+        int maxDepth = clientType == ClientTypeEnum.MOBILE ? 2 : 1;
+        return clientRenderService.listUserMenu(
+                UserContextUtils.getUserId(), UserContextUtils.getUserOrg(), clientType, maxDepth
+        );
+    }
+
+    /**
+     * 获取当前用户的完整菜单树，用于构建快捷入口
+     * @param clientType 1:PC端 2:移动端
+     * @return 菜单树
+     */
+    @GetMapping("/menu-tree")
+    public List<TreeNode<ResourceTree>> listMenuTree(@NotNull(message = "clientType必须指定") Integer clientType) {
+        return clientRenderService.listUserMenu(
+                UserContextUtils.getUserId(), UserContextUtils.getUserOrg(), clientType, 0
+        );
     }
 
     /**
@@ -77,7 +93,7 @@ public class ClientRenderController {
      *
      * @return 组织树
      */
-    @GetMapping("/orgTree")
+    @GetMapping("/org-tree")
     public List<TreeNode<UserOrgDTO>> listOrgTree() {
         return clientRenderService.listUserOrgTree();
     }
@@ -87,7 +103,6 @@ public class ClientRenderController {
      */
     @GetMapping("/res")
     public List<TreeNode<ResTreeDTO>> listRes(ClientResQueryVO vo) {
-        vo.setAppId(UserContextUtils.getAppId());
         vo.setOrgId(UserContextUtils.getUserOrg());
         return permUnitResourceService.listUserResources(vo);
     }
@@ -110,7 +125,7 @@ public class ClientRenderController {
      * @param resId 菜单id， 不传则返回整个app的所有权限码
      * @return 权限码
      */
-    @GetMapping("/permCode")
+    @GetMapping("/perm-code")
     public Set<String> listPermCode(String resId) {
         List<ResPermDTO> dtos = permUnitUserService.listPerms(null, resId);
         return dtos.stream().map(ResPermDTO::getPermCode).collect(Collectors.toSet());
@@ -123,7 +138,7 @@ public class ClientRenderController {
      * @param permCode 权限码
      * @return true or false
      */
-    @GetMapping("/permCheck")
+    @GetMapping("/perm-check")
     public boolean checkPerm(String permCode) {
         return permUnitUserService.checkPerm(permCode);
     }
