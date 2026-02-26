@@ -6,6 +6,8 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -67,7 +69,11 @@ public class UserContextUtils {
      * @return 用户姓名
      */
     public static String getUserName() {
-        return getHeader(AuthConstants.HEADER_USER_NAME);
+        String encodedName = getHeader(AuthConstants.HEADER_USER_NAME);
+        if (StringUtils.isBlank(encodedName)) {
+            return "";
+        }
+        return URLDecoder.decode(encodedName, StandardCharsets.UTF_8);
     }
 
     /**
