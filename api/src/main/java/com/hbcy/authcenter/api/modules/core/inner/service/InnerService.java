@@ -128,6 +128,9 @@ public class InnerService {
     }
 
     public Map<String, String> getOrgNames(List<String> orgIds, boolean fullName) {
+        if (CollectionUtils.isEmpty(orgIds)) {
+            return Map.of();
+        }
         List<NamedId> namedIds = orgTreeMapper.selectNameByIds(orgIds, fullName);
         return namedIds.stream()
                 .collect(Collectors.toMap(NamedId::getItemId, NamedId::getItemName));

@@ -103,6 +103,9 @@ public class ClientRenderService {
             return List.of();
         }
         Set<String> filteredResIds = grantResIds(userId, org, maxDepth);
+        if (CollectionUtils.isEmpty(filteredResIds)) {
+            return List.of();
+        }
         boolean isPrj = org.getNodeCategory().equals(OrgNodeCategoryEnum.PROJECT.getValue());
         List<Integer> showLevels = Lists.newArrayList(ResourceShowLevelEnum.GLOBAL.getValue());
         List<Integer> clientTypes = Lists.newArrayList(ClientTypeEnum.ALL, clientType);

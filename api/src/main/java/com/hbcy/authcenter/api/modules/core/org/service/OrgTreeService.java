@@ -32,6 +32,7 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -462,6 +463,9 @@ public class OrgTreeService extends ServiceImpl<OrgTreeMapper, OrgTree> {
     }
 
     public Map<String, String> getOrgNameMap(Set<String> orgIds, boolean useFullName) {
+        if (CollectionUtils.isEmpty(orgIds)) {
+            return Map.of();
+        }
         List<NamedId> namedIds = baseMapper.selectNameByIds(orgIds, useFullName);
         return namedIds.stream().collect(Collectors.toMap(NamedId::getItemId, NamedId::getItemName));
     }
