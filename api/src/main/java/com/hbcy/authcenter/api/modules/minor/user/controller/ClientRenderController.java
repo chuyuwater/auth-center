@@ -122,12 +122,12 @@ public class ClientRenderController {
      * 获取当前用户、当前组织下、当前应用（或指定菜单下）的权限码
      * 该结果不会使用缓存，因此可能和网关侧的权限判断结果不一致
      *
-     * @param resId 菜单id， 不传则返回整个app的所有权限码
+     * @param customId 前端自定义的菜单id（非数据库id）， 不传则返回用户拥有的整个app的所有权限码
      * @return 权限码
      */
     @GetMapping("/perm-code")
-    public Set<String> listPermCode(String resId) {
-        List<ResPermDTO> dtos = permUnitUserService.listPerms(null, resId);
+    public Set<String> listPermCode(String customId) {
+        List<ResPermDTO> dtos = permUnitUserService.listPerms(null, customId);
         return dtos.stream().map(ResPermDTO::getPermCode).collect(Collectors.toSet());
     }
 

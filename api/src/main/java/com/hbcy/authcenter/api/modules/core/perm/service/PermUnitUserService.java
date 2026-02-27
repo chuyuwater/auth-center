@@ -5,9 +5,11 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.f4b6a3.ulid.UlidCreator;
 import com.hbcy.authcenter.api.modules.core.app.dao.ResourcePermMapper;
+import com.hbcy.authcenter.api.modules.core.app.dao.ResourceTreeMapper;
 import com.hbcy.authcenter.api.modules.core.app.dto.GrantAppDTO;
 import com.hbcy.authcenter.api.modules.core.app.dto.ResPermDTO;
 import com.hbcy.authcenter.api.modules.core.app.model.ResourcePerm;
+import com.hbcy.authcenter.api.modules.core.app.model.ResourceTree;
 import com.hbcy.authcenter.api.modules.core.inner.service.InnerService;
 import com.hbcy.authcenter.api.modules.core.org.model.OrgTree;
 import com.hbcy.authcenter.api.modules.core.org.service.OrgTreeService;
@@ -33,6 +35,7 @@ import com.hbcy.common.base.pojo.PageResp;
 import com.hbcy.common.db.model.PageRespEx;
 import jakarta.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -59,6 +62,8 @@ public class PermUnitUserService extends ServiceImpl<PermUnitUserMapper, PermUni
     private ResourcePermMapper resourcePermMapper;
     @Resource
     private InnerService innerService;
+    @Autowired
+    private ResourceTreeMapper resourceTreeMapper;
 
     @Transactional(rollbackFor = Exception.class)
     public void addUsersToUnits(PermUnitUserUpdateVO vo) {
@@ -148,8 +153,24 @@ public class PermUnitUserService extends ServiceImpl<PermUnitUserMapper, PermUni
 
     public List<ResPermDTO> listPerms(String appId, String resId) {
         List<ResPermDTO> resPermDTOS = listPerms(appId);
+        if (StringUtils.isBlank(resId)) {
+            return resPermDTOS;
+        }
         return resPermDTOS.stream().filter(
                 resPermDTO -> resPermDTO.getResId().equals(resId)).toList();
+    }
+
+    public List<ResPermDTO> listPermByCustomId(String appId, String customId) {
+        if (customId == null) {
+            return listPerms(appId);
+        }
+        ResourceTree node = resourceTreeMapper.selectOne(new QueryWrapper<ResourceTree>()
+                .eq(ResourceTree.COL_APP_ID, appId)
+                .eq(ResourceTree.COL_CUSTOM_ID, customId));
+        if (node == null) {
+            return List.of();
+        }
+        return listPerms(appId, node.getId());
     }
 
     //移除角色授权人员
@@ -196,8 +217,7 @@ public class PermUnitUserService extends ServiceImpl<PermUnitUserMapper, PermUni
         return baseMapper.listGrantApps(userId, orgId, withForbidden);
     }
 
-    public boolean checkPerm(String permCode) {
-        String appId = UserContextUtils.getAppId();
+    public boolean checkPerm(String userId, String orgId, String appId, String permCode) {
         List<ResourcePerm> resourcePerms = resourcePermMapper.selectList(new QueryWrapper<ResourcePerm>()
                 .eq(ResourcePerm.COL_APP_ID, appId)
                 .eq(ResourcePerm.COL_PERM_CODE, permCode));
@@ -205,8 +225,6 @@ public class PermUnitUserService extends ServiceImpl<PermUnitUserMapper, PermUni
             return false;
         }
         Set<String> permIds = resourcePerms.stream().map(ResourcePerm::getId).collect(Collectors.toSet());
-        String userId = UserContextUtils.getUserId();
-        String orgId = UserContextUtils.getUserOrg();
         int check = innerService.hasAnyPerm(userId, orgId, permIds);
         if (check > 0) {
             return true;
@@ -229,6 +247,13 @@ public class PermUnitUserService extends ServiceImpl<PermUnitUserMapper, PermUni
                     .in(TenantAppResource.COL_PERM_ID, permIds));
         }
         return baseMapper.hasPerm(userId, orgId, permIds) > 0;
+    }
+
+    public boolean checkPerm(String permCode) {
+        String appId = UserContextUtils.getAppId();
+        String userId = UserContextUtils.getUserId();
+        String orgId = UserContextUtils.getUserOrg();
+        return checkPerm(userId, orgId, appId, permCode);
     }
 
     /**

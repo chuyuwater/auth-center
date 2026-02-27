@@ -26,11 +26,11 @@ public interface AuthCenterClient {
      * 需要将用户数据通过header透传过来
      * 建议调用方缓存这个结果一段时间
      *
-     * @param resId 资源id，传入null则返回整个app的所有权限码
+     * @param customId 前端自定义的菜单id
      * @return 权限码集合
      */
     @GetMapping("/api/portal/v1/client/perm-code")
-    ApiResponse<Set<String>> listPermCode(@RequestParam String resId);
+    ApiResponse<Set<String>> listPermCode(@RequestParam String customId);
 
     /**
      * 检查当前用户在当前组织、当前app下是否有指定权限码
@@ -67,6 +67,23 @@ public interface AuthCenterClient {
      */
     @GetMapping("/inner/portal/v1/user/names")
     ApiResponse<Map<String, String>> getUserNames(@RequestParam Collection<String> userIds);
+
+    /**
+     * 检查指定用户在指定组织、指定app下是否有指定权限码
+     * 该结果会使用与网关侧一致的缓存，因此判断结果与网关放行一致
+     *
+     * @param userId 用户id
+     * @param orgId 组织id
+     * @param appId 应用编码
+     * @param permCode 权限码，如sys:user:create
+     * @return true/false
+     */
+    @GetMapping("/inner/portal/v1/perm/check")
+    ApiResponse<Boolean> checkAnyPerm(
+            @RequestParam String userId,
+            @RequestParam String orgId,
+            @RequestParam String appId,
+            @RequestParam String permCode);
 
     /**
      * 分组下的字典项列表

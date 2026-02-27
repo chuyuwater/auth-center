@@ -3,6 +3,7 @@ package com.hbcy.authcenter.api.modules.core.inner.controller;
 import com.hbcy.authcenter.api.modules.core.auth.model.UserAccess;
 import com.hbcy.authcenter.api.modules.core.auth.service.UserAccessService;
 import com.hbcy.authcenter.api.modules.core.inner.service.InnerService;
+import com.hbcy.authcenter.api.modules.core.perm.service.PermUnitUserService;
 import com.hbcy.authcenter.gateway.dto.ApiPermDTO;
 import com.hbcy.authcenter.gateway.vo.RefreshUserPermVO;
 import jakarta.annotation.Resource;
@@ -29,6 +30,8 @@ public class InnerController {
     private InnerService innerService;
     @Resource
     private UserAccessService userAccessService;
+    @Resource
+    private PermUnitUserService permUnitUserService;
 
     /**
      * 刷新用户权限缓存，供网关调用
@@ -87,5 +90,17 @@ public class InnerController {
     @GetMapping("/user/names")
     public Map<String, String> getOrgNames(@RequestParam Set<String> userIds) {
         return innerService.getUserNames(userIds);
+    }
+
+    /**
+     * 获取用户在指定组织、指定应用下是否有某个权限码
+     * @param userId 用户id
+     * @param orgId 组织id
+     *
+     * @return 是否拥有权限
+     */
+    @GetMapping("/perm/check")
+    public boolean hasAnyPerm(String userId, String orgId, String appId, String permCode) {
+        return permUnitUserService.checkPerm(userId, orgId, appId, permCode);
     }
 }
