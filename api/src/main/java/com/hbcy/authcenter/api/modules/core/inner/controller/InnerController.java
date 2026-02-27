@@ -8,6 +8,8 @@ import com.hbcy.authcenter.gateway.dto.ApiPermDTO;
 import com.hbcy.authcenter.gateway.vo.RefreshUserPermVO;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,6 +25,7 @@ import java.util.Set;
  * @ignore
  * @date 2025-12-31 10:10
  */
+@Validated
 @RestController
 @RequestMapping("inner/portal/v1")
 public class InnerController {
@@ -100,7 +103,10 @@ public class InnerController {
      * @return 是否拥有权限
      */
     @GetMapping("/perm/check")
-    public boolean hasAnyPerm(String userId, String orgId, String appId, String permCode) {
+    public boolean hasAnyPerm(@NotBlank(message = "用户id不能为空") String userId,
+                              @NotBlank(message = "组织id不能为空") String orgId,
+                              @NotBlank(message = "应用id不能为空") String appId,
+                              @NotBlank(message = "权限码不能为空") String permCode) {
         return permUnitUserService.checkPerm(userId, orgId, appId, permCode);
     }
 }
