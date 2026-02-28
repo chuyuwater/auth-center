@@ -109,4 +109,20 @@ public class InnerController {
                               @NotBlank(message = "权限码不能为空") String permCode) {
         return permUnitUserService.checkPerm(userId, orgId, appId, permCode);
     }
+
+    /**
+     * 获取用户有指定权限码的组织
+     * @param userId 用户id
+     * @param appId 应用id
+     * @param permCode 权限码
+     * @param parentOrgId 父级组织id，查询本下，不传则查询租户所有满足条件的组织
+     * @return 组织id列表
+     */
+    @GetMapping("/perm/grant-orgs")
+    public List<String> listGrantOrgs(@NotBlank(message = "用户id不能为空") String userId,
+                                      @NotBlank(message = "应用id不能为空") String appId,
+                                      @NotBlank(message = "权限码不能为空") String permCode,
+                                      String parentOrgId) {
+        return innerService.listGrantOrgs(userId, appId, permCode, parentOrgId);
+    }
 }

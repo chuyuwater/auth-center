@@ -96,6 +96,20 @@ public interface AuthCenterClient {
             @RequestParam String permCode);
 
     /**
+     * 获取用户被赋予了某个权限的所有组织id
+     * @param userId 用户id
+     * @param appId 应用编码
+     * @param permCode 权限码，如sys:user:create
+     * @return 授权组织id列表
+     */
+    @GetMapping("/inner/portal/v1/perm/grant-orgs")
+    ApiResponse<List<String>> listGrantOrgs(
+            @RequestParam String userId,
+            @RequestParam String appId,
+            @RequestParam String permCode
+    );
+
+    /**
      * 分组下的字典项列表
      * 用于列表状字典的全量查询，或树状字典的分级展开查询，有缓存
      * @param featCode 字典类型编码（非id）

@@ -63,4 +63,12 @@ public interface ResourcePermMapper extends BaseMapper<ResourcePerm> {
      * @return idPath
      */
     List<String> getPermResIdPaths(@Param("permIds") Collection<String> permIds);
+
+    /**
+     * 根据权限码搜索权限点
+     * @param appId 应用id
+     * @param permCode 权限码
+     * @return 权限点id
+     */
+    List<String> listPermCodeIds(@Param("appId") String appId, @Param("permCode") String permCode);
 }

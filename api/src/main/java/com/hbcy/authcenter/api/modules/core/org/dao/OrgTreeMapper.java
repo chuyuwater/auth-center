@@ -84,4 +84,24 @@ public interface OrgTreeMapper extends BaseMapper<OrgTree> {
      * @return 最大显示顺序
      */
     int getChildMaxShowOrder(@Param("tenantId") String tenantId, @Param("parentId") String parentId);
+
+    /**
+     * 获取所有组织id
+     *
+     * @param tenantId 租户id
+     * @return 组织id
+     */
+    List<String> getAllOrgIds(@Param("tenantId") String tenantId);
+
+    /**
+     * 获取用户有权限的组织
+     *
+     * @param userId      用户id
+     * @param tenantId    租户id
+     * @param permIds     权限id
+     * @param parentIdPath 父节点id
+     * @return 有权组织id
+     */
+    List<String> listGrantOrgs(@Param("userId") String userId, @Param("tenantId") String tenantId,
+                               @Param("permIds") List<String> permIds, @Param("parentIdPath") String parentIdPath);
 }

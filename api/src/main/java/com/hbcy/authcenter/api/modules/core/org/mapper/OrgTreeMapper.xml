@@ -145,4 +145,34 @@
         and tenant_id = #{tenantId}
         and delete_time = 0
     </select>
+
+    <select id="getAllOrgIds" resultType="java.lang.String">
+        select id
+        from org_tree
+        where tenant_id = #{tenantId}
+        and node_type = 0
+        and forbidden = 0
+        and delete_time = 0
+    </select>
+
+    <select id="listGrantOrgs" resultType="java.lang.String">
+        select ot.id
+        from org_tree ot
+        join perm_unit_user puu on puu.org_id = ot.id
+        join perm_unit_resource pur on pur.unit_id = puu.unit_id
+        <where>
+            puu.user_id = #{userId}
+            and puu.tenant_id = #{tenantId}
+            and pur.perm_id in
+            <foreach item="item" collection="permIds" separator="," close=")" open="(" index="">
+                #{item}
+            </foreach>
+            <if test="parentIdPath != null and parentIdPath != ''">
+                and ot.id_path like concat(#{parentIdPath}, '%')
+            </if>
+            and ot.delete_time = 0
+            and ot.forbidden = 0
+            and ot.node_type = 0
+        </where>
+    </select>
 </mapper>

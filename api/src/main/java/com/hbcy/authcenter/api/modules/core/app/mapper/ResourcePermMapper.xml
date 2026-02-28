@@ -91,4 +91,10 @@
             </foreach>
         </where>
     </select>
+
+    <select id="listPermCodeIds" resultType="java.lang.String">
+        select id
+        from resource_perm
+        where app_id=#{appId} and perm_code= #{permCode}
+    </select>
 </mapper>

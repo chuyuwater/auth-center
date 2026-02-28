@@ -35,7 +35,6 @@ import com.hbcy.common.base.pojo.PageResp;
 import com.hbcy.common.db.model.PageRespEx;
 import jakarta.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -62,7 +61,7 @@ public class PermUnitUserService extends ServiceImpl<PermUnitUserMapper, PermUni
     private ResourcePermMapper resourcePermMapper;
     @Resource
     private InnerService innerService;
-    @Autowired
+    @Resource
     private ResourceTreeMapper resourceTreeMapper;
 
     @Transactional(rollbackFor = Exception.class)
