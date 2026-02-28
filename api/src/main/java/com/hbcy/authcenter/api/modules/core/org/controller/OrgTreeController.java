@@ -5,8 +5,8 @@ import com.hbcy.authcenter.api.modules.core.org.model.OrgTree;
 import com.hbcy.authcenter.api.modules.core.org.service.OrgTreeService;
 import com.hbcy.authcenter.api.modules.core.org.vo.OrgSwitchStatusVO;
 import com.hbcy.authcenter.api.modules.core.org.vo.OrgTreeCreateVO;
-import com.hbcy.authcenter.api.modules.core.org.vo.OrgTreeQueryVO;
 import com.hbcy.authcenter.api.modules.core.org.vo.OrgTreeUpdateVO;
+import com.hbcy.authcenter.sdk.feign.vo.OrgNodeQueryVO;
 import com.hbcy.common.base.tree.TreeNode;
 import com.hbcy.common.web.bean.NameFill;
 import jakarta.annotation.Resource;
@@ -51,7 +51,7 @@ public class OrgTreeController {
      * @return 组织架构树
      */
     @GetMapping("/tree")
-    public List<TreeNode<OrgTree>> getTree(@Valid OrgTreeQueryVO vo) {
+    public List<TreeNode<OrgTree>> getTree(@Valid OrgNodeQueryVO vo) {
         TreeNode<OrgTree> root = orgTreeService.listOrgTreeRecursively(vo);
         //不必返回根节点
         return root.getChildren();
@@ -64,7 +64,7 @@ public class OrgTreeController {
      * @return 满足条件的节点列表
      */
     @GetMapping("/list")
-    public List<OrgTree> list(@Valid OrgTreeQueryVO vo) {
+    public List<OrgTree> list(@Valid OrgNodeQueryVO vo) {
         return orgTreeService.listOrgTree(vo, false);
     }
 
@@ -75,7 +75,7 @@ public class OrgTreeController {
     @GetMapping("/child")
     @NameFill
     public List<OrgTree> getDirectChildren(String parentId) {
-        OrgTreeQueryVO vo = new OrgTreeQueryVO();
+        OrgNodeQueryVO vo = new OrgNodeQueryVO();
         if (StringUtils.isBlank(parentId)) {
             parentId = "";
         }

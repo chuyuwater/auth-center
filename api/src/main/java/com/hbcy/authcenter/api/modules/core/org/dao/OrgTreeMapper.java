@@ -2,7 +2,7 @@ package com.hbcy.authcenter.api.modules.core.org.dao;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.hbcy.authcenter.api.modules.core.org.model.OrgTree;
-import com.hbcy.authcenter.api.modules.core.org.vo.OrgTreeQueryVO;
+import com.hbcy.authcenter.sdk.feign.vo.OrgNodeQueryVO;
 import com.hbcy.common.web.api.NamedId;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -23,7 +23,7 @@ public interface OrgTreeMapper extends BaseMapper<OrgTree> {
      */
     List<OrgTree> listChildren(@Param("tenantId") String tenantId,
                                @Param("parentIdPath") String parentIdPath,
-                               @Param("vo") OrgTreeQueryVO vo);
+                               @Param("vo") OrgNodeQueryVO vo);
 
     /**
      * 在同级尾部创建数据

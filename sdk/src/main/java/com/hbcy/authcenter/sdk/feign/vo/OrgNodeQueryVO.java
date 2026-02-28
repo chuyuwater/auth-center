@@ -1,6 +1,7 @@
-package com.hbcy.authcenter.api.modules.core.org.vo;
+package com.hbcy.authcenter.sdk.feign.vo;
 
 import lombok.Data;
+import lombok.experimental.Accessors;
 
 /**
  * 组织节点查询VO
@@ -9,7 +10,8 @@ import lombok.Data;
  * @date 2025-12-25
  */
 @Data
-public class OrgTreeQueryVO {
+@Accessors(chain = true)
+public class OrgNodeQueryVO {
     /**
      * 父节点ID，若为空则查询整个树
      */

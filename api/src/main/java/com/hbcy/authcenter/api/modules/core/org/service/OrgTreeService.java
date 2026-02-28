@@ -13,10 +13,10 @@ import com.hbcy.authcenter.api.modules.core.org.dao.OrgTreeMapper;
 import com.hbcy.authcenter.api.modules.core.org.model.OrgTree;
 import com.hbcy.authcenter.api.modules.core.org.vo.OrgSwitchStatusVO;
 import com.hbcy.authcenter.api.modules.core.org.vo.OrgTreeCreateVO;
-import com.hbcy.authcenter.api.modules.core.org.vo.OrgTreeQueryVO;
 import com.hbcy.authcenter.api.modules.core.org.vo.OrgTreeUpdateVO;
 import com.hbcy.authcenter.api.modules.core.user.dao.UserOrgMapper;
 import com.hbcy.authcenter.api.modules.core.user.model.UserOrg;
+import com.hbcy.authcenter.sdk.feign.vo.OrgNodeQueryVO;
 import com.hbcy.authcenter.sdk.utils.UserContextUtils;
 import com.hbcy.common.base.error.ParamError;
 import com.hbcy.common.base.error.PermissionError;
@@ -238,7 +238,7 @@ public class OrgTreeService extends ServiceImpl<OrgTreeMapper, OrgTree> {
      * @param vo 查询条件
      * @return 满足条件的列表
      */
-    public List<OrgTree> listOrgTree(OrgTreeQueryVO vo, boolean buildTree) {
+    public List<OrgTree> listOrgTree(OrgNodeQueryVO vo, boolean buildTree) {
         String tenantId = UserContextUtils.getTenantId();
         String parentId = StringUtils.isBlank(vo.getParentId()) ?
                 OrgTree.ORG_ID_TEMPLATE.formatted(tenantId, 0) :
@@ -281,7 +281,7 @@ public class OrgTreeService extends ServiceImpl<OrgTreeMapper, OrgTree> {
      * @param vo 查询条件
      * @return 树
      */
-    public TreeNode<OrgTree> listOrgTreeRecursively(OrgTreeQueryVO vo) {
+    public TreeNode<OrgTree> listOrgTreeRecursively(OrgNodeQueryVO vo) {
         String parentId = StringUtils.isBlank(vo.getParentId()) ?
                 tenantRootId() : vo.getParentId();
         OrgTree rootData = baseMapper.selectById(parentId);
@@ -322,7 +322,7 @@ public class OrgTreeService extends ServiceImpl<OrgTreeMapper, OrgTree> {
     /**
      * 查询组织下级节点
      */
-    public List<OrgTree> listDirectChildren(OrgTreeQueryVO vo) {
+    public List<OrgTree> listDirectChildren(OrgNodeQueryVO vo) {
         if (StringUtils.isBlank(vo.getParentId())) {
             vo.setParentId(tenantRootId());
         } else {

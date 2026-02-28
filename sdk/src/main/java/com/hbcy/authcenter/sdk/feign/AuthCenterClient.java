@@ -4,6 +4,7 @@ import com.hbcy.authcenter.sdk.config.PortalFeignConfig;
 import com.hbcy.authcenter.sdk.feign.dto.OrgNodeDTO;
 import com.hbcy.authcenter.sdk.feign.dto.SysDictDTO;
 import com.hbcy.authcenter.sdk.feign.vo.MsgCreateVO;
+import com.hbcy.authcenter.sdk.feign.vo.OrgNodeQueryVO;
 import com.hbcy.authcenter.sdk.feign.vo.TodoCreateVO;
 import com.hbcy.authcenter.sdk.feign.vo.TodoUpdateVO;
 import com.hbcy.common.base.pojo.ApiResponse;
@@ -59,6 +60,15 @@ public interface AuthCenterClient {
      */
     @GetMapping("/inner/portal/v1/org/names")
     ApiResponse<Map<String, String>> getOrgNames(@RequestParam Collection<String> orgIds, @RequestParam boolean fullName);
+
+    /**
+     * 查询组织节点
+     * 租户id通过header传入
+     * @param vo 查询条件
+     * @return 组织节点列表
+     */
+    @GetMapping("api/portal/v1/org/list")
+    ApiResponse<List<OrgNodeDTO>> listOrgNodes(@RequestParam OrgNodeQueryVO vo);
 
     /**
      * 获取用户名称
