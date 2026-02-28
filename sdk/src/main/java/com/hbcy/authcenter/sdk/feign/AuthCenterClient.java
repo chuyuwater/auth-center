@@ -100,13 +100,15 @@ public interface AuthCenterClient {
      * @param userId 用户id
      * @param appId 应用编码
      * @param permCode 权限码，如sys:user:create
+     * @param parentOrgId 父级组织id，为空则查询用户在租户里的所有有权组织
      * @return 授权组织id列表
      */
     @GetMapping("/inner/portal/v1/perm/grant-orgs")
     ApiResponse<List<String>> listGrantOrgs(
             @RequestParam String userId,
             @RequestParam String appId,
-            @RequestParam String permCode
+            @RequestParam String permCode,
+            @RequestParam String parentOrgId
     );
 
     /**
