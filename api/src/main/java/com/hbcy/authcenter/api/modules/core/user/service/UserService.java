@@ -38,7 +38,6 @@ import com.hbcy.common.base.util.BeanCopyUtils;
 import com.hbcy.common.db.model.PageRespEx;
 import jakarta.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -71,7 +70,7 @@ public class UserService extends ServiceImpl<UserMapper, User> {
     private PermUnitUserMapper permUnitUserMapper;
     @Resource
     private UserAuthService userAuthService;
-    @Autowired
+    @Resource
     private UserOrgMapper userOrgMapper;
 
     /**
