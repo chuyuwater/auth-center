@@ -19,6 +19,7 @@ import com.hbcy.authcenter.api.modules.core.perm.model.PermUnitUser;
 import com.hbcy.authcenter.api.modules.core.tenant.dao.TenantMapper;
 import com.hbcy.authcenter.api.modules.core.tenant.model.Tenant;
 import com.hbcy.authcenter.api.modules.core.user.dao.UserMapper;
+import com.hbcy.authcenter.api.modules.core.user.dao.UserOrgMapper;
 import com.hbcy.authcenter.api.modules.core.user.dto.OrgUserDTO;
 import com.hbcy.authcenter.api.modules.core.user.dto.UserExportDTO;
 import com.hbcy.authcenter.api.modules.core.user.dto.UserOrgDTO;
@@ -37,6 +38,7 @@ import com.hbcy.common.base.util.BeanCopyUtils;
 import com.hbcy.common.db.model.PageRespEx;
 import jakarta.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -69,6 +71,8 @@ public class UserService extends ServiceImpl<UserMapper, User> {
     private PermUnitUserMapper permUnitUserMapper;
     @Resource
     private UserAuthService userAuthService;
+    @Autowired
+    private UserOrgMapper userOrgMapper;
 
     /**
      * 辅助判断：是否是纯文字（排除掉空格和常见的各种标点符号）
@@ -210,6 +214,7 @@ public class UserService extends ServiceImpl<UserMapper, User> {
         }
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public void deleteUser(String userId) {
         User user = getById(userId);
         if (user == null) {
@@ -233,6 +238,8 @@ public class UserService extends ServiceImpl<UserMapper, User> {
         //删除所有角色授权
         permUnitUserMapper.delete(new QueryWrapper<PermUnitUser>()
                 .eq(PermUnitUser.COL_USER_ID, userId));
+        userOrgMapper.delete(new QueryWrapper<UserOrg>()
+                .eq(UserOrg.COL_USER_ID, userId));
         baseMapper.update(new UpdateWrapper<User>()
                 .eq(User.COL_ID, userId)
                 .set(User.COL_UPDATE_USER, UserContextUtils.getUserId())
@@ -277,6 +284,7 @@ public class UserService extends ServiceImpl<UserMapper, User> {
         updatePass(user.getId(), vo.getPassword());
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public void deleteUsers(BatchDeleteVO vo) {
         var tenantId = UserContextUtils.getTenantId();
         boolean exists = exists(new QueryWrapper<User>()
@@ -292,6 +300,9 @@ public class UserService extends ServiceImpl<UserMapper, User> {
                 .in(User.COL_ID, vo.getIds())
                 .set(User.COL_DELETE_TIME, System.currentTimeMillis())
                 .set(User.COL_UPDATE_USER, UserContextUtils.getUserId()));
+        userOrgMapper.delete(new QueryWrapper<UserOrg>()
+                .eq(UserOrg.COL_TENANT_ID, tenantId)
+                .in(UserOrg.COL_USER_ID, vo.getIds()));
         //删除所有角色授权
         permUnitUserMapper.delete(new QueryWrapper<PermUnitUser>()
                 .eq(PermUnitUser.COL_TENANT_ID, tenantId)
@@ -512,12 +523,19 @@ public class UserService extends ServiceImpl<UserMapper, User> {
             existUsers.forEach(user -> sb.append(user.getPhone()).append(","));
             throw new ParamError(sb.toString());
         }
-        //数据准备
+        //分批插入
+        for (List<UserImportVO> parts : Lists.partition(dataList, 1000)) {
+            batchInsert(parts, orgNameIdMap);
+        }
+    }
+
+    private void batchInsert(List<UserImportVO> parts, Map<String, String> orgNameIdMap) {
+        String tenantId = UserContextUtils.getTenantId();
         String createUser = UserContextUtils.getUserId();
+        LocalDateTime now = LocalDateTime.now();
         List<User> users = new ArrayList<>();
         List<UserOrg> userOrgs = new ArrayList<>();
-        LocalDateTime now = LocalDateTime.now();
-        for (UserImportVO d : dataList) {
+        for (UserImportVO d : parts) {
             //用户
             User u = new User();
             BeanCopyUtils.copy(d, u);
