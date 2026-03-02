@@ -54,6 +54,7 @@ sa-token:
   is-read-cookie: false
   is-log: false
   token-style: simple-uuid
+  auto-renew: false
 
 management:
   endpoints:

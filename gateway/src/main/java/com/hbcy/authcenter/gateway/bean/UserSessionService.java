@@ -38,6 +38,11 @@ public class UserSessionService {
         try {
             String loginId = (String) StpUtil.getLoginIdByToken(token);
             SaSession session = StpUtil.getSessionByLoginId(loginId);
+            if (session == null) {
+                return null;
+            }
+            //手动续签
+            StpUtil.stpLogic.updateLastActiveToNow(token);
             return new SessionDTO()
                     .setUserId(loginId)
                     .setTenantId((String) session.get(GatewayConstants.SESSION_TENANT_ID))
