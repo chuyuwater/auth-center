@@ -17,10 +17,13 @@ import java.util.Map;
 import java.util.Set;
 
 /**
+ * sdk，支持外部调用
+ * 但是inner的接口仅在开发环境可用
+ *
  * @author 姚泰然
  * @date 2026-01-13 16:32
  */
-@FeignClient(name = "portal-auth-center", configuration = PortalFeignConfig.class)
+@FeignClient(name = "portal-auth-center", url = "${app.portal.url:}", configuration = PortalFeignConfig.class)
 public interface AuthCenterClient {
     /**
      * 获取当前用户、当前组织下、当前应用（或指定菜单下）的权限码
