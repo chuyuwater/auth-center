@@ -21,7 +21,6 @@ import com.hbcy.authcenter.sdk.utils.UserContextUtils;
 import com.hbcy.common.base.tree.TreeNode;
 import jakarta.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -96,7 +95,6 @@ public class ClientRenderService {
      * @param maxDepth 菜单最大层级，0标识无限制
      * @return 菜单树
      */
-    @Cacheable(value = "@1m")
     public List<TreeNode<ResourceTree>> listUserMenu(String userId, String orgId, int clientType, int maxDepth) {
         OrgTree org = orgTreeMapper.selectById(orgId);
         if (org == null) {
