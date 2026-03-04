@@ -9,12 +9,14 @@ import com.hbcy.authcenter.api.config.UserAuthConfig;
 import com.hbcy.authcenter.api.modules.core.auth.dto.CaptchaDTO;
 import com.hbcy.authcenter.api.modules.core.auth.dto.LoginRespDTO;
 import com.hbcy.authcenter.api.modules.core.auth.vo.LoginVO;
+import com.hbcy.authcenter.api.modules.core.inner.service.InnerService;
 import com.hbcy.authcenter.api.modules.core.tenant.dao.TenantMapper;
 import com.hbcy.authcenter.api.modules.core.tenant.model.Tenant;
 import com.hbcy.authcenter.api.modules.core.user.dao.UserMapper;
 import com.hbcy.authcenter.api.modules.core.user.dao.UserOrgMapper;
 import com.hbcy.authcenter.api.modules.core.user.model.User;
 import com.hbcy.authcenter.gateway.constants.GatewayConstants;
+import com.hbcy.authcenter.gateway.vo.RefreshUserPermVO;
 import com.hbcy.authcenter.sdk.utils.UserContextUtils;
 import com.hbcy.common.base.error.AuthError;
 import com.hbcy.common.base.error.ClientError;
@@ -58,6 +60,8 @@ public class UserAuthService {
     private UserOrgMapper userOrgMapper;
     @Resource
     private TenantMapper tenantMapper;
+    @Resource
+    private InnerService innerService;
 
     private long checkLockTime(String userId) {
         Long expire = stringRedisTemplate.getExpire(USER_LOCK_KEY_PREFIX + userId, TimeUnit.SECONDS);
@@ -138,6 +142,12 @@ public class UserAuthService {
         if (StringUtils.isBlank(orgId)) {
             throw new AuthError("您所在的组织已被禁用，请联系管理员！");
         }
+        //刷新权限
+        RefreshUserPermVO refreshUserPermVO = new RefreshUserPermVO()
+                .setUserId(chosen.getId())
+                .setOrgId(orgId)
+                .setTenantId(chosen.getTenantId());
+        innerService.refreshUserPerms(refreshUserPermVO);
         //执行登录
         StpUtil.login(chosen.getId(), new SaLoginParameter()
                 .setTimeout(authConfig.getTokenExpire().toSeconds())
