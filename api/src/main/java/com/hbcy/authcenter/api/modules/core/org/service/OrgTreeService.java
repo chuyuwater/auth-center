@@ -383,6 +383,9 @@ public class OrgTreeService extends ServiceImpl<OrgTreeMapper, OrgTree> {
         if (!parentNode.getTenantId().equals(node.getTenantId())) {
             throw new ParamError("当前节点和父节点属于不同的租户");
         }
+        if (parentNode.getIdPath().contains(node.getId())) {
+            throw new ParamError("父节点不能是当前节点的子节点");
+        }
         //校验移动的合法性
         checkLevelAllow(node, parentNode);
         // Correct handling of ID Path updates

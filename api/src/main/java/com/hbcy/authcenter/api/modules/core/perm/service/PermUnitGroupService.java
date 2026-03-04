@@ -197,6 +197,9 @@ public class PermUnitGroupService extends ServiceImpl<PermUnitGroupMapper, PermU
 
     private void updateParent(PermUnitGroup node, String newParentId) {
         PermUnitGroup parentNode = checkParentId(node.getTenantId(), newParentId);
+        if (parentNode != null && parentNode.getIdPath().contains(node.getId())) {
+            throw new ParamError("父节点不能是子节点");
+        }
         String oldPath = node.getIdPath();
         String newPath = (parentNode != null ? parentNode.getIdPath() + G.ID_PATH_SPLITTER : "") + node.getId();
         baseMapper.updateIdPath(node.getTenantId(), oldPath, newPath);

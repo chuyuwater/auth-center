@@ -137,6 +137,9 @@ public class ResourceTreeService extends ServiceImpl<ResourceTreeMapper, Resourc
             }
             //父节点被移动
             ResourceTree newParent = checkNewParent(entity, vo.getParentId());
+            if (newParent != null && newParent.getIdPath().contains(id)) {
+                throw new ParamError("父节点不能是子节点");
+            }
             updateChildrenPath(entity, newParent);
             entity.setShowOrder(baseMapper.getMaxChildShowOrder(entity.getAppId(), vo.getParentId()) + 1);
         }
@@ -363,6 +366,9 @@ public class ResourceTreeService extends ServiceImpl<ResourceTreeMapper, Resourc
             }
             if (!parentNode.getAppId().equals(node.getAppId())) {
                 throw new ParamError("当前节点和父节点属于不同的应用");
+            }
+            if (parentNode.getIdPath().contains(node.getId())) {
+                throw new ParamError("父节点不能是当前节点的子节点");
             }
         }
         return parentNode;
