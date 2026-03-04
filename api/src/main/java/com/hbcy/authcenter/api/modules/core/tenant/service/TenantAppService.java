@@ -312,6 +312,7 @@ public class TenantAppService extends ServiceImpl<TenantAppMapper, TenantApp> {
 
     /**
      * 批量授权时，授权全部权限
+     *
      * @param vo 授权信息
      */
     private void batchGrantApp(TenantAppBatchGrantVO vo) {
@@ -361,7 +362,9 @@ public class TenantAppService extends ServiceImpl<TenantAppMapper, TenantApp> {
             tenantApp.setUpdateUser(userId);
             tenantApps.add(tenantApp);
         }
-        baseMapper.insertIgnore(tenantApps);
+        if (!CollectionUtils.isEmpty(tenantApps)) {
+            baseMapper.insertIgnore(tenantApps);
+        }
     }
 
 
