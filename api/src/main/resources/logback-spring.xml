@@ -21,7 +21,7 @@
         <File>${path}/${appName}.log</File>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <FileNamePattern>${path}/${appName}-%d{yyyy-MM-dd}-%i.log</FileNamePattern>
-            <maxHistory>15</maxHistory>
+            <maxHistory>7</maxHistory>
             <maxFileSize>5MB</maxFileSize>
             <totalSizeCap>100MB</totalSizeCap>
         </rollingPolicy>
@@ -39,7 +39,7 @@
         <File>${path}/${appName}-error.log</File>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <FileNamePattern>${path}/${appName}-error-%d{yyyy-MM-dd}-%i.log</FileNamePattern>
-            <maxHistory>15</maxHistory>
+            <maxHistory>7</maxHistory>
             <maxFileSize>5MB</maxFileSize>
             <totalSizeCap>100MB</totalSizeCap>
         </rollingPolicy>
@@ -62,7 +62,7 @@
     <!--根日志配置-->
     <root>
         <appender-ref ref="console"/>
-        <!--        <appender-ref ref="serviceLog"/>-->
+        <appender-ref ref="serviceLog"/>
         <appender-ref ref="errorLog"/>
     </root>
 </configuration>
