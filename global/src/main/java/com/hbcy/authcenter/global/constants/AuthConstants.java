@@ -33,7 +33,8 @@ public class AuthConstants {
     public static final String HEADER_ORG_ID = "X-ORG-ID";
     //当前应用id
     public static final String HEADER_APP_ID = "X-APP-ID";
-
+    //从链路追踪中提取的traceId
+    public static final String HEADER_TRACE_ID = "X-TRACE-ID";
     /********************************后端AK/SK访问**************************************/
     //AK，当不使用ip白名单时，需要结合下面的key来校验
     public static final String HEADER_AK = "X-AUTH-AK";

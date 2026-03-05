@@ -109,7 +109,7 @@ public class UserContextUtils {
      * @return traceId
      */
     public static String getTraceId() {
-        return getHeader(AuthConstants.HEADER_TRACE_PARENT);
+        return getHeader(AuthConstants.HEADER_TRACE_ID);
     }
 
     /**
