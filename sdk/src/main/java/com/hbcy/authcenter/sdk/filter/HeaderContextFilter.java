@@ -34,11 +34,6 @@ public class HeaderContextFilter extends OncePerRequestFilter {
             MDC.put("userId", request.getHeader(AuthConstants.HEADER_USER_ID));
             MDC.put("tenantId", request.getHeader(AuthConstants.HEADER_TENANT_ID));
             MDC.put("orgId", request.getHeader(AuthConstants.HEADER_ORG_ID));
-            if (request.getHeader(AuthConstants.HEADER_TRACE_ID) != null) {
-                headers.put(AuthConstants.HEADER_TRACE_ID, request.getHeader(AuthConstants.HEADER_TRACE_ID));
-                //注入traceId到上下文
-                MDC.put("traceId", request.getHeader(AuthConstants.HEADER_TRACE_ID));
-            }
             UserContextUtils.setHeaders(headers);
             filterChain.doFilter(request, response);
         } finally {

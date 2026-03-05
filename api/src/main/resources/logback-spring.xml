@@ -27,7 +27,7 @@
         </rollingPolicy>
         <encoder>
             <charset>UTF-8</charset>
-            <pattern>%d [%thread] [%X{traceId}] %level %logger{36} %line - %msg%n</pattern>
+            <pattern>%d [%thread] [%X{trace_id}] %level %logger{36} %line - %msg%n</pattern>
         </encoder>
     </appender>
 
@@ -45,7 +45,7 @@
         </rollingPolicy>
         <encoder>
             <charset>UTF-8</charset>
-            <pattern>%d [%thread] [%X{traceId}] %level %logger{36} %line - %msg%n</pattern>
+            <pattern>%d [%thread] [%X{trace_id}] %level %logger{36} %line - %msg%n</pattern>
         </encoder>
     </appender>
 
