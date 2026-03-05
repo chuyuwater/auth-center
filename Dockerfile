@@ -22,11 +22,6 @@ WORKDIR /app
 
 # OTEL可观测性配置
 ENV OTEL_SERVICE_NAME="auth-center"
-ENV OTEL_EXPORTER_OTLP_ENDPOINT="https://dev.chuyuwater.cn:32007/api/default"
-ENV OTEL_EXPORTER_OTLP_HEADERS="Authorization=Basic cm9vdEBleGFtcGxlLmNvbTpQYmx5bEExbXJ2OFhXYzE5"
-
-# Maven中央仓库下载otel-agent
-RUN curl https://repo1.maven.org/maven2/io/opentelemetry/javaagent/opentelemetry-javaagent/2.25.0/opentelemetry-javaagent-2.25.0.jar -o /app/opentelemetry-javaagent.jar
 
 # 从 builder 阶段复制 jar 包
 COPY --from=builder /app/api/target/*.jar app.jar
