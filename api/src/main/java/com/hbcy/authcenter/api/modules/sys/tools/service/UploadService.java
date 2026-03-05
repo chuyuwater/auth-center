@@ -8,20 +8,21 @@ import com.hbcy.common.base.uploader.UploadResultDTO;
 import com.pig4cloud.plugin.oss.OssProperties;
 import com.pig4cloud.plugin.oss.service.OssTemplate;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 
 /**
  * @author 姚泰然
  * @date 2025-12-23 10:40
  */
 @Component
+@Slf4j
 public class UploadService {
     @Resource
     private OssTemplate ossTemplate;
@@ -40,10 +41,9 @@ public class UploadService {
                 throw new ParamError("后缀不在允许范围内");
             }
             String uploadName = UlidCreator.getUlid().toString() + "." + suffix;
-            // 使用 BufferedInputStream 包装
-            try (InputStream is = new BufferedInputStream(file.getInputStream())) {
-                ossTemplate.putObject(ossProperties.getBucketName(), uploadName, is);
-            }
+            //这里只适用于上传小文件，大文件应直接上传到oss，而不是通过服务端二次传递
+            //FIXME：解决文件内存二次复制的问题，理论上不需要，但是pig4cloud的实现有问题
+            ossTemplate.putObject(ossProperties.getBucketName(), uploadName, new ByteArrayInputStream(file.getBytes()));
             UploadResultDTO dto = new UploadResultDTO();
             dto.setFileName(uploadName);
             dto.setUrl(ossProperties.getEndpoint() + "/" + ossProperties.getBucketName() + "/" + uploadName);
