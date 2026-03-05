@@ -55,6 +55,11 @@ sa-token:
   is-log: false
   token-style: simple-uuid
   auto-renew: false
+  # 30天
+  timeout: 2592000
+  # 1天
+  active-timeout: 86400
+  dynamic-active-timeout: true
 
 management:
   endpoints:

@@ -2,7 +2,6 @@ package com.hbcy.authcenter.api.modules.core.auth.service;
 
 import cn.dev33.satoken.stp.SaTokenInfo;
 import cn.dev33.satoken.stp.StpUtil;
-import cn.dev33.satoken.stp.parameter.SaLoginParameter;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.github.f4b6a3.ulid.UlidCreator;
 import com.hbcy.authcenter.api.config.UserAuthConfig;
@@ -149,10 +148,7 @@ public class UserAuthService {
                 .setTenantId(chosen.getTenantId());
         innerService.refreshUserPerms(refreshUserPermVO);
         //执行登录
-        StpUtil.login(chosen.getId(), new SaLoginParameter()
-                .setTimeout(authConfig.getTokenExpire().toSeconds())
-                .setActiveTimeout(authConfig.getTokenExpire().toSeconds())
-        );
+        StpUtil.login(chosen.getId());
         //将租户id和用户名字保存到session中
         StpUtil.getSession(true)
                 .set(GatewayConstants.SESSION_TENANT_ID, chosen.getTenantId())

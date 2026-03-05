@@ -19,16 +19,6 @@ import java.time.Duration;
 @Data
 public class UserAuthConfig {
     /**
-     * Token最大过期时间
-     */
-    private Duration tokenExpire = Duration.ofDays(7);
-
-    /**
-     * Token多久无活跃自动过期
-     */
-    private Duration tokenInactive = Duration.ofDays(1);
-
-    /**
      * 登录失败重试次数
      */
     private Integer maxRetry = 5;
