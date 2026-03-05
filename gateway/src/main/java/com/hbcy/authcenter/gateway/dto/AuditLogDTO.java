@@ -13,9 +13,13 @@ import java.time.LocalDateTime;
 @Data
 public class AuditLogDTO {
     /**
-     * trace id
+     * ulid
      */
     private String id;
+    /**
+     * from traceparent
+     */
+    private String traceId;
     /**
      * 用户id
      */

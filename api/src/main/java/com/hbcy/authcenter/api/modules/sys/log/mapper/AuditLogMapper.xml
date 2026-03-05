@@ -5,6 +5,7 @@
         <!--@mbg.generated-->
         <!--@Table audit_log-->
         <id column="id" jdbcType="CHAR" property="id"/>
+        <result column="trace_id" jdbcType="CHAR" property="traceId"/>
         <result column="user_id" jdbcType="CHAR" property="userId"/>
         <result column="org_id" jdbcType="VARCHAR" property="orgId"/>
         <result column="src_app" jdbcType="VARCHAR" property="srcApp"/>
@@ -24,6 +25,7 @@
     <sql id="Base_Column_List">
         <!--@mbg.generated-->
         id,
+        trace_id,
         user_id,
         org_id,
         src_app,
@@ -72,11 +74,13 @@
 
     <!-- TODO:仅适配MySQL系-->
     <insert id="insertIgnore">
-        insert ignore into audit_log (id, user_id, org_id, src_app, target_app, req_method, req_host, req_path,
+        insert ignore into audit_log (id, trace_id, user_id, org_id, src_app, target_app, req_method, req_host,
+        req_path,
         req_param, req_body, resp_code, resp_body, req_time, duration, client_ip)
         values
         <foreach collection="list" item="item" separator=",">
-            (#{item.id}, #{item.userId}, #{item.orgId}, #{item.srcApp}, #{item.targetApp}, #{item.reqMethod},
+            (#{item.id},#{item.traceId}, #{item.userId}, #{item.orgId}, #{item.srcApp}, #{item.targetApp},
+            #{item.reqMethod},
             #{item.reqHost}, #{item.reqPath}, #{item.reqParam}, #{item.reqBody}, #{item.respCode}, #{item.respBody},
             #{item.reqTime}, #{item.duration}, #{item.clientIp})
         </foreach>

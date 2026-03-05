@@ -19,6 +19,7 @@ public class AuditLog {
     public static final String COL_ID = "id";
     public static final String COL_USER_ID = "user_id";
     public static final String COL_ORG_ID = "org_id";
+    public static final String COL_TRACE_ID = "trace_id";
     public static final String COL_SRC_APP = "src_app";
     public static final String COL_TARGET_APP = "target_app";
     public static final String COL_REQ_METHOD = "req_method";
@@ -34,6 +35,11 @@ public class AuditLog {
     public static final String COL_CREATE_TIME = "create_time";
     @TableId(value = "id", type = IdType.INPUT)
     private String id;
+    /**
+     * 追踪id
+     */
+    @TableField(value = "trace_id")
+    private String traceId;
     /**
      * 用户id
      */
