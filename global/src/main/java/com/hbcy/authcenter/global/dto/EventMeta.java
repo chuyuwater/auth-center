@@ -38,4 +38,9 @@ public class EventMeta {
      * 如果事件需要保持有序，此处传入分片key
      */
     private String shardingKey = "";
+    /**
+     * 显式注入的traceId
+     * 如果使用了openTelemetry, header里面会自动注入traceparent
+     */
+    private String traceId;
 }
