@@ -61,7 +61,7 @@ public interface AuthCenterClient {
      * @param fullName 是否返回全称
      * @return 组织id与名称的映射
      */
-    @GetMapping("/inner/portal/v1/org/names")
+    @GetMapping("/api/portal/v1/sdk/org/names")
     ApiResponse<Map<String, String>> getOrgNames(@RequestParam Collection<String> orgIds, @RequestParam boolean fullName);
 
     /**
@@ -78,7 +78,7 @@ public interface AuthCenterClient {
      * @param userIds 用户id
      * @return 用户id与名称的映射
      */
-    @GetMapping("/inner/portal/v1/user/names")
+    @GetMapping("/api/portal/v1/sdk/user/names")
     ApiResponse<Map<String, String>> getUserNames(@RequestParam Collection<String> userIds);
 
     /**
@@ -91,7 +91,7 @@ public interface AuthCenterClient {
      * @param permCode 权限码，如sys:user:create
      * @return true/false
      */
-    @GetMapping("/inner/portal/v1/perm/check")
+    @GetMapping("/api/portal/v1/sdk/perm/check")
     ApiResponse<Boolean> checkAnyPerm(
             @RequestParam String userId,
             @RequestParam String orgId,
@@ -106,7 +106,7 @@ public interface AuthCenterClient {
      * @param parentOrgId 父级组织id，为空则查询用户在租户里的所有有权组织
      * @return 授权组织id列表
      */
-    @GetMapping("/inner/portal/v1/perm/grant-orgs")
+    @GetMapping("/api/portal/v1/sdk/perm/grant-orgs")
     ApiResponse<List<String>> listGrantOrgs(
             @RequestParam String userId,
             @RequestParam String appId,
