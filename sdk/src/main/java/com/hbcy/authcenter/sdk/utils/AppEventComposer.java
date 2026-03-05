@@ -28,8 +28,7 @@ public class AppEventComposer {
                 .setTopic(topic)
                 .setShardingKey(shardingKey)
                 .setEventVersion(eventVersion)
-                .setEventCode(eventCode)
-                .setTraceId(UserContextUtils.getTraceId());
+                .setEventCode(eventCode);
         event.setMeta(meta);
         event.setPayload(payload);
         return event;

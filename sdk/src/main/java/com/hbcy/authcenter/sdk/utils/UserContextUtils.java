@@ -104,12 +104,12 @@ public class UserContextUtils {
     }
 
     /**
-     * 获取网关生成的traceId
+     * 获取otel agent注入的traceId
      *
      * @return traceId
      */
     public static String getTraceId() {
-        return getHeader(AuthConstants.HEADER_TRACE_ID);
+        return getHeader(AuthConstants.HEADER_TRACE_PARENT);
     }
 
     /**

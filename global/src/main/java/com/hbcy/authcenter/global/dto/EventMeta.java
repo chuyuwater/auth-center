@@ -38,8 +38,4 @@ public class EventMeta {
      * 如果事件需要保持有序，此处传入分片key
      */
     private String shardingKey = "";
-    /**
-     * 事件触发的traceId
-     */
-    private String traceId;
 }
