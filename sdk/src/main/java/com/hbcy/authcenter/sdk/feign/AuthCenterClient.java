@@ -18,7 +18,6 @@ import java.util.Set;
 
 /**
  * sdk，支持外部调用
- * 但是inner的接口仅在开发环境可用
  *
  * @author 姚泰然
  * @date 2026-01-13 16:32
