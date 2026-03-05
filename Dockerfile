@@ -22,6 +22,7 @@ WORKDIR /app
 
 # OTEL可观测性配置
 ENV OTEL_SERVICE_NAME="auth-center"
+ENV OTEL_INSTRUMENTATION_HTTP_SERVER_CAPTURE_REQUEST_HEADERS="X-USER-ID,X-TENANT-ID,X-ORG-ID,X-APP-ID"
 
 # 从 builder 阶段复制 jar 包
 COPY --from=builder /app/api/target/*.jar app.jar
