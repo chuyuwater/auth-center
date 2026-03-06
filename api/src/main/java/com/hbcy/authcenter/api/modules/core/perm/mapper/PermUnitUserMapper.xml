@@ -102,9 +102,9 @@
         app.memo,
         app.icon,
         tenant_app.forbidden,
-        puu.id as grant_id,
-        puu.create_user,
-        puu.create_time
+        tenant_app.id as grant_id,
+        tenant_app.create_user,
+        tenant_app.create_time
         from app
         join perm_unit_resource pur on app.id = pur.app_id
         join perm_unit_user puu on puu.unit_id = pur.unit_id
