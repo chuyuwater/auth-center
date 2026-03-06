@@ -174,7 +174,9 @@ public class ResourcePermService extends ServiceImpl<ResourcePermMapper, Resourc
                     //确认更新
                     if (!vo.getPermCode().equals(entity.getPermCode())
                             || !vo.getApiMethod().equals(entity.getApiMethod())
-                            || !vo.getApiPath().equals(entity.getApiPath())) {
+                            || !vo.getApiPath().equals(entity.getApiPath())
+                            || !vo.getPermName().equals(entity.getPermName())) {
+                        entity.setPermName(vo.getPermName());
                         entity.setPermCode(vo.getPermCode());
                         entity.setApiMethod(vo.getApiMethod());
                         entity.setApiPath(vo.getApiPath());
