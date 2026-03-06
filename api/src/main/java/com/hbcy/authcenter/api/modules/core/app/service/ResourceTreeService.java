@@ -78,6 +78,9 @@ public class ResourceTreeService extends ServiceImpl<ResourceTreeMapper, Resourc
         }
         for (ResourcePermCreateVO subPerm : subPerms) {
             String apiPath = subPerm.getApiPath();
+            if (StringUtils.isBlank(apiPath)) {
+                continue;
+            }
             List<String> parts = Splitter.on("/").splitToList(apiPath);
             if (parts.size() < 3) {
                 throw new ParamError("API路径过短");
