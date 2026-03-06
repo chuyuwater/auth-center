@@ -17,7 +17,7 @@ import java.util.Set;
 /**
  * SDK专用接口
  * 这些接口在网关层不会鉴权，仅供SDK调用
- *
+ * @ignore
  * @author 姚泰然
  * @date 2026-03-05 09:08
  */

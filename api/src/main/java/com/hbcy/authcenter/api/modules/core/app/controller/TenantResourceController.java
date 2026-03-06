@@ -18,10 +18,10 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 /**
- * 被授权的应用资源（租户侧）
+ * 我的应用
  *
  * @author 姚泰然
- * @module myapp
+ * @module app
  * @date 2025-12-30 13:02
  */
 @RestController
