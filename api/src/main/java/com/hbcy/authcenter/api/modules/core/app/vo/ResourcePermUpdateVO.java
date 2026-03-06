@@ -25,7 +25,8 @@ public class ResourcePermUpdateVO {
      * 权限码
      */
     @Length(max = 100, message = "权限码长度不能超过100")
-    private String permCode = "";
+    @NotBlank(message = "权限码不能为空")
+    private String permCode;
 
     /**
      * API请求方法，可以为null
