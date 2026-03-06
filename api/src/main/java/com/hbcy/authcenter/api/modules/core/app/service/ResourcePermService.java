@@ -1,8 +1,10 @@
 package com.hbcy.authcenter.api.modules.core.app.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.f4b6a3.ulid.UlidCreator;
+import com.google.common.base.Splitter;
 import com.hbcy.authcenter.api.common.bean.EventDispatcher;
 import com.hbcy.authcenter.api.modules.core.app.dao.ResourcePermMapper;
 import com.hbcy.authcenter.api.modules.core.app.model.ResourcePerm;
@@ -86,18 +88,48 @@ public class ResourcePermService extends ServiceImpl<ResourcePermMapper, Resourc
                 .in(PermUnitResource.COL_PERM_ID, permIds));
     }
 
+    public void checkPerm(ResourcePermUpdateVO vo) {
+        String apiPath = vo.getApiPath();
+        if (StringUtils.isBlank(apiPath)) {
+            vo.setApiPath(null);
+            return;
+        }
+        List<String> parts = Splitter.on("/").splitToList(apiPath);
+        if (parts.size() < 3) {
+            throw new ParamError("API路径过短");
+        }
+        int firstIndex = apiPath.indexOf("**");
+        if (firstIndex >= 0) {
+            if (!"**".equals(parts.get(parts.size() - 1)) || firstIndex != apiPath.length() - 2) {
+                throw new ParamError("API路径中，**只能放在末尾");
+            }
+        }
+    }
+
     public ResourcePerm update(String id, ResourcePermUpdateVO vo) {
+        checkPerm(vo);
         ResourcePerm rp = baseMapper.selectById(id);
         if (rp == null) {
             throw new ParamError("指定ID不存在");
         }
-        BeanCopyUtils.copy(vo, rp);
+        doUpdate(vo, id);
+        return rp;
+    }
+
+    private void doUpdate(ResourcePermUpdateVO vo, String id) {
         try {
-            baseMapper.updateById(rp);
+            //注意api_method和api_path可以被更新为null
+            baseMapper.update(new UpdateWrapper<ResourcePerm>()
+                    .eq(ResourcePerm.COL_ID, id)
+                    .set(ResourcePerm.COL_PERM_NAME, vo.getPermName())
+                    .set(ResourcePerm.COL_PERM_CODE, vo.getPermCode())
+                    .set(ResourcePerm.COL_API_METHOD, vo.getApiMethod())
+                    .set(ResourcePerm.COL_API_PATH, vo.getApiPath())
+                    .set(ResourcePerm.COL_UPDATE_USER, UserContextUtils.getUserId())
+                    .set(ResourcePerm.COL_UPDATE_TIME, LocalDateTime.now()));
         } catch (DuplicateKeyException e) {
             throw new ParamError("API路径和方法组合已存在");
         }
-        return rp;
     }
 
     /**
@@ -112,6 +144,7 @@ public class ResourcePermService extends ServiceImpl<ResourcePermMapper, Resourc
         }
         List<ResourcePerm> toInsert = new ArrayList<>();
         for (ResourcePermCreateVO vo : subPerms) {
+            checkPerm(vo);
             ResourcePerm subPerm = new ResourcePerm();
             BeanCopyUtils.copy(vo, subPerm);
             subPerm.setId(UlidCreator.getUlid().toString());
@@ -173,17 +206,11 @@ public class ResourcePermService extends ServiceImpl<ResourcePermMapper, Resourc
                     }
                     //确认更新
                     if (!vo.getPermCode().equals(entity.getPermCode())
-                            || !vo.getApiMethod().equals(entity.getApiMethod())
-                            || !vo.getApiPath().equals(entity.getApiPath())
+                            || !Objects.equals(vo.getApiMethod(), entity.getApiMethod())
+                            || !Objects.equals(vo.getApiPath(), entity.getApiPath())
                             || !vo.getPermName().equals(entity.getPermName())) {
-                        entity.setPermName(vo.getPermName());
-                        entity.setPermCode(vo.getPermCode());
-                        entity.setApiMethod(vo.getApiMethod());
-                        entity.setApiPath(vo.getApiPath());
-                        entity.setUpdateTime(LocalDateTime.now());
-                        entity.setUpdateUser(UserContextUtils.getUserId());
-                        //逐个更新（一般没几条）
-                        updateById(entity);
+                        //逐个更新（一般没几条
+                        doUpdate(vo, vo.getId());
                         isChanged = true;
                     }
                 }

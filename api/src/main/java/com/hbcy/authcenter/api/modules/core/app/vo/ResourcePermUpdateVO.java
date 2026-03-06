@@ -28,14 +28,14 @@ public class ResourcePermUpdateVO {
     private String permCode = "";
 
     /**
-     * API请求方法
+     * API请求方法，可以为null
      * 0-GET, 1-POST, 2-PUT, 3-DELETE
      */
     @Range(min = 0, max = 3, message = "请求方法只能为0-3")
     private Integer apiMethod;
 
     /**
-     * API路径
+     * API路径，可以为空或者null
      */
     @Length(max = 255, message = "API路径长度不能超过255")
     @Pattern(regexp = "^$|^/api/[\\w/\\-*?]*$", message = "API必须以/api开头")

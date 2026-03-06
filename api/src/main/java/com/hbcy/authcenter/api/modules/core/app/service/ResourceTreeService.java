@@ -18,7 +18,6 @@ import com.hbcy.authcenter.api.modules.core.app.vo.ResourcePermCreateVO;
 import com.hbcy.authcenter.api.modules.core.app.vo.ResourceTreeCreateVO;
 import com.hbcy.authcenter.api.modules.core.app.vo.ResourceTreeQueryVO;
 import com.hbcy.authcenter.api.modules.core.app.vo.ResourceTreeUpdateVO;
-import com.hbcy.authcenter.api.modules.core.tenant.dao.TenantAppMapper;
 import com.hbcy.authcenter.sdk.utils.UserContextUtils;
 import com.hbcy.common.base.error.ParamError;
 import com.hbcy.common.base.log.JsonLogUtils;
@@ -28,7 +27,6 @@ import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
 import org.jspecify.annotations.Nullable;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,8 +49,6 @@ public class ResourceTreeService extends ServiceImpl<ResourceTreeMapper, Resourc
     private ResourcePermService resourcePermService;
     @Resource
     private NameCacheService nameCacheService;
-    @Autowired
-    private TenantAppMapper tenantAppMapper;
 
     private ResourceTree checkParentId(String appId, String parentId) {
         App app = appMapper.selectById(appId);
@@ -77,20 +73,7 @@ public class ResourceTreeService extends ServiceImpl<ResourceTreeMapper, Resourc
             return;
         }
         for (ResourcePermCreateVO subPerm : subPerms) {
-            String apiPath = subPerm.getApiPath();
-            if (StringUtils.isBlank(apiPath)) {
-                continue;
-            }
-            List<String> parts = Splitter.on("/").splitToList(apiPath);
-            if (parts.size() < 3) {
-                throw new ParamError("API路径过短");
-            }
-            int firstIndex = apiPath.indexOf("**");
-            if (firstIndex >= 0) {
-                if (!"**".equals(parts.get(parts.size() - 1)) || firstIndex != apiPath.length() - 2) {
-                    throw new ParamError("API路径中，**只能放在末尾");
-                }
-            }
+            resourcePermService.checkPerm(subPerm);
         }
     }
 
