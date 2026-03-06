@@ -1,11 +1,10 @@
 package com.hbcy.authcenter.api.modules.core.perm.controller;
 
-import com.hbcy.authcenter.api.modules.core.perm.dto.UnitUserDTO;
+import com.hbcy.authcenter.api.modules.core.perm.dto.UserUnitDTO;
 import com.hbcy.authcenter.api.modules.core.perm.service.PermUnitUserService;
-import com.hbcy.authcenter.api.modules.core.perm.vo.PermUnitUserQueryVO;
 import com.hbcy.authcenter.api.modules.core.perm.vo.PermUnitUserUpdateVO;
+import com.hbcy.authcenter.api.modules.core.perm.vo.PermUserUnitQueryVO;
 import com.hbcy.common.base.pojo.BatchDeleteVO;
-import com.hbcy.common.base.pojo.PageResp;
 import com.hbcy.common.web.bean.NameFill;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
@@ -16,19 +15,29 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * 角色关联用户（租户侧）
+ * 用户关联角色（租户侧）
  *
  * @author 姚泰然
  * @module perm
  * @date 2025-12-28
  */
 @RestController
-@RequestMapping("/api/portal/v1/perm/unit/users")
+@RequestMapping("api/portal/v1/perm/user/units")
 @Validated
-public class PermUnitUserController {
-
+public class PermUserUnitController {
     @Resource
     private PermUnitUserService permUnitUserService;
+
+    /**
+     * 用户授权清单
+     * @param vo 查询条件
+     * @return 用户关联的授权信息
+     */
+    @GetMapping
+    @NameFill
+    public List<UserUnitDTO> listUserUnits(@Valid PermUserUnitQueryVO vo) {
+        return permUnitUserService.listUserUnits(vo);
+    }
 
     /**
      * 批量关联用户到角色
@@ -59,17 +68,5 @@ public class PermUnitUserController {
     @PostMapping("/delete-batch")
     public void batchDeleteUsers(@Valid @RequestBody BatchDeleteVO vo) {
         permUnitUserService.deleteGrant(vo.getIds());
-    }
-
-    /**
-     * 授权用户列表
-     *
-     * @param vo 查询条件
-     * @return 用户列表
-     */
-    @GetMapping
-    @NameFill
-    public PageResp<UnitUserDTO> listGrantUsers(@Valid PermUnitUserQueryVO vo) {
-        return permUnitUserService.listGrantUsers(vo);
     }
 }
