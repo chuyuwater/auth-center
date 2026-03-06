@@ -66,6 +66,7 @@
             <if test="appId != null and appId != ''">
                 app_id = #{appId}
             </if>
+            and api_path != ''
         </where>
     </select>
 

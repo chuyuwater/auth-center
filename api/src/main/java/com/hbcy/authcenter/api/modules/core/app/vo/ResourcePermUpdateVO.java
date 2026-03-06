@@ -38,6 +38,6 @@ public class ResourcePermUpdateVO {
      * API路径
      */
     @Length(max = 255, message = "API路径长度不能超过255")
-    @Pattern(regexp = "^/[\\w/\\-\\*\\?]*$", message = "API路径格式错误")
+    @Pattern(regexp = "^$|^/api/[\\w/\\-*?]*$", message = "API必须以/api开头")
     private String apiPath;
 }
