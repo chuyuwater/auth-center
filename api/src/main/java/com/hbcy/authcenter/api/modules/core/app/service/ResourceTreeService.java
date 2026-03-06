@@ -82,8 +82,11 @@ public class ResourceTreeService extends ServiceImpl<ResourceTreeMapper, Resourc
             if (parts.size() < 3) {
                 throw new ParamError("API路径过短");
             }
-            if (apiPath.contains("**") && !"**".equals(parts.get(parts.size() - 1))) {
-                throw new ParamError("API路径中，**只能放在末尾");
+            int firstIndex = apiPath.indexOf("**");
+            if (firstIndex >= 0) {
+                if (!"**".equals(parts.get(parts.size() - 1)) || firstIndex != apiPath.length() - 2) {
+                    throw new ParamError("API路径中，**只能放在末尾");
+                }
             }
         }
     }
