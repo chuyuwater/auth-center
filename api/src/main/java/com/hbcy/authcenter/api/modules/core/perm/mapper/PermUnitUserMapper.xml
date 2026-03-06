@@ -97,7 +97,7 @@
     </select>
 
     <select id="listGrantApps" resultType="com.hbcy.authcenter.api.modules.core.app.dto.GrantAppDTO">
-        select app.id as app_id,
+        select distinct app.id as app_id,
         app.name_cn,
         app.memo,
         app.icon,
@@ -106,9 +106,9 @@
         puu.create_user,
         puu.create_time
         from app
-        join tenant_app on app.id = tenant_app.app_id
         join perm_unit_resource pur on app.id = pur.app_id
         join perm_unit_user puu on puu.unit_id = pur.unit_id
+        join tenant_app on (app.id = tenant_app.app_id and tenant_app.tenant_id = puu.tenant_id)
         <where>
             tenant_app.delete_time = 0
             <if test="!withForbidden">
