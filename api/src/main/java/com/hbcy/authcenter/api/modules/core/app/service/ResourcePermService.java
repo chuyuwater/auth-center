@@ -93,6 +93,8 @@ public class ResourcePermService extends ServiceImpl<ResourcePermMapper, Resourc
         if (StringUtils.isBlank(apiPath)) {
             vo.setApiPath(null);
             return;
+        } else if (vo.getApiMethod() == null) {
+            throw new ParamError("请选择API请求方法");
         }
         List<String> parts = Splitter.on("/").splitToList(apiPath);
         if (parts.size() < 3) {
