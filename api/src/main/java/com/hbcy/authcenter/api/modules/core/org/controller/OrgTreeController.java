@@ -121,7 +121,7 @@ public class OrgTreeController {
      *
      * @param vo 移动详情
      */
-    @PostMapping("/node/move")
+    @PutMapping("/node/move")
     public void move(@RequestBody @Valid NodeMoveVO vo) {
         orgTreeService.move(vo);
     }

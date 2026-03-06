@@ -68,7 +68,7 @@ public class AppController {
     /**
      * 拖动节点排序
      **/
-    @PostMapping("/move")
+    @PutMapping("/move")
     public void move(@RequestBody @Valid NodeMoveVO vo) {
         appService.move(vo);
     }

@@ -84,7 +84,7 @@ public class ResourceTreeController {
      *
      * @param vo 移动详情
      */
-    @PostMapping("/move")
+    @PutMapping("/move")
     public void move(@RequestBody @Valid NodeMoveVO vo) {
         resourceTreeService.move(vo);
     }

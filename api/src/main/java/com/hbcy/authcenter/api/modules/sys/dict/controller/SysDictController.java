@@ -107,7 +107,7 @@ public class SysDictController {
      * 只能在同级移动，后端忽略parentId参数
      * @param vo 移动详情
      */
-    @PostMapping("/move")
+    @PutMapping("/move")
     public void move(@Valid @RequestBody NodeMoveVO vo) {
         sysDictService.move(vo);
     }
