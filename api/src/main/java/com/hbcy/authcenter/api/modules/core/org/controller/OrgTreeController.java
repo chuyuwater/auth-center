@@ -11,6 +11,7 @@ import com.hbcy.common.base.tree.TreeNode;
 import com.hbcy.common.web.bean.NameFill;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -131,8 +132,8 @@ public class OrgTreeController {
      *
      * @param id 节点ID
      */
-    @DeleteMapping("/node/{id}")
-    public void delete(@PathVariable String id) {
+    @PostMapping("/node/delete")
+    public void delete(@NotBlank(message = "id不能为空") String id) {
         orgTreeService.delete(id);
     }
 }

@@ -71,7 +71,7 @@ public class UserTodoController {
      *
      * @param vo 操作参数
      */
-    @PostMapping("/batch-delete")
+    @PostMapping("/delete-batch")
     public void batchDelete(@Valid @RequestBody UserTodoBatchOpVO vo) {
         userTodoService.batchDelete(vo);
     }

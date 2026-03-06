@@ -59,8 +59,8 @@ public class SysDictController {
      *
      * @param id 字典ID
      */
-    @DeleteMapping("/{id}")
-    public void deleteSysDict(@NotBlank(message = "ID不能为空") @PathVariable String id) {
+    @PostMapping("/delete")
+    public void deleteSysDict(@NotBlank(message = "ID不能为空") String id) {
         sysDictService.deleteSysDict(id);
     }
 

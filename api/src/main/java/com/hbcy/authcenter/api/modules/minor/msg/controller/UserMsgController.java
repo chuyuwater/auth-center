@@ -61,7 +61,7 @@ public class UserMsgController {
      *
      * @param vo 操作参数
      */
-    @PostMapping("/batch-delete")
+    @PostMapping("/delete-batch")
     public void batchDelete(@Valid @RequestBody UserMsgBatchOpVO vo) {
         userMsgService.batchDelete(vo);
     }

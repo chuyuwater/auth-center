@@ -11,6 +11,7 @@ import com.hbcy.common.base.pojo.PageResp;
 import com.hbcy.common.web.bean.NameFill;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -45,11 +46,11 @@ public class PermUnitUserController {
     /**
      * 按授权id移除授权
      *
-     * @param grantId 授权ID
+     * @param id 授权ID
      */
-    @DeleteMapping("/unit/users")
-    public void removeUsersFromUnit(@RequestParam String grantId) {
-        permUnitUserService.deleteGrant(List.of(grantId));
+    @PostMapping("/unit/users/delete")
+    public void removeUsersFromUnit(@NotBlank(message = "id不能为空") String id) {
+        permUnitUserService.deleteGrant(List.of(id));
     }
 
     /**
@@ -57,7 +58,7 @@ public class PermUnitUserController {
      *
      * @param vo 批量删除请求参数
      */
-    @PostMapping("/unit/users/batch-delete")
+    @PostMapping("/unit/users/delete-batch")
     public void batchDeleteUsers(@Valid @RequestBody BatchDeleteVO vo) {
         permUnitUserService.deleteGrant(vo.getIds());
     }

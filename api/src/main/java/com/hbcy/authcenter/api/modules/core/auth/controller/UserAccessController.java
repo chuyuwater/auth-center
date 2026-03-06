@@ -5,6 +5,7 @@ import com.hbcy.authcenter.api.modules.core.auth.service.UserAccessService;
 import com.hbcy.authcenter.api.modules.core.auth.vo.UserAccessUpsertVO;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -47,8 +48,8 @@ public class UserAccessController {
      * 删除访问密钥
      * @param id 密钥id
      */
-    @DeleteMapping("/{id}")
-    public void deleteUserAccess(@PathVariable String id) {
+    @PostMapping("/delete")
+    public void deleteUserAccess(@NotBlank(message = "id不能为空") String id) {
         userAccessService.deleteUserAccess(id);
     }
 

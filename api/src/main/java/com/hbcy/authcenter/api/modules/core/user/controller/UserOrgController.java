@@ -37,7 +37,7 @@ public class UserOrgController {
      * @param userId 用户id
      * @param nodeId 用户实际挂载的节点（部门或组织）id
      */
-    @DeleteMapping
+    @PostMapping("/delete")
     public void deleteUserOrg(@NotBlank(message = "节点id不能为空") @RequestParam String nodeId,
                               @NotBlank(message = "用户id不能为空") @RequestParam String userId) {
         userOrgService.removeUserOrg(userId, nodeId);

@@ -6,6 +6,7 @@ import com.hbcy.authcenter.api.modules.sys.dict.vo.DictGroupCreateVO;
 import com.hbcy.authcenter.api.modules.sys.dict.vo.DictGroupUpdateVO;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -47,8 +48,8 @@ public class SysDictGroupController {
      * 删除字典类型
      * @param id 分组id
      */
-    @DeleteMapping("/{id}")
-    public void deleteGroup(@PathVariable String id) {
+    @PostMapping("/delete")
+    public void deleteGroup(@NotBlank(message = "id不能为空") String id) {
         sysDictGroupService.deleteGroup(id);
     }
 

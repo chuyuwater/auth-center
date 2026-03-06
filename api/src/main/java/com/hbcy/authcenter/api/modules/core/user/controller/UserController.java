@@ -16,6 +16,7 @@ import com.pig4cloud.plugin.excel.annotation.ResponseExcel;
 import com.pig4cloud.plugin.excel.vo.ErrorMessage;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import org.springframework.util.CollectionUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -55,11 +56,11 @@ public class UserController {
     /**
      * 删除用户
      *
-     * @param userId 用户id
+     * @param id 用户id
      */
-    @DeleteMapping("/{userId}")
-    public void deleteUser(@PathVariable String userId) {
-        userService.deleteUser(userId);
+    @PostMapping("/delete")
+    public void deleteUser(@NotBlank(message = "id不能为空") String id) {
+        userService.deleteUser(id);
     }
 
     /**
@@ -140,7 +141,7 @@ public class UserController {
      *
      * @param vo 用户id列表
      */
-    @PostMapping("/batch-delete")
+    @PostMapping("/delete-batch")
     public void deleteUsers(@Valid @RequestBody BatchDeleteVO vo) {
         userService.deleteUsers(vo);
     }

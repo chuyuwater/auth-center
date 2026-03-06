@@ -65,11 +65,11 @@ public class TenantAppController {
     /**
      * 删除授权
      *
-     * @param grantId 授权id
+     * @param id 授权id
      */
-    @DeleteMapping("/{grantId}")
-    public void deleteGrant(@PathVariable String grantId) {
-        tenantAppService.deleteGrant(grantId);
+    @PostMapping("/delete")
+    public void deleteGrant(@NotBlank(message = "id不能为空") String id) {
+        tenantAppService.deleteGrant(id);
     }
 
     /**

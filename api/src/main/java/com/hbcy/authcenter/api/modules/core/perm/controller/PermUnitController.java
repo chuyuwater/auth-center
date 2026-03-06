@@ -12,6 +12,7 @@ import com.hbcy.common.base.pojo.PageResp;
 import com.hbcy.common.web.bean.NameFill;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -90,8 +91,8 @@ public class PermUnitController {
      *
      * @param id 权限单元ID
      */
-    @DeleteMapping("/{id}")
-    public void delete(@PathVariable String id) {
+    @PostMapping("/delete")
+    public void delete(@NotBlank(message = "id不能为空") String id) {
         permUnitService.delete(id);
     }
 
@@ -99,7 +100,7 @@ public class PermUnitController {
      * 批量删除权限单元
      * @param vo 参数
      */
-    @PostMapping("/batch-delete")
+    @PostMapping("/delete-batch")
     public void batchDelete(@Valid @RequestBody BatchDeleteVO vo) {
         permUnitService.delete(vo);
     }

@@ -11,6 +11,7 @@ import com.hbcy.common.base.tree.TreeNode;
 import com.hbcy.common.web.bean.NameFill;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -97,8 +98,8 @@ public class ResourceTreeController {
      * @param id    节点ID
      * @param force 是否强制删除，默认false
      */
-    @DeleteMapping("/{id}")
-    public void delete(@PathVariable String id, boolean force) {
+    @PostMapping("/delete")
+    public void delete(@NotBlank(message = "id不能为空") String id, boolean force) {
         resourceTreeService.delete(id, force);
     }
 }

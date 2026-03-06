@@ -7,6 +7,7 @@ import com.hbcy.authcenter.api.modules.core.app.vo.ResourcePermUpdateVO;
 import com.hbcy.common.web.bean.NameFill;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -55,8 +56,8 @@ public class ResourcePermController {
      * 删除权限点
      * @param id 权限点ID
      */
-    @DeleteMapping("/{id}")
-    public void delete(@PathVariable String id) {
+    @PostMapping("/delete")
+    public void delete(@NotBlank(message = "id不能为空") String id) {
         resourcePermService.delete(id);
     }
 }

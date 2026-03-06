@@ -11,6 +11,7 @@ import com.hbcy.common.base.tree.TreeNode;
 import com.hbcy.common.web.bean.NameFill;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -108,8 +109,8 @@ public class PermUnitGroupController {
      *
      * @param id 节点ID
      */
-    @DeleteMapping("/{id}")
-    public void delete(@PathVariable String id) {
+    @PostMapping("/delete")
+    public void delete(@NotBlank(message = "id不能为空") String id) {
         permUnitGroupService.delete(id);
     }
 }
