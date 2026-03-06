@@ -47,6 +47,11 @@
             <version>1.0.0-SNAPSHOT</version>
         </dependency>
         <dependency>
+            <groupId>com.hbcy.common</groupId>
+            <artifactId>oss</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
             <groupId>com.hbcy.authcenter</groupId>
             <artifactId>sdk</artifactId>
             <version>0.0.1-SNAPSHOT</version>
@@ -101,11 +106,6 @@
         <dependency>
             <groupId>com.mysql</groupId>
             <artifactId>mysql-connector-j</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.pig4cloud.plugin</groupId>
-            <artifactId>oss-spring-boot-starter</artifactId>
-            <version>3.1.2</version>
         </dependency>
         <dependency>
             <groupId>com.pig4cloud.excel</groupId>
