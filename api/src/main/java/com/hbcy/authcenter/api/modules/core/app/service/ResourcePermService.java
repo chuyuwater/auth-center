@@ -207,13 +207,16 @@ public class ResourcePermService extends ServiceImpl<ResourcePermMapper, Resourc
                         throw new ParamError("权限归属资源id错误，请刷新重试");
                     }
                     //确认更新
-                    if (!vo.getPermCode().equals(entity.getPermCode())
+                    boolean coreChange = !vo.getPermCode().equals(entity.getPermCode())
                             || !Objects.equals(vo.getApiMethod(), entity.getApiMethod())
-                            || !Objects.equals(vo.getApiPath(), entity.getApiPath())
-                            || !vo.getPermName().equals(entity.getPermName())) {
+                            || !Objects.equals(vo.getApiPath(), entity.getApiPath());
+                    if (coreChange || !vo.getPermName().equals(entity.getPermName())) {
                         //逐个更新（一般没几条
                         doUpdate(vo, vo.getId());
-                        isChanged = true;
+                        if (coreChange) {
+                            //只改了名字不影响网关使用
+                            isChanged = true;
+                        }
                     }
                 }
             }
