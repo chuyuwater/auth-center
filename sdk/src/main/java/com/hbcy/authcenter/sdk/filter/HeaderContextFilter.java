@@ -39,6 +39,7 @@ public class HeaderContextFilter extends OncePerRequestFilter {
         try {
             Map<String, String> headers = new HashMap<>();
             headers.put(AuthConstants.HEADER_USER_ID, request.getHeader(AuthConstants.HEADER_USER_ID));
+            headers.put(AuthConstants.HEADER_USER_IP, request.getHeader(AuthConstants.HEADER_USER_IP));
             headers.put(AuthConstants.HEADER_USER_NAME, request.getHeader(AuthConstants.HEADER_USER_NAME));
             headers.put(AuthConstants.HEADER_APP_ID, request.getHeader(AuthConstants.HEADER_APP_ID));
             headers.put(AuthConstants.HEADER_TENANT_ID, request.getHeader(AuthConstants.HEADER_TENANT_ID));
@@ -52,7 +53,6 @@ public class HeaderContextFilter extends OncePerRequestFilter {
                 //也支持非open-telemetry环境时，手动注入的traceId
                 headers.put(AuthConstants.HEADER_TRACE_ID, request.getHeader(AuthConstants.HEADER_TRACE_ID));
             }
-
             MDC.put("appId", request.getHeader(AuthConstants.HEADER_APP_ID));
             MDC.put("userId", request.getHeader(AuthConstants.HEADER_USER_ID));
             MDC.put("tenantId", request.getHeader(AuthConstants.HEADER_TENANT_ID));

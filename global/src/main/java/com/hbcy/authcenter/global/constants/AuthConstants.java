@@ -26,6 +26,8 @@ public class AuthConstants {
     public static final String HEADER_TENANT_ID = "X-TENANT-ID";
     //当前用户是租户默认管理员，用于特殊权限校验
     public static final String HEADER_ADMIN_FLAG = "X-ADMIN-FLAG";
+    //用户请求ip，某些命令需要
+    public static final String HEADER_USER_IP = "X-USER-IP";
     /****************************以下为前端传入header*************************************/
     //当前用户token
     public static final String HEADER_TOKEN = "X-AUTH-TOKEN";

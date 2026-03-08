@@ -65,6 +65,14 @@ public class UserContextUtils {
     }
 
     /**
+     * 获取用户出口ip
+     * @return 解析出的ip地址
+     */
+    public static String getUserIp() {
+        return getHeader(AuthConstants.HEADER_USER_IP);
+    }
+
+    /**
      * 获取当前用户姓名
      * @return 用户姓名
      */
