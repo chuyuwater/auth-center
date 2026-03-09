@@ -407,7 +407,7 @@ public class UserService extends ServiceImpl<UserMapper, User> {
                 UserQueryResultDTO::getId).collect(Collectors.toSet());
         //然后查询每个人的所有任职组织及其概况
         List<UserOrgDTO> userOrgs;
-        if (vo.isDeptJob()) {
+        if (vo.getDeptJob()) {
             userOrgs = userOrgService.listUserOrgNodes(userIds);
         } else {
             userOrgs = userOrgService.listUserOrgs(userIds);
@@ -417,7 +417,7 @@ public class UserService extends ServiceImpl<UserMapper, User> {
         for (UserOrgDTO userOrg : userOrgs) {
             orgIds.addAll(Splitter.on(G.ID_PATH_SPLITTER).splitToList(userOrg.getIdPath()));
         }
-        Map<String, String> idNameMap = orgTreeService.getOrgNameMap(orgIds, vo.isUseFullName());
+        Map<String, String> idNameMap = orgTreeService.getOrgNameMap(orgIds, vo.getUseFullName());
         //回填userOrg
         for (UserOrgDTO userOrg : userOrgs) {
             List<String> nameParts = Splitter.on(G.ID_PATH_SPLITTER).splitToList(userOrg.getIdPath()).stream()
@@ -458,7 +458,7 @@ public class UserService extends ServiceImpl<UserMapper, User> {
         for (OrgUserDTO r : result.getRecords()) {
             nodeIds.addAll(Splitter.on(G.ID_PATH_SPLITTER).splitToList(r.getIdPath()));
         }
-        Map<String, String> idNameMap = orgTreeService.getOrgNameMap(nodeIds, vo.isUseFullName());
+        Map<String, String> idNameMap = orgTreeService.getOrgNameMap(nodeIds, vo.getUseFullName());
         //回填userOrg
         for (OrgUserDTO r : result.getRecords()) {
             List<String> nameParts = Splitter.on(G.ID_PATH_SPLITTER).splitToList(r.getIdPath()).stream()

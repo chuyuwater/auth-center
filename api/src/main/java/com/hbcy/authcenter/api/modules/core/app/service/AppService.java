@@ -51,7 +51,7 @@ public class AppService extends ServiceImpl<AppMapper, App> {
 
         App app = new App();
         BeanCopyUtils.copy(vo, app);
-        if (vo.isMultiTenancy()) {
+        if (Boolean.TRUE.equals(vo.getMultiTenancy())) {
             app.setBindingTenant("");
         } else {
             app.setBindingTenant(App.BINDING_PLACEHOLDER);

@@ -172,7 +172,7 @@ public class PermUnitResourceService extends ServiceImpl<PermUnitResourceMapper,
         queryVO.setAppId(vo.getAppId());
         queryVO.setWithPerm(true);
 
-        if (vo.isOnlyPacked()) {
+        if (vo.getOnlyPacked()) {
             //计算交集
             currentUserPerms.removeIf(perm -> !grantIds.contains(perm.getId()));
             if (currentUserPerms.isEmpty()) {
@@ -182,7 +182,7 @@ public class PermUnitResourceService extends ServiceImpl<PermUnitResourceMapper,
         //基于用户权限封装的权限树，移除无权限的节点
         TreeNode<ResTreeDTO> tree = resourceTreeService.listResTreeRecursively(
                 queryVO, currentUserPerms, true);
-        if (vo.isOnlyPacked()) {
+        if (vo.getOnlyPacked()) {
             return tree.getChildren();
         }
         if (!grantIds.isEmpty()) {
@@ -222,7 +222,7 @@ public class PermUnitResourceService extends ServiceImpl<PermUnitResourceMapper,
         ResourceTreeQueryVO queryVO = new ResourceTreeQueryVO();
         queryVO.setAppId(vo.getAppId());
         queryVO.setClientType(vo.getClientType());
-        queryVO.setWithPerm(vo.isWithPerm());
+        queryVO.setWithPerm(vo.getWithPerm());
         queryVO.setHidden(0);
         queryVO.setResType(vo.getResType());
         queryVO.setShowLevel(isPrj ? ResourceShowLevelEnum.PRJ.getValue() : ResourceShowLevelEnum.ORG.getValue());

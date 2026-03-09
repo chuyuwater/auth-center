@@ -114,7 +114,7 @@ public class TenantAppService extends ServiceImpl<TenantAppMapper, TenantApp> {
         tenantApp.setForbidden(0);
         //TODO：这里直接绑定默认组织树，后续由用户自己选择
         tenantApp.setOrgTree(OrgTree.ORG_ID_TEMPLATE.formatted(tenantId, 1));
-        tenantApp.setGrantAll(vo.isGrantAll() ? 1 : 0);
+        tenantApp.setGrantAll(vo.getGrantAll() ? 1 : 0);
         tenantApp.setCreateUser(UserContextUtils.getUserId());
         tenantApp.setUpdateUser(UserContextUtils.getUserId());
 
@@ -122,7 +122,7 @@ public class TenantAppService extends ServiceImpl<TenantAppMapper, TenantApp> {
         tenantAppResourceMapper.delete(new QueryWrapper<TenantAppResource>()
                 .eq(TenantAppResource.COL_TENANT_ID, tenantId)
                 .eq(TenantAppResource.COL_APP_ID, vo.getAppId()));
-        if (!vo.isGrantAll() && !CollectionUtils.isEmpty(vo.getPermIds())) {
+        if (!vo.getGrantAll() && !CollectionUtils.isEmpty(vo.getPermIds())) {
             //手动勾选的资源
             Set<String> filteredIds = resourcePermMapper.selectList(new QueryWrapper<ResourcePerm>()
                             .eq(ResourcePerm.COL_APP_ID, vo.getAppId())
@@ -162,13 +162,13 @@ public class TenantAppService extends ServiceImpl<TenantAppMapper, TenantApp> {
             throw new ParamError("授权已取消");
         }
         //情况1
-        if (inst.getGrantAll() > 0 && vo.isGrantAll()) {
+        if (inst.getGrantAll() > 0 && vo.getGrantAll()) {
             return;
         }
         inst.setUpdateUser(UserContextUtils.getUserId());
         inst.setUpdateTime(LocalDateTime.now());
         //情况2
-        if (inst.getGrantAll() == 0 && vo.isGrantAll()) {
+        if (inst.getGrantAll() == 0 && vo.getGrantAll()) {
             inst.setGrantAll(1);
             cleanTenantAppPerm(inst.getTenantId(), inst.getAppId());
             baseMapper.updateById(inst);
@@ -202,7 +202,7 @@ public class TenantAppService extends ServiceImpl<TenantAppMapper, TenantApp> {
             permUnitResourceMapper.delete(new QueryWrapper<PermUnitResource>()
                     .in(PermUnitResource.COL_PERM_ID, oldPermIds));
         }
-        inst.setGrantAll(vo.isGrantAll() ? 1 : 0);
+        inst.setGrantAll(vo.getGrantAll() ? 1 : 0);
         inst.setUpdateUser(UserContextUtils.getUserId());
         updateById(inst);
     }

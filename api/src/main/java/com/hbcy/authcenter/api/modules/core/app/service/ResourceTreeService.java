@@ -177,14 +177,14 @@ public class ResourceTreeService extends ServiceImpl<ResourceTreeMapper, Resourc
             return root;
         }
         List<ResourcePerm> resourcePerms = new ArrayList<>();
-        if (vo.isWithPerm()) {
+        if (vo.getWithPerm()) {
             List<String> ids = resourceTrees.stream().map(ResourceTree::getId).toList();
             resourcePerms = resourcePermService.list(new QueryWrapper<ResourcePerm>()
                     .in(ResourcePerm.COL_RES_ID, ids));
         }
 
         Set<String> allGrantIds = filterGranted(grantPermList, removeUngrant, resourceTrees, resourcePerms);
-        if (vo.isWithCreator()) {
+        if (vo.getWithCreator()) {
             //填充人的信息，前端列表页需要
             Set<String> users = new HashSet<>();
             for (ResourceTree resourceTree : resourceTrees) {
