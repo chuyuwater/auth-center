@@ -91,6 +91,7 @@ public class SysDictGroupService {
 
     public List<SysDict> queryGroups(String appId) {
         return sysDictMapper.selectList(new QueryWrapper<SysDict>()
-                .eq(StringUtils.isNotBlank(appId), SysDict.COL_APP_ID, appId));
+                .eq(StringUtils.isNotBlank(appId), SysDict.COL_APP_ID, appId)
+                .eq(SysDict.COL_PARENT_ID, ""));
     }
 }
