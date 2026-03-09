@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.github.f4b6a3.ulid.UlidCreator;
 import com.google.common.base.Splitter;
+import com.hbcy.authcenter.api.common.bean.NameCacheService;
 import com.hbcy.authcenter.api.common.bean.NodeMoveVO;
 import com.hbcy.authcenter.api.common.constants.G;
 import com.hbcy.authcenter.api.modules.sys.dict.dao.SysDictMapper;
@@ -46,6 +47,8 @@ public class SysDictService extends ServiceImpl<SysDictMapper, SysDict> {
 
     @Resource
     private StringRedisTemplate stringRedisTemplate;
+    @Resource
+    private NameCacheService nameCacheService;
 
     private void cleanCache(String featCode) {
         stringRedisTemplate.delete(DICT_CACHE_KEY_LIST + featCode);
@@ -213,6 +216,16 @@ public class SysDictService extends ServiceImpl<SysDictMapper, SysDict> {
         ids.remove(group.getId());
         if (ids.size() > records.size()) {
             records = baseMapper.selectByIds(ids);
+        }
+        Set<String> userIds = new HashSet<>();
+        for (SysDict r : records) {
+            userIds.add(r.getUpdateUser());
+            userIds.add(r.getCreateUser());
+        }
+        Map<String, String> userNameMap = nameCacheService.getUserNameMap(userIds);
+        for (SysDict r : records) {
+            r.setCreateUserName(userNameMap.get(r.getCreateUser()));
+            r.setUpdateUserName(userNameMap.get(r.getUpdateUser()));
         }
         Map<String, List<SysDict>> childrenMap = records.stream()
                 .collect(Collectors.groupingBy(

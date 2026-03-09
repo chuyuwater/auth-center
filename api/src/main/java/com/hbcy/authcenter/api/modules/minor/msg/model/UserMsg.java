@@ -1,7 +1,9 @@
 package com.hbcy.authcenter.api.modules.minor.msg.model;
 
 import com.baomidou.mybatisplus.annotation.*;
+import com.hbcy.common.db.model.BaseNameFields;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
@@ -13,10 +15,11 @@ import java.time.LocalDateTime;
  */
 
 @Data
+@EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @TableName(value = "user_msg")
 @Accessors(chain = true)
-public class UserMsg {
+public class UserMsg extends BaseNameFields {
     public static final int STATUS_UNREAD = 0;
     public static final int STATUS_READ = 1;
     public static final String COL_ID = "id";

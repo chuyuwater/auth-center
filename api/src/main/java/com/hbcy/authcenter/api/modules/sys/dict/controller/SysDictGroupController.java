@@ -4,6 +4,7 @@ import com.hbcy.authcenter.api.modules.sys.dict.model.SysDict;
 import com.hbcy.authcenter.api.modules.sys.dict.service.SysDictGroupService;
 import com.hbcy.authcenter.api.modules.sys.dict.vo.DictGroupCreateVO;
 import com.hbcy.authcenter.api.modules.sys.dict.vo.DictGroupUpdateVO;
+import com.hbcy.common.web.bean.NameFill;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -59,6 +60,7 @@ public class SysDictGroupController {
      * @return 字典类型列表
      */
     @GetMapping
+    @NameFill
     public List<SysDict> queryGroups(String appId) {
         return sysDictGroupService.queryGroups(appId);
     }

@@ -97,7 +97,6 @@ public class SysDictController {
      * @return 子节点列表
      */
     @GetMapping("/children")
-    @NameFill
     public List<TreeNode<SysDict>> getChildrenRecursively(DictQueryVO vo) {
         return sysDictService.getChildrenAsTree(vo);
     }
