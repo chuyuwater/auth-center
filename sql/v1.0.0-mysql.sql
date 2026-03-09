@@ -21,23 +21,24 @@ create table if not exists app
 
 create table if not exists audit_log
 (
-    id          char(26)                           not null
+    id          char(26)                              not null
         primary key,
-    user_id     char(26)                           not null comment '用户id',
-    org_id      varchar(20)                        not null comment '组织id',
-    src_app     varchar(20)                        not null comment '请求源app',
-    target_app  varchar(20)                        not null comment '目标应用',
-    req_method  varchar(10)                        not null comment '请求方法',
-    req_host    varchar(200)                       not null comment '请求域名或ip',
-    req_path    varchar(300)                       not null comment 'uri的路径',
-    req_param   text                               null comment '请求参数',
-    req_body    text                               null comment '返回值',
-    resp_code   int                                not null comment 'http状态码',
-    resp_body   text                               null,
-    req_time    datetime                           not null comment '请求时间点',
-    duration    int                                not null comment '响应时间（毫秒）',
-    client_ip   varchar(100)                       null,
-    create_time datetime default CURRENT_TIMESTAMP not null comment '插入数据库时间'
+    trace_id    varchar(64) default ''                not null comment '追踪id',
+    user_id     char(26)                              not null comment '用户id',
+    org_id      varchar(20)                           not null comment '组织id',
+    src_app     varchar(20)                           not null comment '请求源app',
+    target_app  varchar(20)                           not null comment '目标应用',
+    req_method  varchar(10)                           not null comment '请求方法',
+    req_host    varchar(200)                          not null comment '请求域名或ip',
+    req_path    varchar(300)                          not null comment 'uri的路径',
+    req_param   text                                  null comment '请求参数',
+    req_body    text                                  null comment '返回值',
+    resp_code   int                                   not null comment 'http状态码',
+    resp_body   text                                  null,
+    req_time    datetime                              not null comment '请求时间点',
+    duration    int                                   not null comment '响应时间（毫秒）',
+    client_ip   varchar(100)                          null,
+    create_time datetime    default CURRENT_TIMESTAMP not null comment '插入数据库时间'
 )
     comment '审计日志';
 
@@ -64,9 +65,9 @@ create table if not exists org_tree
     exist_type    tinyint      default 0                 not null comment '存在形式：0-实体，1-虚拟',
     node_category tinyint      default 1                 not null comment '类别，组织：0-项目部，1-公司，2-分公司，3-子公司',
     parent_id     varchar(50)  default ''                not null comment '父节点id',
+    forbidden     tinyint      default 0                 not null comment '0-启用，1-禁用',
     id_path       varchar(768) default ''                not null comment '全路径，方便查询',
     show_order    int          default 0                 not null,
-    forbidden     tinyint      default 0                 not null comment '0-启用，1-禁用',
     tenant_id     varchar(20)                            not null comment '租户id',
     relate_id     varchar(50)                            null comment '关联代码，如项目id、第三方平台id',
     delete_time   bigint       default 0                 not null comment '逻辑删除',
@@ -87,33 +88,6 @@ create index ix_org_tree_id_path
 
 create index ix_org_tree_parent_id
     on org_tree (parent_id, show_order);
-
-create table if not exists perm_unit_group
-(
-    id           varchar(25)                            not null
-        primary key,
-    node_name    varchar(50)                            not null comment '分组（节点）名称',
-    memo         varchar(200) default ''                not null comment '说明',
-    parent_id    char(26)     default ''                not null comment '父节点id',
-    policy_model tinyint      default 0                 not null comment '0-RBAC, 1-ABAC',
-    id_path      varchar(768)                           not null,
-    show_order   int          default 0                 not null,
-    tenant_id    varchar(20)                            not null,
-    create_user  char(26)     default '0'               not null,
-    update_user  char(26)     default '0'               not null,
-    create_time  datetime     default CURRENT_TIMESTAMP not null,
-    update_time  datetime     default CURRENT_TIMESTAMP not null on update current_timestamp,
-    delete_time  bigint       default 0                 not null
-);
-
-create index ix_perm_unit_group_id_path
-    on perm_unit_group (id_path);
-
-create index ix_perm_unit_group_tenant_name
-    on perm_unit_group (tenant_id, show_order, node_name);
-
-create index ux_perm_unit_group_level_name
-    on perm_unit_group (parent_id, node_name);
 
 create table if not exists perm_unit
 (
@@ -140,22 +114,32 @@ create index ix_perm_unit_name
 create index ix_perm_unit_tenant_id
     on perm_unit (tenant_id, policy_model, forbidden);
 
-create table if not exists perm_unit_policy
+create table if not exists perm_unit_group
 (
-    id          char(26)                               not null
+    id           varchar(25)                            not null
         primary key,
-    unit_id     varchar(20)                            null comment '权限单元id',
-    policy_fe   varchar(768) default ''                not null comment '前端规则表达式',
-    policy_be   varchar(768) default ''                not null comment '后端表达式',
-    policy_sql  varchar(768) default ''                not null comment '对应的sql表达式（宽表）',
-    tenant_id   varchar(20)                            not null,
-    create_user char(26)     default '0'               not null,
-    update_user char(26)     default '0'               not null,
-    create_time datetime     default CURRENT_TIMESTAMP not null,
-    update_time datetime     default CURRENT_TIMESTAMP not null on update current_timestamp,
-    constraint ux_perm_rule_unit
-        unique (unit_id)
-);
+    node_name    varchar(50)                            not null comment '分组（节点）名称',
+    memo         varchar(200) default ''                not null comment '说明',
+    parent_id    char(26)     default ''                not null comment '父节点id',
+    policy_model tinyint      default 0                 not null comment '0-RBAC, 1-ABAC',
+    id_path      varchar(768)                           not null,
+    show_order   int          default 0                 not null,
+    tenant_id    varchar(20)                            not null,
+    create_user  char(26)     default '0'               not null,
+    update_user  char(26)     default '0'               not null,
+    create_time  datetime     default CURRENT_TIMESTAMP not null,
+    update_time  datetime     default CURRENT_TIMESTAMP not null,
+    delete_time  bigint       default 0                 not null
+) comment '授权分组';
+
+create index ix_perm_tree_id_path
+    on perm_unit_group (id_path);
+
+create index ix_perm_tree_tenant_name
+    on perm_unit_group (tenant_id, show_order, node_name);
+
+create index ux_perm_tree_level_name
+    on perm_unit_group (parent_id, node_name);
 
 create table if not exists perm_unit_resource
 (
@@ -296,9 +280,8 @@ create table if not exists sys_user
     avatar        varchar(255) default ''                not null comment '头像',
     forbidden     tinyint      default 0                 not null,
     wecom_id      varchar(200)                           null comment '企业微信id',
-    src_type      tinyint      default 0                 not null comment '账号来源，0-自建，1-OA同步',
-    src_id        varchar(200)                           null comment '源系统id',
-    employee_type int          default 0                 not null comment '用工类型，字典EMPLOYEE_TYPE',
+    src_type      tinyint      default 0                 not null comment '账号来源，0-自建，1-外部同步',
+    employee_type int                                    null comment '用工类型，字典EMPLOYEE_TYPE',
     passwd_expire datetime                               null comment '密码过期时间，null标识永不过期',
     tenant_id     varchar(20)                            not null comment '账号所属租户',
     last_login    datetime                               null comment '最近一次登陆时间',
@@ -307,8 +290,6 @@ create table if not exists sys_user
     update_time   datetime     default CURRENT_TIMESTAMP not null on update current_timestamp,
     create_user   char(26)     default '0'               not null,
     update_user   char(26)     default '0'               not null,
-    constraint ux_sys_user_src_id
-        unique (src_type, src_id, tenant_id, delete_time),
     constraint ux_sys_user_tenant_account
         unique (account, tenant_id, delete_time),
     constraint ux_sys_user_tenant_email
@@ -318,6 +299,23 @@ create table if not exists sys_user
     constraint ux_sys_user_tenant_wecom
         unique (tenant_id, wecom_id, delete_time)
 );
+
+create table if not exists sys_user_mapping
+(
+    id           char(26)                           not null
+        primary key,
+    user_id      char(26)                           not null comment '我方用户id',
+    src_type     int      default 1                 not null comment '第三方平台，字典项',
+    src_id       varchar(100)                       null comment '第三方平台id',
+    account_type tinyint  default 0                 not null comment '多账号系统同步，0-主账号，1-子账号',
+    create_time  datetime default CURRENT_TIMESTAMP not null,
+    constraint ux_sys_user_mapping
+        unique (src_id, src_type, user_id)
+)
+    comment '用户映射';
+
+create index ix_sys_user_mapping_user
+    on sys_user_mapping (user_id);
 
 create table if not exists tenant
 (
@@ -373,31 +371,32 @@ create table if not exists tenant_app_resource
         unique (perm_id, app_id, tenant_id)
 );
 
-create table if not exists user_org
+create table if not exists user_access
 (
     id          char(26)                           not null
         primary key,
-    user_id     char(26)                           not null comment '用户id',
-    org_id      varchar(20)                        not null,
-    node_id     varchar(20)                        not null comment '关联节点id（组织或部门）',
-    tenant_id   varchar(20)                        not null comment '租户id',
-    main_job    tinyint  default 0                 not null comment '0-兼职，1-主职',
-    create_user char(26) default '0'               not null,
-    update_user char(26) default '0'               not null,
+    key_name    varchar(200)                       null comment '名称',
+    access_key  char(26)                           not null,
+    secret_key  varchar(64)                        not null comment '加密的密钥',
+    forbidden   tinyint  default 0                 not null comment '是否禁用',
+    expire_time datetime                           null comment '过期时间',
+    user_id     char(26)                           not null comment 'ak归属用户',
+    tenant_id   varchar(20)                        not null comment 'ak归属租户',
     create_time datetime default CURRENT_TIMESTAMP not null,
-    update_time datetime default CURRENT_TIMESTAMP not null on update current_timestamp,
-    constraint ux_user_org_user_dept
-        unique (user_id, node_id)
-);
+    update_time datetime default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP,
+    constraint ix_user_access_user_tenant
+        unique (user_id, tenant_id)
+)
+    comment 'ak/sk通信';
 
-create index ix_user_org_main_job
-    on user_org (org_id, tenant_id, main_job);
+create index ix_user_access_ak
+    on user_access (access_key, expire_time, forbidden);
 
 create table if not exists user_msg
 (
     id          char(26)                               not null
         primary key,
-    src_id      varchar(100)                           not null comment '源消息id，用来去重',
+    src_id      varchar(100)                           null comment '源消息id，用来去重',
     src_app     varchar(20)                            not null comment '源应用id',
     msg_title   varchar(200)                           not null comment '消息标题',
     msg_content varchar(700) default ''                not null comment '消息内容',
@@ -407,6 +406,7 @@ create table if not exists user_msg
     msg_type    tinyint      default 0                 not null comment '0-普通消息，1-预警消息',
     relate_link varchar(256) default ''                not null comment '跳转链接',
     origin_json text                                   null comment '原始报文',
+    tenant_id   varchar(20)                            not null,
     create_time datetime     default CURRENT_TIMESTAMP not null,
     constraint ux_user_inbox_target_src
         unique (src_app, src_id, target_user)
@@ -419,13 +419,51 @@ create index ix_user_inbox_msg_title
 create index ix_user_inbox_user_time_status
     on user_msg (target_user, view_status, msg_type, send_time);
 
+create table if not exists user_org
+(
+    id          char(26)                           not null
+        primary key,
+    user_id     char(26)                           not null comment '用户id',
+    org_id      varchar(20)                        not null,
+    node_id     varchar(20)                        not null comment '关联节点id（组织或部门）',
+    tenant_id   varchar(20)                        not null comment '租户id',
+    main_job    tinyint  default 0                 not null comment '0-兼职，1-主职',
+    create_user char(26) default '0'               not null,
+    update_user char(26) default '0'               not null,
+    create_time datetime default CURRENT_TIMESTAMP not null,
+    update_time datetime default CURRENT_TIMESTAMP not null,
+    constraint ux_user_org_user_dept
+        unique (user_id, node_id)
+) comment '用户组织关系';
+
+create index ix_user_org_main_job
+    on user_org (org_id, tenant_id, main_job);
+
+create table if not exists user_quick_link
+(
+    id          char(26)                           not null
+        primary key,
+    res_id      char(26)                           not null comment '菜单id',
+    show_order  int      default 0                 not null comment '显示顺序',
+    user_id     char(26)                           not null comment '用户id',
+    org_id      varchar(20)                        null comment '组织id',
+    client_type tinyint  default 1                 not null comment '1-PC端，2-移动端',
+    create_time datetime default CURRENT_TIMESTAMP not null
+)
+    comment '快捷入口';
+
+create index ix_user_quick_link_res_id
+    on user_quick_link (res_id);
+
+create index ux_user_quick_link
+    on user_quick_link (user_id, org_id, client_type, res_id);
 
 create table if not exists user_todo
 (
     id            char(26)                               not null
         primary key,
     src_app       varchar(20)                            not null comment '源app id',
-    src_id        varchar(100)                           not null comment '源id，用于去重',
+    src_id        varchar(100)                           null comment '源id，用于去重',
     todo_title    varchar(300)                           not null comment '待办标题',
     todo_content  varchar(700)                           null comment '待办内容',
     target_user   char(26)                               not null comment '关联用户',
@@ -435,6 +473,7 @@ create table if not exists user_todo
     todo_type     tinyint      default 0                 not null comment '待办类型，0-流程待办，1-任务待办',
     relate_link   varchar(255) default ''                not null comment '关联链接',
     origin_json   text                                   null comment '用于调试',
+    tenant_id     varchar(20)                            not null,
     create_time   datetime     default CURRENT_TIMESTAMP not null,
     update_time   datetime     default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP,
     constraint ux_user_todo_target_src
@@ -446,6 +485,7 @@ create index ix_user_todo_title
 
 create index ix_user_todo_user_time_status
     on user_todo (target_user, view_state, process_state, todo_type);
+
 
 
 INSERT INTO portal_auth_center.sys_dict (id, app_id, feat_code, value_str, value_cn, dict_type, parent_id, id_path,
@@ -596,7 +636,7 @@ VALUES ('01KFYM4E91TFYAFSP6CFMP3A9Z', 'portal', 'TODO_PROCESS_STATE', '8', '抄�
 
 
 INSERT INTO `app`
-VALUES ('portal', '统一门户', '', 1, '', 0, '0', 0, '2026-01-06 01:10:24', '2026-01-06 01:10:24', '0', '0');
+VALUES ('portal', '统一门户', '', 1, '', 0, '', 0, '2026-01-06 01:10:24', '2026-01-06 01:10:24', '0', '0');
 INSERT INTO `tenant`
 VALUES ('0', '系统', '系统', '', '', 0, '姚泰然', '18502710984', '01KE8DW1DK2KPAZJAENJW6SSFE', 0, '0', '0',
         '2026-01-06 09:13:48', '2026-01-06 09:13:48');
@@ -604,19 +644,19 @@ INSERT INTO `tenant_app`
 VALUES ('01KE8DY46ZGMHAZH7P7RDRZDQW', 'portal', '0', '0-ORG-000001', 1, 0, 0, '2026-01-06 09:14:57',
         '2026-01-06 09:14:57', '0', '0');
 INSERT INTO `sys_user`
-VALUES ('01KE8DW1DK2KPAZJAENJW6SSFE', '18502710984', 'admin', '超级管理员',
-        '$2a$10$Kg/w2Tcsqbu1RsmcuZgW4uRseXBFuAADY3Eavl9yplcPRHRZovFHC', NULL, '', 0, NULL, 0, NULL, '0', NULL, '0',
-        '2026-01-08 17:48:17', 0, '2026-01-06 09:13:48', '2026-01-06 09:13:48', '0', '0');
+VALUES ('01KE8DW1DK2KPAZJAENJW6SSFE', '17912345678', 'admin', '超级管理员',
+        '$2a$10$Kg/w2Tcsqbu1RsmcuZgW4uRseXBFuAADY3Eavl9yplcPRHRZovFHC', NULL, '', 0, NULL, 0, 0, NULL, '0',
+        null, 0, now(), now(), '0', '0');
 INSERT INTO org_tree (id, node_name, short_name, memo, node_type, exist_type, node_category,
                       parent_id, id_path, show_order, tenant_id, relate_id, delete_time, create_time,
                       update_time, create_user, update_user)
-VALUES ('0-ORG-000000', '根组织', '根组织', '', 0, 1, 1, '', '0-ORG-000000', 0, '0', null, 0, '2026-01-06 09:13:48',
-        '2026-01-06 09:13:48', '0', '0'),
+VALUES ('0-ORG-000000', '根组织', '根组织', '', 0, 1, 1, '', '0-ORG-000000', 0, '0', null, 0, now(),
+        now(), '0', '0'),
        ('0-ORG-000001', '平台管理', '平台管理', '', 0, 1, 1, '0-ORG-000000', '0-ORG-000000/0-ORG-000001', 0, '0', null,
-        0, '2026-01-06 09:13:48',
-        '2026-01-06 09:13:48', '0', '0');
+        0, now(),
+        now(), '0', '0');
 
 INSERT INTO user_org (id, user_id, org_id, node_id, tenant_id, main_job, create_user, update_user,
                       create_time, update_time)
 VALUES ('01KE8DW1HB7X41NK3Q9K6QCCHC', '01KE8DW1DK2KPAZJAENJW6SSFE', '0-ORG-000001', '0-ORG-000001', '0', 1, '0', '0',
-        '2026-01-06 09:13:48', '2026-01-06 09:13:48');
+        now(), now());
