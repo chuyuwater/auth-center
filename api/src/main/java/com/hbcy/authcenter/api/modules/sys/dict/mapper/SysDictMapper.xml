@@ -13,7 +13,6 @@
         <result column="parent_id" jdbcType="VARCHAR" property="parentId"/>
         <result column="id_path" jdbcType="VARCHAR" property="idPath"/>
         <result column="show_order" jdbcType="INTEGER" property="showOrder"/>
-        <result column="memo" jdbcType="VARCHAR" property="memo"/>
         <result column="forbidden" jdbcType="TINYINT" property="forbidden"/>
         <result column="create_user" jdbcType="CHAR" property="createUser"/>
         <result column="update_user" jdbcType="CHAR" property="updateUser"/>
@@ -32,7 +31,6 @@
         parent_id,
         id_path,
         show_order,
-        memo,
         forbidden,
         create_user,
         update_user,
@@ -60,7 +58,7 @@
     </select>
 
     <insert id="append">
-        insert into sys_dict (id, app_id, feat_code, value_str, value_cn, dict_type, parent_id, id_path, memo,
+        insert into sys_dict (id, app_id, feat_code, value_str, value_cn, dict_type, parent_id, id_path,
         forbidden, create_user, show_order)
         select #{dict.id},
         #{dict.appId},
@@ -70,7 +68,6 @@
         #{dict.dictType},
         #{dict.parentId},
         #{dict.idPath},
-        #{dict.memo},
         #{dict.forbidden},
         #{dict.createUser},
         (SELECT COALESCE(MAX(show_order), 0) + 1
