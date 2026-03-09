@@ -40,7 +40,7 @@ public class UserBasicQueryVO extends PageVO {
      * 查询级别，0-本级，1-下级，2-本下
      */
     @Range(min = 0, max = 2, message = "查询级别错误")
-    private int level = 2;
+    private Integer level = 2;
     /**
      * 姓名、手机号、账号模糊搜索
      * 性能较差，谨慎使用
@@ -56,7 +56,7 @@ public class UserBasicQueryVO extends PageVO {
      * 组织架构用简称还是全称
      * 默认简称
      */
-    private boolean useFullName;
+    private Boolean useFullName = false;
     /**
      * 用工形式，字典EMPLOYEE_TYPE
      */

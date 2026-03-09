@@ -15,7 +15,7 @@ public class ClientResQueryVO {
     /**
      * 是否返回菜单关联的权限点
      */
-    private boolean withPerm;
+    private Boolean withPerm = false;
     /**
      * 1-pc，2-移动端
      */

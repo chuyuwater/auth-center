@@ -42,7 +42,7 @@ public class UserTodoCreateVO {
     /**
      * 待办类型：0-流程待办，1-任务待办
      */
-    private int type;
+    private Integer type = 0;
     /**
      * 处理状态
      */

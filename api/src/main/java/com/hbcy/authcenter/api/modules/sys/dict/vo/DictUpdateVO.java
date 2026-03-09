@@ -27,5 +27,5 @@ public class DictUpdateVO {
     /**
      * 禁用状态，0-正常，1-禁用
      */
-    private int forbidden;
+    private Integer forbidden = 0;
 }

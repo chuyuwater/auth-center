@@ -19,5 +19,5 @@ public class TenantAppGrantUpdateVO {
     /**
      * 是否授权全部权限
      */
-    private boolean grantAll;
+    private Boolean grantAll = false;
 }

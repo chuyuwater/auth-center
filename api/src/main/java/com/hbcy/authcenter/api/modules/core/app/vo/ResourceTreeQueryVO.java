@@ -30,7 +30,7 @@ public class ResourceTreeQueryVO {
     /**
      * 是否附带权限点信息，默认true
      */
-    private boolean withPerm = true;
+    private Boolean withPerm = true;
     /**
      * 0-全端，1-pc端，2-移动端
      */
@@ -53,7 +53,7 @@ public class ResourceTreeQueryVO {
      *
      */
     @JsonIgnore
-    private boolean withCreator;
+    private Boolean withCreator = false;
     /**
      * 父节点idPath,后端填充
      */

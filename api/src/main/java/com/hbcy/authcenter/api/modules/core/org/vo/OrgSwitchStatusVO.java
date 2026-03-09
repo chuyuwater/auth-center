@@ -17,5 +17,5 @@ public class OrgSwitchStatusVO {
     /**
      * 状态,0-启用，1-禁用
      */
-    private int forbidden;
+    private Integer forbidden = 0;
 }

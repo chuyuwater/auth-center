@@ -16,5 +16,5 @@ public class PermUnitGroupCreateVO extends PermUnitGroupUpdateVO {
      * 策略模型
      * 0-RBAC, 1-ABAC
      */
-    private int policyModel = 0;
+    private Integer policyModel = 0;
 }

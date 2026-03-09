@@ -23,5 +23,5 @@ public class DictGroupCreateVO extends DictGroupUpdateVO {
      * 字典类型, 0-列表，1-树状
      */
     @Range(min = 0, max = 1, message = "字典类型只能为0或1")
-    private int dictType;
+    private Integer dictType = 0;
 }

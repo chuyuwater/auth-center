@@ -21,5 +21,5 @@ public class TenantForbiddenVO {
      * 是否禁用，0-正常，1-禁用
      */
     @Range(min = 0, max = 1, message = "禁用状态只能为0或1")
-    private int forbidden;
+    private Integer forbidden = 0;
 }

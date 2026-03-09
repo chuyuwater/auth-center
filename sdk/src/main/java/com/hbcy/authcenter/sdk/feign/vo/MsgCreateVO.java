@@ -40,7 +40,7 @@ public class MsgCreateVO {
     /**
      * 消息类型：0-普通消息，1-预警消息
      */
-    private int type;
+    private Integer type = 0;
     /**
      * 消息产生时间
      */

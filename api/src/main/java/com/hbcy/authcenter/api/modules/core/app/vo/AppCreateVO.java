@@ -24,5 +24,5 @@ public class AppCreateVO extends AppUpdateVO {
     /**
      * 是否多租户
      */
-    private boolean multiTenancy;
+    private Boolean multiTenancy = false;
 }

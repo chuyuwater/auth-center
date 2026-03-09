@@ -33,7 +33,7 @@ public class PermUnitQueryVO extends PageVO {
      * 查询级别，0-本级，1-下级，2-本下
      */
     @Range(min = 0, max = 2, message = "查询级别错误")
-    private int level = 2;
+    private Integer level = 2;
 
     @JsonIgnore
     private String tenantId;

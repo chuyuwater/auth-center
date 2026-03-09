@@ -21,5 +21,5 @@ public class UserQuickLinkUpsertVO {
      * 客户端类型, 1-PC, 2-移动端
      */
     @Range(min = 1, max = 2, message = "客户端类型错误")
-    private int clientType;
+    private Integer clientType = 0;
 }

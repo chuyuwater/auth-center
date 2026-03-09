@@ -26,5 +26,5 @@ public class UserFilterVO extends UserBasicQueryVO {
      * 任职是否具体到部门
      */
     @JsonIgnore
-    private boolean deptJob;
+    private Boolean deptJob = false;
 }

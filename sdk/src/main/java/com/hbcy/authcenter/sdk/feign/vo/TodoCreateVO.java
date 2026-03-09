@@ -41,7 +41,7 @@ public class TodoCreateVO {
     /**
      * 待办类型：0-流程待办，1-任务待办
      */
-    private int type;
+    private Integer type = 0;
     /**
      * 处理状态，0-待办，2-已办，4-办结，8-抄送
      */
