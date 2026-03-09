@@ -225,7 +225,7 @@ public class SysDictService extends ServiceImpl<SysDictMapper, SysDict> {
                                 }
                         )
                 ));
-        TreeNode<SysDict> tree = new TreeNode<>(new SysDict());
+        TreeNode<SysDict> tree = new TreeNode<>(group);
         buildTree(tree, childrenMap);
         return tree.getChildren();
     }
