@@ -32,7 +32,7 @@ public class ResourceTreeUpdateVO {
      * 资源类型：0-页面，1-按钮
      */
     @Range(min = 0, max = 1, message = "资源类型只能为0或1")
-    private int resType;
+    private Integer resType = 0;
     /**
      * 自定义菜单ID
      */
