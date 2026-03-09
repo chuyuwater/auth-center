@@ -50,19 +50,23 @@ public class SysDictService extends ServiceImpl<SysDictMapper, SysDict> {
     }
 
     public SysDict createSysDict(DictCreateVO vo) {
+        SysDict dict = new SysDict();
         SysDict parent = checkExist(vo.getParentId());
         if (!parent.getFeatCode().isBlank()) {
             //父节点不是分组，需要确认分组对应的是list
             SysDict group = checkExist("", parent.getFeatCode());
             if (group == null) {
                 throw new ParamError("分组不存在");
+            } else {
+                //与分组的dictType一致
+                dict.setDictType(group.getDictType());
             }
             if (!group.getDictType().equals(SysDict.DICT_TYPE_TREE)) {
                 throw new ParamError("字典类型不是树形结构");
+            } else {
+                dict.setDictType(SysDict.DICT_TYPE_TREE);
             }
         }
-
-        SysDict dict = new SysDict();
         BeanCopyUtils.copy(vo, dict);
         String userId = UserContextUtils.getUserId();
         dict.setId(UlidCreator.getUlid().toString());
