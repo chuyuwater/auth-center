@@ -41,6 +41,8 @@ public class SysDictService extends ServiceImpl<SysDictMapper, SysDict> {
     //缓存有效期
     public static final Duration DICT_EXPIRE = Duration.ofMinutes(10);
     public static final String DICT_CACHE_KEY_LIST = "portal:sys:dict:list:";
+    //SysDictGroup和SysDict共用一张表，parentId为""的为group，同时feat_code也为""
+    public static final String GROUP_FEAT_CODE = "";
 
     @Resource
     private StringRedisTemplate stringRedisTemplate;
@@ -55,7 +57,7 @@ public class SysDictService extends ServiceImpl<SysDictMapper, SysDict> {
         BeanCopyUtils.copy(vo, dict);
         if (!parent.getFeatCode().isBlank()) {
             //父节点不是分组，需要确认分组对应的是list
-            SysDict group = checkExist("", parent.getFeatCode());
+            SysDict group = checkExist(GROUP_FEAT_CODE, parent.getFeatCode());
             if (group == null) {
                 throw new ParamError("分组不存在");
             } else {
@@ -139,7 +141,7 @@ public class SysDictService extends ServiceImpl<SysDictMapper, SysDict> {
      * @return 字典项列表
      */
     public List<SysDict> listDictByFeatCode(String featCode, String parentId) {
-        if (parentId == null) parentId = "";
+        if (parentId == null) parentId = GROUP_FEAT_CODE;
         String cached = (String) stringRedisTemplate.opsForHash().get(DICT_CACHE_KEY_LIST + featCode, parentId);
         if (StringUtils.isNotBlank(cached)) {
             return JsonUtils.readValue(cached, new TypeReference<>() {
@@ -191,7 +193,7 @@ public class SysDictService extends ServiceImpl<SysDictMapper, SysDict> {
     }
 
     public List<TreeNode<SysDict>> getChildrenAsTree(DictQueryVO vo) {
-        SysDict group = checkExist("", vo.getFeatCode());
+        SysDict group = checkExist(GROUP_FEAT_CODE, vo.getFeatCode());
         if (group == null) {
             return List.of();
         }
