@@ -36,6 +36,10 @@ public class ResourceTreeQueryVO {
      */
     private Integer clientType;
     /**
+     * 资源类型，0-菜单，1-按钮
+     */
+    private Integer resType;
+    /**
      * 显示级别，0-全局，1-组织级，2-项目级
      */
     private Integer showLevel;

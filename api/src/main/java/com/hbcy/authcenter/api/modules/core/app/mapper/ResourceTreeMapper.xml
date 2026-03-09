@@ -11,6 +11,7 @@
         <result column="parent_id" jdbcType="CHAR" property="parentId"/>
         <result column="id_path" jdbcType="VARCHAR" property="idPath"/>
         <result column="client_type" jdbcType="TINYINT" property="clientType"/>
+        <result column="res_type" jdbcType="TINYINT" property="resType"/>
         <result column="icon" jdbcType="VARCHAR" property="icon"/>
         <result column="route_link" jdbcType="VARCHAR" property="routeLink"/>
         <result column="show_order" jdbcType="INTEGER" property="showOrder"/>
@@ -30,6 +31,7 @@
         parent_id,
         id_path,
         client_type,
+        res_type,
         icon,
         route_link,
         show_order,
@@ -60,6 +62,9 @@
                     </when>
                 </choose>
             </if>
+            <if test="vo.resType != null">
+                and res_type = #{vo.resType}
+            </if>
             <if test="vo.showLevel != null">
                 <choose>
                     <when test="vo.showLevel == 1">
@@ -83,7 +88,8 @@
     </select>
 
     <insert id="append">
-        insert into resource_tree (id, name_cn, app_id, custom_id, parent_id, id_path, client_type, icon, route_link,
+        insert into resource_tree (id, name_cn, app_id, custom_id, parent_id, id_path, res_type, client_type, icon,
+        route_link,
         hidden, show_level, create_user, update_user,
         show_order)
         select #{entity.id},
@@ -92,6 +98,7 @@
         #{entity.customId},
         #{entity.parentId},
         #{entity.idPath},
+        #{entity.resType}
         #{entity.clientType},
         #{entity.icon},
         #{entity.routeLink},
@@ -147,6 +154,7 @@
         rt.parent_id,
         rt.id_path,
         rt.client_type,
+        rt.res_type,
         rt.icon,
         rt.route_link,
         rt.show_order

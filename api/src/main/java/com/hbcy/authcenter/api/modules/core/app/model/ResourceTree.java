@@ -25,6 +25,7 @@ public class ResourceTree extends BaseEntity {
     public static final String COL_PARENT_ID = "parent_id";
     public static final String COL_ID_PATH = "id_path";
     public static final String COL_CLIENT_TYPE = "client_type";
+    public static final String COL_RES_TYPE = "res_type";
     public static final String COL_ICON = "icon";
     public static final String COL_ROUTE_LINK = "route_link";
     public static final String COL_SHOW_ORDER = "show_order";
@@ -34,6 +35,9 @@ public class ResourceTree extends BaseEntity {
     public static final String COL_UPDATE_TIME = "update_time";
     public static final String COL_CREATE_USER = "create_user";
     public static final String COL_UPDATE_USER = "update_user";
+
+    public static final int RES_TYPE_MENU = 0;
+    public static final int RES_TYPE_BUTTON = 1;
 
     @TableId(value = "id", type = IdType.ASSIGN_UUID)
     private String id;
@@ -68,6 +72,12 @@ public class ResourceTree extends BaseEntity {
     @TableField(value = "client_type")
     @DictInject(value = "CLIENT_TYPE")
     private Integer clientType;
+    /**
+     * 资源类型
+     * 0-页面，1-按钮
+     */
+    @TableField(value = "res_type")
+    private Integer resType;
     /**
      * 图标地址
      */

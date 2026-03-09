@@ -27,6 +27,12 @@ public class ResourceTreeUpdateVO {
     @Length(max = 50, message = "中文名长度不能超过50")
     @NotBlank(message = "中文名不能为空")
     private String nameCn;
+
+    /**
+     * 资源类型：0-页面，1-按钮
+     */
+    @Range(min = 0, max = 1, message = "资源类型只能为0或1")
+    private int resType;
     /**
      * 自定义菜单ID
      */
