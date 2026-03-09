@@ -218,6 +218,7 @@ create table if not exists resource_tree
     parent_id   char(26)     default ''                not null comment '父节点',
     id_path     varchar(768)                           not null comment '节点全路径',
     client_type tinyint      default 0                 not null comment '支持的客户端类型，0-全端，1-PC端，2-移动端',
+    res_type    tinyint      default 0                 not null comment '0-页面，1-按钮',
     icon        varchar(200) default ''                not null comment '图标地址',
     route_link  varchar(255) default ''                not null comment '路由地址',
     show_order  int          default 0                 not null comment '同级显示顺序',
@@ -249,7 +250,6 @@ create table if not exists sys_dict
     parent_id   varchar(26)  default ''                not null comment '父节点',
     id_path     varchar(768) default ''                not null,
     show_order  int          default 0                 not null comment '显示顺序',
-    memo        varchar(200) default ''                not null comment '备注',
     forbidden   tinyint      default 0                 not null,
     create_user char(26)     default '0'               not null,
     update_user char(26)     default '0'               not null,
@@ -489,149 +489,149 @@ create index ix_user_todo_user_time_status
 
 
 INSERT INTO portal_auth_center.sys_dict (id, app_id, feat_code, value_str, value_cn, dict_type, parent_id, id_path,
-                                         show_order, memo, forbidden, create_user, update_user, create_time,
+                                         show_order, forbidden, create_user, update_user, create_time,
                                          update_time, delete_time)
 VALUES ('01KE8EFFY2XC6ZSX1NKARS72Q0', 'portal', '', 'CLIENT_TYPE', '客户端类型', 0, '', '01KE8EFFY2XC6ZSX1NKARS72Q0', 0,
-        '', 0, '0', '0', '2026-01-06 09:24:26', '2026-01-06 09:24:26', 0);
+        0, '0', '0', '2026-01-06 09:24:26', '2026-01-06 09:24:26', 0);
 INSERT INTO portal_auth_center.sys_dict (id, app_id, feat_code, value_str, value_cn, dict_type, parent_id, id_path,
-                                         show_order, memo, forbidden, create_user, update_user, create_time,
+                                         show_order, forbidden, create_user, update_user, create_time,
                                          update_time, delete_time)
 VALUES ('01KE8EHWVSM9FQP5C0K0G2SXVV', 'portal', 'CLIENT_TYPE', '0', '全端', 0, '01KE8EFFY2XC6ZSX1NKARS72Q0',
-        '01KE8EFFY2XC6ZSX1NKARS72Q0/01KE8EHWVSM9FQP5C0K0G2SXVV', 0, '', 0, '0', '0', '2026-01-06 09:25:44',
+        '01KE8EFFY2XC6ZSX1NKARS72Q0/01KE8EHWVSM9FQP5C0K0G2SXVV', 0, 0, '0', '0', '2026-01-06 09:25:44',
         '2026-01-06 09:25:44', 0);
 INSERT INTO portal_auth_center.sys_dict (id, app_id, feat_code, value_str, value_cn, dict_type, parent_id, id_path,
-                                         show_order, memo, forbidden, create_user, update_user, create_time,
+                                         show_order, forbidden, create_user, update_user, create_time,
                                          update_time, delete_time)
 VALUES ('01KE8EJ9WN1WCMC66ET9HGXTFD', 'portal', 'CLIENT_TYPE', '1', 'PC端', 0, '01KE8EFFY2XC6ZSX1NKARS72Q0',
-        '01KE8EFFY2XC6ZSX1NKARS72Q0/01KE8EJ9WN1WCMC66ET9HGXTFD', 0, '', 0, '0', '0', '2026-01-06 09:25:58',
+        '01KE8EFFY2XC6ZSX1NKARS72Q0/01KE8EJ9WN1WCMC66ET9HGXTFD', 0, 0, '0', '0', '2026-01-06 09:25:58',
         '2026-01-06 09:25:58', 0);
 INSERT INTO portal_auth_center.sys_dict (id, app_id, feat_code, value_str, value_cn, dict_type, parent_id, id_path,
-                                         show_order, memo, forbidden, create_user, update_user, create_time,
+                                         show_order, forbidden, create_user, update_user, create_time,
                                          update_time, delete_time)
 VALUES ('01KE8EJKRHFZAQ9CPZS6PQ2XJ3', 'portal', 'CLIENT_TYPE', '2', '移动端', 0, '01KE8EFFY2XC6ZSX1NKARS72Q0',
-        '01KE8EFFY2XC6ZSX1NKARS72Q0/01KE8EJKRHFZAQ9CPZS6PQ2XJ3', 0, '', 0, '0', '0', '2026-01-06 09:26:08',
+        '01KE8EFFY2XC6ZSX1NKARS72Q0/01KE8EJKRHFZAQ9CPZS6PQ2XJ3', 0, 0, '0', '0', '2026-01-06 09:26:08',
         '2026-01-06 09:26:08', 0);
 INSERT INTO portal_auth_center.sys_dict (id, app_id, feat_code, value_str, value_cn, dict_type, parent_id, id_path,
-                                         show_order, memo, forbidden, create_user, update_user, create_time,
+                                         show_order, forbidden, create_user, update_user, create_time,
                                          update_time, delete_time)
 VALUES ('01KE8EKGW3W428BJEEB9ATGAFA', 'portal', '', 'MENU_LEVEL', '显示级别', 0, '', '01KE8EKGW3W428BJEEB9ATGAFA', 0,
-        '', 0, '0', '0', '2026-01-06 09:26:38', '2026-01-06 09:26:38', 0);
+        0, '0', '0', '2026-01-06 09:26:38', '2026-01-06 09:26:38', 0);
 INSERT INTO portal_auth_center.sys_dict (id, app_id, feat_code, value_str, value_cn, dict_type, parent_id, id_path,
-                                         show_order, memo, forbidden, create_user, update_user, create_time,
+                                         show_order, forbidden, create_user, update_user, create_time,
                                          update_time, delete_time)
 VALUES ('01KE8EM552768TQ7AWKFPPS2ZW', 'portal', 'MENU_LEVEL', '0', '全级', 0, '01KE8EKGW3W428BJEEB9ATGAFA',
-        '01KE8EKGW3W428BJEEB9ATGAFA/01KE8EM552768TQ7AWKFPPS2ZW', 0, '', 0, '0', '0', '2026-01-06 09:26:58',
+        '01KE8EKGW3W428BJEEB9ATGAFA/01KE8EM552768TQ7AWKFPPS2ZW', 0, 0, '0', '0', '2026-01-06 09:26:58',
         '2026-01-06 09:26:58', 0);
 INSERT INTO portal_auth_center.sys_dict (id, app_id, feat_code, value_str, value_cn, dict_type, parent_id, id_path,
-                                         show_order, memo, forbidden, create_user, update_user, create_time,
+                                         show_order, forbidden, create_user, update_user, create_time,
                                          update_time, delete_time)
 VALUES ('01KE8EMJN3A57J8VFCG55YJEQF', 'portal', 'MENU_LEVEL', '1', '组织级', 0, '01KE8EKGW3W428BJEEB9ATGAFA',
-        '01KE8EKGW3W428BJEEB9ATGAFA/01KE8EMJN3A57J8VFCG55YJEQF', 0, '', 0, '0', '0', '2026-01-06 09:27:12',
+        '01KE8EKGW3W428BJEEB9ATGAFA/01KE8EMJN3A57J8VFCG55YJEQF', 0, 0, '0', '0', '2026-01-06 09:27:12',
         '2026-01-06 09:27:12', 0);
 INSERT INTO portal_auth_center.sys_dict (id, app_id, feat_code, value_str, value_cn, dict_type, parent_id, id_path,
-                                         show_order, memo, forbidden, create_user, update_user, create_time,
+                                         show_order, forbidden, create_user, update_user, create_time,
                                          update_time, delete_time)
 VALUES ('01KE8EMSV5T1FW5YXQABJPF6JR', 'portal', 'MENU_LEVEL', '2', '项目级', 0, '01KE8EKGW3W428BJEEB9ATGAFA',
-        '01KE8EKGW3W428BJEEB9ATGAFA/01KE8EMSV5T1FW5YXQABJPF6JR', 0, '', 0, '0', '0', '2026-01-06 09:27:20',
+        '01KE8EKGW3W428BJEEB9ATGAFA/01KE8EMSV5T1FW5YXQABJPF6JR', 0, 0, '0', '0', '2026-01-06 09:27:20',
         '2026-01-06 09:27:20', 0);
 INSERT INTO portal_auth_center.sys_dict (id, app_id, feat_code, value_str, value_cn, dict_type, parent_id, id_path,
-                                         show_order, memo, forbidden, create_user, update_user, create_time,
+                                         show_order, forbidden, create_user, update_user, create_time,
                                          update_time, delete_time)
 VALUES ('01KE8EP5825600MR5D03YEMNZ9', 'portal', '', 'ORG_CATEGORY', '组织类型', 0, '', '01KE8EP5825600MR5D03YEMNZ9', 0,
-        '', 0, '0', '0', '2026-01-06 09:28:04', '2026-01-06 09:28:04', 0);
+        0, '0', '0', '2026-01-06 09:28:04', '2026-01-06 09:28:04', 0);
 INSERT INTO portal_auth_center.sys_dict (id, app_id, feat_code, value_str, value_cn, dict_type, parent_id, id_path,
-                                         show_order, memo, forbidden, create_user, update_user, create_time,
+                                         show_order, forbidden, create_user, update_user, create_time,
                                          update_time, delete_time)
 VALUES ('01KE8EQ1H000TNJED9N14AAZD2', 'portal', 'ORG_CATEGORY', '0', '项目部', 0, '01KE8EP5825600MR5D03YEMNZ9',
-        '01KE8EP5825600MR5D03YEMNZ9/01KE8EQ1H000TNJED9N14AAZD2', 0, '', 0, '0', '0', '2026-01-06 09:28:33',
+        '01KE8EP5825600MR5D03YEMNZ9/01KE8EQ1H000TNJED9N14AAZD2', 0, 0, '0', '0', '2026-01-06 09:28:33',
         '2026-01-06 09:28:33', 0);
 INSERT INTO portal_auth_center.sys_dict (id, app_id, feat_code, value_str, value_cn, dict_type, parent_id, id_path,
-                                         show_order, memo, forbidden, create_user, update_user, create_time,
+                                         show_order, forbidden, create_user, update_user, create_time,
                                          update_time, delete_time)
 VALUES ('01KE8EQFH86ESG8WQQQC6AGQ85', 'portal', 'ORG_CATEGORY', '1', '集团', 0, '01KE8EP5825600MR5D03YEMNZ9',
-        '01KE8EP5825600MR5D03YEMNZ9/01KE8EQFH86ESG8WQQQC6AGQ85', 0, '', 0, '0', '0', '2026-01-06 09:28:47',
+        '01KE8EP5825600MR5D03YEMNZ9/01KE8EQFH86ESG8WQQQC6AGQ85', 0, 0, '0', '0', '2026-01-06 09:28:47',
         '2026-01-06 09:28:47', 0);
 INSERT INTO portal_auth_center.sys_dict (id, app_id, feat_code, value_str, value_cn, dict_type, parent_id, id_path,
-                                         show_order, memo, forbidden, create_user, update_user, create_time,
+                                         show_order, forbidden, create_user, update_user, create_time,
                                          update_time, delete_time)
 VALUES ('01KE8EQS0SKVNYK6GSNCRDTCV4', 'portal', 'ORG_CATEGORY', '2', '公司', 0, '01KE8EP5825600MR5D03YEMNZ9',
-        '01KE8EP5825600MR5D03YEMNZ9/01KE8EQS0SKVNYK6GSNCRDTCV4', 0, '', 0, '0', '0', '2026-01-06 09:28:57',
+        '01KE8EP5825600MR5D03YEMNZ9/01KE8EQS0SKVNYK6GSNCRDTCV4', 0, 0, '0', '0', '2026-01-06 09:28:57',
         '2026-01-06 09:28:57', 0);
 INSERT INTO portal_auth_center.sys_dict (id, app_id, feat_code, value_str, value_cn, dict_type, parent_id, id_path,
-                                         show_order, memo, forbidden, create_user, update_user, create_time,
+                                         show_order, forbidden, create_user, update_user, create_time,
                                          update_time, delete_time)
 VALUES ('01KE8ER1YCF9VJ8ZKPV3KE3KM0', 'portal', 'ORG_CATEGORY', '3', '分公司', 0, '01KE8EP5825600MR5D03YEMNZ9',
-        '01KE8EP5825600MR5D03YEMNZ9/01KE8ER1YCF9VJ8ZKPV3KE3KM0', 0, '', 0, '0', '0', '2026-01-06 09:29:06',
+        '01KE8EP5825600MR5D03YEMNZ9/01KE8ER1YCF9VJ8ZKPV3KE3KM0', 0, 0, '0', '0', '2026-01-06 09:29:06',
         '2026-01-06 09:29:06', 0);
 INSERT INTO portal_auth_center.sys_dict (id, app_id, feat_code, value_str, value_cn, dict_type, parent_id, id_path,
-                                         show_order, memo, forbidden, create_user, update_user, create_time,
+                                         show_order, forbidden, create_user, update_user, create_time,
                                          update_time, delete_time)
 VALUES ('01KE8ERCRSW4G1D9HXC9HY9JRK', 'portal', 'ORG_CATEGORY', '4', '子公司', 0, '01KE8EP5825600MR5D03YEMNZ9',
-        '01KE8EP5825600MR5D03YEMNZ9/01KE8ERCRSW4G1D9HXC9HY9JRK', 0, '', 0, '0', '0', '2026-01-06 09:29:17',
+        '01KE8EP5825600MR5D03YEMNZ9/01KE8ERCRSW4G1D9HXC9HY9JRK', 0, 0, '0', '0', '2026-01-06 09:29:17',
         '2026-01-06 09:29:17', 0);
 INSERT INTO portal_auth_center.sys_dict (id, app_id, feat_code, value_str, value_cn, dict_type, parent_id, id_path,
-                                         show_order, memo, forbidden, create_user, update_user, create_time,
+                                         show_order, forbidden, create_user, update_user, create_time,
                                          update_time, delete_time)
 VALUES ('01KFM9R6GS6BA56YYC2FFEH757', 'portal', '', 'EMPLOYEE_TYPE', '用工形式', 0, '', '01KFM9R6GS6BA56YYC2FFEH757', 0,
-        '', 0, '0', '0', '2026-01-23 02:10:49', '2026-01-23 02:10:49', 0);
+        0, '0', '0', '2026-01-23 02:10:49', '2026-01-23 02:10:49', 0);
 INSERT INTO portal_auth_center.sys_dict (id, app_id, feat_code, value_str, value_cn, dict_type, parent_id, id_path,
-                                         show_order, memo, forbidden, create_user, update_user, create_time,
+                                         show_order, forbidden, create_user, update_user, create_time,
                                          update_time, delete_time)
 VALUES ('01KFMA52ZERARG4Y62MP1C7Z7A', 'portal', 'EMPLOYEE_TYPE', '0', '劳务合同工', 0, '01KFM9R6GS6BA56YYC2FFEH757',
-        '01KFM9R6GS6BA56YYC2FFEH757/01KFMA52ZERARG4Y62MP1C7Z7A', 0, '', 0, '0', '0', '2026-01-23 02:16:29',
+        '01KFM9R6GS6BA56YYC2FFEH757/01KFMA52ZERARG4Y62MP1C7Z7A', 0, 0, '0', '0', '2026-01-23 02:16:29',
         '2026-01-23 02:16:29', 0);
 INSERT INTO portal_auth_center.sys_dict (id, app_id, feat_code, value_str, value_cn, dict_type, parent_id, id_path,
-                                         show_order, memo, forbidden, create_user, update_user, create_time,
+                                         show_order, forbidden, create_user, update_user, create_time,
                                          update_time, delete_time)
 VALUES ('01KFMA56WRTMEAQQY0D4HKNP9S', 'portal', 'EMPLOYEE_TYPE', '1', '劳务派遣工', 0, '01KFM9R6GS6BA56YYC2FFEH757',
-        '01KFM9R6GS6BA56YYC2FFEH757/01KFMA56WRTMEAQQY0D4HKNP9S', 0, '', 0, '0', '0', '2026-01-23 02:16:29',
+        '01KFM9R6GS6BA56YYC2FFEH757/01KFMA56WRTMEAQQY0D4HKNP9S', 0, 0, '0', '0', '2026-01-23 02:16:29',
         '2026-01-23 02:16:29', 0);
 INSERT INTO portal_auth_center.sys_dict (id, app_id, feat_code, value_str, value_cn, dict_type, parent_id, id_path,
-                                         show_order, memo, forbidden, create_user, update_user, create_time,
+                                         show_order, forbidden, create_user, update_user, create_time,
                                          update_time, delete_time)
 VALUES ('01KFMA5ANQ026FV2KNY554NDPR', 'portal', 'EMPLOYEE_TYPE', '2', '劳务外包工', 0, '01KFM9R6GS6BA56YYC2FFEH757',
-        '01KFM9R6GS6BA56YYC2FFEH757/01KFMA5ANQ026FV2KNY554NDPR', 0, '', 0, '0', '0', '2026-01-23 02:16:29',
+        '01KFM9R6GS6BA56YYC2FFEH757/01KFMA5ANQ026FV2KNY554NDPR', 0, 0, '0', '0', '2026-01-23 02:16:29',
         '2026-01-23 02:16:29', 0);
 INSERT INTO portal_auth_center.sys_dict (id, app_id, feat_code, value_str, value_cn, dict_type, parent_id, id_path,
-                                         show_order, memo, forbidden, create_user, update_user, create_time,
+                                         show_order, forbidden, create_user, update_user, create_time,
                                          update_time, delete_time)
 VALUES ('01KFMA5HVR541T6JZVZDGJ70ZF', 'portal', 'EMPLOYEE_TYPE', '3', '实习生', 0, '01KFM9R6GS6BA56YYC2FFEH757',
-        '01KFM9R6GS6BA56YYC2FFEH757/01KFMA5HVR541T6JZVZDGJ70ZF', 0, '', 0, '0', '0', '2026-01-23 02:16:29',
+        '01KFM9R6GS6BA56YYC2FFEH757/01KFMA5HVR541T6JZVZDGJ70ZF', 0, 0, '0', '0', '2026-01-23 02:16:29',
         '2026-01-23 02:16:29', 0);
 INSERT INTO portal_auth_center.sys_dict (id, app_id, feat_code, value_str, value_cn, dict_type, parent_id, id_path,
-                                         show_order, memo, forbidden, create_user, update_user, create_time,
+                                         show_order, forbidden, create_user, update_user, create_time,
                                          update_time, delete_time)
 VALUES ('01KFMAS9WS88ZFZRHB83ZTEZ78', 'portal', 'EMPLOYEE_TYPE', '4', '外部单位人员', 0, '01KFM9R6GS6BA56YYC2FFEH757',
-        '01KFM9R6GS6BA56YYC2FFEH757/01KFMAS9WS88ZFZRHB83ZTEZ78', 0, '', 0, '0', '0', '2026-01-23 10:29:34',
+        '01KFM9R6GS6BA56YYC2FFEH757/01KFMAS9WS88ZFZRHB83ZTEZ78', 0, 0, '0', '0', '2026-01-23 10:29:34',
         '2026-01-23 10:29:52', 0);
 INSERT INTO portal_auth_center.sys_dict (id, app_id, feat_code, value_str, value_cn, dict_type, parent_id, id_path,
-                                         show_order, memo, forbidden, create_user, update_user, create_time,
+                                         show_order, forbidden, create_user, update_user, create_time,
                                          update_time, delete_time)
 VALUES ('01KFYM0AV5ED1X686525888CZS', 'portal', '', 'TODO_PROCESS_STATE', '待办处理状态', 0, '',
-        '01KFYM0AV5ED1X686525888CZS', 0, '', 0, '0', '0', '2026-01-27 10:21:44', '2026-01-27 10:21:44', 0);
+        '01KFYM0AV5ED1X686525888CZS', 0, 0, '0', '0', '2026-01-27 10:21:44', '2026-01-27 10:21:44', 0);
 INSERT INTO portal_auth_center.sys_dict (id, app_id, feat_code, value_str, value_cn, dict_type, parent_id, id_path,
-                                         show_order, memo, forbidden, create_user, update_user, create_time,
+                                         show_order, forbidden, create_user, update_user, create_time,
                                          update_time, delete_time)
 VALUES ('01KFYM40NPEER546ZZZKT96W7N', 'portal', 'TODO_PROCESS_STATE', '0', '待办', 0, '01KFYM0AV5ED1X686525888CZS',
-        '01KFYM0AV5ED1X686525888CZS/01KFYM40NPEER546ZZZKT96W7N', 0, '', 0, '0', '0', '2026-01-27 10:23:02',
+        '01KFYM0AV5ED1X686525888CZS/01KFYM40NPEER546ZZZKT96W7N', 0, 0, '0', '0', '2026-01-27 10:23:02',
         '2026-01-27 10:23:02', 0);
 INSERT INTO portal_auth_center.sys_dict (id, app_id, feat_code, value_str, value_cn, dict_type, parent_id, id_path,
-                                         show_order, memo, forbidden, create_user, update_user, create_time,
+                                         show_order, forbidden, create_user, update_user, create_time,
                                          update_time, delete_time)
 VALUES ('01KFYM46Y3EHDBQNR8DWN0MZ51', 'portal', 'TODO_PROCESS_STATE', '2', '已办', 0, '01KFYM0AV5ED1X686525888CZS',
-        '01KFYM0AV5ED1X686525888CZS/01KFYM46Y3EHDBQNR8DWN0MZ51', 0, '', 0, '0', '0', '2026-01-27 10:23:02',
+        '01KFYM0AV5ED1X686525888CZS/01KFYM46Y3EHDBQNR8DWN0MZ51', 0, 0, '0', '0', '2026-01-27 10:23:02',
         '2026-01-27 10:23:02', 0);
 INSERT INTO portal_auth_center.sys_dict (id, app_id, feat_code, value_str, value_cn, dict_type, parent_id, id_path,
-                                         show_order, memo, forbidden, create_user, update_user, create_time,
+                                         show_order, forbidden, create_user, update_user, create_time,
                                          update_time, delete_time)
 VALUES ('01KFYM4ANAKN48HNKKFDMRB22J', 'portal', 'TODO_PROCESS_STATE', '4', '办结', 0, '01KFYM0AV5ED1X686525888CZS',
-        '01KFYM0AV5ED1X686525888CZS/01KFYM4ANAKN48HNKKFDMRB22J', 0, '', 0, '0', '0', '2026-01-27 10:23:02',
+        '01KFYM0AV5ED1X686525888CZS/01KFYM4ANAKN48HNKKFDMRB22J', 0, 0, '0', '0', '2026-01-27 10:23:02',
         '2026-01-27 10:23:02', 0);
 INSERT INTO portal_auth_center.sys_dict (id, app_id, feat_code, value_str, value_cn, dict_type, parent_id, id_path,
-                                         show_order, memo, forbidden, create_user, update_user, create_time,
+                                         show_order, forbidden, create_user, update_user, create_time,
                                          update_time, delete_time)
 VALUES ('01KFYM4E91TFYAFSP6CFMP3A9Z', 'portal', 'TODO_PROCESS_STATE', '8', '抄送', 0, '01KFYM0AV5ED1X686525888CZS',
-        '01KFYM0AV5ED1X686525888CZS/01KFYM4E91TFYAFSP6CFMP3A9Z', 0, '', 0, '0', '0', '2026-01-27 10:23:02',
+        '01KFYM0AV5ED1X686525888CZS/01KFYM4E91TFYAFSP6CFMP3A9Z', 0, 0, '0', '0', '2026-01-27 10:23:02',
         '2026-01-27 10:23:02', 0);
 
 
