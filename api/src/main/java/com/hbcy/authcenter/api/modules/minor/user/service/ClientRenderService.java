@@ -114,6 +114,7 @@ public class ClientRenderService {
         }
         //满足条件的菜单
         OrderedMenuQueryVO vo = new OrderedMenuQueryVO();
+        vo.setResType(ResourceTree.RES_TYPE_MENU);
         vo.setClientTypes(clientTypes);
         vo.setShowLevels(showLevels);
         vo.setResIds(filteredResIds);

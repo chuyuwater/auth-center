@@ -163,6 +163,9 @@
         <where>
             app.forbidden = 0
             and rt.hidden = 0
+            <if test="resType != null">
+                and rt.res_type = #{resType}
+            </if>
             and rt.id in
             <foreach collection="resIds" open="(" close=")" separator="," item="item">
                 #{item}

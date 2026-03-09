@@ -26,6 +26,10 @@ public class ClientResQueryVO {
      */
     private String appId;
     /**
+     * 资源类型，0-页面，1-按钮
+     */
+    private Integer resType;
+    /**
      * 组织id，后端填充
      */
     @JsonIgnore

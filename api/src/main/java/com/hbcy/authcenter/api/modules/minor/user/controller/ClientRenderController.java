@@ -81,7 +81,8 @@ public class ClientRenderController {
      * @return 菜单树
      */
     @GetMapping("/menu-tree")
-    public List<TreeNode<ResourceTree>> listMenuTree(@NotNull(message = "clientType必须指定") Integer clientType) {
+    public List<TreeNode<ResourceTree>> listMenuTree(
+            @NotNull(message = "clientType必须指定") Integer clientType) {
         return clientRenderService.listUserMenu(
                 UserContextUtils.getUserId(), UserContextUtils.getUserOrg(), clientType, 0
         );

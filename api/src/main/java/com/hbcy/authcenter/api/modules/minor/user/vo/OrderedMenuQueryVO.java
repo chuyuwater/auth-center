@@ -10,6 +10,7 @@ import java.util.Collection;
  */
 @Data
 public class OrderedMenuQueryVO {
+    private Integer resType;
     private Collection<String> resIds;
     private Collection<Integer> showLevels;
     private Collection<Integer> clientTypes;

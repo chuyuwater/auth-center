@@ -31,7 +31,8 @@ public interface TenantAppResourceMapper extends BaseMapper<TenantAppResource> {
      * @param appId    应用ID
      * @return 资源ID列表
      */
-    Set<String> getGrantedResIds(@Param("tenantId") String tenantId, @Param("appId") String appId);
+    Set<String> getGrantedResIds(@Param("tenantId") String tenantId,
+                                 @Param("appId") String appId);
 
     /**
      * 获取授权应用资源权限列表

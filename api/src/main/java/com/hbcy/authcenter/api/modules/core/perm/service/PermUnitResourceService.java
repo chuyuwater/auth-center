@@ -224,6 +224,7 @@ public class PermUnitResourceService extends ServiceImpl<PermUnitResourceMapper,
         queryVO.setClientType(vo.getClientType());
         queryVO.setWithPerm(vo.isWithPerm());
         queryVO.setHidden(0);
+        queryVO.setResType(vo.getResType());
         queryVO.setShowLevel(isPrj ? ResourceShowLevelEnum.PRJ.getValue() : ResourceShowLevelEnum.ORG.getValue());
         TreeNode<ResTreeDTO> root = resourceTreeService.listResTreeRecursively(
                 queryVO, currentUserPerms, true);
