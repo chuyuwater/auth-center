@@ -23,8 +23,22 @@
     </resultMap>
     <sql id="Base_Column_List">
         <!--@mbg.generated-->
-        id, app_id, feat_code, value_str, value_cn, dict_type, parent_id, id_path, show_order,
-        memo, forbidden, create_user, update_user, create_time, update_time, delete_time
+        id,
+        app_id,
+        feat_code,
+        value_str,
+        value_cn,
+        dict_type,
+        parent_id,
+        id_path,
+        show_order,
+        memo,
+        forbidden,
+        create_user,
+        update_user,
+        create_time,
+        update_time,
+        delete_time
     </sql>
 
     <select id="selectChildrenRecursively" resultMap="BaseResultMap">
@@ -48,11 +62,20 @@
     <insert id="append">
         insert into sys_dict (id, app_id, feat_code, value_str, value_cn, dict_type, parent_id, id_path, memo,
         forbidden, create_user, show_order)
-        values (#{dict.id}, #{dict.appId}, #{dict.featCode}, #{dict.valueStr}, #{dict.valueCn}, #{dict.dictType},
-        #{dict.parentId}, #{dict.idPath}, #{dict.memo}, #{dict.forbidden}, #{dict.createUser},
+        select #{dict.id},
+        #{dict.appId},
+        #{dict.featCode},
+        #{dict.valueStr},
+        #{dict.valueCn},
+        #{dict.dictType},
+        #{dict.parentId},
+        #{dict.idPath},
+        #{dict.memo},
+        #{dict.forbidden},
+        #{dict.createUser},
         (SELECT COALESCE(MAX(show_order), 0) + 1
         from sys_dict
-        where parent_id = #{dict.parentId}))
+        where parent_id = #{dict.parentId})
     </insert>
 
     <update id="updateIdPath">
