@@ -116,7 +116,7 @@ public class ClientRenderController {
      */
     @GetMapping("/perm")
     public List<ResPermDTO> listPerm(String resId) {
-        return permUnitUserService.listPerms(null, resId);
+        return permUnitUserService.listPerms(UserContextUtils.getAppId(), resId);
     }
 
     /**
@@ -128,7 +128,8 @@ public class ClientRenderController {
      */
     @GetMapping("/perm-code")
     public Set<String> listPermCode(String customId) {
-        List<ResPermDTO> dtos = permUnitUserService.listPermByCustomId(null, customId);
+        List<ResPermDTO> dtos = permUnitUserService.listPermByCustomId(
+                UserContextUtils.getAppId(), customId);
         return dtos.stream().map(ResPermDTO::getPermCode).collect(Collectors.toSet());
     }
 
