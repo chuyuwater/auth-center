@@ -577,7 +577,7 @@ VALUES ('01KFM9R6GS6BA56YYC2FFEH757', 'portal', '', 'EMPLOYEE_TYPE', '用工形�
 INSERT INTO portal_auth_center.sys_dict (id, app_id, feat_code, value_str, value_cn, dict_type, parent_id, id_path,
                                          show_order, forbidden, create_user, update_user, create_time,
                                          update_time, delete_time)
-VALUES ('01KFMA52ZERARG4Y62MP1C7Z7A', 'portal', 'EMPLOYEE_TYPE', '0', '劳务合同工', 0, '01KFM9R6GS6BA56YYC2FFEH757',
+VALUES ('01KFMA52ZERARG4Y62MP1C7Z7A', 'portal', 'EMPLOYEE_TYPE', '0', '劳动合同工', 0, '01KFM9R6GS6BA56YYC2FFEH757',
         '01KFM9R6GS6BA56YYC2FFEH757/01KFMA52ZERARG4Y62MP1C7Z7A', 0, 0, '0', '0', '2026-01-23 02:16:29',
         '2026-01-23 02:16:29', 0);
 INSERT INTO portal_auth_center.sys_dict (id, app_id, feat_code, value_str, value_cn, dict_type, parent_id, id_path,
