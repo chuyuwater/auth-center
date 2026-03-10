@@ -9,7 +9,7 @@ import java.util.Collection;
 
 /**
  * @author 姚泰然
- * @date 2026-03-10 08:46
+ * @date 2026-03-10 17:10
  */
 @Mapper
 public interface ResourcePermApiMapper extends BaseMapper<ResourcePermApi> {

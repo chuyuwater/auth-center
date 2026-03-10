@@ -160,7 +160,7 @@ public class PermUnitUserService extends ServiceImpl<PermUnitUserMapper, PermUni
     }
 
     public List<ResPermDTO> listPermByCustomId(String appId, String customId) {
-        if (customId == null) {
+        if (StringUtils.isBlank(customId)) {
             return listPerms(appId);
         }
         ResourceTree node = resourceTreeMapper.selectOne(new QueryWrapper<ResourceTree>()

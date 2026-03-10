@@ -304,12 +304,14 @@ public class ResourcePermService extends ServiceImpl<ResourcePermMapper, Resourc
         String userId = UserContextUtils.getUserId();
         for (PermAPiBatchCreateVO createVO : vo) {
             String permId = createVO.getPermId();
+            int i = 0;
             for (ResourcePermApiVO apiVO : createVO.getApis()) {
                 ResourcePermApi api = new ResourcePermApi();
                 api.setId(UlidCreator.getUlid().toString());
                 api.setPermId(permId);
                 api.setApiMethod(apiVO.getApiMethod());
                 api.setApiPath(apiVO.getApiPath());
+                api.setShowOrder(i++);
                 api.setCreateUser(userId);
                 toInsert.add(api);
             }

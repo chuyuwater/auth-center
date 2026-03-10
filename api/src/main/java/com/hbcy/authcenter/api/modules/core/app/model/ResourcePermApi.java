@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 /**
  * 权限对应api
  * @author 姚泰然
- * @date 2026-03-10 08:46
+ * @date 2026-03-10 17:10
  */
 
 @Data
@@ -20,6 +20,7 @@ public class ResourcePermApi {
     public static final String COL_PERM_ID = "perm_id";
     public static final String COL_API_METHOD = "api_method";
     public static final String COL_API_PATH = "api_path";
+    public static final String COL_SHOW_ORDER = "show_order";
     public static final String COL_CREATE_TIME = "create_time";
     public static final String COL_CREATE_USER = "create_user";
     @TableId(value = "id", type = IdType.ASSIGN_UUID)
@@ -33,6 +34,8 @@ public class ResourcePermApi {
     private Integer apiMethod;
     @TableField(value = "api_path")
     private String apiPath;
+    @TableField(value = "show_order")
+    private Integer showOrder;
     @TableField(value = "create_time", fill = FieldFill.INSERT)
     private LocalDateTime createTime;
     @TableField(value = "create_user")
