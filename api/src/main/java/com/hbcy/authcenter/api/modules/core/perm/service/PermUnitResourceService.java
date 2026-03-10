@@ -218,7 +218,7 @@ public class PermUnitResourceService extends ServiceImpl<PermUnitResourceMapper,
             return new ArrayList<>();
         }
         ResourceTree parent = null;
-        if (StringUtils.isNotBlank(vo.getParentCustomId())) {
+        if (StringUtils.isNotBlank(vo.getAppId()) && StringUtils.isNotBlank(vo.getParentCustomId())) {
             parent = resourceTreeMapper.selectOne(new QueryWrapper<ResourceTree>()
                     .eq(ResourceTree.COL_CUSTOM_ID, vo.getParentCustomId())
                     .eq(ResourceTree.COL_APP_ID, vo.getAppId()));

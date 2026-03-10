@@ -105,7 +105,6 @@ public class ClientRenderController {
     @GetMapping("/res")
     public List<TreeNode<ResTreeDTO>> listRes(ClientResQueryVO vo) {
         vo.setOrgId(UserContextUtils.getUserOrg());
-        vo.setAppId(UserContextUtils.getAppId());
         return permUnitResourceService.listUserResources(vo);
     }
 
