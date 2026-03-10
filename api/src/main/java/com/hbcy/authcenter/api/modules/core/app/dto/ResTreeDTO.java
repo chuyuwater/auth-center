@@ -1,7 +1,6 @@
 package com.hbcy.authcenter.api.modules.core.app.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.hbcy.authcenter.api.modules.core.app.model.ResourcePerm;
 import com.hbcy.authcenter.api.modules.core.app.model.ResourceTree;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -21,13 +20,12 @@ public class ResTreeDTO {
      */
     private ResourceTree res;
     /**
-     * 权限信息
+     * 权限信息（含关联的API列表）
      */
-    private ResourcePerm perm;
+    private ResourcePermDTO perm;
     /**
      * 是否已授权
      * 用于构建授权树
      */
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     private Boolean granted;
 }

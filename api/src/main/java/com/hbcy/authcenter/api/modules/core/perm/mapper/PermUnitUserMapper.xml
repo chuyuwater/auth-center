@@ -34,9 +34,7 @@
         rp.app_id,
         rp.res_id,
         rp.perm_name,
-        rp.perm_code,
-        rp.api_method,
-        rp.api_path
+        rp.perm_code
         from perm_unit_user puu
         join perm_unit_resource pur on puu.unit_id = pur.unit_id
         join resource_perm rp on pur.perm_id = rp.id
@@ -55,9 +53,7 @@
         rp.app_id,
         rp.res_id,
         rp.perm_name,
-        rp.perm_code,
-        rp.api_method,
-        rp.api_path
+        rp.perm_code
         from resource_perm rp
         <where>
             rp.id in

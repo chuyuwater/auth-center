@@ -15,4 +15,12 @@
         <!--@mbg.generated-->
         id, perm_id, api_method, api_path, create_time, create_user
     </sql>
+
+    <delete id="deleteByPermIds">
+        DELETE FROM resource_perm_api
+        WHERE perm_id IN
+        <foreach collection="permIds" open="(" close=")" separator="," item="pid">
+            #{pid}
+        </foreach>
+    </delete>
 </mapper>

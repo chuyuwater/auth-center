@@ -22,8 +22,6 @@ public class ResourcePerm extends BaseEntity {
     public static final String COL_RES_ID = "res_id";
     public static final String COL_PERM_NAME = "perm_name";
     public static final String COL_PERM_CODE = "perm_code";
-    public static final String COL_API_METHOD = "api_method";
-    public static final String COL_API_PATH = "api_path";
     public static final String COL_CREATE_TIME = "create_time";
     public static final String COL_UPDATE_TIME = "update_time";
     public static final String COL_CREATE_USER = "create_user";
@@ -50,16 +48,6 @@ public class ResourcePerm extends BaseEntity {
      */
     @TableField(value = "perm_code")
     private String permCode;
-    /**
-     * 0-GET, 1-POST, 2-PUT, 3-DELETE
-     */
-    @TableField(value = "api_method")
-    private Integer apiMethod;
-    /**
-     * 支持ant通配符的api路径
-     */
-    @TableField(value = "api_path")
-    private String apiPath;
     @TableField(value = "create_time", fill = FieldFill.INSERT)
     private LocalDateTime createTime;
     @TableField(value = "update_time", fill = FieldFill.INSERT_UPDATE)

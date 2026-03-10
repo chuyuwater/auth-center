@@ -9,8 +9,6 @@
         <result column="res_id" jdbcType="CHAR" property="resId"/>
         <result column="perm_name" jdbcType="VARCHAR" property="permName"/>
         <result column="perm_code" jdbcType="VARCHAR" property="permCode"/>
-        <result column="api_method" jdbcType="TINYINT" property="apiMethod"/>
-        <result column="api_path" jdbcType="VARCHAR" property="apiPath"/>
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
         <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
         <result column="create_user" jdbcType="CHAR" property="createUser"/>
@@ -23,8 +21,6 @@
         res_id,
         perm_name,
         perm_code,
-        api_method,
-        api_path,
         create_time,
         update_time,
         create_user,
@@ -57,16 +53,16 @@
     </select>
 
     <select id="select4Gateway" resultType="com.hbcy.authcenter.gateway.dto.ApiPermDTO">
-        select id as perm_id,
-        api_method,
-        api_path,
-        app_id
-        from resource_perm
+        select rp.id as perm_id,
+        rpa.api_method,
+        rpa.api_path,
+        rp.app_id
+        from resource_perm rp
+        join resource_perm_api rpa on rpa.perm_id = rp.id
         <where>
             <if test="appId != null and appId != ''">
-                app_id = #{appId}
+                rp.app_id = #{appId}
             </if>
-            and api_path is not null
         </where>
     </select>
 
@@ -75,11 +71,9 @@
         rp.app_id,
         rp.res_id,
         rp.perm_name,
-        rp.perm_code,
-        rp.api_method,
-        rp.api_path
+        rp.perm_code
         from resource_perm rp
-        where app_id = #{appId}
+        where rp.app_id = #{appId}
     </select>
 
     <select id="getPermResIdPaths" resultType="java.lang.String">

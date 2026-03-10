@@ -8,11 +8,15 @@ import com.hbcy.authcenter.api.common.bean.NameCacheService;
 import com.hbcy.authcenter.api.common.bean.NodeMoveVO;
 import com.hbcy.authcenter.api.common.constants.G;
 import com.hbcy.authcenter.api.modules.core.app.dao.AppMapper;
+import com.hbcy.authcenter.api.modules.core.app.dao.ResourcePermApiMapper;
 import com.hbcy.authcenter.api.modules.core.app.dao.ResourceTreeMapper;
+import com.hbcy.authcenter.api.modules.core.app.dto.ResNodeDTO;
 import com.hbcy.authcenter.api.modules.core.app.dto.ResPermDTO;
 import com.hbcy.authcenter.api.modules.core.app.dto.ResTreeDTO;
+import com.hbcy.authcenter.api.modules.core.app.dto.ResourcePermDTO;
 import com.hbcy.authcenter.api.modules.core.app.model.App;
 import com.hbcy.authcenter.api.modules.core.app.model.ResourcePerm;
+import com.hbcy.authcenter.api.modules.core.app.model.ResourcePermApi;
 import com.hbcy.authcenter.api.modules.core.app.model.ResourceTree;
 import com.hbcy.authcenter.api.modules.core.app.vo.ResourcePermCreateVO;
 import com.hbcy.authcenter.api.modules.core.app.vo.ResourceTreeCreateVO;
@@ -48,6 +52,8 @@ public class ResourceTreeService extends ServiceImpl<ResourceTreeMapper, Resourc
     @Resource
     private ResourcePermService resourcePermService;
     @Resource
+    private ResourcePermApiMapper resourcePermApiMapper;
+    @Resource
     private NameCacheService nameCacheService;
 
     private ResourceTree checkParentId(String appId, String parentId) {
@@ -75,6 +81,44 @@ public class ResourceTreeService extends ServiceImpl<ResourceTreeMapper, Resourc
         for (ResourcePermCreateVO subPerm : subPerms) {
             resourcePermService.checkPerm(subPerm);
         }
+    }
+
+    /**
+     * 根据ID获取资源节点详情（含关联的权限点及API列表）
+     *
+     * @param id 节点ID
+     * @return 节点及其权限点
+     */
+    public ResNodeDTO getResTreeById(String id) {
+        ResourceTree node = getById(id);
+        if (node == null) {
+            throw new ParamError("指定节点不存在");
+        }
+        ResNodeDTO result = new ResNodeDTO().setRes(node);
+
+        // 查询关联的权限点
+        List<ResourcePerm> perms = resourcePermService.list(new QueryWrapper<ResourcePerm>()
+                .eq(ResourcePerm.COL_RES_ID, id));
+        if (perms.isEmpty()) {
+            result.setPerms(Collections.emptyList());
+            return result;
+        }
+        // 批量查询api配置，按permId分组
+        Set<String> permIds = perms.stream().map(ResourcePerm::getId).collect(Collectors.toSet());
+        List<ResourcePermApi> permApis = resourcePermApiMapper.selectList(
+                new QueryWrapper<ResourcePermApi>().in(ResourcePermApi.COL_PERM_ID, permIds));
+        Map<String, List<ResourcePermApi>> permApiMap = permApis.stream()
+                .collect(Collectors.groupingBy(ResourcePermApi::getPermId));
+
+        List<ResourcePermDTO> permDTOs = new ArrayList<>();
+        for (ResourcePerm perm : perms) {
+            ResourcePermDTO permDTO = new ResourcePermDTO();
+            BeanCopyUtils.copy(perm, permDTO);
+            permDTO.setApis(permApiMap.getOrDefault(perm.getId(), Collections.emptyList()));
+            permDTOs.add(permDTO);
+        }
+        result.setPerms(permDTOs);
+        return result;
     }
 
     /**
@@ -124,7 +168,7 @@ public class ResourceTreeService extends ServiceImpl<ResourceTreeMapper, Resourc
             if (vo.getParentId().equals(id)) {
                 throw new ParamError("父节点不能是自身");
             }
-            //父节点被移动
+            // 父节点被移动
             ResourceTree newParent = checkNewParent(entity, vo.getParentId());
             if (newParent != null && newParent.getIdPath().contains(id)) {
                 throw new ParamError("父节点不能是子节点");
@@ -161,7 +205,7 @@ public class ResourceTreeService extends ServiceImpl<ResourceTreeMapper, Resourc
      * @return 树
      */
     public TreeNode<ResTreeDTO> listResTreeRecursively(ResourceTreeQueryVO vo,
-                                                       List<ResPermDTO> grantPermList, boolean removeUngrant) {
+            List<ResPermDTO> grantPermList, boolean removeUngrant) {
         TreeNode<ResTreeDTO> root = new TreeNode<>();
         ResTreeDTO dto = new ResTreeDTO();
         root.setData(dto);
@@ -183,9 +227,19 @@ public class ResourceTreeService extends ServiceImpl<ResourceTreeMapper, Resourc
                     .in(ResourcePerm.COL_RES_ID, ids));
         }
 
+        // 查询权限点关联的api列表，按permId分组
+        Map<String, List<ResourcePermApi>> permApiMap = new HashMap<>();
+        if (!resourcePerms.isEmpty()) {
+            Set<String> permIds = resourcePerms.stream().map(ResourcePerm::getId).collect(Collectors.toSet());
+            List<ResourcePermApi> permApis = resourcePermApiMapper.selectList(
+                    new QueryWrapper<ResourcePermApi>().in(ResourcePermApi.COL_PERM_ID, permIds));
+            permApiMap = permApis.stream()
+                    .collect(Collectors.groupingBy(ResourcePermApi::getPermId));
+        }
+
         Set<String> allGrantIds = filterGranted(grantPermList, removeUngrant, resourceTrees, resourcePerms);
         if (vo.getWithCreator()) {
-            //填充人的信息，前端列表页需要
+            // 填充人的信息，前端列表页需要
             Set<String> users = new HashSet<>();
             for (ResourceTree resourceTree : resourceTrees) {
                 users.add(resourceTree.getCreateUser());
@@ -213,40 +267,40 @@ public class ResourceTreeService extends ServiceImpl<ResourceTreeMapper, Resourc
                         })));
         Map<String, List<ResourcePerm>> permChildrenMap = resourcePerms.stream()
                 .collect(Collectors.groupingBy(ResourcePerm::getResId, Collectors.toList()));
-        buildTree(root, resChildrenMap, permChildrenMap, allGrantIds);
+        buildTree(root, resChildrenMap, permChildrenMap, permApiMap, allGrantIds);
         return root;
     }
 
     @Nullable
     private Set<String> filterGranted(List<ResPermDTO> grantPermList, boolean removeUngrant,
-                                      List<ResourceTree> resourceTrees, List<ResourcePerm> resourcePerms) {
+            List<ResourceTree> resourceTrees, List<ResourcePerm> resourcePerms) {
         if (grantPermList == null) {
             return null;
         }
-        //权限点关联的直接资源节点
+        // 权限点关联的直接资源节点
         Set<String> directIds = new HashSet<>();
-        //授权的资源节点
+        // 授权的资源节点
         Set<String> grantResIds = new HashSet<>();
-        //授权的权限点
+        // 授权的权限点
         Set<String> grantPermIds = new HashSet<>();
         for (ResPermDTO dto : grantPermList) {
             directIds.add(dto.getResId());
             grantPermIds.add(dto.getId());
         }
         if (!directIds.isEmpty()) {
-            List<ResourceTree> grantRes = baseMapper.selectList(new QueryWrapper<ResourceTree>().
-                    in(ResourceTree.COL_ID, directIds)
-                    .select(ResourceTree.COL_ID_PATH));
+            List<ResourceTree> grantRes = baseMapper
+                    .selectList(new QueryWrapper<ResourceTree>().in(ResourceTree.COL_ID, directIds)
+                            .select(ResourceTree.COL_ID_PATH));
             for (ResourceTree rt : grantRes) {
                 grantResIds.addAll(Splitter.on(G.ID_PATH_SPLITTER).splitToList(rt.getIdPath()));
             }
         }
         if (removeUngrant) {
-            //在这里直接移除掉未授权的节点
+            // 在这里直接移除掉未授权的节点
             resourceTrees.removeIf(x -> !grantResIds.contains(x.getId()));
             resourcePerms.removeIf(x -> !grantPermIds.contains(x.getId()));
         } else {
-            //下文构建树的时候标记授权
+            // 下文构建树的时候标记授权
             Set<String> allGrantIds = new HashSet<>();
             allGrantIds.addAll(grantPermIds);
             allGrantIds.addAll(grantResIds);
@@ -256,23 +310,27 @@ public class ResourceTreeService extends ServiceImpl<ResourceTreeMapper, Resourc
     }
 
     private void buildTree(TreeNode<ResTreeDTO> current,
-                           Map<String, List<ResourceTree>> childrenMap,
-                           Map<String, List<ResourcePerm>> permMap,
-                           Set<String> allGrantIds) {
+            Map<String, List<ResourceTree>> childrenMap,
+            Map<String, List<ResourcePerm>> permMap,
+            Map<String, List<ResourcePermApi>> permApiMap,
+            Set<String> allGrantIds) {
         String resId = Optional.ofNullable(
-                        current.getData()).map(ResTreeDTO::getRes)
+                current.getData()).map(ResTreeDTO::getRes)
                 .map(ResourceTree::getId).orElse("");
-        //先查询当前节点关联的权限点
+        // 先查询当前节点关联的权限点
         for (ResourcePerm t : permMap.getOrDefault(resId, Collections.emptyList())) {
             TreeNode<ResTreeDTO> node = new TreeNode<>();
-            ResTreeDTO dto = new ResTreeDTO().setPerm(t);
+            ResourcePermDTO permDTO = new ResourcePermDTO();
+            BeanCopyUtils.copy(t, permDTO);
+            permDTO.setApis(permApiMap.getOrDefault(t.getId(), Collections.emptyList()));
+            ResTreeDTO dto = new ResTreeDTO().setPerm(permDTO);
             if (allGrantIds != null) {
                 dto.setGranted(allGrantIds.contains(t.getId()));
             }
             node.setData(dto);
             current.addChild(node);
         }
-        //再递归查询当前节点关联的菜单
+        // 再递归查询当前节点关联的菜单
         for (ResourceTree t : childrenMap.getOrDefault(resId, Collections.emptyList())) {
             TreeNode<ResTreeDTO> node = new TreeNode<>();
             ResTreeDTO dto = new ResTreeDTO().setRes(t);
@@ -281,7 +339,7 @@ public class ResourceTreeService extends ServiceImpl<ResourceTreeMapper, Resourc
             }
             node.setData(dto);
             current.addChild(node);
-            buildTree(node, childrenMap, permMap, allGrantIds);
+            buildTree(node, childrenMap, permMap, permApiMap, allGrantIds);
         }
     }
 
@@ -317,7 +375,7 @@ public class ResourceTreeService extends ServiceImpl<ResourceTreeMapper, Resourc
      */
     @Transactional(rollbackFor = Exception.class)
     public void delete(String id, boolean force) {
-        //需要删除其下的所有子节点和附属的资源
+        // 需要删除其下的所有子节点和附属的资源
         ResourceTree node = getById(id);
         if (node == null) {
             return;
@@ -333,8 +391,8 @@ public class ResourceTreeService extends ServiceImpl<ResourceTreeMapper, Resourc
         }
         Set<String> permIds = resourcePermService.list(new QueryWrapper<ResourcePerm>()
                 .select(ResourcePerm.COL_ID)
-                .in(ResourcePerm.COL_RES_ID, resIds)).stream().map(
-                ResourcePerm::getId).collect(Collectors.toSet());
+                .in(ResourcePerm.COL_RES_ID, resIds)).stream().map(ResourcePerm::getId)
+                .collect(Collectors.toSet());
         if (!force && !permIds.isEmpty()) {
             throw new ParamError("请先删除该菜单下的所有权限点");
         }
@@ -364,10 +422,10 @@ public class ResourceTreeService extends ServiceImpl<ResourceTreeMapper, Resourc
     }
 
     private void updateChildrenPath(ResourceTree node, ResourceTree newParent) {
-        //父节点被移动，意味着当前节点及其下级节点的id_path需要更新
+        // 父节点被移动，意味着当前节点及其下级节点的id_path需要更新
         String oldPath = node.getIdPath();
-        String newPath = newParent == null ? node.getId() : newParent.getIdPath()
-                + G.ID_PATH_SPLITTER + node.getId();
+        String newPath = newParent == null ? node.getId()
+                : newParent.getIdPath() + G.ID_PATH_SPLITTER + node.getId();
         baseMapper.updateIdPath(node.getAppId(), oldPath, newPath);
         node.setIdPath(newPath);
     }
@@ -398,13 +456,13 @@ public class ResourceTreeService extends ServiceImpl<ResourceTreeMapper, Resourc
             ResourceTree parentNode = checkNewParent(node, vo.getParentId());
             updateChildrenPath(node, parentNode);
         }
-        //检查前节点，修改被移动节点及其之后节点的show_order
+        // 检查前节点，修改被移动节点及其之后节点的show_order
         int targetIdx = 0;
         if (prevNode != null) {
             targetIdx = prevNode.getShowOrder() + 1;
         }
         baseMapper.updateShowOrder(node.getAppId(), vo.getParentId(), targetIdx);
-        //最后，修改目标节点自身数据
+        // 最后，修改目标节点自身数据
         ResourceTree toUpdate = new ResourceTree();
         toUpdate.setId(vo.getNodeId());
         toUpdate.setParentId(vo.getParentId());

@@ -1,10 +1,11 @@
 package com.hbcy.authcenter.api.modules.core.app.vo;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 import org.hibernate.validator.constraints.Length;
-import org.hibernate.validator.constraints.Range;
+
+import java.util.List;
 
 /**
  * 资源权限更新VO
@@ -29,16 +30,9 @@ public class ResourcePermUpdateVO {
     private String permCode;
 
     /**
-     * API请求方法，可以为null
-     * 0-GET, 1-POST, 2-PUT, 3-DELETE
+     * 关联的API列表，可以为空（纯权限点不绑定API）。
+     * 每次提交覆盖之前的配置。
      */
-    @Range(min = 0, max = 3, message = "请求方法只能为0-3")
-    private Integer apiMethod;
-
-    /**
-     * API路径，可以为空或者null
-     */
-    @Length(max = 255, message = "API路径长度不能超过255")
-    @Pattern(regexp = "^$|^/api/[\\w/\\-*?]*$", message = "API必须以/api开头")
-    private String apiPath;
+    @Valid
+    private List<ResourcePermApiVO> apis;
 }

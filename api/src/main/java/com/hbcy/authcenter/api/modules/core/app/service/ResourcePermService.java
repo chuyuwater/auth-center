@@ -6,8 +6,11 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.f4b6a3.ulid.UlidCreator;
 import com.google.common.base.Splitter;
 import com.hbcy.authcenter.api.common.bean.EventDispatcher;
+import com.hbcy.authcenter.api.modules.core.app.dao.ResourcePermApiMapper;
 import com.hbcy.authcenter.api.modules.core.app.dao.ResourcePermMapper;
 import com.hbcy.authcenter.api.modules.core.app.model.ResourcePerm;
+import com.hbcy.authcenter.api.modules.core.app.model.ResourcePermApi;
+import com.hbcy.authcenter.api.modules.core.app.vo.ResourcePermApiVO;
 import com.hbcy.authcenter.api.modules.core.app.vo.ResourcePermCreateVO;
 import com.hbcy.authcenter.api.modules.core.app.vo.ResourcePermQueryVO;
 import com.hbcy.authcenter.api.modules.core.app.vo.ResourcePermUpdateVO;
@@ -45,7 +48,8 @@ public class ResourcePermService extends ServiceImpl<ResourcePermMapper, Resourc
     private PermUnitResourceMapper permUnitResourceMapper;
     @Resource
     private EventDispatcher eventDispatcher;
-
+    @Resource
+    private ResourcePermApiMapper resourcePermApiMapper;
 
     /**
      * 查询资源权限列表
@@ -58,7 +62,7 @@ public class ResourcePermService extends ServiceImpl<ResourcePermMapper, Resourc
                 .likeRight(StringUtils.isNotBlank(vo.getPermCode()), ResourcePerm.COL_PERM_CODE, vo.getPermCode())
                 .eq(StringUtils.isNotBlank(vo.getResId()), ResourcePerm.COL_RES_ID, vo.getResId())
                 .eq(StringUtils.isNotBlank(vo.getAppId()), ResourcePerm.COL_APP_ID, vo.getAppId())
-                .orderByAsc(ResourcePerm.COL_API_METHOD));
+                .orderByAsc(ResourcePerm.COL_ID));
     }
 
     public Set<String> filterAppPermIds(String appId, Set<String> supplyIds) {
@@ -79,22 +83,24 @@ public class ResourcePermService extends ServiceImpl<ResourcePermMapper, Resourc
      */
     public void delete(String appId, Collection<String> permIds) {
         baseMapper.deleteByIds(permIds);
-        //删除租户应用最大授权
+        // 删除关联的api配置
+        resourcePermApiMapper.deleteByPermIds(permIds);
+        // 删除租户应用最大授权
         tenantAppResourceMapper.delete(new QueryWrapper<TenantAppResource>()
                 .eq(TenantAppResource.COL_APP_ID, appId)
                 .in(TenantAppResource.COL_PERM_ID, permIds));
-        //删除已有的角色/策略授权
+        // 删除已有的角色/策略授权
         permUnitResourceMapper.delete(new QueryWrapper<PermUnitResource>()
                 .in(PermUnitResource.COL_PERM_ID, permIds));
     }
 
-    public void checkPerm(ResourcePermUpdateVO vo) {
-        String apiPath = vo.getApiPath();
+    /**
+     * 校验单个API配置项
+     */
+    private void checkApiItem(ResourcePermApiVO apiVO) {
+        String apiPath = apiVO.getApiPath();
         if (StringUtils.isBlank(apiPath)) {
-            vo.setApiPath(null);
-            return;
-        } else if (vo.getApiMethod() == null) {
-            throw new ParamError("请选择API请求方法");
+            throw new ParamError("API路径不能为空");
         }
         List<String> parts = Splitter.on("/").splitToList(apiPath);
         if (parts.size() < 3) {
@@ -108,6 +114,19 @@ public class ResourcePermService extends ServiceImpl<ResourcePermMapper, Resourc
         }
     }
 
+    /**
+     * 校验权限VO中的APIs列表
+     */
+    public void checkPerm(ResourcePermUpdateVO vo) {
+        if (CollectionUtils.isEmpty(vo.getApis())) {
+            return;
+        }
+        for (ResourcePermApiVO apiVO : vo.getApis()) {
+            checkApiItem(apiVO);
+        }
+    }
+
+    @Transactional(rollbackFor = Exception.class)
     public ResourcePerm update(String id, ResourcePermUpdateVO vo) {
         checkPerm(vo);
         ResourcePerm rp = baseMapper.selectById(id);
@@ -118,28 +137,33 @@ public class ResourcePermService extends ServiceImpl<ResourcePermMapper, Resourc
         return rp;
     }
 
-    private void doUpdate(ResourcePermUpdateVO vo, String id) {
+    public void doUpdate(ResourcePermUpdateVO vo, String id) {
         try {
-            //注意api_method和api_path可以被更新为null
             baseMapper.update(new UpdateWrapper<ResourcePerm>()
                     .eq(ResourcePerm.COL_ID, id)
                     .set(ResourcePerm.COL_PERM_NAME, vo.getPermName())
                     .set(ResourcePerm.COL_PERM_CODE, vo.getPermCode())
-                    .set(ResourcePerm.COL_API_METHOD, vo.getApiMethod())
-                    .set(ResourcePerm.COL_API_PATH, vo.getApiPath())
                     .set(ResourcePerm.COL_UPDATE_USER, UserContextUtils.getUserId())
                     .set(ResourcePerm.COL_UPDATE_TIME, LocalDateTime.now()));
         } catch (DuplicateKeyException e) {
-            throw new ParamError("API路径和方法组合已存在");
+            throw new ParamError("权限码已存在");
+        }
+        // 覆盖写入api配置：先删除旧记录，再插入新记录
+        resourcePermApiMapper.deleteByPermIds(List.of(id));
+        List<ResourcePermApiVO> apis = vo.getApis();
+        if (!CollectionUtils.isEmpty(apis)) {
+            insertPermApis(id, apis);
         }
     }
 
     /**
      * 批量创建res关联的权限点
      *
+     * @param appId    应用id
      * @param resId    资源id
      * @param subPerms 权限点
      */
+    @Transactional(rollbackFor = Exception.class)
     public void batchCreate(String appId, String resId, List<ResourcePermCreateVO> subPerms) {
         if (CollectionUtils.isEmpty(subPerms)) {
             return;
@@ -159,9 +183,17 @@ public class ResourcePermService extends ServiceImpl<ResourcePermMapper, Resourc
         try {
             baseMapper.insert(toInsert);
         } catch (DuplicateKeyException e) {
-            throw new ParamError("API路径和方法组合已存在");
+            throw new ParamError("权限码已存在");
         }
-        //权限资源变更
+        // 批量插入api配置
+        for (int i = 0; i < subPerms.size(); i++) {
+            ResourcePermCreateVO vo = subPerms.get(i);
+            String permId = toInsert.get(i).getId();
+            if (!CollectionUtils.isEmpty(vo.getApis())) {
+                insertPermApis(permId, vo.getApis());
+            }
+        }
+        // 权限资源变更
         eventDispatcher.dispatch(
                 appId,
                 EventConstants.KAFKA_RESOURCE_PERM_CHANGED,
@@ -187,13 +219,13 @@ public class ResourcePermService extends ServiceImpl<ResourcePermMapper, Resourc
             subIds = subPerms.stream().map(ResourcePermCreateVO::getId).collect(Collectors.toSet());
         }
         boolean isChanged = false;
-        //计算出被删除的条目
+        // 计算出被删除的条目
         existsIds.removeAll(subIds);
         if (!existsIds.isEmpty()) {
-            delete(resId, existsIds);
+            delete(appId, existsIds);
             isChanged = true;
         }
-        //新增的条目
+        // 新增的条目
         List<ResourcePermCreateVO> toCreate = new ArrayList<>();
         for (ResourcePermCreateVO vo : subPerms) {
             if (StringUtils.isBlank(vo.getId())) {
@@ -206,15 +238,16 @@ public class ResourcePermService extends ServiceImpl<ResourcePermMapper, Resourc
                     if (!entity.getResId().equals(resId)) {
                         throw new ParamError("权限归属资源id错误，请刷新重试");
                     }
-                    //确认更新
-                    boolean coreChange = !vo.getPermCode().equals(entity.getPermCode())
-                            || !Objects.equals(vo.getApiMethod(), entity.getApiMethod())
-                            || !Objects.equals(vo.getApiPath(), entity.getApiPath());
+                    // 比对基础字段是否变化
+                    boolean codeChange = !vo.getPermCode().equals(entity.getPermCode());
+                    // 比对apis列表是否变化
+                    boolean apisChange = isApisChanged(vo.getId(), vo.getApis());
+                    boolean coreChange = codeChange || apisChange;
                     if (coreChange || !vo.getPermName().equals(entity.getPermName())) {
-                        //逐个更新（一般没几条
+                        // 逐个更新（一般没几条）
                         doUpdate(vo, vo.getId());
                         if (coreChange) {
-                            //只改了名字不影响网关使用
+                            // 只改了名字不影响网关使用
                             isChanged = true;
                         }
                     }
@@ -226,11 +259,58 @@ public class ResourcePermService extends ServiceImpl<ResourcePermMapper, Resourc
             isChanged = true;
         }
         if (isChanged) {
-            //权限资源变更
+            // 权限资源变更
             eventDispatcher.dispatch(
                     appId,
                     EventConstants.KAFKA_RESOURCE_PERM_CHANGED,
                     new EventResPermChanged().setAppId(appId).setResId(resId));
+        }
+    }
+
+    /**
+     * 比对提交的apis列表与数据库中现有的apis是否一致
+     */
+    private boolean isApisChanged(String permId, List<ResourcePermApiVO> newApis) {
+        List<ResourcePermApi> existApis = resourcePermApiMapper.selectList(
+                new QueryWrapper<ResourcePermApi>().eq(ResourcePermApi.COL_PERM_ID, permId));
+        int newSize = CollectionUtils.isEmpty(newApis) ? 0 : newApis.size();
+        if (existApis.size() != newSize) {
+            return true;
+        }
+        if (newSize == 0) {
+            return false;
+        }
+        // 用 method+path 的组合做集合比对
+        Set<String> existSet = existApis.stream()
+                .map(a -> a.getApiMethod() + ":" + a.getApiPath())
+                .collect(Collectors.toSet());
+        for (ResourcePermApiVO vo : newApis) {
+            if (!existSet.contains(vo.getApiMethod() + ":" + vo.getApiPath())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 将api配置批量插入到resource_perm_api表
+     */
+    private void insertPermApis(String permId, List<ResourcePermApiVO> apis) {
+        List<ResourcePermApi> toInsert = new ArrayList<>();
+        String userId = UserContextUtils.getUserId();
+        for (ResourcePermApiVO apiVO : apis) {
+            ResourcePermApi api = new ResourcePermApi();
+            api.setId(UlidCreator.getUlid().toString());
+            api.setPermId(permId);
+            api.setApiMethod(apiVO.getApiMethod());
+            api.setApiPath(apiVO.getApiPath());
+            api.setCreateUser(userId);
+            toInsert.add(api);
+        }
+        try {
+            resourcePermApiMapper.insert(toInsert);
+        } catch (DuplicateKeyException e) {
+            throw new ParamError("api方法+路径的组合必须全局唯一");
         }
     }
 }

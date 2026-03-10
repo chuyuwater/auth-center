@@ -1,6 +1,7 @@
 package com.hbcy.authcenter.api.modules.core.app.controller;
 
 import com.hbcy.authcenter.api.common.bean.NodeMoveVO;
+import com.hbcy.authcenter.api.modules.core.app.dto.ResNodeDTO;
 import com.hbcy.authcenter.api.modules.core.app.dto.ResTreeDTO;
 import com.hbcy.authcenter.api.modules.core.app.model.ResourceTree;
 import com.hbcy.authcenter.api.modules.core.app.service.ResourceTreeService;
@@ -8,7 +9,6 @@ import com.hbcy.authcenter.api.modules.core.app.vo.ResourceTreeCreateVO;
 import com.hbcy.authcenter.api.modules.core.app.vo.ResourceTreeQueryVO;
 import com.hbcy.authcenter.api.modules.core.app.vo.ResourceTreeUpdateVO;
 import com.hbcy.common.base.tree.TreeNode;
-import com.hbcy.common.web.bean.NameFill;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -33,15 +33,14 @@ public class ResourceTreeController {
     private ResourceTreeService resourceTreeService;
 
     /**
-     * 根据ID获取资源节点详情
+     * 根据ID获取资源节点详情（含关联的权限点及API列表）
      *
      * @param id 节点ID
-     * @return 节点信息
+     * @return 节点及其权限点
      */
     @GetMapping("/{id}")
-    @NameFill
-    public ResourceTree getById(@PathVariable String id) {
-        return resourceTreeService.getById(id);
+    public ResNodeDTO getById(@PathVariable String id) {
+        return resourceTreeService.getResTreeById(id);
     }
 
     /**

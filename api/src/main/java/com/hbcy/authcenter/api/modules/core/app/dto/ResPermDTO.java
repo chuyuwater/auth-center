@@ -30,12 +30,4 @@ public class ResPermDTO {
      * 权限编码
      */
     private String permCode;
-    /**
-     * API请求方法
-     */
-    private Integer apiMethod;
-    /**
-     * API请求路径
-     */
-    private String apiPath;
 }

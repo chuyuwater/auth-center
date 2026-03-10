@@ -53,9 +53,7 @@
         rp.app_id,
         rp.res_id,
         rp.perm_name,
-        rp.perm_code,
-        rp.api_method,
-        rp.api_path
+        rp.perm_code
         from tenant_app_resource tar
         join resource_perm rp on tar.perm_id = rp.id
         where tar.tenant_id = #{tenantId}
