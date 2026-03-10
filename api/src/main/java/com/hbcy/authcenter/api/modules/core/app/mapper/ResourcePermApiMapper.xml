@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hbcy.authcenter.api.modules.core.app.dao.ResourcePermApiMapper">
+    <resultMap id="BaseResultMap" type="com.hbcy.authcenter.api.modules.core.app.model.ResourcePermApi">
+        <!--@mbg.generated-->
+        <!--@Table resource_perm_api-->
+        <id column="id" jdbcType="CHAR" property="id"/>
+        <result column="perm_id" jdbcType="CHAR" property="permId"/>
+        <result column="api_method" jdbcType="TINYINT" property="apiMethod"/>
+        <result column="api_path" jdbcType="VARCHAR" property="apiPath"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="create_user" jdbcType="CHAR" property="createUser"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        <!--@mbg.generated-->
+        id, perm_id, api_method, api_path, create_time, create_user
+    </sql>
+</mapper>
