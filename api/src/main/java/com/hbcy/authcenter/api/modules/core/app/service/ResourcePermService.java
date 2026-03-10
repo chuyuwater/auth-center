@@ -242,16 +242,14 @@ public class ResourcePermService extends ServiceImpl<ResourcePermMapper, Resourc
                     if (!entity.getResId().equals(resId)) {
                         throw new ParamError("权限归属资源id错误，请刷新重试");
                     }
-                    // 比对基础字段是否变化
-                    boolean codeChange = !vo.getPermCode().equals(entity.getPermCode());
                     // 比对apis列表是否变化
                     boolean apisChange = isApisChanged(vo.getId(), vo.getApis());
-                    boolean coreChange = codeChange || apisChange;
-                    if (coreChange || !vo.getPermName().equals(entity.getPermName())) {
+                    if (apisChange || !vo.getPermName().equals(entity.getPermName())
+                            || !vo.getPermCode().equals(entity.getPermCode())) {
                         // 逐个更新（一般没几条）
                         doUpdate(vo, vo.getId());
-                        if (coreChange) {
-                            // 只改了名字不影响网关使用
+                        if (apisChange) {
+                            // 只有api变化影响网关
                             isChanged = true;
                         }
                     }
