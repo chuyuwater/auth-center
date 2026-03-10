@@ -15,6 +15,7 @@ import com.hbcy.authcenter.sdk.utils.UserContextUtils;
 import com.hbcy.common.base.tree.TreeNode;
 import jakarta.annotation.Resource;
 import jakarta.validation.constraints.NotNull;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -105,6 +106,9 @@ public class ClientRenderController {
     @GetMapping("/res")
     public List<TreeNode<ResTreeDTO>> listRes(ClientResQueryVO vo) {
         vo.setOrgId(UserContextUtils.getUserOrg());
+        if (StringUtils.isBlank(vo.getAppId())) {
+            vo.setAppId(UserContextUtils.getAppId());
+        }
         return permUnitResourceService.listUserResources(vo);
     }
 

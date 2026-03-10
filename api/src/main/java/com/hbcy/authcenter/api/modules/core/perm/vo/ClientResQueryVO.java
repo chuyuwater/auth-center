@@ -22,7 +22,7 @@ public class ClientResQueryVO {
     @DictValid(dictKey = "CLIENT_TYPE")
     private Integer clientType;
     /**
-     * 应用id，不传则搜索所有应用
+     * 应用id，不传则搜索当前应用
      */
     private String appId;
     /**
