@@ -26,6 +26,10 @@ public class ClientResQueryVO {
      */
     private String appId;
     /**
+     * 父级菜单自定义id
+     */
+    private String parentCustomId;
+    /**
      * 资源类型，0-页面，1-按钮
      */
     private Integer resType;

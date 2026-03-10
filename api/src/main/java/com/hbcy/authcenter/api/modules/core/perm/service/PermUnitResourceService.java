@@ -8,9 +8,11 @@ import com.hbcy.authcenter.api.common.constants.G;
 import com.hbcy.authcenter.api.common.enums.OrgNodeCategoryEnum;
 import com.hbcy.authcenter.api.common.enums.ResourceShowLevelEnum;
 import com.hbcy.authcenter.api.modules.core.app.dao.ResourcePermMapper;
+import com.hbcy.authcenter.api.modules.core.app.dao.ResourceTreeMapper;
 import com.hbcy.authcenter.api.modules.core.app.dto.GrantAppDTO;
 import com.hbcy.authcenter.api.modules.core.app.dto.ResPermDTO;
 import com.hbcy.authcenter.api.modules.core.app.dto.ResTreeDTO;
+import com.hbcy.authcenter.api.modules.core.app.model.ResourceTree;
 import com.hbcy.authcenter.api.modules.core.app.service.ResourcePermService;
 import com.hbcy.authcenter.api.modules.core.app.service.ResourceTreeService;
 import com.hbcy.authcenter.api.modules.core.app.vo.ResourceTreeQueryVO;
@@ -30,6 +32,7 @@ import com.hbcy.common.base.error.ParamError;
 import com.hbcy.common.base.error.PermissionError;
 import com.hbcy.common.base.tree.TreeNode;
 import jakarta.annotation.Resource;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -52,6 +55,8 @@ public class PermUnitResourceService extends ServiceImpl<PermUnitResourceMapper,
     private PermUnitUserService permUnitUserService;
     @Resource
     private ResourceTreeService resourceTreeService;
+    @Resource
+    private ResourceTreeMapper resourceTreeMapper;
     @Resource
     private OrgTreeMapper orgTreeMapper;
     @Resource
@@ -212,12 +217,24 @@ public class PermUnitResourceService extends ServiceImpl<PermUnitResourceMapper,
         if (CollectionUtils.isEmpty(currentUserPerms)) {
             return new ArrayList<>();
         }
+        ResourceTree parent = null;
+        if (StringUtils.isNotBlank(vo.getParentCustomId())) {
+            parent = resourceTreeMapper.selectOne(new QueryWrapper<ResourceTree>()
+                    .eq(ResourceTree.COL_CUSTOM_ID, vo.getParentCustomId())
+                    .eq(ResourceTree.COL_APP_ID, vo.getAppId()));
+            if (parent == null) {
+                return new ArrayList<>();
+            }
+        }
         ResourceTreeQueryVO queryVO = new ResourceTreeQueryVO();
         queryVO.setAppId(vo.getAppId());
         queryVO.setClientType(vo.getClientType());
         queryVO.setWithPerm(vo.getWithPerm());
         queryVO.setHidden(0);
         queryVO.setResType(vo.getResType());
+        if (parent != null) {
+            queryVO.setParentId(parent.getId());
+        }
         queryVO.setShowLevel(isPrj ? ResourceShowLevelEnum.PRJ.getValue() : ResourceShowLevelEnum.ORG.getValue());
         TreeNode<ResTreeDTO> root = resourceTreeService.listResTreeRecursively(
                 queryVO, currentUserPerms, true);
