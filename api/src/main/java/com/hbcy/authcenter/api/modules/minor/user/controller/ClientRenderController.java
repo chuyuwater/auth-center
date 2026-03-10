@@ -128,7 +128,7 @@ public class ClientRenderController {
      */
     @GetMapping("/perm-code")
     public Set<String> listPermCode(String customId) {
-        List<ResPermDTO> dtos = permUnitUserService.listPerms(null, customId);
+        List<ResPermDTO> dtos = permUnitUserService.listPermByCustomId(null, customId);
         return dtos.stream().map(ResPermDTO::getPermCode).collect(Collectors.toSet());
     }
 
