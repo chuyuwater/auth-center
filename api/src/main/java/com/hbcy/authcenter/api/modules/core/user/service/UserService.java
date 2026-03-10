@@ -287,7 +287,7 @@ public class UserService extends ServiceImpl<UserMapper, User> {
     public void deleteUsers(BatchDeleteVO vo) {
         var tenantId = UserContextUtils.getTenantId();
         boolean exists = exists(new QueryWrapper<User>()
-                .eq(User.COL_FORBIDDEN, "0")
+                .eq(User.COL_FORBIDDEN, 0)
                 .in(User.COL_ID, vo.getIds()));
         if (exists) {
             throw new ParamError("删除用户前需要先禁用用户");
@@ -574,9 +574,9 @@ public class UserService extends ServiceImpl<UserMapper, User> {
     public List<UserExportDTO> export(UserFilterVO vo) {
         checkParams(vo);
         Page<?> dbPage = vo.getDbPage();
-        Page<UserQueryResultDTO> result = baseMapper.queryUser(dbPage, vo);
         //全量导出
         dbPage.setSize(-1L);
+        Page<UserQueryResultDTO> result = baseMapper.queryUser(dbPage, vo);
         List<UserExportDTO> users = new ArrayList<>();
         Set<String> userIds = new HashSet<>();
         result.getRecords().forEach(u -> {

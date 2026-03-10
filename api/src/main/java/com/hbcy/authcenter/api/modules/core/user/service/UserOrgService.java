@@ -114,6 +114,9 @@ public class UserOrgService extends ServiceImpl<UserOrgMapper, UserOrg> {
             vo.setUserId(UserContextUtils.getUserId());
         } else {
             user = userMapper.selectById(vo.getUserId());
+            if (user == null || user.getForbidden() > 0) {
+                throw new ParamError("用户不存在或已被禁用");
+            }
             if (!user.getTenantId().equals(UserContextUtils.getTenantId())) {
                 throw new PermissionError();
             }

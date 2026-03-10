@@ -46,7 +46,7 @@ public class TenantMaintainService {
         toUpdate.setContactPhone(user.getPhone());
         toUpdate.setContactUser(user.getRealName());
         toUpdate.setUpdateUser(UserContextUtils.getUserId());
-        tenantService.save(toUpdate);
+        tenantService.updateById(toUpdate);
         eventDispatcher.dispatch(
                 tenantId,
                 EventConstants.TENANT_ADMIN_CHANGED,

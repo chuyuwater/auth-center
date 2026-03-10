@@ -25,14 +25,11 @@ import com.hbcy.authcenter.api.modules.core.perm.vo.PermUnitAppDTO;
 import com.hbcy.authcenter.api.modules.core.perm.vo.PermUnitResourceQueryVO;
 import com.hbcy.authcenter.api.modules.core.perm.vo.PermUnitResourceSaveVO;
 import com.hbcy.authcenter.api.modules.core.tenant.dao.TenantAppMapper;
-import com.hbcy.authcenter.api.modules.core.tenant.model.TenantApp;
 import com.hbcy.authcenter.sdk.utils.UserContextUtils;
 import com.hbcy.common.base.error.ParamError;
 import com.hbcy.common.base.error.PermissionError;
 import com.hbcy.common.base.tree.TreeNode;
 import jakarta.annotation.Resource;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -57,7 +54,7 @@ public class PermUnitResourceService extends ServiceImpl<PermUnitResourceMapper,
     private ResourceTreeService resourceTreeService;
     @Resource
     private OrgTreeMapper orgTreeMapper;
-    @Autowired
+    @Resource
     private ResourcePermMapper resourcePermMapper;
 
     @Transactional(rollbackFor = Exception.class)
@@ -72,13 +69,6 @@ public class PermUnitResourceService extends ServiceImpl<PermUnitResourceMapper,
         if (!permUnit.getTenantId().equals(tenantId)) {
             throw new PermissionError();
         }
-        //检查应用是否已授权
-        Long cnt = tenantAppMapper.selectCount(new QueryWrapper<TenantApp>()
-                .eq(TenantApp.COL_TENANT_ID, tenantId)
-                .eq(TenantApp.COL_APP_ID, vo.getAppId()));
-        if (cnt == 0) {
-            throw new PermissionError();
-        }
         //仅保留权限点
         Set<String> pointIds = resourcePermService.filterAppPermIds(vo.getAppId(), vo.getPermIds());
         if (CollectionUtils.isEmpty(pointIds)) {
@@ -86,7 +76,11 @@ public class PermUnitResourceService extends ServiceImpl<PermUnitResourceMapper,
         }
         //用户只能授权自己拥有的权限
         List<ResPermDTO> granted = permUnitUserService.listPerms(vo.getAppId());
-        var grantedIds = granted.stream().map(ResPermDTO::getId).collect(Collectors.toSet());
+        if (CollectionUtils.isEmpty(granted)) {
+            throw new ParamError("无有效权限");
+        }
+        var grantedIds = granted.stream().map(ResPermDTO::getId).collect(
+                Collectors.toSet());
 
         List<PermUnitResource> resources = new ArrayList<>();
         for (String pointId : pointIds) {
@@ -211,7 +205,6 @@ public class PermUnitResourceService extends ServiceImpl<PermUnitResourceMapper,
      *
      * @return 移除了未授权资源
      */
-    @Cacheable(value = "@1m")
     public List<TreeNode<ResTreeDTO>> listUserResources(ClientResQueryVO vo) {
         OrgTree orgTree = orgTreeMapper.selectById(vo.getOrgId());
         boolean isPrj = orgTree.getNodeCategory().equals(OrgNodeCategoryEnum.PROJECT.getValue());

@@ -38,6 +38,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -112,7 +113,7 @@ public class PermUnitService extends ServiceImpl<PermUnitMapper, PermUnit> {
         if (StringUtils.isNotBlank(vo.getBelongTo()) && vo.getLevel() > 0) {
             PermUnitGroup permUnitGroup = permUnitGroupMapper.selectById(vo.getBelongTo());
             if (permUnitGroup == null) return new PageResp<>();
-            if (vo.getLevel() == TreeQueryLevelEnum.CHILD.getCode()) {
+            if (Objects.equals(vo.getLevel(), TreeQueryLevelEnum.CHILD.getCode())) {
                 vo.setGroupIdPath(permUnitGroup.getIdPath() + G.ID_PATH_SPLITTER);
             } else {
                 vo.setGroupIdPath(permUnitGroup.getIdPath());
@@ -180,6 +181,7 @@ public class PermUnitService extends ServiceImpl<PermUnitMapper, PermUnit> {
         }
         PermUnit toUpdate = new PermUnit();
         toUpdate.setId(vo.getUnitId());
+        toUpdate.setForbidden(vo.getForbidden());
         toUpdate.setUpdateUser(UserContextUtils.getUserId());
         baseMapper.updateById(toUpdate);
         //级联更新授权用户，避免查询的时候join表过多

@@ -29,7 +29,6 @@ import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.dao.DuplicateKeyException;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -48,7 +47,6 @@ import java.util.stream.Collectors;
 @Service
 public class OrgTreeService extends ServiceImpl<OrgTreeMapper, OrgTree> {
     public static final String BIZ_KEY = "portal:orgtree:tenant:%s:%d:";
-    public static final String NAME_CACHE_KEY = "portal:orgtree:name:%s";
     /**
      * 节点类型规则，key：父节点，value：允许的子节点类型
      */
@@ -58,8 +56,6 @@ public class OrgTreeService extends ServiceImpl<OrgTreeMapper, OrgTree> {
     );
     @Resource
     private NameCacheService nameCacheService;
-    @Resource
-    private StringRedisTemplate stringRedisTemplate;
     @Resource
     private RedisIdGenerator redisIdGenerator;
     @Resource
@@ -80,14 +76,6 @@ public class OrgTreeService extends ServiceImpl<OrgTreeMapper, OrgTree> {
             }
         }
         return null;
-    }
-
-    private void cleanNameCache(String userId) {
-        stringRedisTemplate.opsForHash().delete(NAME_CACHE_KEY, userId);
-    }
-
-    private void cleanNameCache(Collection<String> userIds) {
-        stringRedisTemplate.opsForHash().delete(NAME_CACHE_KEY, userIds.toArray());
     }
 
     private OrgTree checkParentId(String tenantId, String parentId) {
@@ -207,9 +195,6 @@ public class OrgTreeService extends ServiceImpl<OrgTreeMapper, OrgTree> {
         String rootId = tenantRootId();
         if (rootId.equals(entity.getId())) {
             throw new PermissionError("禁止更新根节点");
-        }
-        if (!vo.getNodeName().equals(entity.getNodeName())) {
-            cleanNameCache(entity.getId());
         }
         if (StringUtils.isBlank(vo.getParentId())) {
             vo.setParentId(rootId);
@@ -356,17 +341,17 @@ public class OrgTreeService extends ServiceImpl<OrgTreeMapper, OrgTree> {
         if (node.getId().equals(tenantRootId())) {
             throw new PermissionError("不能删除根节点");
         }
-        Long count = userOrgMapper.selectCount(new QueryWrapper<UserOrg>()
-                .eq(UserOrg.COL_TENANT_ID, node.getTenantId())
-                .eq(UserOrg.COL_NODE_ID, node.getId())
-        );
-        if (count > 0) {
-            throw new PermissionError("删除节点内存在用户，需要将用户移出才能删除");
-        }
-        List<OrgTree> related = baseMapper.listChildren(node.getTenantId(), node.getIdPath(), null);
+        List<OrgTree> related = baseMapper.listChildren(
+                node.getTenantId(), node.getIdPath(), null);
         Set<String> ids = related.stream().map(OrgTree::getId).collect(Collectors.toSet());
         ids.add(id);
-        cleanNameCache(ids);
+        boolean exists = userOrgMapper.exists(new QueryWrapper<UserOrg>()
+                .eq(UserOrg.COL_TENANT_ID, node.getTenantId())
+                .in(UserOrg.COL_NODE_ID, ids)
+        );
+        if (exists) {
+            throw new PermissionError("节点或子节点已关联用户，需要将用户移出才能删除");
+        }
         //逻辑删除
         baseMapper.update(new UpdateWrapper<OrgTree>()
                 .in(OrgTree.COL_ID, ids)

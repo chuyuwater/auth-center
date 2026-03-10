@@ -10,10 +10,7 @@ import com.hbcy.authcenter.api.modules.core.app.dao.ResourcePermApiMapper;
 import com.hbcy.authcenter.api.modules.core.app.dao.ResourcePermMapper;
 import com.hbcy.authcenter.api.modules.core.app.model.ResourcePerm;
 import com.hbcy.authcenter.api.modules.core.app.model.ResourcePermApi;
-import com.hbcy.authcenter.api.modules.core.app.vo.ResourcePermApiVO;
-import com.hbcy.authcenter.api.modules.core.app.vo.ResourcePermCreateVO;
-import com.hbcy.authcenter.api.modules.core.app.vo.ResourcePermQueryVO;
-import com.hbcy.authcenter.api.modules.core.app.vo.ResourcePermUpdateVO;
+import com.hbcy.authcenter.api.modules.core.app.vo.*;
 import com.hbcy.authcenter.api.modules.core.perm.dao.PermUnitResourceMapper;
 import com.hbcy.authcenter.api.modules.core.perm.model.PermUnitResource;
 import com.hbcy.authcenter.api.modules.core.tenant.dao.TenantAppResourceMapper;
@@ -152,7 +149,7 @@ public class ResourcePermService extends ServiceImpl<ResourcePermMapper, Resourc
         resourcePermApiMapper.deleteByPermIds(List.of(id));
         List<ResourcePermApiVO> apis = vo.getApis();
         if (!CollectionUtils.isEmpty(apis)) {
-            insertPermApis(id, apis);
+            insertPermApis(List.of(new PermAPiBatchCreateVO(id, apis)));
         }
     }
 
@@ -186,12 +183,16 @@ public class ResourcePermService extends ServiceImpl<ResourcePermMapper, Resourc
             throw new ParamError("权限码已存在");
         }
         // 批量插入api配置
+        List<PermAPiBatchCreateVO> batchCreateVOS = new ArrayList<>();
         for (int i = 0; i < subPerms.size(); i++) {
             ResourcePermCreateVO vo = subPerms.get(i);
             String permId = toInsert.get(i).getId();
             if (!CollectionUtils.isEmpty(vo.getApis())) {
-                insertPermApis(permId, vo.getApis());
+                batchCreateVOS.add(new PermAPiBatchCreateVO(permId, vo.getApis()));
             }
+        }
+        if (!batchCreateVOS.isEmpty()) {
+            insertPermApis(batchCreateVOS);
         }
         // 权限资源变更
         eventDispatcher.dispatch(
@@ -216,7 +217,10 @@ public class ResourcePermService extends ServiceImpl<ResourcePermMapper, Resourc
             subPerms = new ArrayList<>();
         }
         if (!subPerms.isEmpty()) {
-            subIds = subPerms.stream().map(ResourcePermCreateVO::getId).collect(Collectors.toSet());
+            subIds = subPerms.stream()
+                    .map(ResourcePermCreateVO::getId)
+                    .filter(StringUtils::isNotBlank)
+                    .collect(Collectors.toSet());
         }
         boolean isChanged = false;
         // 计算出被删除的条目
@@ -295,17 +299,20 @@ public class ResourcePermService extends ServiceImpl<ResourcePermMapper, Resourc
     /**
      * 将api配置批量插入到resource_perm_api表
      */
-    private void insertPermApis(String permId, List<ResourcePermApiVO> apis) {
+    private void insertPermApis(List<PermAPiBatchCreateVO> vo) {
         List<ResourcePermApi> toInsert = new ArrayList<>();
         String userId = UserContextUtils.getUserId();
-        for (ResourcePermApiVO apiVO : apis) {
-            ResourcePermApi api = new ResourcePermApi();
-            api.setId(UlidCreator.getUlid().toString());
-            api.setPermId(permId);
-            api.setApiMethod(apiVO.getApiMethod());
-            api.setApiPath(apiVO.getApiPath());
-            api.setCreateUser(userId);
-            toInsert.add(api);
+        for (PermAPiBatchCreateVO createVO : vo) {
+            String permId = createVO.getPermId();
+            for (ResourcePermApiVO apiVO : createVO.getApis()) {
+                ResourcePermApi api = new ResourcePermApi();
+                api.setId(UlidCreator.getUlid().toString());
+                api.setPermId(permId);
+                api.setApiMethod(apiVO.getApiMethod());
+                api.setApiPath(apiVO.getApiPath());
+                api.setCreateUser(userId);
+                toInsert.add(api);
+            }
         }
         try {
             resourcePermApiMapper.insert(toInsert);

@@ -35,7 +35,6 @@ import com.hbcy.common.base.tree.TreeNode;
 import com.hbcy.common.lock.service.RedissonDistributedLock;
 import jakarta.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -69,7 +68,7 @@ public class TenantAppService extends ServiceImpl<TenantAppMapper, TenantApp> {
     private TenantAppResourceMapper tenantAppResourceMapper;
     @Resource
     private RedissonDistributedLock redissonDistributedLock;
-    @Autowired
+    @Resource
     private ResourceTreeService resourceTreeService;
 
     private static List<TenantAppResource> genTenantAppResources(
@@ -234,6 +233,7 @@ public class TenantAppService extends ServiceImpl<TenantAppMapper, TenantApp> {
     /**
      * 租户为应用绑定组织树
      */
+    @Transactional(rollbackFor = Exception.class)
     public void bindingOrgTree(BindOrgTreeVO vo) {
         String tenantId = UserContextUtils.getTenantId();
         TenantApp tenantApp = baseMapper.selectOne(new QueryWrapper<TenantApp>()
@@ -251,13 +251,13 @@ public class TenantAppService extends ServiceImpl<TenantAppMapper, TenantApp> {
         if (!root.getTenantId().equals(tenantId)) {
             throw new PermissionError();
         }
-        if (!OrgTree.ORG_ID_TEMPLATE.formatted(tenantApp, 0).equals(root.getParentId())) {
+        if (!OrgTree.ORG_ID_TEMPLATE.formatted(tenantApp.getTenantId(), 0).equals(root.getParentId())) {
             throw new ParamError("必须使用组织树的根节点");
         }
         TenantApp toUpdate = new TenantApp();
         toUpdate.setId(tenantApp.getId());
         toUpdate.setOrgTree(vo.getOrgRootId());
-        save(toUpdate);
+        baseMapper.updateById(toUpdate);
     }
 
     /**

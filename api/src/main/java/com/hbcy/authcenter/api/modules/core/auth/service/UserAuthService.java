@@ -3,6 +3,7 @@ package com.hbcy.authcenter.api.modules.core.auth.service;
 import cn.dev33.satoken.stp.SaTokenInfo;
 import cn.dev33.satoken.stp.StpUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.github.f4b6a3.ulid.UlidCreator;
 import com.hbcy.authcenter.api.config.UserAuthConfig;
 import com.hbcy.authcenter.api.modules.core.auth.dto.CaptchaDTO;
@@ -77,6 +78,10 @@ public class UserAuthService {
         return cnt != null && cnt >= authConfig.getMaxRetry();
     }
 
+    private void cleanLoginFail(String userId) {
+        stringRedisTemplate.delete(USER_LOGIN_FAIL_KEY_PREFIX + userId);
+    }
+
     private void lockUser(String userId) {
         stringRedisTemplate.opsForValue().set(USER_LOCK_KEY_PREFIX + userId, "1",
                 authConfig.getLockTime());
@@ -90,9 +95,11 @@ public class UserAuthService {
         if (StringUtils.isBlank(captchaCode)) {
             throw new ParamError("验证码已过期");
         }
-        if (!captchaCode.equals(vo.getCaptchaCode())) {
+        if (!captchaCode.equalsIgnoreCase(vo.getCaptchaCode())) {
+            deleteCaptcha(vo.getCaptchaId());
             throw new ParamError("验证码错误");
         }
+        deleteCaptcha(vo.getCaptchaId());
         List<User> userList = userMapper.selectList(new QueryWrapper<User>()
                 .eq(StringUtils.isNotBlank(vo.getAccount()), User.COL_ACCOUNT, vo.getAccount())
                 .eq(StringUtils.isNotBlank(vo.getPhone()), User.COL_PHONE, vo.getPhone())
@@ -104,17 +111,21 @@ public class UserAuthService {
         }
         List<String> hitTenant = new ArrayList<>();
         User chosen = null;
+        List<String> tried = new ArrayList<>();
         for (User user : userList) {
             if (passwordEncoder.matches(vo.getPassword(), user.getPasswd())) {
                 hitTenant.add(user.getTenantId());
             } else {
-                if (checkLoginFail(user.getId())) {
-                    lockUser(user.getId());
-                    throw new AuthError("登录失败次数过多，请稍后再试");
-                }
+                tried.add(user.getId());
             }
         }
         if (CollectionUtils.isEmpty(hitTenant)) {
+            for (String userId : tried) {
+                if (checkLoginFail(userId)) {
+                    lockUser(userId);
+                    throw new AuthError("登录失败次数过多，请稍后再试");
+                }
+            }
             throw new AuthError("账号或密码错误");
         }
         if (hitTenant.size() > 1) {
@@ -136,6 +147,7 @@ public class UserAuthService {
         if (Integer.valueOf(1).equals(chosen.getForbidden())) {
             throw new AuthError("账号已被禁用，请联系管理员");
         }
+        cleanLoginFail(chosen.getId());
         //主职组织
         String orgId = userOrgMapper.queryMainOrg(chosen.getId());
         if (StringUtils.isBlank(orgId)) {
@@ -167,7 +179,9 @@ public class UserAuthService {
                 .setAvatar(chosen.getAvatar());
         // 更新最后登录时间
         chosen.setLastLogin(LocalDateTime.now());
-        userMapper.updateById(chosen);
+        userMapper.update(new UpdateWrapper<User>()
+                .eq(User.COL_ID, chosen.getId())
+                .set(User.COL_LAST_LOGIN, LocalDateTime.now()));
         return resp;
     }
 
@@ -187,6 +201,10 @@ public class UserAuthService {
 
     private String getCaptchaCode(String key) {
         return stringRedisTemplate.opsForValue().get(CAPTCHA_KEY_PREFIX + key);
+    }
+
+    private void deleteCaptcha(String key) {
+        stringRedisTemplate.delete(CAPTCHA_KEY_PREFIX + key);
     }
 
     public CaptchaDTO getCaptcha() {
