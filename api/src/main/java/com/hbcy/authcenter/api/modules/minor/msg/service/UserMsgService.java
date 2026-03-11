@@ -6,9 +6,12 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.f4b6a3.ulid.UlidCreator;
 import com.hbcy.authcenter.api.common.bean.NameCacheService;
 import com.hbcy.authcenter.api.common.constants.G;
+import com.hbcy.authcenter.api.modules.core.app.model.App;
 import com.hbcy.authcenter.api.modules.core.app.service.AppService;
 import com.hbcy.authcenter.api.modules.core.inner.service.SDKService;
+import com.hbcy.authcenter.api.modules.core.perm.service.PermUnitUserService;
 import com.hbcy.authcenter.api.modules.core.user.dao.UserMapper;
+import com.hbcy.authcenter.api.modules.core.user.dao.UserOrgMapper;
 import com.hbcy.authcenter.api.modules.core.user.model.User;
 import com.hbcy.authcenter.api.modules.minor.msg.dao.UserMsgMapper;
 import com.hbcy.authcenter.api.modules.minor.msg.dto.MsgDTO;
@@ -20,11 +23,14 @@ import com.hbcy.authcenter.api.modules.minor.msg.vo.UserMsgCreateVO;
 import com.hbcy.authcenter.api.modules.minor.msg.vo.UserMsgQueryVO;
 import com.hbcy.authcenter.sdk.utils.UserContextUtils;
 import com.hbcy.common.base.error.ParamError;
+import com.hbcy.common.base.error.PermissionError;
 import com.hbcy.common.base.pojo.PageResp;
+import com.hbcy.common.base.util.BeanCopyUtils;
 import com.hbcy.common.db.model.PageRespEx;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -45,6 +51,10 @@ public class UserMsgService extends ServiceImpl<UserMsgMapper, UserMsg> {
     private AppService appService;
     @Resource
     private SDKService sdkService;
+    @Resource
+    private PermUnitUserService permUnitUserService;
+    @Resource
+    private UserOrgMapper userOrgMapper;
 
     /**
      * NOTE: 创建消息和待办（以及更新待办）是portal平台侧的权限
@@ -146,27 +156,32 @@ public class UserMsgService extends ServiceImpl<UserMsgMapper, UserMsg> {
     }
 
     /**
-     * 根据 id 查询消息详情（仅当消息接收人属于当前用户本下组织范围内时返回）
+     * 根据 id 查询消息详情
      */
     public MsgDTO getMsgById(String id) {
-        List<String> childOrgIds = sdkService.listGrantOrgs(
-                UserContextUtils.getUserId(),
-                G.APP_NAME,
-                PERM_QUERY_MSG,
-                UserContextUtils.getUserOrg()
-        );
-        if (childOrgIds == null || childOrgIds.isEmpty()) {
+        UserMsg userMsg = baseMapper.selectById(id);
+        if (userMsg == null) {
             return null;
         }
-        MsgDTO dto = baseMapper.getMsgByIdInOrgs(id, childOrgIds);
-        if (dto == null) {
-            return null;
+        String userId = UserContextUtils.getUserId();
+        if (!userMsg.getTargetUser().equals(userId)) {
+            //确认用户确实有该消息的访问权限
+            Set<String> targetOrgs = userOrgMapper.listAllOrg(userMsg.getTargetUser());
+            List<String> childOrgIds = sdkService.listGrantOrgs(
+                    UserContextUtils.getUserId(),
+                    G.APP_NAME,
+                    PERM_QUERY_MSG,
+                    UserContextUtils.getUserOrg()
+            );
+            if (!CollectionUtils.containsAny(new HashSet<>(childOrgIds), targetOrgs)) {
+                throw new PermissionError();
+            }
         }
-        Map<String, String> appNameMap = appService.getNameMap(Collections.singleton(dto.getSrcApp()));
-        Map<String, String> userNameMap = nameCacheService.getUserNameMap(Collections.singleton(dto.getTargetUser()));
-        dto.setSrcAppName(appNameMap.get(dto.getSrcApp()));
-        dto.setTargetUserName(userNameMap.get(dto.getTargetUser()));
-        return dto;
+        MsgDTO resp = BeanCopyUtils.copy(userMsg, MsgDTO.class);
+        App app = appService.getById(resp.getSrcApp());
+        resp.setSrcAppName(app == null ? resp.getSrcApp() : app.getNameCn());
+        resp.setTargetUserName(nameCacheService.getUserName(resp.getTargetUser()));
+        return resp;
     }
 
     /**
