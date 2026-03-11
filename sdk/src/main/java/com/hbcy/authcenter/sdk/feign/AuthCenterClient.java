@@ -126,18 +126,18 @@ public interface AuthCenterClient {
     /**
      * 创建消息
      */
-    @PostMapping("/api/portal/v1/user/inbox")
+    @PostMapping("/api/portal/v1/sdk/inbox")
     ApiResponse<Object> createMsg(@RequestBody MsgCreateVO vo);
 
     /**
      * 创建待办，一般是流程引擎调用
      */
-    @PostMapping("/api/portal/v1/user/todo")
+    @PostMapping("/api/portal/v1/sdk/todo")
     ApiResponse<Object> createTodo(@RequestBody TodoCreateVO vo);
 
     /**
      * 更新待办状态，一般是流程引擎调用
      */
-    @PostMapping("/api/portal/v1/user/todo/update-state")
+    @PutMapping("/api/portal/v1/sdk/todo/update-state")
     ApiResponse<Object> updateTodoState(@RequestBody TodoUpdateVO vo);
 }
