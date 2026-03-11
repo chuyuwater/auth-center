@@ -1,5 +1,11 @@
 package com.hbcy.authcenter.api.modules.minor.todo.controller;
 
+import com.hbcy.authcenter.api.modules.minor.todo.dto.TodoDTO;
+import com.hbcy.authcenter.api.modules.minor.todo.service.UserTodoService;
+import com.hbcy.authcenter.api.modules.minor.todo.vo.UserTodoQueryVO;
+import com.hbcy.common.base.pojo.PageResp;
+import jakarta.annotation.Resource;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -11,4 +17,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/v1/portal/v1/todo")
 public class TodoOpController {
+    @Resource
+    private UserTodoService userTodoService;
+
+    @GetMapping
+    public PageResp<TodoDTO> queryTodo(UserTodoQueryVO vo) {
+        return userTodoService.listTodo(vo);
+    }
 }

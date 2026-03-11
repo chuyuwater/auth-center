@@ -18,5 +18,5 @@ import java.util.List;
 public interface UserTodoMapper extends BaseMapper<UserTodo> {
     void insertIgnore(@Param("todos") List<UserTodo> todos);
 
-    Page<UserTodoDTO> query(Page<?> dbPage, @Param("vo") UserTodoQueryVO vo);
+    Page<UserTodoDTO> query4user(Page<?> dbPage, @Param("vo") UserTodoQueryVO vo);
 }

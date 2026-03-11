@@ -7,6 +7,7 @@ import com.github.f4b6a3.ulid.UlidCreator;
 import com.hbcy.authcenter.api.modules.core.user.dao.UserMapper;
 import com.hbcy.authcenter.api.modules.core.user.model.User;
 import com.hbcy.authcenter.api.modules.minor.todo.dao.UserTodoMapper;
+import com.hbcy.authcenter.api.modules.minor.todo.dto.TodoDTO;
 import com.hbcy.authcenter.api.modules.minor.todo.dto.UserTodoDTO;
 import com.hbcy.authcenter.api.modules.minor.todo.model.UserTodo;
 import com.hbcy.authcenter.api.modules.minor.todo.vo.UserTodoBatchOpVO;
@@ -73,7 +74,7 @@ public class UserTodoService extends ServiceImpl<UserTodoMapper, UserTodo> {
     public PageResp<UserTodoDTO> queryTodo(UserTodoQueryVO vo) {
         Page<UserTodoDTO> dbPage = vo.getDbPage();
         vo.setUserId(UserContextUtils.getUserId());
-        dbPage = baseMapper.query(dbPage, vo);
+        dbPage = baseMapper.query4user(dbPage, vo);
         return new PageRespEx<>(dbPage);
     }
 
@@ -96,5 +97,9 @@ public class UserTodoService extends ServiceImpl<UserTodoMapper, UserTodo> {
                 .eq(UserTodo.COL_TARGET_USER, UserContextUtils.getUserId())
                 .in(UserTodo.COL_ID, vo.getTodoIds())
                 .set(UserTodo.COL_VIEW_STATE, 1));
+    }
+
+    public PageResp<TodoDTO> listTodo(UserTodoQueryVO vo) {
+        return null;
     }
 }
