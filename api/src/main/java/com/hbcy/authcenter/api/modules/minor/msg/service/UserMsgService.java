@@ -8,7 +8,6 @@ import com.hbcy.authcenter.api.common.bean.NameCacheService;
 import com.hbcy.authcenter.api.common.constants.G;
 import com.hbcy.authcenter.api.modules.core.app.service.AppService;
 import com.hbcy.authcenter.api.modules.core.inner.service.SDKService;
-import com.hbcy.authcenter.api.modules.core.org.service.OrgTreeService;
 import com.hbcy.authcenter.api.modules.core.user.dao.UserMapper;
 import com.hbcy.authcenter.api.modules.core.user.model.User;
 import com.hbcy.authcenter.api.modules.minor.msg.dao.UserMsgMapper;
@@ -40,8 +39,6 @@ public class UserMsgService extends ServiceImpl<UserMsgMapper, UserMsg> {
     public static final String PERM_QUERY_MSG = "msg.query";
     @Resource
     private UserMapper userMapper;
-    @Resource
-    private OrgTreeService orgTreeService;
     @Resource
     private NameCacheService nameCacheService;
     @Resource
