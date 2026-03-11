@@ -19,7 +19,7 @@ import java.util.Map;
  * @date 2026-03-11 08:32
  */
 @RestController
-@RequestMapping("/api/v1/portal/v1/todo")
+@RequestMapping("/api/portal/v1/todo")
 public class TodoOpController {
     @Resource
     private UserTodoService userTodoService;
