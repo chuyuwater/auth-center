@@ -2,6 +2,7 @@ package com.hbcy.authcenter.api.modules.minor.todo.dao;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.hbcy.authcenter.api.modules.minor.todo.dto.TodoDTO;
 import com.hbcy.authcenter.api.modules.minor.todo.dto.UserTodoDTO;
 import com.hbcy.authcenter.api.modules.minor.todo.model.UserTodo;
 import com.hbcy.authcenter.api.modules.minor.todo.vo.UserTodoQueryVO;
@@ -19,4 +20,6 @@ public interface UserTodoMapper extends BaseMapper<UserTodo> {
     void insertIgnore(@Param("todos") List<UserTodo> todos);
 
     Page<UserTodoDTO> query4user(Page<?> dbPage, @Param("vo") UserTodoQueryVO vo);
+
+    Page<TodoDTO> listTodo(Page<?> dbPage, @Param("vo") UserTodoQueryVO vo);
 }

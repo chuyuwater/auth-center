@@ -75,4 +75,51 @@
         </where>
         order by id desc
     </select>
+
+    <select id="listTodo" resultType="com.hbcy.authcenter.api.modules.minor.todo.dto.TodoDTO">
+        select td.id,
+        td.src_id,
+        td.src_app,
+        td.todo_title,
+        td.todo_content,
+        td.target_user,
+        td.send_time,
+        td.process_state,
+        td.view_state,
+        td.todo_type,
+        td.relate_link,
+        td.origin_json,
+        td.create_time,
+        td.update_time
+        from user_todo td
+        join user_org uo on td.target_user = uo.user_id
+        <where>
+            uo.org_id in
+            <foreach item="orgId" collection="vo.searchOrgIds" separator="," close=")" open="(" index="">
+                #{orgId}
+            </foreach>
+            <if test="vo.processState != null">
+                and td.process_state = #{vo.processState}
+            </if>
+            <if test="vo.viewState != null">
+                and td.view_state = #{vo.viewState}
+            </if>
+            <if test="vo.keyword != null and vo.keyword != ''">
+                and td.todo_title like concat('%', #{vo.keyword}, '%')
+            </if>
+            <if test="vo.todoType != null">
+                and td.todo_type = #{vo.todoType}
+            </if>
+            <if test="vo.srcApp != null and vo.srcApp != ''">
+                and td.src_app = #{vo.srcApp}
+            </if>
+            <if test="vo.sendTimeStart != null">
+                and td.send_time &gt;= #{vo.sendTimeStart}
+            </if>
+            <if test="vo.sendTimeEnd != null">
+                and #{vo.sendTimeEnd} &gt;= td.send_time
+            </if>
+        </where>
+        order by td.id desc
+    </select>
 </mapper>

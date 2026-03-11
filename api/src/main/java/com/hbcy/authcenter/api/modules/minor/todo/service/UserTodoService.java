@@ -4,6 +4,10 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.f4b6a3.ulid.UlidCreator;
+import com.hbcy.authcenter.api.common.bean.NameCacheService;
+import com.hbcy.authcenter.api.common.constants.G;
+import com.hbcy.authcenter.api.modules.core.app.service.AppService;
+import com.hbcy.authcenter.api.modules.core.inner.service.SDKService;
 import com.hbcy.authcenter.api.modules.core.user.dao.UserMapper;
 import com.hbcy.authcenter.api.modules.core.user.model.User;
 import com.hbcy.authcenter.api.modules.minor.todo.dao.UserTodoMapper;
@@ -23,9 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -34,8 +36,15 @@ import java.util.stream.Collectors;
  */
 @Service
 public class UserTodoService extends ServiceImpl<UserTodoMapper, UserTodo> {
+    public static final String PERM_VIEW_TODO = "todo.query";
     @Resource
     private UserMapper userMapper;
+    @Resource
+    private NameCacheService nameCacheService;
+    @Resource
+    private AppService appService;
+    @Resource
+    private SDKService sdkService;
 
     @Transactional(rollbackFor = Exception.class)
     public void batchCreateTodo(UserTodoCreateVO vo) {
@@ -48,8 +57,7 @@ public class UserTodoService extends ServiceImpl<UserTodoMapper, UserTodo> {
             throw new ParamError("部分用户不存在");
         }
         Map<String, User> userMap = users.stream().collect(
-                Collectors.toMap(User::getId, v -> v)
-        );
+                Collectors.toMap(User::getId, v -> v));
         List<UserTodo> todos = new ArrayList<>();
         for (String targetUser : vo.getTargetUsers()) {
             UserTodo todo = new UserTodo()
@@ -99,7 +107,34 @@ public class UserTodoService extends ServiceImpl<UserTodoMapper, UserTodo> {
                 .set(UserTodo.COL_VIEW_STATE, 1));
     }
 
+    /**
+     * 查询当前用户有权查看的本下组织的所有用户的待办
+     *
+     * @param vo 查询条件
+     * @return 搜索结果分页
+     */
     public PageResp<TodoDTO> listTodo(UserTodoQueryVO vo) {
-        return null;
+        Page<TodoDTO> dbPage = vo.getDbPage();
+        List<String> childOrgIds = sdkService.listGrantOrgs(
+                UserContextUtils.getUserId(),
+                G.APP_NAME,
+                PERM_VIEW_TODO,
+                UserContextUtils.getUserOrg()
+        );
+        vo.setSearchOrgIds(childOrgIds);
+        Page<TodoDTO> page = baseMapper.listTodo(dbPage, vo);
+        Set<String> appIds = new HashSet<>();
+        Set<String> userIds = new HashSet<>();
+        for (TodoDTO r : page.getRecords()) {
+            appIds.add(r.getSrcApp());
+            userIds.add(r.getTargetUser());
+        }
+        Map<String, String> appNameMap = appService.getNameMap(appIds);
+        Map<String, String> userNameMap = nameCacheService.getUserNameMap(userIds);
+        for (TodoDTO r : page.getRecords()) {
+            r.setSrcAppName(appNameMap.get(r.getSrcApp()));
+            r.setTargetUserName(userNameMap.get(r.getTargetUser()));
+        }
+        return new PageRespEx<>(page);
     }
 }

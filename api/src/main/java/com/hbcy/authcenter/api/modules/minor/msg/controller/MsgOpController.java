@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * 消息管理
  * @author 姚泰然
+ * @module msg
  * @date 2026-03-11 08:31
  */
 @RestController
@@ -20,6 +21,12 @@ public class MsgOpController {
     @Resource
     private UserMsgService userMsgService;
 
+    /**
+     * 查询消息
+     *
+     * @param vo 查询条件
+     * @return 消息分页结果
+     */
     @GetMapping
     public PageResp<MsgDTO> queryMsg(UserMsgQueryVO vo) {
         return userMsgService.listMsg(vo);

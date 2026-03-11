@@ -6,9 +6,11 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 
 /**
  * 待办搜索
+ *
  * @author 姚泰然
  * @date 2026-01-27
  */
@@ -44,8 +46,12 @@ public class UserTodoQueryVO extends PageVO {
      */
     private String srcApp;
     /**
-     * 用户id，服务端填充
+     * 接收人id
+     */
+    private String userId;
+    /**
+     * 搜索者本下组织，服务端填充
      */
     @JsonIgnore
-    private String userId;
+    private Collection<String> searchOrgIds;
 }

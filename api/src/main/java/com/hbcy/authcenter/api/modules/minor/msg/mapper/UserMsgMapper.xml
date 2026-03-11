@@ -69,10 +69,17 @@
     </select>
 
     <select id="listMsg" resultType="com.hbcy.authcenter.api.modules.minor.msg.dto.MsgDTO">
-        select
-        msg.id,
-        msg.src_id,msg.src_app, msg.msg_title, msg.msg_content, msg.target_user,
-        msg.send_time, msg.view_status, msg.msg_type, msg.relate_link, msg.origin_json
+        select msg.id,
+        msg.src_id,
+        msg.src_app,
+        msg.msg_title,
+        msg.msg_content,
+        msg.target_user,
+        msg.send_time,
+        msg.view_status,
+        msg.msg_type,
+        msg.relate_link,
+        msg.origin_json
         from user_msg msg
         join user_org uo on msg.target_user = uo.user_id
         <where>

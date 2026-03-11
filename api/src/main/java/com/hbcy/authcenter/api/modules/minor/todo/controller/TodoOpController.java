@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * 待办管理
  * @author 姚泰然
+ * @module msg
  * @date 2026-03-11 08:32
  */
 @RestController
@@ -20,6 +21,12 @@ public class TodoOpController {
     @Resource
     private UserTodoService userTodoService;
 
+    /**
+     * 查询待办
+     *
+     * @param vo 查询条件
+     * @return 待办分页结果
+     */
     @GetMapping
     public PageResp<TodoDTO> queryTodo(UserTodoQueryVO vo) {
         return userTodoService.listTodo(vo);

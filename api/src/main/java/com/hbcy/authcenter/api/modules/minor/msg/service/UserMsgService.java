@@ -5,8 +5,9 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.f4b6a3.ulid.UlidCreator;
 import com.hbcy.authcenter.api.common.bean.NameCacheService;
-import com.hbcy.authcenter.api.common.enums.OrgNodeTypeEnum;
+import com.hbcy.authcenter.api.common.constants.G;
 import com.hbcy.authcenter.api.modules.core.app.service.AppService;
+import com.hbcy.authcenter.api.modules.core.inner.service.SDKService;
 import com.hbcy.authcenter.api.modules.core.org.service.OrgTreeService;
 import com.hbcy.authcenter.api.modules.core.user.dao.UserMapper;
 import com.hbcy.authcenter.api.modules.core.user.model.User;
@@ -35,6 +36,7 @@ import java.util.stream.Collectors;
  */
 @Service
 public class UserMsgService extends ServiceImpl<UserMsgMapper, UserMsg> {
+    public static final String PERM_QUERY_MSG = "msg.query";
     @Resource
     private UserMapper userMapper;
     @Resource
@@ -43,6 +45,8 @@ public class UserMsgService extends ServiceImpl<UserMsgMapper, UserMsg> {
     private NameCacheService nameCacheService;
     @Resource
     private AppService appService;
+    @Resource
+    private SDKService sdkService;
 
     /**
      * NOTE: 创建消息和待办（以及更新待办）是portal平台侧的权限
@@ -107,11 +111,16 @@ public class UserMsgService extends ServiceImpl<UserMsgMapper, UserMsg> {
      */
     public PageResp<MsgDTO> listMsg(UserMsgQueryVO vo) {
         Page<MsgDTO> dbPage = vo.getDbPage();
-        Set<String> childOrgIds = orgTreeService.getChildOrgIds(
-                UserContextUtils.getUserOrg(), OrgNodeTypeEnum.ORG.getValue());
+        List<String> childOrgIds = sdkService.listGrantOrgs(
+                UserContextUtils.getUserId(),
+                G.APP_NAME,
+                PERM_QUERY_MSG,
+                UserContextUtils.getUserOrg()
+        );
         if (childOrgIds.isEmpty()) {
             return new PageRespEx<>(dbPage);
         }
+        vo.setSearchOrgIds(childOrgIds);
         Page<MsgDTO> page = baseMapper.listMsg(dbPage, vo);
         Set<String> appIds = new HashSet<>();
         Set<String> userIds = new HashSet<>();
