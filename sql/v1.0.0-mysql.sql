@@ -371,7 +371,7 @@ create table if not exists tenant_app_resource
         unique (perm_id, app_id, tenant_id)
 );
 
-create table if not exists user_access
+create table if not exists tenant_access
 (
     id          char(26)                           not null
         primary key,
@@ -380,17 +380,17 @@ create table if not exists user_access
     secret_key  varchar(64)                        not null comment '加密的密钥',
     forbidden   tinyint  default 0                 not null comment '是否禁用',
     expire_time datetime                           null comment '过期时间',
-    user_id     char(26)                           not null comment 'ak归属用户',
     tenant_id   varchar(20)                        not null comment 'ak归属租户',
     create_time datetime default CURRENT_TIMESTAMP not null,
-    update_time datetime default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP,
-    constraint ix_user_access_user_tenant
-        unique (user_id, tenant_id)
+    update_time datetime default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP
 )
-    comment 'ak/sk通信';
+    comment 'ak/sk通信' row_format = DYNAMIC;
 
 create index ix_user_access_ak
-    on user_access (access_key, expire_time, forbidden);
+    on tenant_access (access_key, expire_time, forbidden);
+
+create index ix_user_access_tenant
+    on tenant_access (tenant_id);
 
 create table if not exists user_msg
 (

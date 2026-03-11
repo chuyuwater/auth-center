@@ -3,7 +3,7 @@
 <mapper namespace="com.hbcy.authcenter.api.modules.core.auth.dao.TenantAccessMapper">
     <resultMap id="BaseResultMap" type="com.hbcy.authcenter.api.modules.core.auth.model.TenantAccess">
         <!--@mbg.generated-->
-        <!--@Table user_access-->
+        <!--@Table tenant_access-->
         <id column="id" jdbcType="CHAR" property="id"/>
         <result column="key_name" jdbcType="VARCHAR" property="keyName"/>
         <result column="access_key" jdbcType="CHAR" property="accessKey"/>
