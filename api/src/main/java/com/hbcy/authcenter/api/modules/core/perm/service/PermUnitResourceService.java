@@ -7,6 +7,7 @@ import com.google.common.base.Splitter;
 import com.hbcy.authcenter.api.common.constants.G;
 import com.hbcy.authcenter.api.common.enums.OrgNodeCategoryEnum;
 import com.hbcy.authcenter.api.common.enums.ResourceShowLevelEnum;
+import com.hbcy.authcenter.api.common.enums.TreeQueryLevelEnum;
 import com.hbcy.authcenter.api.modules.core.app.dao.ResourcePermMapper;
 import com.hbcy.authcenter.api.modules.core.app.dao.ResourceTreeMapper;
 import com.hbcy.authcenter.api.modules.core.app.dto.GrantAppDTO;
@@ -230,14 +231,22 @@ public class PermUnitResourceService extends ServiceImpl<PermUnitResourceMapper,
         queryVO.setAppId(vo.getAppId());
         queryVO.setClientType(vo.getClientType());
         queryVO.setWithPerm(vo.getWithPerm());
+        //这里是给前端用的，不需要api
+        queryVO.setWithApi(false);
         queryVO.setHidden(0);
         queryVO.setResType(vo.getResType());
         if (parent != null) {
             queryVO.setParentId(parent.getId());
+            queryVO.setParentLevel(vo.getParentLevel());
         }
         queryVO.setShowLevel(isPrj ? ResourceShowLevelEnum.PRJ.getValue() : ResourceShowLevelEnum.ORG.getValue());
         TreeNode<ResTreeDTO> root = resourceTreeService.listResTreeRecursively(
                 queryVO, currentUserPerms, true);
+        //如果查询的是本下，root节点也要返回
+        if (StringUtils.isNotBlank(vo.getParentCustomId()) &&
+                TreeQueryLevelEnum.CURRENT_AND_CHILD.getCode().equals(vo.getParentLevel())) {
+            return List.of(root);
+        }
         return root.getChildren();
     }
 }

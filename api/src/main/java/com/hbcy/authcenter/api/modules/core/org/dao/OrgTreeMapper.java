@@ -9,6 +9,7 @@ import org.apache.ibatis.annotations.Param;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author 姚泰然
@@ -92,6 +93,16 @@ public interface OrgTreeMapper extends BaseMapper<OrgTree> {
      * @return 组织id
      */
     List<String> getAllOrgIds(@Param("tenantId") String tenantId);
+
+
+    /**
+     * 获取子组织id
+     *
+     * @param parentIdPath 父节点idPath
+     * @param nodeType      节点类型
+     * @return 子组织id
+     */
+    Set<String> getChildOrgIds(@Param("parentIdPath") String parentIdPath, @Param("nodeType") Integer nodeType);
 
     /**
      * 获取用户有权限的组织

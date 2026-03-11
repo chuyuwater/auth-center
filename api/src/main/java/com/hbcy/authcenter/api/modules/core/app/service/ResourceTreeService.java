@@ -7,6 +7,7 @@ import com.google.common.base.Splitter;
 import com.hbcy.authcenter.api.common.bean.NameCacheService;
 import com.hbcy.authcenter.api.common.bean.NodeMoveVO;
 import com.hbcy.authcenter.api.common.constants.G;
+import com.hbcy.authcenter.api.common.enums.TreeQueryLevelEnum;
 import com.hbcy.authcenter.api.modules.core.app.dao.AppMapper;
 import com.hbcy.authcenter.api.modules.core.app.dao.ResourcePermApiMapper;
 import com.hbcy.authcenter.api.modules.core.app.dao.ResourceTreeMapper;
@@ -205,14 +206,14 @@ public class ResourceTreeService extends ServiceImpl<ResourceTreeMapper, Resourc
      * @return 树
      */
     public TreeNode<ResTreeDTO> listResTreeRecursively(ResourceTreeQueryVO vo,
-            List<ResPermDTO> grantPermList, boolean removeUngrant) {
+                                                       List<ResPermDTO> grantPermList, boolean removeUngrant) {
         TreeNode<ResTreeDTO> root = new TreeNode<>();
         ResTreeDTO dto = new ResTreeDTO();
         root.setData(dto);
         if (StringUtils.isNotBlank(vo.getParentId())) {
             ResourceTree node = baseMapper.selectById(vo.getParentId());
             if (node == null) {
-                throw new ParamError("指定节点不存在");
+                return root;
             }
             dto.setRes(node);
         }
@@ -229,7 +230,7 @@ public class ResourceTreeService extends ServiceImpl<ResourceTreeMapper, Resourc
 
         // 查询权限点关联的api列表，按permId分组
         Map<String, List<ResourcePermApi>> permApiMap = new HashMap<>();
-        if (!resourcePerms.isEmpty()) {
+        if (vo.getWithApi() && !resourcePerms.isEmpty()) {
             Set<String> permIds = resourcePerms.stream().map(ResourcePerm::getId).collect(Collectors.toSet());
             List<ResourcePermApi> permApis = resourcePermApiMapper.selectList(
                     new QueryWrapper<ResourcePermApi>().in(ResourcePermApi.COL_PERM_ID, permIds));
@@ -273,7 +274,7 @@ public class ResourceTreeService extends ServiceImpl<ResourceTreeMapper, Resourc
 
     @Nullable
     private Set<String> filterGranted(List<ResPermDTO> grantPermList, boolean removeUngrant,
-            List<ResourceTree> resourceTrees, List<ResourcePerm> resourcePerms) {
+                                      List<ResourceTree> resourceTrees, List<ResourcePerm> resourcePerms) {
         if (grantPermList == null) {
             return null;
         }
@@ -310,12 +311,12 @@ public class ResourceTreeService extends ServiceImpl<ResourceTreeMapper, Resourc
     }
 
     private void buildTree(TreeNode<ResTreeDTO> current,
-            Map<String, List<ResourceTree>> childrenMap,
-            Map<String, List<ResourcePerm>> permMap,
-            Map<String, List<ResourcePermApi>> permApiMap,
-            Set<String> allGrantIds) {
+                           Map<String, List<ResourceTree>> childrenMap,
+                           Map<String, List<ResourcePerm>> permMap,
+                           Map<String, List<ResourcePermApi>> permApiMap,
+                           Set<String> allGrantIds) {
         String resId = Optional.ofNullable(
-                current.getData()).map(ResTreeDTO::getRes)
+                        current.getData()).map(ResTreeDTO::getRes)
                 .map(ResourceTree::getId).orElse("");
         // 先查询当前节点关联的权限点
         for (ResourcePerm t : permMap.getOrDefault(resId, Collections.emptyList())) {
@@ -356,7 +357,11 @@ public class ResourceTreeService extends ServiceImpl<ResourceTreeMapper, Resourc
             if (tree == null) {
                 throw new ParamError("父节点不存在");
             }
-            idPath = tree.getIdPath() + G.ID_PATH_SPLITTER;
+            if (TreeQueryLevelEnum.CHILD.getCode().equals(vo.getParentLevel())) {
+                idPath = tree.getIdPath() + G.ID_PATH_SPLITTER;
+            } else {
+                idPath = tree.getIdPath();
+            }
         }
         vo.setIdPath(idPath);
         List<ResourceTree> resourceTrees = baseMapper.listChildren(vo);
@@ -390,8 +395,8 @@ public class ResourceTreeService extends ServiceImpl<ResourceTreeMapper, Resourc
             throw new ParamError("请先删除该菜单下的所有子资源");
         }
         Set<String> permIds = resourcePermService.list(new QueryWrapper<ResourcePerm>()
-                .select(ResourcePerm.COL_ID)
-                .in(ResourcePerm.COL_RES_ID, resIds)).stream().map(ResourcePerm::getId)
+                        .select(ResourcePerm.COL_ID)
+                        .in(ResourcePerm.COL_RES_ID, resIds)).stream().map(ResourcePerm::getId)
                 .collect(Collectors.toSet());
         if (!force && !permIds.isEmpty()) {
             throw new ParamError("请先删除该菜单下的所有权限点");

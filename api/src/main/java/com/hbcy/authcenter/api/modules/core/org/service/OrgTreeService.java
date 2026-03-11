@@ -482,4 +482,16 @@ public class OrgTreeService extends ServiceImpl<OrgTreeMapper, OrgTree> {
                 .likeRight(OrgTree.COL_ID_PATH, node.getIdPath())
                 .set(OrgTree.COL_FORBIDDEN, vo.getForbidden()));
     }
+
+    /**
+     * 查询所有下级组织id
+     * @return 组织id
+     */
+    public Set<String> getChildOrgIds(String orgId, Integer nodeType) {
+        OrgTree orgTree = baseMapper.selectById(orgId);
+        if (orgTree == null) {
+            return Set.of();
+        }
+        return baseMapper.getChildOrgIds(orgTree.getIdPath(), nodeType);
+    }
 }

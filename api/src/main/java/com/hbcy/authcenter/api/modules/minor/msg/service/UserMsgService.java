@@ -4,9 +4,14 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.f4b6a3.ulid.UlidCreator;
+import com.hbcy.authcenter.api.common.bean.NameCacheService;
+import com.hbcy.authcenter.api.common.enums.OrgNodeTypeEnum;
+import com.hbcy.authcenter.api.modules.core.app.service.AppService;
+import com.hbcy.authcenter.api.modules.core.org.service.OrgTreeService;
 import com.hbcy.authcenter.api.modules.core.user.dao.UserMapper;
 import com.hbcy.authcenter.api.modules.core.user.model.User;
 import com.hbcy.authcenter.api.modules.minor.msg.dao.UserMsgMapper;
+import com.hbcy.authcenter.api.modules.minor.msg.dto.MsgDTO;
 import com.hbcy.authcenter.api.modules.minor.msg.dto.UserMsgDTO;
 import com.hbcy.authcenter.api.modules.minor.msg.model.UserMsg;
 import com.hbcy.authcenter.api.modules.minor.msg.vo.UserMsgBatchOpVO;
@@ -21,9 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -34,6 +37,12 @@ import java.util.stream.Collectors;
 public class UserMsgService extends ServiceImpl<UserMsgMapper, UserMsg> {
     @Resource
     private UserMapper userMapper;
+    @Resource
+    private OrgTreeService orgTreeService;
+    @Resource
+    private NameCacheService nameCacheService;
+    @Resource
+    private AppService appService;
 
     /**
      * NOTE: 创建消息和待办（以及更新待办）是portal平台侧的权限
@@ -74,7 +83,7 @@ public class UserMsgService extends ServiceImpl<UserMsgMapper, UserMsg> {
     public PageResp<UserMsgDTO> queryMsg(UserMsgQueryVO vo) {
         Page<UserMsgDTO> dbPage = vo.getDbPage();
         vo.setUserId(UserContextUtils.getUserId());
-        dbPage = baseMapper.query(dbPage, vo);
+        dbPage = baseMapper.query4User(dbPage, vo);
         return new PageRespEx<>(dbPage);
     }
 
@@ -89,5 +98,33 @@ public class UserMsgService extends ServiceImpl<UserMsgMapper, UserMsg> {
         baseMapper.delete(new UpdateWrapper<UserMsg>()
                 .eq(UserMsg.COL_TARGET_USER, UserContextUtils.getUserId())
                 .in(UserMsg.COL_ID, vo.getMsgIds()));
+    }
+
+    /**
+     * 查询当前用户有权查看的本下组织的所有用户的消息
+     * @param vo 查询条件
+     * @return 搜索结果分页
+     */
+    public PageResp<MsgDTO> listMsg(UserMsgQueryVO vo) {
+        Page<MsgDTO> dbPage = vo.getDbPage();
+        Set<String> childOrgIds = orgTreeService.getChildOrgIds(
+                UserContextUtils.getUserOrg(), OrgNodeTypeEnum.ORG.getValue());
+        if (childOrgIds.isEmpty()) {
+            return new PageRespEx<>(dbPage);
+        }
+        Page<MsgDTO> page = baseMapper.listMsg(dbPage, vo);
+        Set<String> appIds = new HashSet<>();
+        Set<String> userIds = new HashSet<>();
+        for (MsgDTO r : page.getRecords()) {
+            appIds.add(r.getSrcApp());
+            userIds.add(r.getTargetUser());
+        }
+        Map<String, String> appNameMap = appService.getNameMap(appIds);
+        Map<String, String> userNameMap = nameCacheService.getUserNameMap(userIds);
+        for (MsgDTO r : page.getRecords()) {
+            r.setSrcAppName(appNameMap.get(r.getSrcApp()));
+            r.setTargetUserName(userNameMap.get(r.getTargetUser()));
+        }
+        return new PageRespEx<>(page);
     }
 }

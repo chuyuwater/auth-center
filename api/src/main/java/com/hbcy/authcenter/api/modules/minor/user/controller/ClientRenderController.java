@@ -113,17 +113,6 @@ public class ClientRenderController {
     }
 
     /**
-     * 获取当前用户、当前组织下、当前应用（或指定菜单下）的权限点列表
-     *
-     * @param resId 菜单id，不传则返回整个app的所有权限点
-     * @return 权限点
-     */
-    @GetMapping("/perm")
-    public List<ResPermDTO> listPerm(String resId) {
-        return permUnitUserService.listPerms(UserContextUtils.getAppId(), resId);
-    }
-
-    /**
      * 获取当前用户、当前组织下、当前应用（或指定菜单下）的权限码
      * 该结果不会使用缓存，因此可能和网关侧的权限判断结果不一致
      *

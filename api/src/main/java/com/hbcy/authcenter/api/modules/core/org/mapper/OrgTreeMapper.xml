@@ -175,4 +175,16 @@
             and ot.node_type = 0
         </where>
     </select>
+
+    <select id="getChildOrgIds" resultType="java.lang.String">
+        select id
+        from org_tree
+        <where>
+            id_path like concat(#{parentIdPath}, '/%')
+            and delete_time = 0
+            <if test="nodeType != null">
+                and node_type = #{nodeType}
+            </if>
+        </where>
+    </select>
 </mapper>

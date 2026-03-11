@@ -1,6 +1,7 @@
 package com.hbcy.authcenter.api.modules.core.perm.vo;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.hbcy.authcenter.api.common.enums.TreeQueryLevelEnum;
 import com.hbcy.common.db.dictvalue.DictValid;
 import lombok.Data;
 
@@ -29,6 +30,11 @@ public class ClientResQueryVO {
      * 父级菜单自定义id
      */
     private String parentCustomId;
+    /**
+     * 父级菜单查询方式
+     * 1-下级，2-本下，默认1
+     */
+    private Integer parentLevel = TreeQueryLevelEnum.CHILD.getCode();
     /**
      * 资源类型，0-页面，1-按钮
      */

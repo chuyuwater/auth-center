@@ -23,7 +23,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 应用相关业务逻辑
@@ -153,5 +156,11 @@ public class AppService extends ServiceImpl<AppMapper, App> {
                 .set(App.COL_UPDATE_USER, UserContextUtils.getUserId())
                 .set(App.COL_DELETE_TIME, System.currentTimeMillis())
                 .set(App.COL_UPDATE_TIME, LocalDateTime.now()));
+    }
+
+    public Map<String, String> getNameMap(Collection<String> appIds) {
+        List<App> apps = baseMapper.selectList(new QueryWrapper<App>()
+                .in(App.COL_ID, appIds));
+        return apps.stream().collect(Collectors.toMap(App::getId, App::getNameCn));
     }
 }

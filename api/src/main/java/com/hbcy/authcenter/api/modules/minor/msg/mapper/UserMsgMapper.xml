@@ -35,7 +35,7 @@
         </foreach>
     </insert>
 
-    <select id="query" resultType="com.hbcy.authcenter.api.modules.minor.msg.dto.UserMsgDTO">
+    <select id="query4User" resultType="com.hbcy.authcenter.api.modules.minor.msg.dto.UserMsgDTO">
         select id,
         msg_title,
         msg_content,
@@ -66,5 +66,44 @@
             </if>
         </where>
         order by id desc
+    </select>
+
+    <select id="listMsg" resultType="com.hbcy.authcenter.api.modules.minor.msg.dto.MsgDTO">
+        select
+        msg.id,
+        msg.src_id,msg.src_app, msg.msg_title, msg.msg_content, msg.target_user,
+        msg.send_time, msg.view_status, msg.msg_type, msg.relate_link, msg.origin_json
+        from user_msg msg
+        join user_org uo on msg.target_user = uo.user_id
+        <where>
+            uo.org_id in
+            <foreach item="orgId" collection="vo.searchOrgIds" separator="," close=")" open="(" index="">
+                #{orgId}
+            </foreach>
+            <if test="vo.viewStatus != null">
+                and msg.view_status = #{vo.viewStatus}
+            </if>
+            <if test="vo.keyword != null and vo.keyword != ''">
+                and msg.msg_title like concat('%', #{vo.keyword}, '%')
+            </if>
+            <if test="vo.msgType != null">
+                and msg.msg_type = #{vo.msgType}
+            </if>
+            <if test="vo.srcApp != null and vo.srcApp != ''">
+                and msg.src_app = #{vo.srcApp}
+            </if>
+            <if test="vo.tenantId != null and vo.tenantId != ''">
+                and msg.tenant_id = #{vo.tenantId}
+            </if>
+            <if test="vo.viewStatus != null">
+                and msg.view_status = #{vo.viewStatus}
+            </if>
+            <if test="vo.sendTimeStart != null">
+                and msg.send_time &gt;= #{vo.sendTimeStart}
+            </if>
+            <if test="vo.sendTimeEnd != null">
+                and #{vo.sendTimeEnd} &gt;= msg.send_time
+            </if>
+        </where>
     </select>
 </mapper>

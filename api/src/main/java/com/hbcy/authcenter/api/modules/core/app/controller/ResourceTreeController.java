@@ -1,6 +1,7 @@
 package com.hbcy.authcenter.api.modules.core.app.controller;
 
 import com.hbcy.authcenter.api.common.bean.NodeMoveVO;
+import com.hbcy.authcenter.api.common.enums.TreeQueryLevelEnum;
 import com.hbcy.authcenter.api.modules.core.app.dto.ResNodeDTO;
 import com.hbcy.authcenter.api.modules.core.app.dto.ResTreeDTO;
 import com.hbcy.authcenter.api.modules.core.app.model.ResourceTree;
@@ -12,6 +13,7 @@ import com.hbcy.common.base.tree.TreeNode;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -53,6 +55,10 @@ public class ResourceTreeController {
     public List<TreeNode<ResTreeDTO>> getTree(@Valid ResourceTreeQueryVO vo) {
         vo.setWithCreator(true);
         TreeNode<ResTreeDTO> root = resourceTreeService.listResTreeRecursively(vo);
+        if (StringUtils.isNotBlank(vo.getParentId()) &&
+                TreeQueryLevelEnum.CURRENT_AND_CHILD.getCode().equals(vo.getParentLevel())) {
+            return List.of(root);
+        }
         return root.getChildren();
     }
 

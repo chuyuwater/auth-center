@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 
 /**
  * 消息搜索
@@ -40,8 +41,16 @@ public class UserMsgQueryVO extends PageVO {
      */
     private String srcApp;
     /**
-     * 用户id，服务端填充
+     * 用户id
+     * 个人用户只能搜自己的，无需填充
+     */
+    private String userId;
+
+    @JsonIgnore
+    private String tenantId;
+    /**
+     * 搜索者本下组织
      */
     @JsonIgnore
-    private String userId;
+    private Set<String> searchOrgIds;
 }
