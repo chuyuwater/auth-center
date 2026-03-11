@@ -1,7 +1,7 @@
 package com.hbcy.authcenter.api.modules.core.auth.dao;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.hbcy.authcenter.api.modules.core.auth.model.UserAccess;
+import com.hbcy.authcenter.api.modules.core.auth.model.TenantAccess;
 import org.apache.ibatis.annotations.Mapper;
 
 /**
@@ -9,5 +9,5 @@ import org.apache.ibatis.annotations.Mapper;
  * @date 2026-01-26 17:42
  */
 @Mapper
-public interface UserAccessMapper extends BaseMapper<UserAccess> {
+public interface TenantAccessMapper extends BaseMapper<TenantAccess> {
 }

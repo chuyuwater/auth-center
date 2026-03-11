@@ -7,10 +7,9 @@ import lombok.Data;
  * @date 2026-01-26 17:53
  */
 @Data
-public class UserAccessDTO {
+public class TenantAccessDTO {
     private String id;
     private String accessKey;
     private String secretKey;
-    private String userId;
     private String tenantId;
 }
