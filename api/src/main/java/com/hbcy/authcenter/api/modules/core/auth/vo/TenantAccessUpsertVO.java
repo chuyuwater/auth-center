@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
  * @date 2026-01-26 17:04
  */
 @Data
-public class UserAccessUpsertVO {
+public class TenantAccessUpsertVO {
     @NotBlank(message = "keyName不能为空")
     private String keyName;
     /**

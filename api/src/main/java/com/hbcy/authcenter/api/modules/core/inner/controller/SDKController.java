@@ -2,13 +2,16 @@ package com.hbcy.authcenter.api.modules.core.inner.controller;
 
 import com.hbcy.authcenter.api.modules.core.inner.service.SDKService;
 import com.hbcy.authcenter.api.modules.core.perm.service.PermUnitUserService;
+import com.hbcy.authcenter.api.modules.minor.msg.service.UserMsgService;
+import com.hbcy.authcenter.api.modules.minor.msg.vo.UserMsgCreateVO;
+import com.hbcy.authcenter.api.modules.minor.todo.service.UserTodoService;
+import com.hbcy.authcenter.api.modules.minor.todo.vo.UserTodoCreateVO;
+import com.hbcy.authcenter.api.modules.minor.todo.vo.UserTodoUpdateVO;
 import jakarta.annotation.Resource;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
@@ -31,6 +34,12 @@ public class SDKController {
 
     @Resource
     private PermUnitUserService permUnitUserService;
+
+    @Resource
+    private UserMsgService userMsgService;
+
+    @Resource
+    private UserTodoService userTodoService;
 
     /**
      * 获取组织id对应的组织名称
@@ -82,5 +91,29 @@ public class SDKController {
                                       @NotBlank(message = "权限码不能为空") String permCode,
                                       String parentOrgId) {
         return sdkService.listGrantOrgs(userId, appId, permCode, parentOrgId);
+    }
+
+    /**
+     * 创建消息
+     */
+    @PostMapping("/msg")
+    public void batchCreateMsg(@Valid @RequestBody UserMsgCreateVO vo) {
+        userMsgService.batchCreateMsg(vo);
+    }
+
+    /**
+     * 创建待办，一般是流程引擎调用
+     */
+    @PostMapping("/todo")
+    public void batchCreateTodo(@Valid @RequestBody UserTodoCreateVO vo) {
+        userTodoService.batchCreateTodo(vo);
+    }
+    
+    /**
+     * 更新待办状态，一般是流程引擎调用
+     */
+    @PutMapping("/todo/update-state")
+    public void updateState(@Valid @RequestBody UserTodoUpdateVO vo) {
+        userTodoService.updateState(vo);
     }
 }

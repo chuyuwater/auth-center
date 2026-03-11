@@ -3,7 +3,6 @@ package com.hbcy.authcenter.api.modules.minor.msg.controller;
 import com.hbcy.authcenter.api.modules.minor.msg.dto.UserMsgDTO;
 import com.hbcy.authcenter.api.modules.minor.msg.service.UserMsgService;
 import com.hbcy.authcenter.api.modules.minor.msg.vo.UserMsgBatchOpVO;
-import com.hbcy.authcenter.api.modules.minor.msg.vo.UserMsgCreateVO;
 import com.hbcy.authcenter.api.modules.minor.msg.vo.UserMsgQueryVO;
 import com.hbcy.common.base.pojo.PageResp;
 import jakarta.annotation.Resource;
@@ -33,17 +32,6 @@ public class UserMsgController {
     @GetMapping
     public PageResp<UserMsgDTO> queryMsg(UserMsgQueryVO vo) {
         return userMsgService.queryMsg(vo);
-    }
-
-    /**
-     * 批量创建消息
-     * 供第三方系统调用
-     *
-     * @param vo 消息创建参数
-     */
-    @PostMapping
-    public void batchCreateMsg(@Valid @RequestBody UserMsgCreateVO vo) {
-        userMsgService.batchCreateMsg(vo);
     }
 
     /**

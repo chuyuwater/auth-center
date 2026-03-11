@@ -1,8 +1,8 @@
 package com.hbcy.authcenter.api.modules.core.auth.controller;
 
-import com.hbcy.authcenter.api.modules.core.auth.model.UserAccess;
-import com.hbcy.authcenter.api.modules.core.auth.service.UserAccessService;
-import com.hbcy.authcenter.api.modules.core.auth.vo.UserAccessUpsertVO;
+import com.hbcy.authcenter.api.modules.core.auth.model.TenantAccess;
+import com.hbcy.authcenter.api.modules.core.auth.service.TenantAccessService;
+import com.hbcy.authcenter.api.modules.core.auth.vo.TenantAccessUpsertVO;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -21,7 +21,7 @@ import java.util.List;
 @RequestMapping("/api/portal/v1/user/access-token")
 public class UserAccessController {
     @Resource
-    private UserAccessService userAccessService;
+    private TenantAccessService tenantAccessService;
 
     /**
      * 创建访问密钥
@@ -29,8 +29,8 @@ public class UserAccessController {
      * @return 密钥信息
      */
     @PostMapping
-    public UserAccess createUserAccess(@Valid @RequestBody UserAccessUpsertVO vo) {
-        return userAccessService.createUserAccess(vo);
+    public TenantAccess createUserAccess(@Valid @RequestBody TenantAccessUpsertVO vo) {
+        return tenantAccessService.createAccess(vo);
     }
 
     /**
@@ -40,8 +40,8 @@ public class UserAccessController {
      * @return 密钥信息
      */
     @PutMapping("/{id}")
-    public UserAccess updateUserAccess(@PathVariable String id, @Valid @RequestBody UserAccessUpsertVO vo) {
-        return userAccessService.updateUserAccess(id, vo);
+    public TenantAccess updateUserAccess(@PathVariable String id, @Valid @RequestBody TenantAccessUpsertVO vo) {
+        return tenantAccessService.updateAccess(id, vo);
     }
 
     /**
@@ -50,7 +50,7 @@ public class UserAccessController {
      */
     @PostMapping("/delete")
     public void deleteUserAccess(@NotBlank(message = "id不能为空") String id) {
-        userAccessService.deleteUserAccess(id);
+        tenantAccessService.deleteAccess(id);
     }
 
     /**
@@ -59,16 +59,16 @@ public class UserAccessController {
      * @return 密钥详情
      */
     @GetMapping("/{id}")
-    public UserAccess getUserAccess(@PathVariable String id) {
-        return userAccessService.getById(id);
+    public TenantAccess getUserAccess(@PathVariable String id) {
+        return tenantAccessService.getById(id);
     }
 
     /**
-     * 获取用户的所有密钥
+     * 获取租户的所有密钥
      * @return 密钥列表
      */
     @GetMapping
-    public List<UserAccess> listUserAccess() {
-        return userAccessService.getUserAKs();
+    public List<TenantAccess> listUserAccess() {
+        return tenantAccessService.getTenantAKs();
     }
 }

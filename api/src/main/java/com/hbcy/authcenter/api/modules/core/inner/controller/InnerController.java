@@ -1,7 +1,7 @@
 package com.hbcy.authcenter.api.modules.core.inner.controller;
 
-import com.hbcy.authcenter.api.modules.core.auth.model.UserAccess;
-import com.hbcy.authcenter.api.modules.core.auth.service.UserAccessService;
+import com.hbcy.authcenter.api.modules.core.auth.model.TenantAccess;
+import com.hbcy.authcenter.api.modules.core.auth.service.TenantAccessService;
 import com.hbcy.authcenter.api.modules.core.inner.service.InnerService;
 import com.hbcy.authcenter.gateway.dto.ApiPermDTO;
 import com.hbcy.authcenter.gateway.vo.RefreshUserPermVO;
@@ -29,7 +29,7 @@ public class InnerController {
     @Resource
     private InnerService innerService;
     @Resource
-    private UserAccessService userAccessService;
+    private TenantAccessService tenantAccessService;
 
     /**
      * 刷新用户权限缓存，供网关调用
@@ -65,7 +65,7 @@ public class InnerController {
      * @return 密钥详情
      */
     @GetMapping("/access-token/check/{ak}")
-    public UserAccess checkUserAccess(@PathVariable String ak) {
-        return userAccessService.checkUserAccess(ak);
+    public TenantAccess checkUserAccess(@PathVariable String ak) {
+        return tenantAccessService.checkAccess(ak);
     }
 }

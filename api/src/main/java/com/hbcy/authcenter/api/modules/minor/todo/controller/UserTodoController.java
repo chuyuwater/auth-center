@@ -3,9 +3,7 @@ package com.hbcy.authcenter.api.modules.minor.todo.controller;
 import com.hbcy.authcenter.api.modules.minor.todo.dto.UserTodoDTO;
 import com.hbcy.authcenter.api.modules.minor.todo.service.UserTodoService;
 import com.hbcy.authcenter.api.modules.minor.todo.vo.UserTodoBatchOpVO;
-import com.hbcy.authcenter.api.modules.minor.todo.vo.UserTodoCreateVO;
 import com.hbcy.authcenter.api.modules.minor.todo.vo.UserTodoQueryVO;
-import com.hbcy.authcenter.api.modules.minor.todo.vo.UserTodoUpdateVO;
 import com.hbcy.common.base.pojo.PageResp;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
@@ -35,16 +33,6 @@ public class UserTodoController {
         return userTodoService.queryTodo(vo);
     }
 
-    /**
-     * 批量创建待办
-     * 供第三方系统调用
-     *
-     * @param vo 待办创建参数
-     */
-    @PostMapping
-    public void batchCreateTodo(@Valid @RequestBody UserTodoCreateVO vo) {
-        userTodoService.batchCreateTodo(vo);
-    }
 
     /**
      * 批量标记待办为已读
@@ -54,16 +42,6 @@ public class UserTodoController {
     @PostMapping("/mark-as-read")
     public void markAsRead(@Valid @RequestBody UserTodoBatchOpVO vo) {
         userTodoService.batchMarkAsRead(vo);
-    }
-
-    /**
-     * 更新待办处理状态
-     * 供第三方系统调用
-     * @param vo 操作参数
-     */
-    @PostMapping("/update-state")
-    public void updateState(@Valid @RequestBody UserTodoUpdateVO vo) {
-        userTodoService.updateState(vo);
     }
 
     /**

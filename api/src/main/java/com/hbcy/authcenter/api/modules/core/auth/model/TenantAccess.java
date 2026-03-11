@@ -6,25 +6,22 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
-/**
+/** ak/sk通信
  * @author 姚泰然
  * @date 2026-01-26 17:42
  */
 
-/**
- * ak/sk通信
- */
+
 @Data
 @NoArgsConstructor
-@TableName(value = "user_access")
-public class UserAccess {
+@TableName(value = "tenant_access")
+public class TenantAccess {
     public static final String COL_ID = "id";
     public static final String COL_KEY_NAME = "key_name";
     public static final String COL_ACCESS_KEY = "access_key";
     public static final String COL_SECRET_KEY = "secret_key";
     public static final String COL_FORBIDDEN = "forbidden";
     public static final String COL_EXPIRE_TIME = "expire_time";
-    public static final String COL_USER_ID = "user_id";
     public static final String COL_TENANT_ID = "tenant_id";
     public static final String COL_CREATE_TIME = "create_time";
     public static final String COL_UPDATE_TIME = "update_time";
@@ -52,11 +49,6 @@ public class UserAccess {
      */
     @TableField(value = "expire_time")
     private LocalDateTime expireTime;
-    /**
-     * ak归属用户
-     */
-    @TableField(value = "user_id")
-    private String userId;
     /**
      * ak归属租户
      */
