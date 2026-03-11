@@ -21,9 +21,11 @@ import org.apache.commons.lang3.Strings;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -159,6 +161,9 @@ public class AppService extends ServiceImpl<AppMapper, App> {
     }
 
     public Map<String, String> getNameMap(Collection<String> appIds) {
+        if (CollectionUtils.isEmpty(appIds)) {
+            return Collections.emptyMap();
+        }
         List<App> apps = baseMapper.selectList(new QueryWrapper<App>()
                 .in(App.COL_ID, appIds));
         return apps.stream().collect(Collectors.toMap(App::getId, App::getNameCn));
