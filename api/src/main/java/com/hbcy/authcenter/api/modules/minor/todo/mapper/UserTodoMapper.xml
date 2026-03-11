@@ -147,7 +147,7 @@
                 and #{vo.sendTimeEnd} &gt;= td.send_time
             </if>
         </where>
-        order by td.send_time desc
+        order by td.id desc
     </select>
 
     <select id="listDistinctSrcApp" resultType="java.lang.String">
@@ -158,7 +158,7 @@
         <foreach item="orgId" collection="orgIds" separator="," open="(" close=")">
             #{orgId}
         </foreach>
-        and td.src_app is not null and td.src_app != ''
+        and td.src_app != ''
         order by td.src_app
     </select>
 </mapper>
