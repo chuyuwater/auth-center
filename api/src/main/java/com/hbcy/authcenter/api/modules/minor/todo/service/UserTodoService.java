@@ -10,6 +10,7 @@ import com.hbcy.authcenter.api.modules.core.app.service.AppService;
 import com.hbcy.authcenter.api.modules.core.inner.service.SDKService;
 import com.hbcy.authcenter.api.modules.core.user.dao.UserMapper;
 import com.hbcy.authcenter.api.modules.core.user.model.User;
+import com.hbcy.authcenter.api.modules.minor.msg.dto.SourceAppDTO;
 import com.hbcy.authcenter.api.modules.minor.todo.dao.UserTodoMapper;
 import com.hbcy.authcenter.api.modules.minor.todo.dto.TodoDTO;
 import com.hbcy.authcenter.api.modules.minor.todo.dto.UserTodoDTO;
@@ -153,7 +154,7 @@ public class UserTodoService extends ServiceImpl<UserTodoMapper, UserTodo> {
     /**
      * 查询当前用户本下组织范围内已推送待办的应用列表（用于待办来源下拉）
      */
-    public List<Map<String, String>> listTodoSourceApps() {
+    public List<SourceAppDTO> listTodoSourceApps() {
         List<String> childOrgIds = sdkService.listGrantOrgs(
                 UserContextUtils.getUserId(),
                 G.APP_NAME,
@@ -168,12 +169,12 @@ public class UserTodoService extends ServiceImpl<UserTodoMapper, UserTodo> {
             return Collections.emptyList();
         }
         Map<String, String> appNameMap = appService.getNameMap(new HashSet<>(appIds));
-        List<Map<String, String>> result = new ArrayList<>();
+        List<SourceAppDTO> result = new ArrayList<>();
         for (String appId : appIds) {
-            Map<String, String> item = new HashMap<>();
-            item.put("appId", appId);
-            item.put("appName", appNameMap.getOrDefault(appId, appId));
-            result.add(item);
+            SourceAppDTO dto = new SourceAppDTO();
+            dto.setSrcApp(appId);
+            dto.setSrcAppName(appNameMap.get(appId));
+            result.add(dto);
         }
         return result;
     }

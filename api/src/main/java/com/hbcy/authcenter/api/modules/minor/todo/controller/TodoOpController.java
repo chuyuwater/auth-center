@@ -1,5 +1,6 @@
 package com.hbcy.authcenter.api.modules.minor.todo.controller;
 
+import com.hbcy.authcenter.api.modules.minor.msg.dto.SourceAppDTO;
 import com.hbcy.authcenter.api.modules.minor.todo.dto.TodoDTO;
 import com.hbcy.authcenter.api.modules.minor.todo.service.UserTodoService;
 import com.hbcy.authcenter.api.modules.minor.todo.vo.UserTodoQueryVO;
@@ -39,7 +40,7 @@ public class TodoOpController {
      * 获取已推送待办的应用列表（用于待办来源下拉多选）
      */
     @GetMapping("/source-apps")
-    public List<Map<String, String>> listTodoSourceApps() {
+    public List<SourceAppDTO> listTodoSourceApps() {
         return userTodoService.listTodoSourceApps();
     }
 }

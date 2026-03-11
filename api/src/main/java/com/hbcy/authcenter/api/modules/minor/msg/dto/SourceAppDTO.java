@@ -9,7 +9,13 @@ import lombok.Data;
  * @date 2026-03-11
  */
 @Data
-public class MsgSourceAppItem {
+public class SourceAppDTO {
+    /**
+     * 源应用id
+     */
     private String srcApp;
+    /**
+     * 源应用名称
+     */
     private String srcAppName;
 }

@@ -1,7 +1,7 @@
 package com.hbcy.authcenter.api.modules.minor.msg.controller;
 
 import com.hbcy.authcenter.api.modules.minor.msg.dto.MsgDTO;
-import com.hbcy.authcenter.api.modules.minor.msg.dto.MsgSourceAppItem;
+import com.hbcy.authcenter.api.modules.minor.msg.dto.SourceAppDTO;
 import com.hbcy.authcenter.api.modules.minor.msg.service.UserMsgService;
 import com.hbcy.authcenter.api.modules.minor.msg.vo.UserMsgQueryVO;
 import com.hbcy.common.base.pojo.PageResp;
@@ -42,7 +42,7 @@ public class MsgOpController {
      * @return 应用 id 与名称列表
      */
     @GetMapping("/source-apps")
-    public List<MsgSourceAppItem> listSourceApps() {
+    public List<SourceAppDTO> listSourceApps() {
         return userMsgService.listMsgSourceApps();
     }
 

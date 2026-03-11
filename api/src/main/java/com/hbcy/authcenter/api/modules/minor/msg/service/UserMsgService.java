@@ -15,7 +15,7 @@ import com.hbcy.authcenter.api.modules.core.user.dao.UserOrgMapper;
 import com.hbcy.authcenter.api.modules.core.user.model.User;
 import com.hbcy.authcenter.api.modules.minor.msg.dao.UserMsgMapper;
 import com.hbcy.authcenter.api.modules.minor.msg.dto.MsgDTO;
-import com.hbcy.authcenter.api.modules.minor.msg.dto.MsgSourceAppItem;
+import com.hbcy.authcenter.api.modules.minor.msg.dto.SourceAppDTO;
 import com.hbcy.authcenter.api.modules.minor.msg.dto.UserMsgDTO;
 import com.hbcy.authcenter.api.modules.minor.msg.model.UserMsg;
 import com.hbcy.authcenter.api.modules.minor.msg.vo.UserMsgBatchOpVO;
@@ -187,7 +187,7 @@ public class UserMsgService extends ServiceImpl<UserMsgMapper, UserMsg> {
     /**
      * 查询已推送消息的应用列表（当前用户本下组织范围内）
      */
-    public List<MsgSourceAppItem> listMsgSourceApps() {
+    public List<SourceAppDTO> listMsgSourceApps() {
         List<String> childOrgIds = sdkService.listGrantOrgs(
                 UserContextUtils.getUserId(),
                 G.APP_NAME,
@@ -204,7 +204,7 @@ public class UserMsgService extends ServiceImpl<UserMsgMapper, UserMsg> {
         Map<String, String> appNameMap = appService.getNameMap(new HashSet<>(appIds));
         return appIds.stream()
                 .map(appId -> {
-                    MsgSourceAppItem item = new MsgSourceAppItem();
+                    SourceAppDTO item = new SourceAppDTO();
                     item.setSrcApp(appId);
                     item.setSrcAppName(appNameMap.getOrDefault(appId, appId));
                     return item;
