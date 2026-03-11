@@ -52,7 +52,8 @@
         <where>
             target_user = #{vo.userId}
             <if test="vo.keyword != null and vo.keyword != ''">
-                and todo_title like concat('%', #{vo.keyword}, '%')
+                and (todo_title like concat('%', #{vo.keyword}, '%')
+                or todo_content like concat('%', #{vo.keyword}, '%'))
             </if>
             <if test="vo.todoType != null">
                 and todo_type = #{vo.todoType}
@@ -69,8 +70,11 @@
             <if test="vo.sendTimeEnd != null">
                 and #{vo.sendTimeEnd} &gt;= send_time
             </if>
-            <if test="vo.srcApp != null">
-                and src_app = #{vo.srcApp}
+            <if test="vo.srcApp != null and vo.srcApp.size() > 0">
+                and src_app in
+                <foreach item="a" collection="vo.srcApp" separator="," open="(" close=")">
+                    #{a}
+                </foreach>
             </if>
         </where>
         order by id desc
@@ -105,13 +109,17 @@
                 and td.view_state = #{vo.viewState}
             </if>
             <if test="vo.keyword != null and vo.keyword != ''">
-                and td.todo_title like concat('%', #{vo.keyword}, '%')
+                and (td.todo_title like concat('%', #{vo.keyword}, '%')
+                or td.todo_content like concat('%', #{vo.keyword}, '%'))
             </if>
             <if test="vo.todoType != null">
                 and td.todo_type = #{vo.todoType}
             </if>
-            <if test="vo.srcApp != null and vo.srcApp != ''">
-                and td.src_app = #{vo.srcApp}
+            <if test="vo.srcApp != null and vo.srcApp.size() > 0">
+                and td.src_app in
+                <foreach item="a" collection="vo.srcApp" separator="," open="(" close=")">
+                    #{a}
+                </foreach>
             </if>
             <if test="vo.sendTimeStart != null">
                 and td.send_time &gt;= #{vo.sendTimeStart}
@@ -120,6 +128,18 @@
                 and #{vo.sendTimeEnd} &gt;= td.send_time
             </if>
         </where>
-        order by td.id desc
+        order by td.send_time desc
+    </select>
+
+    <select id="listDistinctSrcApp" resultType="java.lang.String">
+        select distinct td.src_app
+        from user_todo td
+        join user_org uo on td.target_user = uo.user_id
+        where uo.org_id in
+        <foreach item="orgId" collection="orgIds" separator="," open="(" close=")">
+            #{orgId}
+        </foreach>
+        and td.src_app is not null and td.src_app != ''
+        order by td.src_app
     </select>
 </mapper>

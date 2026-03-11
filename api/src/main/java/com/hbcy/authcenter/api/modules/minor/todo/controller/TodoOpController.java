@@ -9,6 +9,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+import java.util.Map;
+
 /**
  * 待办管理
  * @author 姚泰然
@@ -30,5 +33,13 @@ public class TodoOpController {
     @GetMapping
     public PageResp<TodoDTO> queryTodo(UserTodoQueryVO vo) {
         return userTodoService.listTodo(vo);
+    }
+
+    /**
+     * 获取已推送待办的应用列表（用于待办来源下拉多选）
+     */
+    @GetMapping("/source-apps")
+    public List<Map<String, String>> listTodoSourceApps() {
+        return userTodoService.listTodoSourceApps();
     }
 }

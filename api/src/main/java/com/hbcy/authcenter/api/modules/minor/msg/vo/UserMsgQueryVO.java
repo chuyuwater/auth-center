@@ -7,6 +7,7 @@ import lombok.EqualsAndHashCode;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * 消息搜索
@@ -17,7 +18,7 @@ import java.util.Collection;
 @Data
 public class UserMsgQueryVO extends PageVO {
     /**
-     * 关键词
+     * 关键词（消息标题或消息内容模糊检索）
      */
     private String keyword;
     /**
@@ -33,13 +34,17 @@ public class UserMsgQueryVO extends PageVO {
      */
     private LocalDateTime sendTimeEnd;
     /**
-     * 消息类型
+     * 消息类型 0-普通消息，1-预警消息
      */
     private Integer msgType;
     /**
-     * 消息来源应用
+     * 消息来源应用（单值，兼容旧接口）
      */
     private String srcApp;
+    /**
+     * 消息来源应用多选
+     */
+    private List<String> srcAppList;
     /**
      * 用户id
      * 个人用户只能搜自己的，无需填充

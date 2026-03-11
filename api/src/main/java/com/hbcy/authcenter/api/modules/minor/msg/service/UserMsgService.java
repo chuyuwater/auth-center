@@ -13,6 +13,7 @@ import com.hbcy.authcenter.api.modules.core.user.dao.UserMapper;
 import com.hbcy.authcenter.api.modules.core.user.model.User;
 import com.hbcy.authcenter.api.modules.minor.msg.dao.UserMsgMapper;
 import com.hbcy.authcenter.api.modules.minor.msg.dto.MsgDTO;
+import com.hbcy.authcenter.api.modules.minor.msg.dto.MsgSourceAppItem;
 import com.hbcy.authcenter.api.modules.minor.msg.dto.UserMsgDTO;
 import com.hbcy.authcenter.api.modules.minor.msg.model.UserMsg;
 import com.hbcy.authcenter.api.modules.minor.msg.vo.UserMsgBatchOpVO;
@@ -135,5 +136,57 @@ public class UserMsgService extends ServiceImpl<UserMsgMapper, UserMsg> {
             r.setTargetUserName(userNameMap.get(r.getTargetUser()));
         }
         return new PageRespEx<>(page);
+    }
+
+    /**
+     * 根据 id 查询消息详情（仅当消息接收人属于当前用户本下组织范围内时返回）
+     */
+    public MsgDTO getMsgById(String id) {
+        List<String> childOrgIds = sdkService.listGrantOrgs(
+                UserContextUtils.getUserId(),
+                G.APP_NAME,
+                PERM_QUERY_MSG,
+                UserContextUtils.getUserOrg()
+        );
+        if (childOrgIds == null || childOrgIds.isEmpty()) {
+            return null;
+        }
+        MsgDTO dto = baseMapper.getMsgByIdInOrgs(id, childOrgIds);
+        if (dto == null) {
+            return null;
+        }
+        Map<String, String> appNameMap = appService.getNameMap(Collections.singleton(dto.getSrcApp()));
+        Map<String, String> userNameMap = nameCacheService.getUserNameMap(Collections.singleton(dto.getTargetUser()));
+        dto.setSrcAppName(appNameMap.get(dto.getSrcApp()));
+        dto.setTargetUserName(userNameMap.get(dto.getTargetUser()));
+        return dto;
+    }
+
+    /**
+     * 查询已推送消息的应用列表（当前用户本下组织范围内）
+     */
+    public List<MsgSourceAppItem> listMsgSourceApps() {
+        List<String> childOrgIds = sdkService.listGrantOrgs(
+                UserContextUtils.getUserId(),
+                G.APP_NAME,
+                PERM_QUERY_MSG,
+                UserContextUtils.getUserOrg()
+        );
+        if (childOrgIds == null || childOrgIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+        List<String> appIds = baseMapper.listDistinctSrcAppInOrgs(childOrgIds);
+        if (appIds == null || appIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+        Map<String, String> appNameMap = appService.getNameMap(new HashSet<>(appIds));
+        return appIds.stream()
+                .map(appId -> {
+                    MsgSourceAppItem item = new MsgSourceAppItem();
+                    item.setSrcApp(appId);
+                    item.setSrcAppName(appNameMap.getOrDefault(appId, appId));
+                    return item;
+                })
+                .collect(Collectors.toList());
     }
 }

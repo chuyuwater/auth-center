@@ -7,6 +7,7 @@ import lombok.EqualsAndHashCode;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * 待办搜索
@@ -18,7 +19,7 @@ import java.util.Collection;
 @Data
 public class UserTodoQueryVO extends PageVO {
     /**
-     * 关键词
+     * 关键词（匹配待办标题或待办内容）
      */
     private String keyword;
     /**
@@ -38,13 +39,13 @@ public class UserTodoQueryVO extends PageVO {
      */
     private LocalDateTime sendTimeEnd;
     /**
-     * 待办类型
+     * 待办类型：0-流程待办，1-任务待办
      */
     private Integer todoType;
     /**
-     * 来源应用
+     * 来源应用 id 列表（多选，已推送待办的应用）
      */
-    private String srcApp;
+    private List<String> srcApp;
     /**
      * 接收人id
      */

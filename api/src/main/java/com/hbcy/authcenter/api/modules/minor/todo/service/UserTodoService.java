@@ -137,4 +137,32 @@ public class UserTodoService extends ServiceImpl<UserTodoMapper, UserTodo> {
         }
         return new PageRespEx<>(page);
     }
+
+    /**
+     * 查询当前用户本下组织范围内已推送待办的应用列表（用于待办来源下拉）
+     */
+    public List<Map<String, String>> listTodoSourceApps() {
+        List<String> childOrgIds = sdkService.listGrantOrgs(
+                UserContextUtils.getUserId(),
+                G.APP_NAME,
+                PERM_VIEW_TODO,
+                UserContextUtils.getUserOrg()
+        );
+        if (childOrgIds == null || childOrgIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+        List<String> appIds = baseMapper.listDistinctSrcApp(childOrgIds);
+        if (appIds == null || appIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+        Map<String, String> appNameMap = appService.getNameMap(new HashSet<>(appIds));
+        List<Map<String, String>> result = new ArrayList<>();
+        for (String appId : appIds) {
+            Map<String, String> item = new HashMap<>();
+            item.put("appId", appId);
+            item.put("appName", appNameMap.getOrDefault(appId, appId));
+            result.add(item);
+        }
+        return result;
+    }
 }

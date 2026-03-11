@@ -9,6 +9,7 @@ import com.hbcy.authcenter.api.modules.minor.todo.vo.UserTodoQueryVO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -22,4 +23,9 @@ public interface UserTodoMapper extends BaseMapper<UserTodo> {
     Page<UserTodoDTO> query4user(Page<?> dbPage, @Param("vo") UserTodoQueryVO vo);
 
     Page<TodoDTO> listTodo(Page<?> dbPage, @Param("vo") UserTodoQueryVO vo);
+
+    /**
+     * 查询本下组织范围内有推送过待办的应用 id 列表（去重）
+     */
+    List<String> listDistinctSrcApp(@Param("orgIds") Collection<String> orgIds);
 }

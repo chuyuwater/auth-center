@@ -91,19 +91,24 @@
                 and msg.view_status = #{vo.viewStatus}
             </if>
             <if test="vo.keyword != null and vo.keyword != ''">
-                and msg.msg_title like concat('%', #{vo.keyword}, '%')
+                and (msg.msg_title like concat('%', #{vo.keyword}, '%') or msg.msg_content like concat('%', #{vo.keyword}, '%'))
             </if>
             <if test="vo.msgType != null">
                 and msg.msg_type = #{vo.msgType}
             </if>
-            <if test="vo.srcApp != null and vo.srcApp != ''">
-                and msg.src_app = #{vo.srcApp}
+            <if test="vo.srcAppList != null and vo.srcAppList.size() > 0">
+                and msg.src_app in
+                <foreach collection="vo.srcAppList" item="a" open="(" separator="," close=")">
+                    #{a}
+                </foreach>
+            </if>
+            <if test="vo.srcAppList == null or vo.srcAppList.size() == 0">
+                <if test="vo.srcApp != null and vo.srcApp != ''">
+                    and msg.src_app = #{vo.srcApp}
+                </if>
             </if>
             <if test="vo.tenantId != null and vo.tenantId != ''">
                 and msg.tenant_id = #{vo.tenantId}
-            </if>
-            <if test="vo.viewStatus != null">
-                and msg.view_status = #{vo.viewStatus}
             </if>
             <if test="vo.sendTimeStart != null">
                 and msg.send_time &gt;= #{vo.sendTimeStart}
@@ -112,5 +117,40 @@
                 and #{vo.sendTimeEnd} &gt;= msg.send_time
             </if>
         </where>
+        order by msg.send_time desc
+    </select>
+
+    <select id="getMsgByIdInOrgs" resultType="com.hbcy.authcenter.api.modules.minor.msg.dto.MsgDTO">
+        select msg.id,
+        msg.src_id,
+        msg.src_app,
+        msg.msg_title,
+        msg.msg_content,
+        msg.target_user,
+        msg.send_time,
+        msg.view_status,
+        msg.msg_type,
+        msg.relate_link,
+        msg.origin_json
+        from user_msg msg
+        join user_org uo on msg.target_user = uo.user_id
+        where msg.id = #{id}
+        and uo.org_id in
+        <foreach item="orgId" collection="orgIds" separator="," close=")" open="(">
+            #{orgId}
+        </foreach>
+        limit 1
+    </select>
+
+    <select id="listDistinctSrcAppInOrgs" resultType="java.lang.String">
+        select distinct msg.src_app
+        from user_msg msg
+        join user_org uo on msg.target_user = uo.user_id
+        where uo.org_id in
+        <foreach item="orgId" collection="orgIds" separator="," close=")" open="(">
+            #{orgId}
+        </foreach>
+        and msg.src_app is not null and msg.src_app != ''
+        order by msg.src_app
     </select>
 </mapper>
