@@ -35,6 +35,10 @@ public class UserTodoDTO {
      * 发送时间
      */
     private LocalDateTime sendTime;
+    /**
+     * 接收时间（创建时间）
+     */
+    private LocalDateTime createTime;
 
     /**
      * 处理状态
@@ -56,4 +60,8 @@ public class UserTodoDTO {
      * 关联链接
      */
     private String relateLink;
+    /**
+     * 是否催办：0-否，1-是
+     */
+    private Integer urgeFlag;
 }

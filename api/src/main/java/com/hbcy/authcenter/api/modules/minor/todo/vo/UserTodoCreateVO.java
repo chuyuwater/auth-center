@@ -59,6 +59,10 @@ public class UserTodoCreateVO {
     @NotEmpty(message = "目标用户不能为空")
     private Set<String> targetUsers;
     /**
+     * 发起人用户id（可选，用于「我发起的」列表）
+     */
+    private String initiatorId;
+    /**
      * 原始报文，用于调试
      */
     private String originJson;

@@ -47,6 +47,11 @@ public class UserTodoQueryVO extends PageVO {
      */
     private List<String> srcApp;
     /**
+     * 列表类型：myTodo-我的待办，initiated-我发起的，processed-我的已办，sendToMe-送阅我的。
+     * 与 processState 配合使用，若传 listType 则优先按 listType 确定 processState 与排序。
+     */
+    private String listType;
+    /**
      * 接收人id
      */
     private String userId;

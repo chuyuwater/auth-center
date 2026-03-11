@@ -31,6 +31,8 @@ public class UserTodo {
     public static final String COL_TENANT_ID = "tenant_id";
     public static final String COL_CREATE_TIME = "create_time";
     public static final String COL_UPDATE_TIME = "update_time";
+    public static final String COL_INITIATOR_ID = "initiator_id";
+    public static final String COL_URGE_FLAG = "urge_flag";
     @TableId(value = "id", type = IdType.ASSIGN_UUID)
     private String id;
     /**
@@ -91,4 +93,14 @@ public class UserTodo {
     private LocalDateTime createTime;
     @TableField(value = "update_time", fill = FieldFill.INSERT_UPDATE)
     private LocalDateTime updateTime;
+    /**
+     * 发起人用户id（我发起的列表用）
+     */
+    @TableField(value = "initiator_id")
+    private String initiatorId;
+    /**
+     * 是否催办：0-否，1-是
+     */
+    @TableField(value = "urge_flag")
+    private Integer urgeFlag;
 }

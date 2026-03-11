@@ -96,6 +96,16 @@ public class UserMsgService extends ServiceImpl<UserMsgMapper, UserMsg> {
                 .set(UserMsg.COL_VIEW_STATUS, UserMsg.STATUS_READ));
     }
 
+    /**
+     * 将当前用户全部未读消息标记为已读
+     */
+    public void markAllAsRead() {
+        baseMapper.update(null, new UpdateWrapper<UserMsg>()
+                .eq(UserMsg.COL_TARGET_USER, UserContextUtils.getUserId())
+                .eq(UserMsg.COL_VIEW_STATUS, UserMsg.STATUS_UNREAD)
+                .set(UserMsg.COL_VIEW_STATUS, UserMsg.STATUS_READ));
+    }
+
     public void batchDelete(UserMsgBatchOpVO vo) {
         baseMapper.delete(new UpdateWrapper<UserMsg>()
                 .eq(UserMsg.COL_TARGET_USER, UserContextUtils.getUserId())

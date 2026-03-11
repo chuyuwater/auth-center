@@ -65,7 +65,7 @@
                 and src_app = #{vo.srcApp}
             </if>
         </where>
-        order by id desc
+        order by send_time desc
     </select>
 
     <select id="listMsg" resultType="com.hbcy.authcenter.api.modules.minor.msg.dto.MsgDTO">

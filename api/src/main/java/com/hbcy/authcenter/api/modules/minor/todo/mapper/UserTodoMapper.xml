@@ -29,12 +29,12 @@
     <!--    TODO: MySQL Only-->
     <insert id="insertIgnore">
         insert ignore into user_todo (id, src_app, src_id, todo_title, todo_content, target_user,
-        send_time, process_state, todo_type, relate_link, origin_json, tenant_id)
+        send_time, process_state, todo_type, relate_link, origin_json, tenant_id, initiator_id, urge_flag)
         values
         <foreach collection="todos" item="todo" separator=",">
             (#{todo.id}, #{todo.srcApp}, #{todo.srcId}, #{todo.todoTitle}, #{todo.todoContent},
             #{todo.targetUser}, #{todo.sendTime}, #{todo.processState}, #{todo.todoType}, #{todo.relateLink},
-            #{todo.originJson}, #{todo.tenantId})
+            #{todo.originJson}, #{todo.tenantId}, #{todo.initiatorId}, #{todo.urgeFlag})
         </foreach>
     </insert>
 
@@ -44,22 +44,34 @@
         todo_title,
         todo_content,
         send_time,
+        create_time,
         view_state,
         process_state,
         todo_type,
-        relate_link
+        relate_link,
+        urge_flag
         from user_todo
         <where>
             target_user = #{vo.userId}
+            <if test="vo.listType == 'initiated'">
+                and initiator_id = #{vo.userId}
+            </if>
+            <if test="vo.listType != null and vo.listType != '' and vo.listType != 'initiated'">
+                <if test="vo.processState != null">
+                    and process_state = #{vo.processState}
+                </if>
+            </if>
+            <if test="vo.listType == null or vo.listType == ''">
+                <if test="vo.processState != null">
+                    and process_state = #{vo.processState}
+                </if>
+            </if>
             <if test="vo.keyword != null and vo.keyword != ''">
                 and (todo_title like concat('%', #{vo.keyword}, '%')
                 or todo_content like concat('%', #{vo.keyword}, '%'))
             </if>
             <if test="vo.todoType != null">
                 and todo_type = #{vo.todoType}
-            </if>
-            <if test="vo.processState != null">
-                and process_state = #{vo.processState}
             </if>
             <if test="vo.viewState != null">
                 and view_state = #{vo.viewState}
@@ -77,7 +89,14 @@
                 </foreach>
             </if>
         </where>
-        order by id desc
+        <choose>
+            <when test="vo.listType == 'myTodo'">
+                order by urge_flag desc, create_time asc
+            </when>
+            <otherwise>
+                order by send_time desc
+            </otherwise>
+        </choose>
     </select>
 
     <select id="listTodo" resultType="com.hbcy.authcenter.api.modules.minor.todo.dto.TodoDTO">

@@ -73,7 +73,9 @@ public class UserTodoService extends ServiceImpl<UserTodoMapper, UserTodo> {
                     .setOriginJson(vo.getOriginJson())
                     .setTodoType(vo.getType())
                     .setRelateLink(vo.getLink())
-                    .setTenantId(userMap.get(targetUser).getTenantId());
+                    .setTenantId(userMap.get(targetUser).getTenantId())
+                    .setInitiatorId(vo.getInitiatorId())
+                    .setUrgeFlag(0);
             todos.add(todo);
         }
         baseMapper.insertIgnore(todos);
@@ -82,6 +84,16 @@ public class UserTodoService extends ServiceImpl<UserTodoMapper, UserTodo> {
     public PageResp<UserTodoDTO> queryTodo(UserTodoQueryVO vo) {
         Page<UserTodoDTO> dbPage = vo.getDbPage();
         vo.setUserId(UserContextUtils.getUserId());
+        // 按 listType 设置 processState，便于 mapper 筛选与排序
+        String listType = vo.getListType();
+        if (listType != null && !listType.isEmpty()) {
+            switch (listType) {
+                case "myTodo" -> vo.setProcessState(0);
+                case "processed" -> vo.setProcessState(2);
+                case "sendToMe" -> vo.setProcessState(8);
+                default -> { /* initiated 不设 processState，由 mapper 按 initiator_id 筛选 */ }
+            }
+        }
         dbPage = baseMapper.query4user(dbPage, vo);
         return new PageRespEx<>(dbPage);
     }

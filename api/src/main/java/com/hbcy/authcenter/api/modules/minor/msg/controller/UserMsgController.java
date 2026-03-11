@@ -57,6 +57,14 @@ public class UserMsgController {
     }
 
     /**
+     * 全部标记为已读（当前用户全部未读消息）
+     */
+    @PostMapping("/mark-all-read")
+    public void markAllAsRead() {
+        userMsgService.markAllAsRead();
+    }
+
+    /**
      * 批量删除消息
      *
      * @param vo 操作参数

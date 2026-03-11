@@ -460,8 +460,7 @@ create index ux_user_quick_link
 
 create table if not exists user_todo
 (
-    id            char(26)                               not null
-        primary key,
+    id            char(26)                               not null primary key,
     src_app       varchar(20)                            not null comment '源app id',
     src_id        varchar(100)                           null comment '源id，用于去重',
     todo_title    varchar(300)                           not null comment '待办标题',
@@ -474,6 +473,8 @@ create table if not exists user_todo
     relate_link   varchar(255) default ''                not null comment '关联链接',
     origin_json   text                                   null comment '用于调试',
     tenant_id     varchar(20)                            not null,
+    initiator_id  varchar(32)                            null comment '发起人用户id',
+    urge_flag     tinyint      default 0                 not null comment '是否催办：0-否，1-是',
     create_time   datetime     default CURRENT_TIMESTAMP not null,
     update_time   datetime     default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP,
     constraint ux_user_todo_target_src
