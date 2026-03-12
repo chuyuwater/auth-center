@@ -3,7 +3,7 @@ package com.hbcy.authcenter.api.modules.minor.todo.controller;
 import com.hbcy.authcenter.api.modules.minor.msg.dto.SourceAppDTO;
 import com.hbcy.authcenter.api.modules.minor.todo.dto.TodoDTO;
 import com.hbcy.authcenter.api.modules.minor.todo.service.UserTodoService;
-import com.hbcy.authcenter.api.modules.minor.todo.vo.UserTodoQueryVO;
+import com.hbcy.authcenter.api.modules.minor.todo.vo.UserTodoQueryByOpVO;
 import com.hbcy.common.base.pojo.PageResp;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,10 +11,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * 待办管理
+ *
  * @author 姚泰然
  * @module msg
  * @date 2026-03-11 08:32
@@ -32,7 +32,7 @@ public class TodoOpController {
      * @return 待办分页结果
      */
     @GetMapping
-    public PageResp<TodoDTO> queryTodo(UserTodoQueryVO vo) {
+    public PageResp<TodoDTO> queryTodo(UserTodoQueryByOpVO vo) {
         return userTodoService.listTodo(vo);
     }
 

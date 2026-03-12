@@ -52,19 +52,14 @@
         urge_flag
         from user_todo
         <where>
-            target_user = #{vo.userId}
-            <if test="vo.listType == 'initiated'">
-                and initiator_id = #{vo.userId}
+            <if test="vo.userId != null and vo.userId != ''">
+                target_user = #{vo.userId}
             </if>
-            <if test="vo.listType != null and vo.listType != '' and vo.listType != 'initiated'">
-                <if test="vo.processState != null">
-                    and process_state = #{vo.processState}
-                </if>
+            <if test="vo.initiatorId != null and vo.initiatorId != ''">
+                and initiator_id = #{vo.initiatorId}
             </if>
-            <if test="vo.listType == null or vo.listType == ''">
-                <if test="vo.processState != null">
-                    and process_state = #{vo.processState}
-                </if>
+            <if test="vo.processState != null">
+                and process_state = #{vo.processState}
             </if>
             <if test="vo.keyword != null and vo.keyword != ''">
                 and (todo_title like concat('%', #{vo.keyword}, '%')
@@ -90,7 +85,7 @@
             </if>
         </where>
         <choose>
-            <when test="vo.listType == 'myTodo'">
+            <when test="vo.processState != null and vo.processState == 0">
                 order by urge_flag desc, id
             </when>
             <otherwise>

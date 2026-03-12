@@ -3,7 +3,7 @@ package com.hbcy.authcenter.api.modules.minor.todo.controller;
 import com.hbcy.authcenter.api.modules.minor.todo.dto.UserTodoDTO;
 import com.hbcy.authcenter.api.modules.minor.todo.service.UserTodoService;
 import com.hbcy.authcenter.api.modules.minor.todo.vo.UserTodoBatchOpVO;
-import com.hbcy.authcenter.api.modules.minor.todo.vo.UserTodoQueryVO;
+import com.hbcy.authcenter.api.modules.minor.todo.vo.UserTodoQueryByMeVO;
 import com.hbcy.common.base.pojo.PageResp;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
@@ -29,7 +29,7 @@ public class UserTodoController {
      * @return 待办分页结果
      */
     @GetMapping
-    public PageResp<UserTodoDTO> queryTodo(UserTodoQueryVO vo) {
+    public PageResp<UserTodoDTO> queryTodo(UserTodoQueryByMeVO vo) {
         return userTodoService.queryTodo(vo);
     }
 

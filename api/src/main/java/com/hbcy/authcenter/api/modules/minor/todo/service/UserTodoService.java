@@ -4,9 +4,10 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.f4b6a3.ulid.UlidCreator;
+import com.google.common.base.Preconditions;
+import com.hbcy.authcenter.api.common.enums.TodoQueryScopeEnum;
 import com.hbcy.authcenter.api.common.bean.NameCacheService;
 import com.hbcy.authcenter.api.common.constants.G;
-import com.hbcy.authcenter.api.common.enums.TodoProcessStateEnum;
 import com.hbcy.authcenter.api.modules.core.app.service.AppService;
 import com.hbcy.authcenter.api.modules.core.inner.service.SDKService;
 import com.hbcy.authcenter.api.modules.core.user.dao.UserMapper;
@@ -17,7 +18,8 @@ import com.hbcy.authcenter.api.modules.minor.todo.dto.TodoDTO;
 import com.hbcy.authcenter.api.modules.minor.todo.dto.UserTodoDTO;
 import com.hbcy.authcenter.api.modules.minor.todo.model.UserTodo;
 import com.hbcy.authcenter.api.modules.minor.todo.vo.UserTodoBatchOpVO;
-import com.hbcy.authcenter.api.modules.minor.todo.vo.UserTodoQueryVO;
+import com.hbcy.authcenter.api.modules.minor.todo.vo.UserTodoQueryByMeVO;
+import com.hbcy.authcenter.api.modules.minor.todo.vo.UserTodoQueryByOpVO;
 import com.hbcy.authcenter.api.modules.sys.dict.service.DictEnumAdapter;
 import com.hbcy.authcenter.sdk.feign.vo.TodoCreateVO;
 import com.hbcy.authcenter.sdk.feign.vo.TodoUpdateVO;
@@ -90,18 +92,12 @@ public class UserTodoService extends ServiceImpl<UserTodoMapper, UserTodo> {
         baseMapper.insertIgnore(todos);
     }
 
-    public PageResp<UserTodoDTO> queryTodo(UserTodoQueryVO vo) {
+    public PageResp<UserTodoDTO> queryTodo(UserTodoQueryByMeVO vo) {
+        Preconditions.checkNotNull(vo.getScope(), "查询范围不能为空");
         Page<UserTodoDTO> dbPage = vo.getDbPage();
-        vo.setUserId(UserContextUtils.getUserId());
-        // 按 listType 设置 processState，便于 mapper 筛选与排序
-        String listType = vo.getListType();
-        if (listType != null && !listType.isEmpty()) {
-            switch (listType) {
-                case "myTodo" -> vo.setProcessState(TodoProcessStateEnum.TODO.getValue());
-                case "processed" -> vo.setProcessState(TodoProcessStateEnum.DONE.getValue());
-                case "sendToMe" -> vo.setProcessState(TodoProcessStateEnum.CC.getValue());
-                default -> { /* initiated 不设 processState，由 mapper 按 initiator_id 筛选 */ }
-            }
+        switch (vo.getScope()) {
+            case TARGET_ME -> vo.setUserId(UserContextUtils.getUserId());
+            case INITIATOR_ME -> vo.setInitiatorId(UserContextUtils.getUserId());
         }
         dbPage = baseMapper.query4user(dbPage, vo);
         return new PageRespEx<>(dbPage);
@@ -138,7 +134,7 @@ public class UserTodoService extends ServiceImpl<UserTodoMapper, UserTodo> {
      * @param vo 查询条件
      * @return 搜索结果分页
      */
-    public PageResp<TodoDTO> listTodo(UserTodoQueryVO vo) {
+    public PageResp<TodoDTO> listTodo(UserTodoQueryByOpVO vo) {
         Page<TodoDTO> dbPage = vo.getDbPage();
         List<String> childOrgIds = sdkService.listGrantOrgs(
                 UserContextUtils.getUserId(),

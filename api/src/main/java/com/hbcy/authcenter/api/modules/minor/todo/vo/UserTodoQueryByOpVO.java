@@ -10,14 +10,14 @@ import java.util.Collection;
 import java.util.List;
 
 /**
- * 待办搜索
+ * 待办搜索：用于基础平台管理端
  *
  * @author 姚泰然
  * @date 2026-01-27
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class UserTodoQueryVO extends PageVO {
+public class UserTodoQueryByOpVO extends PageVO {
     /**
      * 关键词（匹配待办标题或待办内容）
      */
@@ -46,11 +46,6 @@ public class UserTodoQueryVO extends PageVO {
      * 来源应用 id 列表（多选，已推送待办的应用）
      */
     private List<String> srcApp;
-    /**
-     * 列表类型：myTodo-我的待办，initiated-我发起的，processed-我的已办，sendToMe-送阅我的。
-     * 与 processState 配合使用，若传 listType 则优先按 listType 确定 processState 与排序。
-     */
-    private String listType;
     /**
      * 接收人id
      */
