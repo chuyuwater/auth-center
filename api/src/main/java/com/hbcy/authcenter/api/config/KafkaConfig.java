@@ -2,8 +2,7 @@ package com.hbcy.authcenter.api.config;
 
 import com.google.common.collect.ImmutableMap;
 import com.hbcy.authcenter.api.modules.sys.log.model.AuditLog;
-import com.hbcy.authcenter.global.dto.AppEventInDTO;
-import com.hbcy.authcenter.global.dto.AppEventOutDTO;
+import com.hbcy.authcenter.global.dto.AppEventDTO;
 import com.hbcy.common.kafka.CustomJsonDeserializer;
 import com.hbcy.common.kafka.CustomJsonSerializer;
 import com.hbcy.common.kafka.KafkaUtils;
@@ -40,11 +39,11 @@ public class KafkaConfig implements KafkaListenerConfigurer {
      * 序列化key对应的type，放置在header里，与平台侧消费端要一致
      */
     private final Map<String, Class<?>> produceTypes = ImmutableMap.<String, Class<?>>builder()
-            .put("event", AppEventOutDTO.class)
+            .put("event", AppEventDTO.class)
             .build();
     private final Map<String, Class<?>> consumeTypes = ImmutableMap.<String, Class<?>>builder()
             .put("audit", AuditLog.class)
-            .put("event", AppEventInDTO.class)
+            .put("event", AppEventDTO.class)
             .build();
 
     @Resource

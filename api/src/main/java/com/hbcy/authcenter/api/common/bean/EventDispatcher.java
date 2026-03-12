@@ -1,7 +1,7 @@
 package com.hbcy.authcenter.api.common.bean;
 
 import com.hbcy.authcenter.global.constants.EventConstants;
-import com.hbcy.authcenter.global.dto.AppEventOutDTO;
+import com.hbcy.authcenter.global.dto.AppEventDTO;
 import com.hbcy.authcenter.sdk.utils.AppEventComposer;
 import jakarta.annotation.Resource;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -28,7 +28,7 @@ public class EventDispatcher {
      * @param payload   事件详情
      */
     public void dispatch(String eventCode, Object payload) {
-        AppEventOutDTO event = appEventComposer.createAppEvent(
+        AppEventDTO event = appEventComposer.createAppEvent(
                 EventConstants.KAFKA_TOPIC_PORTAL_EVENT, eventCode, payload);
         kafkaTemplate.send(EventConstants.KAFKA_TOPIC_PORTAL_EVENT, event);
     }
@@ -42,7 +42,7 @@ public class EventDispatcher {
      * @param payload     事件详情
      */
     public void dispatch(String shardingKey, String eventCode, Object payload) {
-        AppEventOutDTO event = appEventComposer.createAppEvent(
+        AppEventDTO event = appEventComposer.createAppEvent(
                 EventConstants.KAFKA_TOPIC_PORTAL_EVENT, shardingKey, eventCode, 1, payload);
         kafkaTemplate.send(EventConstants.KAFKA_TOPIC_PORTAL_EVENT, shardingKey, event);
     }
@@ -57,7 +57,7 @@ public class EventDispatcher {
      * @param payload      事件详情
      */
     public void dispatch(String shardingKey, String eventCode, int eventVersion, Object payload) {
-        AppEventOutDTO event = appEventComposer.createAppEvent(
+        AppEventDTO event = appEventComposer.createAppEvent(
                 EventConstants.KAFKA_TOPIC_PORTAL_EVENT, shardingKey, eventCode, eventVersion, payload);
         kafkaTemplate.send(EventConstants.KAFKA_TOPIC_PORTAL_EVENT, shardingKey, event);
     }

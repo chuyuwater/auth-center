@@ -1,6 +1,7 @@
 package com.hbcy.authcenter.global.dto;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.hbcy.common.base.json.JsonUtils;
 import lombok.Data;
 
 /**
@@ -10,7 +11,7 @@ import lombok.Data;
  * @date 2025-12-31 14:19
  */
 @Data
-public class AppEventInDTO {
+public class AppEventDTO {
 
     /**
      * 事件元数据
@@ -22,4 +23,8 @@ public class AppEventInDTO {
      * 也可以直接取值
      */
     private JsonNode payload;
+
+    public void fillPayload(Object data) {
+        this.payload = JsonUtils.value2tree(data);
+    }
 }

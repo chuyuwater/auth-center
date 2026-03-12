@@ -1,6 +1,6 @@
 package com.hbcy.authcenter.sdk.utils;
 
-import com.hbcy.authcenter.global.dto.AppEventOutDTO;
+import com.hbcy.authcenter.global.dto.AppEventDTO;
 import com.hbcy.authcenter.global.dto.EventMeta;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -18,9 +18,9 @@ public class AppEventComposer {
     @Value("${spring.application.name}")
     private String serviceName;
 
-    public AppEventOutDTO createAppEvent(String topic, String shardingKey, String eventCode,
-                                         long eventVersion, Object payload) {
-        AppEventOutDTO event = new AppEventOutDTO();
+    public AppEventDTO createAppEvent(String topic, String shardingKey, String eventCode,
+                                      long eventVersion, Object payload) {
+        AppEventDTO event = new AppEventDTO();
         EventMeta meta = new EventMeta()
                 .setEventCode(UUID.randomUUID().toString())
                 .setTimestamp(System.currentTimeMillis())
@@ -31,11 +31,11 @@ public class AppEventComposer {
                 .setEventCode(eventCode)
                 .setTraceId(UserContextUtils.getTraceId());
         event.setMeta(meta);
-        event.setPayload(payload);
+        event.fillPayload(payload);
         return event;
     }
 
-    public AppEventOutDTO createAppEvent(String topic, String eventCode, Object payload) {
+    public AppEventDTO createAppEvent(String topic, String eventCode, Object payload) {
         return createAppEvent(topic, null, eventCode, 1, payload);
     }
 }
