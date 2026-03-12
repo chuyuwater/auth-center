@@ -84,14 +84,7 @@
                 </foreach>
             </if>
         </where>
-        <choose>
-            <when test="vo.processState != null and vo.processState == 0">
-                order by urge_flag desc, id
-            </when>
-            <otherwise>
-                order by id desc
-            </otherwise>
-        </choose>
+        <!-- 排序由前端传 orderBy，经 PageVO.getOrderedDbPage 注入到 Page.orders，由 MyBatis-Plus 自动拼接 -->
     </select>
 
     <select id="listTodo" resultType="com.hbcy.authcenter.api.modules.minor.todo.dto.TodoDTO">

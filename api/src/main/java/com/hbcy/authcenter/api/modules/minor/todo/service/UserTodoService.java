@@ -92,9 +92,15 @@ public class UserTodoService extends ServiceImpl<UserTodoMapper, UserTodo> {
         baseMapper.insertIgnore(todos);
     }
 
+    /** 待办列表允许的排序字段（与 PageVO orderBy 规则一致：以 "-" 开头为倒序，多列用逗号分隔） */
+    private static final Set<String> TODO_ORDER_ALLOWED = Set.of(
+        "create_time", "-create_time", "send_time", "-send_time", "urge_flag", "-urge_flag",
+        "-urge_flag,create_time"
+    );
+
     public PageResp<UserTodoDTO> queryTodo(UserTodoQueryByMeVO vo) {
         Preconditions.checkNotNull(vo.getScope(), "查询范围不能为空");
-        Page<UserTodoDTO> dbPage = vo.getDbPage();
+        Page<UserTodoDTO> dbPage = vo.getOrderedDbPage(Map.of("", TODO_ORDER_ALLOWED));
         switch (vo.getScope()) {
             case TARGET_ME -> vo.setUserId(UserContextUtils.getUserId());
             case INITIATOR_ME -> vo.setInitiatorId(UserContextUtils.getUserId());
