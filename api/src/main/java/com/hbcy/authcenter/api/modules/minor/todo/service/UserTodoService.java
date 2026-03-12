@@ -16,9 +16,10 @@ import com.hbcy.authcenter.api.modules.minor.todo.dto.TodoDTO;
 import com.hbcy.authcenter.api.modules.minor.todo.dto.UserTodoDTO;
 import com.hbcy.authcenter.api.modules.minor.todo.model.UserTodo;
 import com.hbcy.authcenter.api.modules.minor.todo.vo.UserTodoBatchOpVO;
-import com.hbcy.authcenter.api.modules.minor.todo.vo.UserTodoCreateVO;
 import com.hbcy.authcenter.api.modules.minor.todo.vo.UserTodoQueryVO;
-import com.hbcy.authcenter.api.modules.minor.todo.vo.UserTodoUpdateVO;
+import com.hbcy.authcenter.api.modules.sys.dict.service.DictEnumAdapter;
+import com.hbcy.authcenter.sdk.feign.vo.TodoCreateVO;
+import com.hbcy.authcenter.sdk.feign.vo.TodoUpdateVO;
 import com.hbcy.authcenter.sdk.utils.UserContextUtils;
 import com.hbcy.common.base.error.ParamError;
 import com.hbcy.common.base.pojo.PageResp;
@@ -38,6 +39,7 @@ import java.util.stream.Collectors;
 @Service
 public class UserTodoService extends ServiceImpl<UserTodoMapper, UserTodo> {
     public static final String PERM_VIEW_TODO = "todo.query";
+    public static final String PROCESS_STATE = "TODO_PROCESS_STATE";
     @Resource
     private UserMapper userMapper;
     @Resource
@@ -46,9 +48,11 @@ public class UserTodoService extends ServiceImpl<UserTodoMapper, UserTodo> {
     private AppService appService;
     @Resource
     private SDKService sdkService;
+    @Resource
+    private DictEnumAdapter dictEnumAdapter;
 
     @Transactional(rollbackFor = Exception.class)
-    public void batchCreateTodo(UserTodoCreateVO vo) {
+    public void batchCreateTodo(TodoCreateVO vo) {
         LocalDateTime sendTime = vo.getCreateTime();
         if (sendTime == null) {
             sendTime = LocalDateTime.now();
@@ -56,6 +60,9 @@ public class UserTodoService extends ServiceImpl<UserTodoMapper, UserTodo> {
         List<User> users = userMapper.selectByIds(vo.getTargetUsers());
         if (users.size() < vo.getTargetUsers().size()) {
             throw new ParamError("部分用户不存在");
+        }
+        if (!dictEnumAdapter.isValidValue(PROCESS_STATE, vo.getProcessState().toString())) {
+            throw new ParamError("处理状态无效");
         }
         Map<String, User> userMap = users.stream().collect(
                 Collectors.toMap(User::getId, v -> v));
@@ -99,12 +106,16 @@ public class UserTodoService extends ServiceImpl<UserTodoMapper, UserTodo> {
         return new PageRespEx<>(dbPage);
     }
 
-    public void updateState(UserTodoUpdateVO vo) {
+    public void updateState(TodoUpdateVO vo) {
+        if (!dictEnumAdapter.isValidValue(PROCESS_STATE, vo.getProcessState().toString())) {
+            throw new ParamError("处理状态无效");
+        }
         baseMapper.update(new UpdateWrapper<UserTodo>()
                 .in(UserTodo.COL_TARGET_USER, vo.getUserIds())
                 .eq(UserTodo.COL_SRC_ID, vo.getSrcId())
                 .eq(UserTodo.COL_SRC_APP, vo.getSrcApp())
-                .set(UserTodo.COL_PROCESS_STATE, vo.getProcessState()));
+                .set(UserTodo.COL_PROCESS_STATE, vo.getProcessState())
+                .set(UserTodo.COL_URGE_FLAG, vo.getUrgeFlag()));
     }
 
     public void batchDelete(UserTodoBatchOpVO vo) {

@@ -52,8 +52,17 @@ public class TodoCreateVO {
      */
     private LocalDateTime createTime;
     /**
+     * 流程发起人用户id
+     */
+    private String initiatorId;
+    /**
      * 目标用户
      */
     @NotEmpty(message = "目标用户不能为空")
     private Set<String> targetUsers;
+
+    /**
+     * 待办相关原始数据
+     */
+    private String originJson;
 }

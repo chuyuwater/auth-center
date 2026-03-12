@@ -5,8 +5,8 @@ import com.hbcy.authcenter.api.modules.core.perm.service.PermUnitUserService;
 import com.hbcy.authcenter.api.modules.minor.msg.service.UserMsgService;
 import com.hbcy.authcenter.api.modules.minor.msg.vo.UserMsgCreateVO;
 import com.hbcy.authcenter.api.modules.minor.todo.service.UserTodoService;
-import com.hbcy.authcenter.api.modules.minor.todo.vo.UserTodoCreateVO;
-import com.hbcy.authcenter.api.modules.minor.todo.vo.UserTodoUpdateVO;
+import com.hbcy.authcenter.sdk.feign.vo.TodoCreateVO;
+import com.hbcy.authcenter.sdk.feign.vo.TodoUpdateVO;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -105,15 +105,15 @@ public class SDKController {
      * 创建待办，一般是流程引擎调用
      */
     @PostMapping("/todo")
-    public void batchCreateTodo(@Valid @RequestBody UserTodoCreateVO vo) {
+    public void batchCreateTodo(@Valid @RequestBody TodoCreateVO vo) {
         userTodoService.batchCreateTodo(vo);
     }
-    
+
     /**
      * 更新待办状态，一般是流程引擎调用
      */
     @PutMapping("/todo/update-state")
-    public void updateState(@Valid @RequestBody UserTodoUpdateVO vo) {
+    public void updateState(@Valid @RequestBody TodoUpdateVO vo) {
         userTodoService.updateState(vo);
     }
 }

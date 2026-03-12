@@ -33,4 +33,9 @@ public class TodoUpdateVO {
      */
     @NotEmpty(message = "用户id不能为空")
     private List<String> userIds;
+
+    /**
+     * 催办标识，0-默认，1-催办
+     */
+    private Integer urgeFlag = 0;
 }
