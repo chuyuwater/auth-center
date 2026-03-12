@@ -91,10 +91,10 @@
         </where>
         <choose>
             <when test="vo.listType == 'myTodo'">
-                order by urge_flag desc, create_time asc
+                order by urge_flag desc, id
             </when>
             <otherwise>
-                order by send_time desc
+                order by id desc
             </otherwise>
         </choose>
     </select>

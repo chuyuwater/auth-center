@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.f4b6a3.ulid.UlidCreator;
 import com.hbcy.authcenter.api.common.bean.NameCacheService;
 import com.hbcy.authcenter.api.common.constants.G;
+import com.hbcy.authcenter.api.common.enums.TodoProcessStateEnum;
 import com.hbcy.authcenter.api.modules.core.app.service.AppService;
 import com.hbcy.authcenter.api.modules.core.inner.service.SDKService;
 import com.hbcy.authcenter.api.modules.core.user.dao.UserMapper;
@@ -96,9 +97,9 @@ public class UserTodoService extends ServiceImpl<UserTodoMapper, UserTodo> {
         String listType = vo.getListType();
         if (listType != null && !listType.isEmpty()) {
             switch (listType) {
-                case "myTodo" -> vo.setProcessState(0);
-                case "processed" -> vo.setProcessState(2);
-                case "sendToMe" -> vo.setProcessState(8);
+                case "myTodo" -> vo.setProcessState(TodoProcessStateEnum.TODO.getValue());
+                case "processed" -> vo.setProcessState(TodoProcessStateEnum.DONE.getValue());
+                case "sendToMe" -> vo.setProcessState(TodoProcessStateEnum.CC.getValue());
                 default -> { /* initiated 不设 processState，由 mapper 按 initiator_id 筛选 */ }
             }
         }

@@ -12,12 +12,12 @@ public enum TodoProcessStateEnum {
     FINISHED(4, "办结"),
     CC(8, "抄送");
     @Getter
-    private final int code;
+    private final int value;
     @Getter
     private final String desc;
 
-    TodoProcessStateEnum(int code, String desc) {
-        this.code = code;
+    TodoProcessStateEnum(int value, String desc) {
+        this.value = value;
         this.desc = desc;
     }
 }
