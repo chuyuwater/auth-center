@@ -99,7 +99,7 @@ public class UserAuthService {
             deleteCaptcha(vo.getCaptchaId());
             throw new ParamError("验证码错误");
         }
-        deleteCaptcha(vo.getCaptchaId());
+        //NOTE: 如果用户是多租户的，选择租户需要复用验证码，所以不要删除验证码
         List<User> userList = userMapper.selectList(new QueryWrapper<User>()
                 .eq(StringUtils.isNotBlank(vo.getAccount()), User.COL_ACCOUNT, vo.getAccount())
                 .eq(StringUtils.isNotBlank(vo.getPhone()), User.COL_PHONE, vo.getPhone())
