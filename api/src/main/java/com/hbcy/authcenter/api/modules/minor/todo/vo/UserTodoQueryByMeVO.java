@@ -49,17 +49,17 @@ public class UserTodoQueryByMeVO extends PageVO {
      */
     private List<String> srcApp;
     /**
-     * 查询范围：target_me-按接收人（我），initiator_me-按发起人（我）；后端据此填充 userId 或 initiatorId
+     * 查询范围：TARGET_ME-按接收人（我），INITIATOR_ME-按发起人（我）；后端据此填充 userId 或 initiatorId
      */
     @NotNull(message = "必须选择查询范围")
     private TodoQueryScopeEnum scope;
     /**
-     * 发起人 id（服务端根据 scope=initiator_me 填充）
+     * 发起人 id（服务端根据 scope=INITIATOR_ME 填充）
      */
     @JsonIgnore
     private String initiatorId;
     /**
-     * 接收人 id（服务端根据 scope=target_me 填充）
+     * 接收人 id（服务端根据 scope=TARGET_ME 填充）
      */
     @JsonIgnore
     private String userId;
