@@ -1,5 +1,6 @@
 package com.hbcy.authcenter.api.modules.core.app.vo;
 
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.Data;
@@ -25,7 +26,7 @@ public class ResourcePermApiVO {
     /**
      * API路径，支持ant通配符
      */
-    @NotNull(message = "API路径不能为空")
+    @NotBlank(message = "API路径不能为空")
     @Length(max = 255, message = "API路径长度不能超过255")
     @Pattern(regexp = "^$|^/api/[\\w/\\-*?]*$", message = "API必须以/api开头")
     private String apiPath;
