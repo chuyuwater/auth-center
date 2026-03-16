@@ -97,6 +97,12 @@ public class UserMsgService extends ServiceImpl<UserMsgMapper, UserMsg> {
         Page<UserMsgDTO> dbPage = vo.getDbPage();
         vo.setUserId(UserContextUtils.getUserId());
         dbPage = baseMapper.query4User(dbPage, vo);
+        Set<String> appIds = dbPage.getRecords().stream().map(
+                UserMsgDTO::getSrcApp).collect(Collectors.toSet());
+        Map<String, String> nameMap = appService.getNameMap(appIds);
+        for (UserMsgDTO r : dbPage.getRecords()) {
+            r.setSrcAppName(nameMap.getOrDefault(r.getSrcApp(), r.getSrcApp()));
+        }
         return new PageRespEx<>(dbPage);
     }
 

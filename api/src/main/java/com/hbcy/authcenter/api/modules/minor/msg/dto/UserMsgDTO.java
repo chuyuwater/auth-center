@@ -19,7 +19,10 @@ public class UserMsgDTO {
      * 消息来源应用
      */
     private String srcApp;
-
+    /**
+     * 来源应用名称
+     */
+    private String srcAppName;
     /**
      * 消息标题
      */

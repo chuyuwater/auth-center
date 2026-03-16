@@ -22,6 +22,11 @@ public class UserTodoDTO {
     private String srcApp;
 
     /**
+     * 来源应用名称
+     */
+    private String srcAppName;
+
+    /**
      * 待办标题
      */
     private String todoTitle;

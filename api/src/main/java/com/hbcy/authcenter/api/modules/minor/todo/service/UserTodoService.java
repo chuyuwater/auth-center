@@ -15,6 +15,7 @@ import com.hbcy.authcenter.api.modules.core.perm.service.PermUnitUserService;
 import com.hbcy.authcenter.api.modules.core.user.dao.UserMapper;
 import com.hbcy.authcenter.api.modules.core.user.model.User;
 import com.hbcy.authcenter.api.modules.minor.msg.dto.SourceAppDTO;
+import com.hbcy.authcenter.api.modules.minor.msg.dto.UserMsgDTO;
 import com.hbcy.authcenter.api.modules.minor.todo.dao.UserTodoMapper;
 import com.hbcy.authcenter.api.modules.minor.todo.dto.TodoDTO;
 import com.hbcy.authcenter.api.modules.minor.todo.dto.UserTodoDTO;
@@ -111,6 +112,12 @@ public class UserTodoService extends ServiceImpl<UserTodoMapper, UserTodo> {
             case INITIATOR_ME -> vo.setInitiatorId(UserContextUtils.getUserId());
         }
         dbPage = baseMapper.query4user(dbPage, vo);
+        Set<String> appIds = dbPage.getRecords().stream().map(
+                UserTodoDTO::getSrcApp).collect(Collectors.toSet());
+        Map<String, String> nameMap = appService.getNameMap(appIds);
+        for (UserTodoDTO r : dbPage.getRecords()) {
+            r.setSrcAppName(nameMap.getOrDefault(r.getSrcApp(), r.getSrcApp()));
+        }
         return new PageRespEx<>(dbPage);
     }
 

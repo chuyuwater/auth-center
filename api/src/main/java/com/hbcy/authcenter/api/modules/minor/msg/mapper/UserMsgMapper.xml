@@ -37,6 +37,7 @@
 
     <select id="query4User" resultType="com.hbcy.authcenter.api.modules.minor.msg.dto.UserMsgDTO">
         select id,
+        src_app,
         msg_title,
         msg_content,
         send_time,
