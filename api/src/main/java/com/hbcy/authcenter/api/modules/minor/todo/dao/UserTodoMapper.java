@@ -24,9 +24,4 @@ public interface UserTodoMapper extends BaseMapper<UserTodo> {
     Page<UserTodoDTO> query4user(Page<?> dbPage, @Param("vo") UserTodoQueryByMeVO vo);
 
     Page<TodoDTO> listTodo(Page<?> dbPage, @Param("vo") UserTodoQueryByOpVO vo);
-
-    /**
-     * 查询本下组织范围内有推送过待办的应用 id 列表（去重）
-     */
-    List<String> listDistinctSrcApp(@Param("orgIds") Collection<String> orgIds);
 }

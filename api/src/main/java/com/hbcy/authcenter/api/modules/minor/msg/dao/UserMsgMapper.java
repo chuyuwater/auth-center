@@ -23,9 +23,4 @@ public interface UserMsgMapper extends BaseMapper<UserMsg> {
     Page<UserMsgDTO> query4User(Page<?> dbPage, @Param("vo") UserMsgQueryVO vo);
 
     Page<MsgDTO> listMsg(Page<?> dbPage, @Param("vo") UserMsgQueryVO vo);
-
-    /**
-     * 查询在指定组织范围内有推送消息的应用 id 列表（去重）
-     */
-    List<String> listDistinctSrcAppInOrgs(@Param("orgIds") Collection<String> orgIds);
 }

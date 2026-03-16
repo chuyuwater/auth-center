@@ -65,7 +65,7 @@
                 and src_app = #{vo.srcApp}
             </if>
         </where>
-        order by send_time desc
+        order by id desc
     </select>
 
     <select id="listMsg" resultType="com.hbcy.authcenter.api.modules.minor.msg.dto.MsgDTO">
@@ -83,15 +83,19 @@
         from user_msg msg
         join user_org uo on msg.target_user = uo.user_id
         <where>
-            uo.org_id in
-            <foreach item="orgId" collection="vo.searchOrgIds" separator="," close=")" open="(" index="">
-                #{orgId}
-            </foreach>
+            msg.tenant_id=#{vo.tenantId}
+            <if test="vo.searchOrgIds != null and !vo.searchOrgIds.empty">
+               and uo.org_id in
+                <foreach item="orgId" collection="vo.searchOrgIds" separator="," close=")" open="(" index="">
+                    #{orgId}
+                </foreach>
+            </if>
             <if test="vo.viewStatus != null">
                 and msg.view_status = #{vo.viewStatus}
             </if>
             <if test="vo.keyword != null and vo.keyword != ''">
-                and (msg.msg_title like concat('%', #{vo.keyword}, '%') or msg.msg_content like concat('%', #{vo.keyword}, '%'))
+                and (msg.msg_title like concat('%', #{vo.keyword}, '%') or msg.msg_content like concat('%',
+                #{vo.keyword}, '%'))
             </if>
             <if test="vo.msgType != null">
                 and msg.msg_type = #{vo.msgType}
@@ -117,18 +121,6 @@
                 and #{vo.sendTimeEnd} &gt;= msg.send_time
             </if>
         </where>
-        order by msg.send_time desc
-    </select>
-
-    <select id="listDistinctSrcAppInOrgs" resultType="java.lang.String">
-        select distinct msg.src_app
-        from user_msg msg
-        join user_org uo on msg.target_user = uo.user_id
-        where uo.org_id in
-        <foreach item="orgId" collection="orgIds" separator="," close=")" open="(">
-            #{orgId}
-        </foreach>
-        and msg.src_app is not null and msg.src_app != ''
-        order by msg.src_app
+        order by msg.id desc
     </select>
 </mapper>

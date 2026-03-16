@@ -105,10 +105,13 @@
         from user_todo td
         join user_org uo on td.target_user = uo.user_id
         <where>
-            uo.org_id in
-            <foreach item="orgId" collection="vo.searchOrgIds" separator="," close=")" open="(" index="">
-                #{orgId}
-            </foreach>
+            td.tenant_id = #{vo.tenantId}
+            <if test="vo.searchOrgIds != null and !vo.searchOrgIds.empty">
+                and uo.org_id in
+                <foreach item="orgId" collection="vo.searchOrgIds" separator="," close=")" open="(" index="">
+                    #{orgId}
+                </foreach>
+            </if>
             <if test="vo.processState != null">
                 and td.process_state = #{vo.processState}
             </if>
@@ -136,17 +139,5 @@
             </if>
         </where>
         order by td.id desc
-    </select>
-
-    <select id="listDistinctSrcApp" resultType="java.lang.String">
-        select distinct td.src_app
-        from user_todo td
-        join user_org uo on td.target_user = uo.user_id
-        where uo.org_id in
-        <foreach item="orgId" collection="orgIds" separator="," open="(" close=")">
-            #{orgId}
-        </foreach>
-        and td.src_app != ''
-        order by td.src_app
     </select>
 </mapper>

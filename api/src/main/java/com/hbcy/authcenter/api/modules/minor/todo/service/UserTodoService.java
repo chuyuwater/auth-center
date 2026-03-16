@@ -8,8 +8,10 @@ import com.google.common.base.Preconditions;
 import com.hbcy.authcenter.api.common.enums.TodoQueryScopeEnum;
 import com.hbcy.authcenter.api.common.bean.NameCacheService;
 import com.hbcy.authcenter.api.common.constants.G;
+import com.hbcy.authcenter.api.modules.core.app.dto.GrantAppDTO;
 import com.hbcy.authcenter.api.modules.core.app.service.AppService;
 import com.hbcy.authcenter.api.modules.core.inner.service.SDKService;
+import com.hbcy.authcenter.api.modules.core.perm.service.PermUnitUserService;
 import com.hbcy.authcenter.api.modules.core.user.dao.UserMapper;
 import com.hbcy.authcenter.api.modules.core.user.model.User;
 import com.hbcy.authcenter.api.modules.minor.msg.dto.SourceAppDTO;
@@ -30,6 +32,7 @@ import com.hbcy.common.db.model.PageRespEx;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -53,6 +56,8 @@ public class UserTodoService extends ServiceImpl<UserTodoMapper, UserTodo> {
     private SDKService sdkService;
     @Resource
     private DictEnumAdapter dictEnumAdapter;
+    @Resource
+    private PermUnitUserService permUnitUserService;
 
     @Transactional(rollbackFor = Exception.class)
     public void batchCreateTodo(TodoCreateVO vo) {
@@ -94,8 +99,8 @@ public class UserTodoService extends ServiceImpl<UserTodoMapper, UserTodo> {
 
     /** 待办列表允许的排序字段（与 PageVO orderBy 规则一致：以 "-" 开头为倒序，多列用逗号分隔） */
     private static final Set<String> TODO_ORDER_ALLOWED = Set.of(
-        "create_time", "-create_time", "send_time", "-send_time", "urge_flag", "-urge_flag",
-        "-urge_flag,create_time"
+            "create_time", "-create_time", "send_time", "-send_time", "urge_flag", "-urge_flag",
+            "-urge_flag,create_time"
     );
 
     public PageResp<UserTodoDTO> queryTodo(UserTodoQueryByMeVO vo) {
@@ -142,13 +147,16 @@ public class UserTodoService extends ServiceImpl<UserTodoMapper, UserTodo> {
      */
     public PageResp<TodoDTO> listTodo(UserTodoQueryByOpVO vo) {
         Page<TodoDTO> dbPage = vo.getDbPage();
-        List<String> childOrgIds = sdkService.listGrantOrgs(
-                UserContextUtils.getUserId(),
-                G.APP_NAME,
-                PERM_VIEW_TODO,
-                UserContextUtils.getUserOrg()
-        );
-        vo.setSearchOrgIds(childOrgIds);
+        if (!UserContextUtils.isTenantAdmin()) {
+            List<String> childOrgIds = sdkService.listGrantOrgs(
+                    UserContextUtils.getUserId(),
+                    G.APP_NAME,
+                    PERM_VIEW_TODO,
+                    UserContextUtils.getUserOrg()
+            );
+            vo.setSearchOrgIds(childOrgIds);
+        }
+        vo.setTenantId(UserContextUtils.getTenantId());
         Page<TodoDTO> page = baseMapper.listTodo(dbPage, vo);
         Set<String> appIds = new HashSet<>();
         Set<String> userIds = new HashSet<>();
@@ -169,27 +177,18 @@ public class UserTodoService extends ServiceImpl<UserTodoMapper, UserTodo> {
      * 查询当前用户本下组织范围内已推送待办的应用列表（用于待办来源下拉）
      */
     public List<SourceAppDTO> listTodoSourceApps() {
-        List<String> childOrgIds = sdkService.listGrantOrgs(
-                UserContextUtils.getUserId(),
-                G.APP_NAME,
-                PERM_VIEW_TODO,
-                UserContextUtils.getUserOrg()
-        );
-        if (childOrgIds == null || childOrgIds.isEmpty()) {
-            return Collections.emptyList();
+        List<GrantAppDTO> grantApps = permUnitUserService.listApp(
+                UserContextUtils.getUserOrg(), false);
+        if (CollectionUtils.isEmpty(grantApps)) {
+            return List.of();
         }
-        List<String> appIds = baseMapper.listDistinctSrcApp(childOrgIds);
-        if (appIds == null || appIds.isEmpty()) {
-            return Collections.emptyList();
-        }
-        Map<String, String> appNameMap = appService.getNameMap(new HashSet<>(appIds));
-        List<SourceAppDTO> result = new ArrayList<>();
-        for (String appId : appIds) {
-            SourceAppDTO dto = new SourceAppDTO();
-            dto.setSrcApp(appId);
-            dto.setSrcAppName(appNameMap.get(appId));
-            result.add(dto);
-        }
-        return result;
+        return grantApps.stream()
+                .map(app -> {
+                    SourceAppDTO item = new SourceAppDTO();
+                    item.setSrcApp(app.getAppId());
+                    item.setSrcAppName(app.getNameCn());
+                    return item;
+                })
+                .collect(Collectors.toList());
     }
 }

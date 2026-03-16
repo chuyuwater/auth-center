@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.f4b6a3.ulid.UlidCreator;
 import com.hbcy.authcenter.api.common.bean.NameCacheService;
 import com.hbcy.authcenter.api.common.constants.G;
+import com.hbcy.authcenter.api.modules.core.app.dto.GrantAppDTO;
 import com.hbcy.authcenter.api.modules.core.app.model.App;
 import com.hbcy.authcenter.api.modules.core.app.service.AppService;
 import com.hbcy.authcenter.api.modules.core.inner.service.SDKService;
@@ -129,16 +130,19 @@ public class UserMsgService extends ServiceImpl<UserMsgMapper, UserMsg> {
      */
     public PageResp<MsgDTO> listMsg(UserMsgQueryVO vo) {
         Page<MsgDTO> dbPage = vo.getDbPage();
-        List<String> childOrgIds = sdkService.listGrantOrgs(
-                UserContextUtils.getUserId(),
-                G.APP_NAME,
-                PERM_QUERY_MSG,
-                UserContextUtils.getUserOrg()
-        );
-        if (childOrgIds.isEmpty()) {
-            return new PageRespEx<>(dbPage);
+        if (!UserContextUtils.isTenantAdmin()) {
+            List<String> childOrgIds = sdkService.listGrantOrgs(
+                    UserContextUtils.getUserId(),
+                    G.APP_NAME,
+                    PERM_QUERY_MSG,
+                    UserContextUtils.getUserOrg()
+            );
+            if (childOrgIds.isEmpty()) {
+                return new PageRespEx<>(dbPage);
+            }
+            vo.setSearchOrgIds(childOrgIds);
         }
-        vo.setSearchOrgIds(childOrgIds);
+        vo.setTenantId(UserContextUtils.getTenantId());
         Page<MsgDTO> page = baseMapper.listMsg(dbPage, vo);
         Set<String> appIds = new HashSet<>();
         Set<String> userIds = new HashSet<>();
@@ -164,7 +168,7 @@ public class UserMsgService extends ServiceImpl<UserMsgMapper, UserMsg> {
             return null;
         }
         String userId = UserContextUtils.getUserId();
-        if (!userMsg.getTargetUser().equals(userId)) {
+        if (!UserContextUtils.isTenantAdmin() && !userMsg.getTargetUser().equals(userId)) {
             //确认用户确实有该消息的访问权限
             Set<String> targetOrgs = userOrgMapper.listAllOrg(userMsg.getTargetUser());
             List<String> childOrgIds = sdkService.listGrantOrgs(
@@ -188,25 +192,16 @@ public class UserMsgService extends ServiceImpl<UserMsgMapper, UserMsg> {
      * 查询已推送消息的应用列表（当前用户本下组织范围内）
      */
     public List<SourceAppDTO> listMsgSourceApps() {
-        List<String> childOrgIds = sdkService.listGrantOrgs(
-                UserContextUtils.getUserId(),
-                G.APP_NAME,
-                PERM_QUERY_MSG,
-                UserContextUtils.getUserOrg()
-        );
-        if (childOrgIds == null || childOrgIds.isEmpty()) {
-            return Collections.emptyList();
+        List<GrantAppDTO> grantApps = permUnitUserService.listApp(
+                UserContextUtils.getUserOrg(), false);
+        if (CollectionUtils.isEmpty(grantApps)) {
+            return List.of();
         }
-        List<String> appIds = baseMapper.listDistinctSrcAppInOrgs(childOrgIds);
-        if (appIds == null || appIds.isEmpty()) {
-            return Collections.emptyList();
-        }
-        Map<String, String> appNameMap = appService.getNameMap(new HashSet<>(appIds));
-        return appIds.stream()
-                .map(appId -> {
+        return grantApps.stream()
+                .map(app -> {
                     SourceAppDTO item = new SourceAppDTO();
-                    item.setSrcApp(appId);
-                    item.setSrcAppName(appNameMap.getOrDefault(appId, appId));
+                    item.setSrcApp(app.getAppId());
+                    item.setSrcAppName(app.getNameCn());
                     return item;
                 })
                 .collect(Collectors.toList());

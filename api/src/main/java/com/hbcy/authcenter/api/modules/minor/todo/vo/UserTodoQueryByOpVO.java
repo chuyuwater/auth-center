@@ -55,4 +55,9 @@ public class UserTodoQueryByOpVO extends PageVO {
      */
     @JsonIgnore
     private Collection<String> searchOrgIds;
+    /**
+     * 租户id，服务端填充
+     */
+    @JsonIgnore
+    private String tenantId;
 }
