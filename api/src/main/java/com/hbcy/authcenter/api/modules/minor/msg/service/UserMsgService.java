@@ -42,7 +42,7 @@ import java.util.stream.Collectors;
  */
 @Service
 public class UserMsgService extends ServiceImpl<UserMsgMapper, UserMsg> {
-    public static final String PERM_QUERY_MSG = "msg.query";
+    public static final String PERM_QUERY_MSG = "msg:query";
     @Resource
     private UserMapper userMapper;
     @Resource

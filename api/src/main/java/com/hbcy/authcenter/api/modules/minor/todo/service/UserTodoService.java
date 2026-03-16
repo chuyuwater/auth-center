@@ -41,7 +41,7 @@ import java.util.stream.Collectors;
  */
 @Service
 public class UserTodoService extends ServiceImpl<UserTodoMapper, UserTodo> {
-    public static final String PERM_VIEW_TODO = "todo.query";
+    public static final String PERM_VIEW_TODO = "todo:query";
     public static final String PROCESS_STATE = "TODO_PROCESS_STATE";
     @Resource
     private UserMapper userMapper;
