@@ -186,9 +186,9 @@ public class TenantAppService extends ServiceImpl<TenantAppMapper, TenantApp> {
             oldPermIds = resourcePermMapper.listAppPermIds(inst.getAppId());
         } else {
             oldPermIds = tenantAppResourceMapper.getGrantedPermIds(inst.getTenantId(), inst.getAppId());
-            // 清空授权
-            cleanTenantAppPerm(inst.getTenantId(), inst.getAppId());
         }
+        // 清空原有授权
+        cleanTenantAppPerm(inst.getTenantId(), inst.getAppId());
         if (!newPermIds.isEmpty()) {
             List<TenantAppResource> tenantAppResources = genTenantAppResources(
                     inst.getAppId(), newPermIds, inst.getTenantId());
