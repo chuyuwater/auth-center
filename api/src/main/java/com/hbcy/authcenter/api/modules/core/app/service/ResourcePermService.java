@@ -2,6 +2,7 @@ package com.hbcy.authcenter.api.modules.core.app.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.baomidou.mybatisplus.core.exceptions.MybatisPlusException;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.f4b6a3.ulid.UlidCreator;
 import com.google.common.base.Splitter;
@@ -20,8 +21,10 @@ import com.hbcy.authcenter.global.constants.EventConstants;
 import com.hbcy.authcenter.sdk.utils.UserContextUtils;
 import com.hbcy.common.base.error.ParamError;
 import com.hbcy.common.base.util.BeanCopyUtils;
+import com.hbcy.common.db.utils.DbExceptionParser;
 import jakarta.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
+import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,6 +50,8 @@ public class ResourcePermService extends ServiceImpl<ResourcePermMapper, Resourc
     private EventDispatcher eventDispatcher;
     @Resource
     private ResourcePermApiMapper resourcePermApiMapper;
+    @Resource
+    private SqlSessionTemplate sqlSessionTemplate;
 
     /**
      * 查询资源权限列表
@@ -181,6 +186,8 @@ public class ResourcePermService extends ServiceImpl<ResourcePermMapper, Resourc
             baseMapper.insert(toInsert);
         } catch (DuplicateKeyException e) {
             throw new ParamError("权限码已存在");
+        } catch (MybatisPlusException e) {
+            DbExceptionParser.checkDup(e, "权限码已存在");
         }
         // 批量插入api配置
         List<PermAPiBatchCreateVO> batchCreateVOS = new ArrayList<>();
@@ -316,6 +323,8 @@ public class ResourcePermService extends ServiceImpl<ResourcePermMapper, Resourc
         }
         try {
             resourcePermApiMapper.insert(toInsert);
+        } catch (MybatisPlusException e) {
+            DbExceptionParser.checkDup(e, "api方法+路径的组合必须全局唯一");
         } catch (DuplicateKeyException e) {
             throw new ParamError("api方法+路径的组合必须全局唯一");
         }

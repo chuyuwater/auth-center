@@ -1,6 +1,7 @@
 package com.hbcy.authcenter.api.modules.core.app.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.exceptions.MybatisPlusException;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.f4b6a3.ulid.UlidCreator;
 import com.google.common.base.Splitter;
@@ -28,6 +29,7 @@ import com.hbcy.common.base.error.ParamError;
 import com.hbcy.common.base.log.JsonLogUtils;
 import com.hbcy.common.base.tree.TreeNode;
 import com.hbcy.common.base.util.BeanCopyUtils;
+import com.hbcy.common.db.utils.DbExceptionParser;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
@@ -147,6 +149,8 @@ public class ResourceTreeService extends ServiceImpl<ResourceTreeMapper, Resourc
             resourcePermService.batchCreate(vo.getAppId(), entity.getId(), vo.getSubPerms());
         } catch (DuplicateKeyException e) {
             throw new ParamError("同一应用下菜单唯一ID不能重复");
+        } catch (MybatisPlusException e) {
+            DbExceptionParser.checkDup(e, "同一应用下菜单唯一ID不能重复");
         }
         return entity;
     }
@@ -185,6 +189,8 @@ public class ResourceTreeService extends ServiceImpl<ResourceTreeMapper, Resourc
             resourcePermService.overwrite(id, vo.getSubPerms(), entity.getAppId());
         } catch (DuplicateKeyException e) {
             throw new ParamError("同一应用下自定义菜单ID不能重复");
+        } catch (MybatisPlusException e) {
+            DbExceptionParser.checkDup(e, "同一应用下自定义菜单ID不能重复");
         }
         return entity;
     }

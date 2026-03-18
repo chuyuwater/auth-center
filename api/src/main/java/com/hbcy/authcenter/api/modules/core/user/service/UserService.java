@@ -3,6 +3,7 @@ package com.hbcy.authcenter.api.modules.core.user.service;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.baomidou.mybatisplus.core.exceptions.MybatisPlusException;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.f4b6a3.ulid.UlidCreator;
@@ -36,6 +37,7 @@ import com.hbcy.common.base.pojo.BatchDeleteVO;
 import com.hbcy.common.base.pojo.PageResp;
 import com.hbcy.common.base.util.BeanCopyUtils;
 import com.hbcy.common.db.model.PageRespEx;
+import com.hbcy.common.db.utils.DbExceptionParser;
 import jakarta.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.dao.DuplicateKeyException;
@@ -568,6 +570,8 @@ public class UserService extends ServiceImpl<UserMapper, User> {
             userOrgService.saveBatch(userOrgs);
         } catch (DuplicateKeyException e) {
             throw new ParamError("用户数据重复，请检查");
+        } catch (MybatisPlusException e) {
+            DbExceptionParser.checkDup(e, "用户数据重复，请检查");
         }
     }
 
