@@ -25,15 +25,14 @@ import java.util.Set;
 @FeignClient(name = "portal-auth-center", url = "${app.portal.url:}", configuration = PortalFeignConfig.class)
 public interface AuthCenterClient {
     /**
-     * 获取当前用户、当前组织下、当前应用（或指定菜单下）的权限码
+     * 获取当前用户、当前组织下、当前应用的权限码
      * 需要将用户数据通过header透传过来
      * 建议调用方缓存这个结果一段时间
      *
-     * @param customId 前端自定义的菜单id
      * @return 权限码集合
      */
     @GetMapping("/api/portal/v1/client/perm-code")
-    ApiResponse<Set<String>> listPermCode(@RequestParam String customId);
+    ApiResponse<Set<String>> listPermCode();
 
     /**
      * 检查当前用户在当前组织、当前app下是否有指定权限码
