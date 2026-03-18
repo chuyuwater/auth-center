@@ -82,6 +82,11 @@
                 and (
                 name_cn like concat('%', #{vo.keyword}, '%')
                 or custom_id like concat('%', #{vo.keyword}, '%')
+                or id in (
+                    select res_id from resource_perm
+                    where app_id = #{vo.appId}
+                    and (perm_name like concat('%', #{vo.keyword}, '%') or perm_code like concat('%', #{vo.keyword}, '%'))
+                    )
                 )
             </if>
         </where>

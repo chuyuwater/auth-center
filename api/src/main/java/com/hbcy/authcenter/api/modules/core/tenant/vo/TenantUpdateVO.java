@@ -22,7 +22,6 @@ public class TenantUpdateVO {
     private String nameCn;
 
     @Length(max = 12, message = "租户简称长度不能超过12")
-    @NotBlank(message = "租户简称不能为空")
     private String shortName;
 
     /**
