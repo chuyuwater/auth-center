@@ -17,7 +17,7 @@ public class UserQueryResultDTO extends UserDTO {
     /**
      * 用户任职概况
      */
-    List<UserOrgDTO> orgList;
+    private List<UserOrgDTO> orgList;
     /**
      * 是否租户管理员
      */

@@ -3,6 +3,7 @@ package com.hbcy.authcenter.sdk.feign;
 import com.hbcy.authcenter.sdk.config.PortalFeignConfig;
 import com.hbcy.authcenter.sdk.feign.dto.OrgNodeDTO;
 import com.hbcy.authcenter.sdk.feign.dto.SysDictDTO;
+import com.hbcy.authcenter.sdk.feign.dto.UserDetailDTO;
 import com.hbcy.authcenter.sdk.feign.vo.MsgCreateVO;
 import com.hbcy.authcenter.sdk.feign.vo.OrgNodeQueryVO;
 import com.hbcy.authcenter.sdk.feign.vo.TodoCreateVO;
@@ -24,6 +25,15 @@ import java.util.Set;
  */
 @FeignClient(name = "portal-auth-center", url = "${app.portal.url:}", configuration = PortalFeignConfig.class)
 public interface AuthCenterClient {
+
+    /**
+     * 获取用户信息
+     * @param id 用户id
+     * @return 用户信息
+     */
+    @GetMapping("/api/portal/v1/user/{id}")
+    ApiResponse<UserDetailDTO> getUserInfo(@PathVariable String id);
+
     /**
      * 获取当前用户、当前组织下、当前应用的权限码
      * 需要将用户数据通过header透传过来
@@ -33,8 +43,7 @@ public interface AuthCenterClient {
      */
     @GetMapping("/api/portal/v1/client/perm-code")
     ApiResponse<Set<String>> listPermCode();
-
-
+    
     /**
      * 检查当前用户在当前组织、当前app下是否有指定权限码
      * 该结果会使用与网关侧一致的缓存，因此判断结果与网关放行一致
