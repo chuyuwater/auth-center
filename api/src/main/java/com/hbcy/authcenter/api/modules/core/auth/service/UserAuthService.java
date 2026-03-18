@@ -32,10 +32,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -98,6 +95,12 @@ public class UserAuthService {
         if (!captchaCode.equalsIgnoreCase(vo.getCaptchaCode())) {
             deleteCaptcha(vo.getCaptchaId());
             throw new ParamError("验证码错误");
+        }
+        if (StringUtils.isNotBlank(vo.getTenantId())) {
+            Tenant tenant = tenantMapper.selectById(vo.getTenantId());
+            if (!Objects.equals(0, tenant.getForbidden())) {
+                throw new ParamError("租户被禁用");
+            }
         }
         //NOTE: 如果用户是多租户的，选择租户需要复用验证码，所以不要删除验证码
         List<User> userList = userMapper.selectList(new QueryWrapper<User>()
