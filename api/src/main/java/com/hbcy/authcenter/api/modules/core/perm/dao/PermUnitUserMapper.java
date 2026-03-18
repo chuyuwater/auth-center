@@ -48,8 +48,8 @@ public interface PermUnitUserMapper extends BaseMapper<PermUnitUser> {
                             @Param("orgIdPath") String orgIdPath);
 
     //判断用户是否有某个权限
-    int hasPerm(@Param("userId") String userId, @Param("orgId") String orgId,
-                @Param("permIds") Set<String> permIds);
+    Set<String> checkPerms(@Param("userId") String userId, @Param("orgId") String orgId,
+                           @Param("permIds") Set<String> permIds);
 
     //按用户身份移除授权
     void batchDelete(@Param("vo") PermUnitUserUpdateVO vo, @Param("tenantId") String tenantId);

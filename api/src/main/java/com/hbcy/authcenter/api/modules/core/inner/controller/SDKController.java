@@ -10,6 +10,7 @@ import com.hbcy.authcenter.sdk.feign.vo.TodoUpdateVO;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -74,7 +75,23 @@ public class SDKController {
                               @NotBlank(message = "组织id不能为空") String orgId,
                               @NotBlank(message = "应用id不能为空") String appId,
                               @NotBlank(message = "权限码不能为空") String permCode) {
-        return permUnitUserService.checkPerm(userId, orgId, appId, permCode);
+        return permUnitUserService.checkPerm(userId, orgId, appId, List.of(permCode)).getOrDefault(
+                permCode, false);
+    }
+
+    /**
+     * 批量检查用户在指定组织、指定应用下是否有某个权限码
+     * @param userId 用户id
+     * @param orgId 组织id
+     * @param permCodes 权限码列表
+     * @return 权限码和是否有权限的映射
+     */
+    @GetMapping("/perm/check-batch")
+    public Map<String, Boolean> checkBatchPerm(@NotBlank(message = "用户id不能为空") String userId,
+                                               @NotBlank(message = "组织id不能为空") String orgId,
+                                               @NotBlank(message = "应用id不能为空") String appId,
+                                               @NotEmpty(message = "权限码列表不能为空") List<String> permCodes) {
+        return permUnitUserService.checkPerm(userId, orgId, appId, permCodes);
     }
 
     /**

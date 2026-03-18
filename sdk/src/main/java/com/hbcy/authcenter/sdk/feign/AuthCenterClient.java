@@ -34,6 +34,7 @@ public interface AuthCenterClient {
     @GetMapping("/api/portal/v1/client/perm-code")
     ApiResponse<Set<String>> listPermCode();
 
+
     /**
      * 检查当前用户在当前组织、当前app下是否有指定权限码
      * 该结果会使用与网关侧一致的缓存，因此判断结果与网关放行一致
@@ -43,6 +44,14 @@ public interface AuthCenterClient {
      */
     @GetMapping("/api/portal/v1/client/perm-check")
     ApiResponse<Boolean> checkPerm(@RequestParam String permCode);
+
+    /**
+     * 批量检查当前用户在当前组织、当前app下是否有指定权限码
+     * @param permCodes 权限码列表
+     * @return 权限码和是否有权限的映射
+     */
+    @GetMapping("/api/portal/v1/client/perm-check-batch")
+    ApiResponse<Map<String, Boolean>> checkPerm(@RequestParam Collection<String> permCodes);
 
     /**
      * 获取组织节点详情
@@ -95,6 +104,21 @@ public interface AuthCenterClient {
             @RequestParam String orgId,
             @RequestParam String appId,
             @RequestParam String permCode);
+
+    /**
+     * 批量检查指定用户在指定组织、指定app下是否有指定权限码
+     * @param userId 用户id
+     * @param orgId 组织id
+     * @param appId 应用编码
+     * @param permCodes 权限码列表
+     * @return 权限码和是否有权限的映射
+     */
+    @GetMapping("/api/portal/v1/sdk/perm/check-batch")
+    ApiResponse<Map<String, Boolean>> checkAnyPerm(
+            @RequestParam String userId,
+            @RequestParam String orgId,
+            @RequestParam String appId,
+            @RequestParam Collection<String> permCodes);
 
     /**
      * 获取用户被赋予了某个权限的所有组织id

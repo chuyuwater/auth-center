@@ -38,10 +38,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -216,19 +213,21 @@ public class PermUnitUserService extends ServiceImpl<PermUnitUserMapper, PermUni
         return baseMapper.listGrantApps(userId, orgId, withForbidden);
     }
 
-    public boolean checkPerm(String userId, String orgId, String appId, String permCode) {
+    public Map<String, Boolean> checkPerm(String userId, String orgId, String appId, Collection<String> permCodes) {
         List<ResourcePerm> resourcePerms = resourcePermMapper.selectList(new QueryWrapper<ResourcePerm>()
                 .eq(ResourcePerm.COL_APP_ID, appId)
-                .eq(ResourcePerm.COL_PERM_CODE, permCode));
+                .in(ResourcePerm.COL_PERM_CODE, permCodes));
+        Map<String, Boolean> defaultResp = new HashMap<>();
+        for (String permCode : permCodes) {
+            defaultResp.put(permCode, false);
+        }
         if (resourcePerms.isEmpty()) {
-            return false;
+            return defaultResp;
         }
         Set<String> permIds = resourcePerms.stream().map(ResourcePerm::getId).collect(Collectors.toSet());
-        int check = innerService.hasAnyPerm(userId, orgId, permIds);
-        if (check > 0) {
-            return true;
-        } else if (check == 0) {
-            return false;
+        Map<String, Boolean> checked = innerService.checkPerms(userId, orgId, permIds);
+        if (checked != null) {
+            return checked;
         }
         //没缓存了，直接从数据库计算
         String tenantId = UserContextUtils.getTenantId();
@@ -236,23 +235,35 @@ public class PermUnitUserService extends ServiceImpl<PermUnitUserMapper, PermUni
             TenantApp grant = tenantAppMapper.selectOne(new QueryWrapper<TenantApp>()
                     .eq(TenantApp.COL_APP_ID, appId)
                     .eq(TenantApp.COL_TENANT_ID, tenantId));
-            if (grant == null) return false;
+            if (grant == null) return defaultResp;
             if (grant.getGrantAll().equals(1)) {
-                return true;
+                for (String permCode : permCodes) {
+                    defaultResp.put(permCode, true);
+                }
+                return defaultResp;
             }
-            return tenantAppResourceMapper.exists(new QueryWrapper<TenantAppResource>()
+            List<TenantAppResource> tenantAppResources = tenantAppResourceMapper.selectList(new QueryWrapper<TenantAppResource>()
                     .eq(TenantAppResource.COL_APP_ID, appId)
                     .eq(TenantAppResource.COL_TENANT_ID, tenantId)
                     .in(TenantAppResource.COL_PERM_ID, permIds));
+            for (TenantAppResource tenantAppResource : tenantAppResources) {
+                defaultResp.put(tenantAppResource.getPermId(), true);
+            }
+            return defaultResp;
         }
-        return baseMapper.hasPerm(userId, orgId, permIds) > 0;
+        Set<String> hasPerms = baseMapper.checkPerms(userId, orgId, permIds);
+        for (String hasPerm : hasPerms) {
+            defaultResp.put(hasPerm, true);
+        }
+        return defaultResp;
     }
 
     public boolean checkPerm(String permCode) {
         String appId = UserContextUtils.getAppId();
         String userId = UserContextUtils.getUserId();
         String orgId = UserContextUtils.getUserOrg();
-        return checkPerm(userId, orgId, appId, permCode);
+        return checkPerm(userId, orgId, appId, List.of(permCode)).getOrDefault(
+                permCode, false);
     }
 
     /**

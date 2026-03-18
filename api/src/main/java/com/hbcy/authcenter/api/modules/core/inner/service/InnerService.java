@@ -16,14 +16,12 @@ import com.hbcy.authcenter.gateway.dto.ApiPermDTO;
 import com.hbcy.authcenter.gateway.vo.RefreshUserPermVO;
 import com.hbcy.common.redis.RedisExtendService;
 import jakarta.annotation.Resource;
+import org.jspecify.annotations.Nullable;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -109,6 +107,26 @@ public class InnerService {
             return 0;
         }
         return -1;
+    }
+
+    @Nullable
+    public Map<String, Boolean> checkPerms(String userId, String orgId, Set<String> permIds) {
+        String key = GatewayConstants.USER_PERM_CACHE_PREFIX.formatted(userId, orgId);
+        if (!Boolean.TRUE.equals(stringRedisTemplate.hasKey(key))) {
+            return null;
+        }
+        Set<String> intersect = stringRedisTemplate.opsForSet().intersect(key, permIds);
+        Map<String, Boolean> resp = new HashMap<>();
+        if (CollectionUtils.isEmpty(intersect)) {
+            for (String permId : permIds) {
+                resp.put(permId, false);
+            }
+            return resp;
+        }
+        for (String permId : permIds) {
+            resp.put(permId, intersect.contains(permId));
+        }
+        return resp;
     }
 
     public List<ApiPermDTO> listAppPerms(String appId) {

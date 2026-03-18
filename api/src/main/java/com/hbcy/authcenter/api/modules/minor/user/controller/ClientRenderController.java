@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -136,5 +137,18 @@ public class ClientRenderController {
     @GetMapping("/perm-check")
     public boolean checkPerm(String permCode) {
         return permUnitUserService.checkPerm(permCode);
+    }
+
+    /**
+     * 批量判断当前用户在当前组织、当前app下是否有某个权限码
+     * 会使用与网关判断权限一致的缓存
+     *
+     * @param permCodes 权限码列表
+     * @return 权限码-是否有权限的map
+     */
+    @GetMapping("/perm-check-batch")
+    public Map<String, Boolean> checkPerms(List<String> permCodes) {
+        return permUnitUserService.checkPerm(UserContextUtils.getUserId(), UserContextUtils.getUserOrg(),
+                UserContextUtils.getAppId(), permCodes);
     }
 }
