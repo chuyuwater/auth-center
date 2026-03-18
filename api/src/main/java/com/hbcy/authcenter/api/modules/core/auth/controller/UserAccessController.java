@@ -3,6 +3,8 @@ package com.hbcy.authcenter.api.modules.core.auth.controller;
 import com.hbcy.authcenter.api.modules.core.auth.model.TenantAccess;
 import com.hbcy.authcenter.api.modules.core.auth.service.TenantAccessService;
 import com.hbcy.authcenter.api.modules.core.auth.vo.TenantAccessUpsertVO;
+import com.hbcy.authcenter.sdk.utils.UserContextUtils;
+import com.hbcy.common.base.error.PermissionError;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -12,7 +14,7 @@ import java.util.List;
 
 /**
  * AK认证
- *
+ * 仅租户管理员可用
  * @author 姚泰然
  * @module auth
  * @date 2026-01-26 19:30
@@ -30,6 +32,9 @@ public class UserAccessController {
      */
     @PostMapping
     public TenantAccess createUserAccess(@Valid @RequestBody TenantAccessUpsertVO vo) {
+        if (!UserContextUtils.isTenantAdmin()) {
+            throw new PermissionError("只有租户管理员才能创建ak");
+        }
         return tenantAccessService.createAccess(vo);
     }
 
@@ -41,6 +46,9 @@ public class UserAccessController {
      */
     @PutMapping("/{id}")
     public TenantAccess updateUserAccess(@PathVariable String id, @Valid @RequestBody TenantAccessUpsertVO vo) {
+        if (!UserContextUtils.isTenantAdmin()) {
+            throw new PermissionError("只有租户管理员才能修改ak");
+        }
         return tenantAccessService.updateAccess(id, vo);
     }
 
@@ -50,6 +58,9 @@ public class UserAccessController {
      */
     @PostMapping("/delete")
     public void deleteUserAccess(@NotBlank(message = "id不能为空") String id) {
+        if (!UserContextUtils.isTenantAdmin()) {
+            throw new PermissionError("只有租户管理员才能删除ak");
+        }
         tenantAccessService.deleteAccess(id);
     }
 
@@ -60,6 +71,9 @@ public class UserAccessController {
      */
     @GetMapping("/{id}")
     public TenantAccess getUserAccess(@PathVariable String id) {
+        if (!UserContextUtils.isTenantAdmin()) {
+            throw new PermissionError();
+        }
         return tenantAccessService.getById(id);
     }
 
@@ -69,6 +83,9 @@ public class UserAccessController {
      */
     @GetMapping
     public List<TenantAccess> listUserAccess() {
+        if (!UserContextUtils.isTenantAdmin()) {
+            throw new PermissionError();
+        }
         return tenantAccessService.getTenantAKs();
     }
 }
