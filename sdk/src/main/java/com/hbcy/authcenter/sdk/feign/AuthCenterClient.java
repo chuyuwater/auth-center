@@ -69,7 +69,7 @@ public interface AuthCenterClient {
      * @param vo 查询条件
      * @return 组织节点列表
      */
-    @GetMapping("api/portal/v1/org/list")
+    @GetMapping("/api/portal/v1/org/list")
     ApiResponse<List<OrgNodeDTO>> listOrgNodes(@RequestParam OrgNodeQueryVO vo);
 
     /**
