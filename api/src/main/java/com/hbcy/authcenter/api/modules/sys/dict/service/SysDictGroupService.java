@@ -32,9 +32,12 @@ public class SysDictGroupService {
     private AppMapper appMapper;
 
     public SysDict createGroup(DictGroupCreateVO vo) {
-        App app = appMapper.selectById(vo.getAppId());
-        if (app == null) {
-            throw new ParamError("app不存在");
+        if (StringUtils.isNotBlank(vo.getAppId())) {
+            // 不为空的时候校验，为空字符串表示"通用类"字典，如行政区划，性别等
+            App app = appMapper.selectById(vo.getAppId());
+            if (app == null) {
+                throw new ParamError("app不存在");
+            }
         }
         SysDict dict = new SysDict();
         BeanCopyUtils.copy(vo, dict);
