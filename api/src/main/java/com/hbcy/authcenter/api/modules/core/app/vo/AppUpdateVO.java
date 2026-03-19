@@ -27,4 +27,9 @@ public class AppUpdateVO {
      * 应用图标
      */
     private String icon = "";
+    /**
+     * 应用URL，仅当应用类型为外部应用时使用，用于三方认证；可修改
+     */
+    @Length(max = 512, message = "应用URL长度不能超过512个字符")
+    private String appUrl = "";
 }
