@@ -47,7 +47,7 @@ public class UserOrgDetail {
     /**
      * 组织类别名称
      */
-    private String nodeCategoryName;
+    private String nodeCategoryCn;
     /**
      * 是否主职组织
      */

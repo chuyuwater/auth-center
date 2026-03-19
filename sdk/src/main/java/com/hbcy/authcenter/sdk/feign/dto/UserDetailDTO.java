@@ -46,7 +46,7 @@ public class UserDetailDTO {
     /**
      * 用工类型名称
      */
-    private String employeeTypeName;
+    private String employeeTypeCn;
     /**
      * 用户任职概况
      */
