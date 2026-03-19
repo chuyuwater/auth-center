@@ -53,9 +53,19 @@ public class AppService extends ServiceImpl<AppMapper, App> {
             throw new ParamError("应用编号已存在");
         }
         checkNameExist(vo.getNameCn());
+        if (vo.getAppType() != null && vo.getAppType().intValue() == App.APP_TYPE_EXTERNAL
+                && StringUtils.isBlank(vo.getAppUrl())) {
+            throw new ParamError("外部应用必须填写应用URL");
+        }
 
         App app = new App();
         BeanCopyUtils.copy(vo, app);
+        if (app.getAppType() == null) {
+            app.setAppType(App.APP_TYPE_PLATFORM);
+        }
+        if (app.getAppUrl() == null) {
+            app.setAppUrl("");
+        }
         if (Boolean.TRUE.equals(vo.getMultiTenancy())) {
             app.setBindingTenant("");
         } else {

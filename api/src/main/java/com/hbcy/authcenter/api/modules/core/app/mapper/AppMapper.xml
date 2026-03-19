@@ -16,6 +16,8 @@
         <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
         <result column="create_user" jdbcType="CHAR" property="createUser"/>
         <result column="update_user" jdbcType="CHAR" property="updateUser"/>
+        <result column="app_type" jdbcType="TINYINT" property="appType"/>
+        <result column="app_url" jdbcType="VARCHAR" property="appUrl"/>
     </resultMap>
     <sql id="Base_Column_List">
         <!--@mbg.generated-->
@@ -30,11 +32,13 @@
         create_time,
         update_time,
         create_user,
-        update_user
+        update_user,
+        app_type,
+        app_url
     </sql>
 
     <insert id="append">
-        insert into app(id, name_cn, memo, icon, binding_tenant, create_user, update_user, show_order)
+        insert into app(id, name_cn, memo, icon, binding_tenant, create_user, update_user, show_order, app_type, app_url)
         values (#{app.id},
         #{app.nameCn},
         #{app.memo},
@@ -42,7 +46,9 @@
         #{app.bindingTenant},
         #{app.createUser},
         #{app.updateUser},
-        (SELECT COALESCE(MAX(show_order), 0) + 1 FROM app AS temp))
+        (SELECT COALESCE(MAX(show_order), 0) + 1 FROM app AS temp),
+        #{app.appType},
+        #{app.appUrl})
     </insert>
 
     <update id="move">

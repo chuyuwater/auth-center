@@ -15,6 +15,8 @@ create table if not exists app
     update_time    datetime     default CURRENT_TIMESTAMP not null on update current_timestamp,
     create_user    char(26)     default ''                not null,
     update_user    char(26)     default ''                not null,
+    app_type       tinyint      default 1                 not null comment '应用类型：1-平台应用，2-外部应用，新增后不可修改',
+    app_url        varchar(512) default ''                not null comment '外部应用时的应用URL，用于三方认证',
     constraint ux_app_name_cn
         unique (name_cn, delete_time)
 );

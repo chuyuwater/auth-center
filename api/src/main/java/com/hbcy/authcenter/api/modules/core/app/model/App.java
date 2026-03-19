@@ -29,7 +29,12 @@ public class App extends BaseEntity {
     public static final String COL_UPDATE_TIME = "update_time";
     public static final String COL_CREATE_USER = "create_user";
     public static final String COL_UPDATE_USER = "update_user";
+    public static final String COL_APP_TYPE = "app_type";
+    public static final String COL_APP_URL = "app_url";
     public static final String BINDING_PLACEHOLDER = "-";
+    /** 应用类型：1-平台应用，2-外部应用 */
+    public static final int APP_TYPE_PLATFORM = 1;
+    public static final int APP_TYPE_EXTERNAL = 2;
     /**
      * 应用英文标识
      */
@@ -65,6 +70,16 @@ public class App extends BaseEntity {
      */
     @TableField(value = "binding_tenant")
     private String bindingTenant;
+    /**
+     * 应用类型：1-平台应用，2-外部应用；新增后不可修改，必填，默认平台应用
+     */
+    @TableField(value = "app_type")
+    private Integer appType;
+    /**
+     * 外部应用时的应用URL，用于三方认证；仅当应用类型为外部应用时有值，库表 NOT NULL 默认空串
+     */
+    @TableField(value = "app_url")
+    private String appUrl;
     @TableField(value = "delete_time")
     private Long deleteTime;
     @TableField(value = "create_time", fill = FieldFill.INSERT)
