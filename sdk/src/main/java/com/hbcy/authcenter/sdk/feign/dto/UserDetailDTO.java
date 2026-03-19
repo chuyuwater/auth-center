@@ -2,7 +2,6 @@ package com.hbcy.authcenter.sdk.feign.dto;
 
 import lombok.Data;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -41,10 +40,6 @@ public class UserDetailDTO {
      */
     private Integer forbidden;
     /**
-     * 创建时间
-     */
-    private LocalDateTime createTime;
-    /**
      * 用工类型，字典EMPLOYEE_TYPE
      */
     private Integer employeeType;
@@ -52,18 +47,6 @@ public class UserDetailDTO {
      * 用工类型名称
      */
     private String employeeTypeName;
-    /**
-     * 修改时间
-     */
-    private LocalDateTime updateTime;
-    /**
-     * 创建人
-     */
-    private String createUser;
-    /**
-     * 修改人
-     */
-    private String updateUser;
     /**
      * 用户任职概况
      */
