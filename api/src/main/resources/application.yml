@@ -56,14 +56,11 @@ sa-token:
   is-log: false
   is-concurrent: true
   is-share: false
-  max-login-count: 30
+  max-login-count: -1
   token-style: simple-uuid
-  auto-renew: false
-  # 30天
-  timeout: 2592000
-  # 1天
-  active-timeout: 86400
-
+  active-timeout: -1
+  # 7天
+  timeout: 604800
 management:
   endpoints:
     web:

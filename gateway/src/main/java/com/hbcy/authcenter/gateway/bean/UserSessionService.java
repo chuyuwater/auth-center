@@ -11,6 +11,7 @@ import com.hbcy.common.redis.RedisExtendService;
 import jakarta.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
 import org.jspecify.annotations.Nullable;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -26,6 +27,8 @@ public class UserSessionService {
     private RedisExtendService redisExtendService;
     @Resource
     private StringRedisTemplate stringRedisTemplate;
+    @Value("${sa-token.timeout:604800}")
+    private Long tokenExpire;
 
     /**
      * 检查登陆状态并返回用户id和租户id
@@ -42,7 +45,7 @@ public class UserSessionService {
                 return null;
             }
             //手动续签
-            StpUtil.stpLogic.updateLastActiveToNow(token);
+            StpUtil.renewTimeout(tokenExpire);
             return new SessionDTO()
                     .setUserId(loginId)
                     .setTenantId((String) session.get(GatewayConstants.SESSION_TENANT_ID))
