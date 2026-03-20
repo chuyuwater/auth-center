@@ -32,4 +32,8 @@ public class PermUnitAppDTO {
      * 资源是否已封装
      */
     private boolean packed;
+    /**
+     * 租户侧应用授权是否禁用，0-启用，1-禁用
+     */
+    private Integer forbidden;
 }

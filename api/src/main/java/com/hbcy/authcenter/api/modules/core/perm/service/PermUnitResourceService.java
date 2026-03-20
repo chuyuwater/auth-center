@@ -125,15 +125,13 @@ public class PermUnitResourceService extends ServiceImpl<PermUnitResourceMapper,
         Set<String> unitApps = baseMapper.listGrantedApps(unitId);
         List<PermUnitAppDTO> resp = new ArrayList<>();
         for (GrantAppDTO app : apps) {
-            if (app.getForbidden() != 0) {
-                continue;
-            }
             resp.add(new PermUnitAppDTO()
                     .setAppIcon(app.getIcon())
                     .setAppName(app.getNameCn())
                     .setAppMemo(app.getMemo())
                     .setAppId(app.getAppId())
-                    .setPacked(unitApps.contains(app.getAppId())));
+                    .setPacked(unitApps.contains(app.getAppId()))
+                    .setForbidden(app.getForbidden() != null ? app.getForbidden() : 0));
         }
         return resp;
     }
