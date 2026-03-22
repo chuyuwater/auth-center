@@ -16,10 +16,10 @@ create table if not exists app
     create_user    char(26)     default ''                not null,
     update_user    char(26)     default ''                not null,
     app_type       tinyint      default 1                 not null comment '应用类型：1-平台应用，2-外部应用，新增后不可修改',
-    app_url        varchar(512) default ''                not null comment '外部应用时的应用URL，用于三方认证',
+    app_url        varchar(512)                           null comment '外部应用时的应用URL，用于三方认证',
     constraint ux_app_name_cn
         unique (name_cn, delete_time)
-);
+) comment '应用';
 
 create table if not exists audit_log
 (
@@ -83,7 +83,7 @@ create table if not exists org_tree
         unique (relate_id, tenant_id, delete_time),
     constraint ux_org_tree_tenant_short_name
         unique (short_name, tenant_id, parent_id, delete_time)
-);
+) comment '组织树';
 
 create index ix_org_tree_id_path
     on org_tree (id_path);
@@ -104,11 +104,11 @@ create table if not exists perm_unit
     create_user  char(26)     default '0'               not null,
     update_user  char(26)     default '0'               not null,
     create_time  datetime     default CURRENT_TIMESTAMP not null,
-    update_time  datetime     default CURRENT_TIMESTAMP not null on update current_timestamp,
+    update_time  datetime     default CURRENT_TIMESTAMP null,
     delete_time  bigint       default 0                 not null,
     constraint ux_perm_unit_parent_name
         unique (belong_to, name_cn, delete_time)
-);
+) comment '权限单元';
 
 create index ix_perm_unit_name
     on perm_unit (name_cn);
@@ -155,7 +155,7 @@ create table if not exists perm_unit_resource
     update_user char(26) default '0'               not null,
     create_time datetime default CURRENT_TIMESTAMP not null,
     update_time datetime default CURRENT_TIMESTAMP not null on update current_timestamp
-);
+) comment '权限单元资源封装';
 
 create index ix_perm_res_tenant_app
     on perm_unit_resource (app_id, tenant_id);
@@ -178,28 +178,24 @@ create table if not exists perm_unit_user
     update_time datetime default CURRENT_TIMESTAMP not null on update current_timestamp,
     constraint ux_perm_unit_user_unit
         unique (unit_id, org_id, user_id)
-);
+) comment '权限单元用户';
 
 create index ix_perm_unit_user
     on perm_unit_user (user_id, tenant_id);
 
 create table if not exists resource_perm
 (
-    id          char(26)                               not null
+    id          char(26)                           not null
         primary key,
-    app_id      char(26)                               not null comment '应用id，冗余方便搜索',
-    res_id      char(26)                               not null comment '资源id',
-    perm_name   varchar(100)                           not null comment '权限名称',
-    perm_code   varchar(100)                           not null comment '权限码',
-    api_method  tinyint      default 0                 not null comment '0-GET, 1-POST, 2-PUT, 3-DELETE',
-    api_path    varchar(255) default ''                not null comment '支持ant通配符的api路径',
-    create_time datetime     default CURRENT_TIMESTAMP not null,
-    update_time datetime     default CURRENT_TIMESTAMP not null on update current_timestamp,
-    create_user char(26)     default '0'               not null,
-    update_user char(26)     default '0'               not null,
-    constraint ux_res_perm_api
-        unique (api_method, api_path)
-);
+    app_id      char(26)                           not null comment '应用id，冗余方便搜索',
+    res_id      char(26)                           not null comment '资源id',
+    perm_name   varchar(100)                       not null comment '权限名称',
+    perm_code   varchar(100)                       not null comment '权限码',
+    create_time datetime default CURRENT_TIMESTAMP not null,
+    update_time datetime default CURRENT_TIMESTAMP not null on update current_timestamp,
+    create_user char(26) default '0'               not null,
+    update_user char(26) default '0'               not null
+) comment '权限资源';
 
 create index ix_res_perm_app_id
     on resource_perm (app_id);
@@ -210,6 +206,26 @@ create index ix_res_perm_code
 create index ix_res_perm_res_id
     on resource_perm (res_id);
 
+create index ux_resource_perm_app_perm_code
+    on resource_perm (app_id, perm_code);
+
+create table if not exists resource_perm_api
+(
+    id          char(26)          not null
+        primary key,
+    perm_id     char(26)          not null,
+    api_method  tinyint           not null comment '0-GET,1-POST,2-PUT,3-DELETE',
+    api_path    varchar(255)      not null,
+    show_order  tinyint default 0 not null,
+    create_time datetime          not null,
+    create_user char(26)          not null,
+    constraint ux_resource_perm_api
+        unique (api_method, api_path)
+) comment '权限对应api';
+
+create index ix_resource_perm_api_perm_id
+    on resource_perm_api (perm_id);
+
 create table if not exists resource_tree
 (
     id          char(26)                               not null comment 'ulid'
@@ -219,8 +235,8 @@ create table if not exists resource_tree
     custom_id   varchar(50)                            not null comment '应用开发者自定义菜单id',
     parent_id   char(26)     default ''                not null comment '父节点',
     id_path     varchar(768)                           not null comment '节点全路径',
-    client_type tinyint      default 0                 not null comment '支持的客户端类型，0-全端，1-PC端，2-移动端',
     res_type    tinyint      default 0                 not null comment '0-页面，1-按钮',
+    client_type tinyint      default 0                 not null comment '支持的客户端类型，0-全端，1-PC端，2-移动端',
     icon        varchar(200) default ''                not null comment '图标地址',
     route_link  varchar(255) default ''                not null comment '路由地址',
     show_order  int          default 0                 not null comment '同级显示顺序',
@@ -232,7 +248,7 @@ create table if not exists resource_tree
     update_user char(26)     default '0'               not null,
     constraint ux_res_tree_app_custom_id
         unique (app_id, custom_id)
-);
+) comment '资源树';
 
 create index ix_res_tree_id_path
     on resource_tree (id_path);
@@ -262,7 +278,7 @@ create table if not exists sys_dict
         unique (feat_code, value_str, delete_time),
     constraint ux_sys_dict_kv_cn
         unique (value_cn, feat_code, delete_time)
-);
+) comment '系统字典';
 
 create index ix_sys_dict_id_path
     on sys_dict (id_path);
@@ -300,7 +316,7 @@ create table if not exists sys_user
         unique (phone, tenant_id, delete_time),
     constraint ux_sys_user_tenant_wecom
         unique (tenant_id, wecom_id, delete_time)
-);
+) comment '用户';
 
 create table if not exists sys_user_mapping
 (
@@ -338,7 +354,27 @@ create table if not exists tenant
     update_time   datetime     default CURRENT_TIMESTAMP not null on update current_timestamp,
     constraint ux_name
         unique (name_cn, delete_time)
-);
+) comment '租户';
+
+create table if not exists tenant_access
+(
+    id          char(26)                           not null
+        primary key,
+    key_name    varchar(200)                       null comment '名称',
+    access_key  char(26)                           not null,
+    secret_key  varchar(64)                        not null comment '加密的密钥',
+    forbidden   tinyint  default 0                 not null comment '是否禁用',
+    expire_time datetime                           null comment '过期时间',
+    tenant_id   varchar(20)                        not null comment 'ak归属租户',
+    create_time datetime default CURRENT_TIMESTAMP not null,
+    update_time datetime default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP
+) comment 'ak/sk通信';
+
+create index ix_tenant_access_ak
+    on tenant_access (access_key, expire_time, forbidden);
+
+create index ix_tenant_access_tenant
+    on tenant_access (tenant_id);
 
 create table if not exists tenant_app
 (
@@ -356,7 +392,7 @@ create table if not exists tenant_app
     update_user char(26)    default ''                not null,
     constraint ux_tenant_app
         unique (app_id, tenant_id, delete_time)
-);
+) comment '租户授权应用';
 
 create table if not exists tenant_app_resource
 (
@@ -371,28 +407,7 @@ create table if not exists tenant_app_resource
     update_user char(26) default '0'               not null,
     constraint ux_tenant_app_res
         unique (perm_id, app_id, tenant_id)
-);
-
-create table if not exists tenant_access
-(
-    id          char(26)                           not null
-        primary key,
-    key_name    varchar(200)                       null comment '名称',
-    access_key  char(26)                           not null,
-    secret_key  varchar(64)                        not null comment '加密的密钥',
-    forbidden   tinyint  default 0                 not null comment '是否禁用',
-    expire_time datetime                           null comment '过期时间',
-    tenant_id   varchar(20)                        not null comment 'ak归属租户',
-    create_time datetime default CURRENT_TIMESTAMP not null,
-    update_time datetime default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP
-)
-    comment 'ak/sk通信' row_format = DYNAMIC;
-
-create index ix_user_access_ak
-    on tenant_access (access_key, expire_time, forbidden);
-
-create index ix_user_access_tenant
-    on tenant_access (tenant_id);
+) comment '租户授权应用资源';
 
 create table if not exists user_msg
 (
@@ -451,8 +466,7 @@ create table if not exists user_quick_link
     org_id      varchar(20)                        null comment '组织id',
     client_type tinyint  default 1                 not null comment '1-PC端，2-移动端',
     create_time datetime default CURRENT_TIMESTAMP not null
-)
-    comment '快捷入口';
+) comment '快捷入口';
 
 create index ix_user_quick_link_res_id
     on user_quick_link (res_id);
@@ -462,7 +476,8 @@ create index ux_user_quick_link
 
 create table if not exists user_todo
 (
-    id            char(26)                               not null primary key,
+    id            char(26)                               not null
+        primary key,
     src_app       varchar(20)                            not null comment '源app id',
     src_id        varchar(100)                           null comment '源id，用于去重',
     todo_title    varchar(300)                           not null comment '待办标题',
@@ -475,13 +490,13 @@ create table if not exists user_todo
     relate_link   varchar(255) default ''                not null comment '关联链接',
     origin_json   text                                   null comment '用于调试',
     tenant_id     varchar(20)                            not null,
-    initiator_id  varchar(32)                            null comment '发起人用户id',
+    initiator_id  char(26)                               null comment '发起人用户id',
     urge_flag     tinyint      default 0                 not null comment '是否催办：0-否，1-是',
     create_time   datetime     default CURRENT_TIMESTAMP not null,
     update_time   datetime     default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP,
     constraint ux_user_todo_target_src
         unique (src_app, src_id, target_user)
-);
+) comment '待办';
 
 create index ix_user_todo_title
     on user_todo (todo_title);
@@ -639,7 +654,7 @@ VALUES ('01KFYM4E91TFYAFSP6CFMP3A9Z', 'portal', 'TODO_PROCESS_STATE', '8', '抄�
 
 
 INSERT INTO `app`
-VALUES ('portal', '统一门户', '', 1, '', 0, '', 0, '2026-01-06 01:10:24', '2026-01-06 01:10:24', '0', '0');
+VALUES ('portal', '统一门户', '', 1, '', 0, '', 0, '2026-01-06 01:10:24', '2026-01-06 01:10:24', '0', '0', 1, '');
 INSERT INTO `tenant`
 VALUES ('0', '系统', '系统', '', '', 0, '姚泰然', '18502710984', '01KE8DW1DK2KPAZJAENJW6SSFE', 0, '0', '0',
         '2026-01-06 09:13:48', '2026-01-06 09:13:48');
