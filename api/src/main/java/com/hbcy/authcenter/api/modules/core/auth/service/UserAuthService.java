@@ -192,7 +192,7 @@ public class UserAuthService {
         if (StringUtils.isBlank(userId)) {
             userId = UserContextUtils.getUserId();
         } else {
-            //明确传入用户id时，强制所有token时效
+            //明确传入用户id时，强制所有token失效
             StpUtil.logoutByTokenValue(userId);
         }
         Set<String> userOrgs = userOrgMapper.listAllOrg(userId);
