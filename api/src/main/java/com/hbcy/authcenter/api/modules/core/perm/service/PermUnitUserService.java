@@ -256,7 +256,7 @@ public class PermUnitUserService extends ServiceImpl<PermUnitUserMapper, PermUni
             for (String permCode : permCodes) {
                 defaultResp.put(permCode, checked.getOrDefault(permCodeIdMap.get(permCode), false));
             }
-            return checked;
+            return defaultResp;
         }
         return null;
     }
