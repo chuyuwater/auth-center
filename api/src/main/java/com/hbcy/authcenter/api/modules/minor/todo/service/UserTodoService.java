@@ -176,12 +176,14 @@ public class UserTodoService extends ServiceImpl<UserTodoMapper, UserTodo> {
         for (TodoDTO r : page.getRecords()) {
             appIds.add(r.getSrcApp());
             userIds.add(r.getTargetUser());
+            userIds.add(r.getInitiatorId());
         }
         Map<String, String> appNameMap = appService.getNameMap(appIds);
         Map<String, String> userNameMap = nameCacheService.getUserNameMap(userIds);
         for (TodoDTO r : page.getRecords()) {
             r.setSrcAppName(appNameMap.get(r.getSrcApp()));
             r.setTargetUserName(userNameMap.get(r.getTargetUser()));
+            r.setInitiatorName(userNameMap.get(r.getInitiatorId()));
         }
         return new PageRespEx<>(page);
     }
@@ -211,6 +213,7 @@ public class UserTodoService extends ServiceImpl<UserTodoMapper, UserTodo> {
         App app = appService.getById(resp.getSrcApp());
         resp.setSrcAppName(app == null ? resp.getSrcApp() : app.getNameCn());
         resp.setTargetUserName(nameCacheService.getUserName(resp.getTargetUser()));
+        resp.setInitiatorName(nameCacheService.getUserName(resp.getInitiatorId()));
         return resp;
     }
 

@@ -94,6 +94,7 @@
         td.todo_title,
         td.todo_content,
         td.target_user,
+        td.initiator_id,
         td.send_time,
         td.process_state,
         td.view_state,
