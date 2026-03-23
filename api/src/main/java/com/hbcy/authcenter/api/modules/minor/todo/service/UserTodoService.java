@@ -8,11 +8,13 @@ import com.google.common.base.Preconditions;
 import com.hbcy.authcenter.api.common.enums.TodoQueryScopeEnum;
 import com.hbcy.authcenter.api.common.bean.NameCacheService;
 import com.hbcy.authcenter.api.common.constants.G;
+import com.hbcy.authcenter.api.modules.core.app.model.App;
 import com.hbcy.authcenter.api.modules.core.app.dto.GrantAppDTO;
 import com.hbcy.authcenter.api.modules.core.app.service.AppService;
 import com.hbcy.authcenter.api.modules.core.inner.service.SDKService;
 import com.hbcy.authcenter.api.modules.core.perm.service.PermUnitUserService;
 import com.hbcy.authcenter.api.modules.core.user.dao.UserMapper;
+import com.hbcy.authcenter.api.modules.core.user.dao.UserOrgMapper;
 import com.hbcy.authcenter.api.modules.core.user.model.User;
 import com.hbcy.authcenter.api.modules.minor.msg.dto.SourceAppDTO;
 import com.hbcy.authcenter.api.modules.minor.msg.dto.UserMsgDTO;
@@ -28,7 +30,9 @@ import com.hbcy.authcenter.sdk.feign.vo.TodoCreateVO;
 import com.hbcy.authcenter.sdk.feign.vo.TodoUpdateVO;
 import com.hbcy.authcenter.sdk.utils.UserContextUtils;
 import com.hbcy.common.base.error.ParamError;
+import com.hbcy.common.base.error.PermissionError;
 import com.hbcy.common.base.pojo.PageResp;
+import com.hbcy.common.base.util.BeanCopyUtils;
 import com.hbcy.common.db.model.PageRespEx;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
@@ -59,6 +63,8 @@ public class UserTodoService extends ServiceImpl<UserTodoMapper, UserTodo> {
     private DictEnumAdapter dictEnumAdapter;
     @Resource
     private PermUnitUserService permUnitUserService;
+    @Resource
+    private UserOrgMapper userOrgMapper;
 
     @Transactional(rollbackFor = Exception.class)
     public void batchCreateTodo(TodoCreateVO vo) {
@@ -178,6 +184,34 @@ public class UserTodoService extends ServiceImpl<UserTodoMapper, UserTodo> {
             r.setTargetUserName(userNameMap.get(r.getTargetUser()));
         }
         return new PageRespEx<>(page);
+    }
+
+    /**
+     * 根据 id 查询待办详情
+     */
+    public TodoDTO getTodoById(String id) {
+        UserTodo userTodo = baseMapper.selectById(id);
+        if (userTodo == null) {
+            return null;
+        }
+        String userId = UserContextUtils.getUserId();
+        if (!UserContextUtils.isTenantAdmin() && !userTodo.getTargetUser().equals(userId)) {
+            Set<String> targetOrgs = userOrgMapper.listAllOrg(userTodo.getTargetUser());
+            List<String> childOrgIds = sdkService.listGrantOrgs(
+                    UserContextUtils.getUserId(),
+                    G.APP_NAME,
+                    PERM_VIEW_TODO,
+                    UserContextUtils.getUserOrg()
+            );
+            if (!CollectionUtils.containsAny(new HashSet<>(childOrgIds), targetOrgs)) {
+                throw new PermissionError();
+            }
+        }
+        TodoDTO resp = BeanCopyUtils.copy(userTodo, TodoDTO.class);
+        App app = appService.getById(resp.getSrcApp());
+        resp.setSrcAppName(app == null ? resp.getSrcApp() : app.getNameCn());
+        resp.setTargetUserName(nameCacheService.getUserName(resp.getTargetUser()));
+        return resp;
     }
 
     /**

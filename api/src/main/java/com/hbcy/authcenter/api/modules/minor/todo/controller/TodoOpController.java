@@ -7,6 +7,7 @@ import com.hbcy.authcenter.api.modules.minor.todo.vo.UserTodoQueryByOpVO;
 import com.hbcy.common.base.pojo.PageResp;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -42,5 +43,16 @@ public class TodoOpController {
     @GetMapping("/source-apps")
     public List<SourceAppDTO> listTodoSourceApps() {
         return userTodoService.listTodoSourceApps();
+    }
+
+    /**
+     * 根据 id 查询待办详情
+     *
+     * @param id 待办 id
+     * @return 待办详情，无权限或不存在时返回 null
+     */
+    @GetMapping("/{id}")
+    public TodoDTO getTodoById(@PathVariable String id) {
+        return userTodoService.getTodoById(id);
     }
 }
