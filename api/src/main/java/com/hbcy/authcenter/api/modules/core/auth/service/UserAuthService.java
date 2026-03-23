@@ -191,6 +191,9 @@ public class UserAuthService {
     public void logout(String userId) {
         if (StringUtils.isBlank(userId)) {
             userId = UserContextUtils.getUserId();
+        } else {
+            //明确传入用户id时，强制所有token时效
+            StpUtil.logoutByTokenValue(userId);
         }
         Set<String> userOrgs = userOrgMapper.listAllOrg(userId);
         Set<String> keys = new HashSet<>();
@@ -199,7 +202,7 @@ public class UserAuthService {
             keys.add(GatewayConstants.USER_PERM_CACHE_PREFIX.formatted(userId, orgId));
         }
         stringRedisTemplate.delete(keys);
-        StpUtil.logout(userId);
+        //注销token的逻辑在网关中实现，因只有网关层可以看到token
     }
 
     private String getCaptchaCode(String key) {
