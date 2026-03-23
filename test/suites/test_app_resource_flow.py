@@ -190,6 +190,36 @@ class AppResourceFlowTestCase(BaseFlowTestCase):
             "新增的权限点不存在",
         )
 
+        clear_perm_response = self.ctx.client.request(
+            "PUT",
+            f"/api/portal/v1/resource/tree/{menu_id}",
+            session_state=admin_session,
+            json_body={
+                "parentId": "",
+                "nameCn": "自动化菜单-更新",
+                "resType": 0,
+                "customId": f"{menu_custom_id}-updated",
+                "clientType": 0,
+                "icon": "icon-menu-updated",
+                "routeLink": f"/auto/{suffix}/updated",
+                "hidden": 0,
+                "showLevel": 0,
+                "forbidden": 0,
+                "subPerms": [],
+            },
+        )
+        ensure_http_status(clear_perm_response, 200)
+        ensure_api_status(clear_perm_response.json())
+
+        cleared_detail_response = self.ctx.client.request(
+            "GET",
+            f"/api/portal/v1/resource/tree/{menu_id}",
+            session_state=admin_session,
+        )
+        ensure_http_status(cleared_detail_response, 200)
+        cleared_detail = ensure_api_status(cleared_detail_response.json())
+        self.assertEqual(len(cleared_detail["perms"]), 0)
+
         delete_menu_response = self.ctx.client.request(
             "POST",
             "/api/portal/v1/resource/tree/delete",
