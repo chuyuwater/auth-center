@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import sys
+import traceback
 import unittest
 from pathlib import Path
 
@@ -15,4 +16,9 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    try:
+        raise SystemExit(main())
+    except Exception:
+        print("\n[auth-center-test] 运行异常，完整 traceback 如下：", file=sys.stderr, flush=True)
+        traceback.print_exc()
+        raise

@@ -2,12 +2,17 @@ from __future__ import annotations
 
 import base64
 import mimetypes
+import os
+import shutil
+import subprocess
+import sys
 import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
 import requests
+from requests import Response
 
 from settings import ACCOUNTS, APP_ID, CAPTCHA_DIR, HOST, REQUEST_TIMEOUT
 
@@ -77,15 +82,25 @@ class AuthCenterClient:
             json=payload,
             timeout=REQUEST_TIMEOUT,
         )
-        body = response.json()
+        body = self.read_json(
+            response,
+            context=(
+                f"{account.name} 登录响应不是合法 JSON; "
+                f"login_field={account.login_field}, principal={account.principal}, tenant_id={account.tenant_id or '<empty>'}"
+            ),
+        )
         if response.status_code == 400 and body.get("status") == 100:
             raise RuntimeError(
                 f"{account.name} 登录命中了多租户选择，请在 settings.py 里补 tenant_id，候选租户: {body.get('data')}"
             )
         if response.status_code != 200:
-            raise RuntimeError(f"{account.name} 登录失败: http={response.status_code}, body={body}")
+            raise RuntimeError(
+                f"{account.name} 登录失败: {self.describe_response(response, body_override=body)}"
+            )
         if body.get("status") != 0:
-            raise RuntimeError(f"{account.name} 登录失败: body={body}")
+            raise RuntimeError(
+                f"{account.name} 登录失败: {self.describe_response(response, body_override=body)}"
+            )
 
         data = body["data"]
         return SessionState(
@@ -102,21 +117,25 @@ class AuthCenterClient:
             "/api/portal/v1/auth/logout",
             session_state=session_state,
         )
-        body = response.json()
+        body = self.read_json(response, context=f"{session_state.account.name} 登出响应不是合法 JSON")
         if response.status_code != 200 or body.get("status") != 0:
             raise RuntimeError(
-                f"{session_state.account.name} 登出失败: http={response.status_code}, body={body}"
+                f"{session_state.account.name} 登出失败: {self.describe_response(response, body_override=body)}"
             )
 
     def get_captcha(self, account_name: str) -> dict[str, str]:
         response = self.http.get(self.url("/api/portal/v1/auth/captcha"), timeout=REQUEST_TIMEOUT)
-        body = response.json()
+        body = self.read_json(response, context=f"{account_name} 获取验证码响应不是合法 JSON")
         if response.status_code != 200 or body.get("status") != 0:
-            raise RuntimeError(f"获取验证码失败: http={response.status_code}, body={body}")
+            raise RuntimeError(f"获取验证码失败: {self.describe_response(response, body_override=body)}")
 
         data = body["data"]
         image_path = self.save_captcha_image(account_name, data["base64"])
-        code = input(f"[{account_name}] 请输入验证码 {image_path}: ").strip()
+        self.show_captcha_image(image_path)
+        try:
+            code = input(f"[{account_name}] 请输入验证码 {image_path}: ").strip()
+        finally:
+            self.cleanup_captcha_image(image_path)
         if not code:
             raise RuntimeError(f"{account_name} 未输入验证码")
         return {"id": data["id"], "code": code}
@@ -156,14 +175,71 @@ class AuthCenterClient:
         if headers:
             final_headers.update(headers)
 
-        return self.http.request(
-            method=method,
-            url=self.url(path),
-            params=params,
-            json=json_body,
-            headers=final_headers,
-            timeout=REQUEST_TIMEOUT,
-        )
+        url = self.url(path)
+        try:
+            return self.http.request(
+                method=method,
+                url=url,
+                params=params,
+                json=json_body,
+                headers=final_headers,
+                timeout=REQUEST_TIMEOUT,
+            )
+        except requests.RequestException as exc:
+            raise RuntimeError(
+                "HTTP 请求失败: "
+                f"method={method}, url={url}, params={params}, json={json_body}, "
+                f"headers={self.mask_headers(final_headers)}, error={exc}"
+            ) from exc
 
     def url(self, path: str) -> str:
         return f"{self.base_url}{path}"
+
+    def show_captcha_image(self, image_path: Path) -> None:
+        if sys.platform != "darwin":
+            return
+        imgcat = shutil.which("imgcat")
+        if not imgcat:
+            return
+        try:
+            subprocess.run([imgcat, os.fspath(image_path)], check=False)
+        except OSError:
+            pass
+
+    def cleanup_captcha_image(self, image_path: Path) -> None:
+        try:
+            image_path.unlink(missing_ok=True)
+        except OSError:
+            pass
+
+    def read_json(self, response: Response, *, context: str) -> dict[str, Any]:
+        try:
+            body = response.json()
+        except ValueError as exc:
+            raise RuntimeError(f"{context}: {self.describe_response(response)}") from exc
+        if not isinstance(body, dict):
+            raise RuntimeError(f"{context}: {self.describe_response(response, body_override=body)}")
+        return body
+
+    def describe_response(self, response: Response, *, body_override: Any | None = None) -> str:
+        body = body_override
+        if body is None:
+            try:
+                body = response.json()
+            except ValueError:
+                body = response.text
+        text = body if isinstance(body, str) else repr(body)
+        text = text.strip()
+        if len(text) > 1000:
+            text = text[:1000] + "...<truncated>"
+        return (
+            f"method={response.request.method}, url={response.request.url}, "
+            f"http={response.status_code}, content_type={response.headers.get('Content-Type', '')}, "
+            f"body={text}"
+        )
+
+    def mask_headers(self, headers: dict[str, str]) -> dict[str, str]:
+        masked = dict(headers)
+        if "X-AUTH-TOKEN" in masked:
+            masked["X-AUTH-TOKEN"] = "<masked>"
+        return masked

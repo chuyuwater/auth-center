@@ -5,7 +5,7 @@ BASE_DIR = Path(__file__).resolve().parent
 ARTIFACT_DIR = BASE_DIR / ".artifacts"
 CAPTCHA_DIR = ARTIFACT_DIR / "captcha"
 
-HOST = "http://127.0.0.1:20001"
+HOST = "https://portal-dev.chuyuwater.cn"
 APP_ID = "portal"
 REQUEST_TIMEOUT = 15
 
@@ -41,30 +41,30 @@ REQUEST_TIMEOUT = 15
 ACCOUNTS = {
     "super_admin": {
         "login_field": "account",
-        "principal": "",
-        "password": "",
+        "principal": "18502710984",
+        "password": "Chuyu@2026",
         "tenant_id": "",
-        "org_ids": [""],
+        "org_ids": ["0-ORG-000001"],
         "extra_headers": {},
     },
     "granted_user": {
         "login_field": "account",
-        "principal": "",
-        "password": "",
+        "principal": "17712345678",
+        "password": "17712345678",
         "tenant_id": "",
         # 至少两个组织：
         # org_ids[0] = 有管理消息权限的组织
         # org_ids[1] = 无管理消息权限的组织
-        "org_ids": [""],
+        "org_ids": ["0-ORG-000001", "0-ORG-000015"],
         "extra_headers": {},
     },
     "forbidden_user": {
         "login_field": "account",
-        "principal": "",
-        "password": "",
+        "principal": "17912345678",
+        "password": "17912345678",
         "tenant_id": "",
         # 默认组织即可。该账号默认不应拥有任何权限
-        "org_ids": [""],
+        "org_ids": ["0-ORG-000001"],
         "extra_headers": {},
     },
 }

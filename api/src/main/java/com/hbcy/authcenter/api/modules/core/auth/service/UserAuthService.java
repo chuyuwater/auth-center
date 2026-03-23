@@ -98,7 +98,7 @@ public class UserAuthService {
         }
         if (StringUtils.isNotBlank(vo.getTenantId())) {
             Tenant tenant = tenantMapper.selectById(vo.getTenantId());
-            if (!Objects.equals(0, tenant.getForbidden())) {
+            if (tenant != null && !Objects.equals(0, tenant.getForbidden())) {
                 throw new ParamError("租户被禁用");
             }
         }
