@@ -317,13 +317,16 @@ public class TenantAppService extends ServiceImpl<TenantAppMapper, TenantApp> {
      */
     private void batchGrantApp(TenantAppBatchGrantVO vo) {
         String tenantId = vo.getTenantId();
+        Set<String> requestedAppIds = vo.getAppIds();
         List<App> appList = appMapper.selectList(new QueryWrapper<App>()
-                .eq(App.COL_FORBIDDEN, 0)
-                .in(App.COL_ID, vo.getAppIds()));
-        Map<String, App> appMap = appList.stream().collect(Collectors.toMap(App::getId, app -> app));
-        if (appList.size() < vo.getAppIds().size()) {
-            throw new ParamError("部分应用不存在或已被禁用");
+                .in(App.COL_ID, requestedAppIds));
+        if (appList.size() < requestedAppIds.size()) {
+            throw new ParamError("部分应用不存在");
         }
+        Map<String, App> appMap = appList.stream()
+                .filter(app -> app.getForbidden() == 0)
+                .collect(Collectors.toMap(App::getId, app -> app));
+        Set<String> enabledAppIds = new HashSet<>(appMap.keySet());
         Tenant tenant = tenantMapper.selectById(tenantId);
         if (tenant.getForbidden() == 1) {
             throw new ParamError("租户已被禁用");
@@ -333,8 +336,8 @@ public class TenantAppService extends ServiceImpl<TenantAppMapper, TenantApp> {
                 .collect(Collectors.toSet());
         //需要移除的授权
         Set<String> toDeleteAppIds = new HashSet<>(granted);
-        toDeleteAppIds.removeAll(vo.getAppIds());
-        Set<String> toAddAppIds = new HashSet<>(vo.getAppIds());
+        toDeleteAppIds.removeAll(enabledAppIds);
+        Set<String> toAddAppIds = new HashSet<>(enabledAppIds);
         toAddAppIds.removeAll(granted);
         if (!toDeleteAppIds.isEmpty()) {
             baseMapper.update(new UpdateWrapper<TenantApp>()
