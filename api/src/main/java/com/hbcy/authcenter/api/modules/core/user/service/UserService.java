@@ -216,24 +216,26 @@ public class UserService extends ServiceImpl<UserMapper, User> {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public void deleteUser(String userId) {
+    public void deleteUser(String userId, boolean force) {
         User user = getById(userId);
         if (user == null) {
             return;
         }
-        if (user.getForbidden() == 0) {
-            throw new ParamError("删除用户前需要先禁用用户");
-        }
-        String tenantId = UserContextUtils.getTenantId();
-        if (!user.getTenantId().equals(tenantId)) {
-            throw new PermissionError();
-        }
-        Tenant tenant = tenantMapper.selectById(user.getTenantId());
-        if (tenant == null) {
-            throw new ServerError("租户被移除，请联系管理员");
-        }
-        if (userId.equals(tenant.getAdminId())) {
-            throw new ParamError("无法删除租户默认管理员");
+        if (!force) {
+            if (user.getForbidden() == 0) {
+                throw new ParamError("删除用户前需要先禁用用户");
+            }
+            String tenantId = UserContextUtils.getTenantId();
+            if (!user.getTenantId().equals(tenantId)) {
+                throw new PermissionError();
+            }
+            Tenant tenant = tenantMapper.selectById(user.getTenantId());
+            if (tenant == null) {
+                throw new ServerError("租户被移除，请联系管理员");
+            }
+            if (userId.equals(tenant.getAdminId())) {
+                throw new ParamError("无法删除租户默认管理员");
+            }
         }
         cleanNameCache(userId);
         //删除所有角色授权

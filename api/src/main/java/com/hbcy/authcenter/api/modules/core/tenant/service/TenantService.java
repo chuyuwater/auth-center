@@ -207,8 +207,7 @@ public class TenantService extends ServiceImpl<TenantMapper, Tenant> {
         if (cnt > 2) { //虚拟根节点+租户名称节点
             throw new ParamError("请先删除该租户下除根组织外所有组织");
         }
-        userOrgMapper.delete(new QueryWrapper<UserOrg>()
-                .eq(UserOrg.COL_TENANT_ID, tenant.getId()));
+        userService.deleteUser(tenant.getAdminId(), true);
         orgTreeMapper.delete(new QueryWrapper<OrgTree>()
                 .eq(OrgTree.COL_TENANT_ID, tenant.getId()));
         tenant.setUpdateUser(UserContextUtils.getUserId());

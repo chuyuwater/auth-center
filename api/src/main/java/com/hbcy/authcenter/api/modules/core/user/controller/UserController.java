@@ -60,7 +60,7 @@ public class UserController {
      */
     @PostMapping("/delete")
     public void deleteUser(@NotBlank(message = "id不能为空") String id) {
-        userService.deleteUser(id);
+        userService.deleteUser(id, false);
     }
 
     /**
