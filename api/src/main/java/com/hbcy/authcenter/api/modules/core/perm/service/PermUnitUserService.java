@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.f4b6a3.ulid.UlidCreator;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import com.hbcy.authcenter.api.modules.core.app.dao.ResourcePermMapper;
 import com.hbcy.authcenter.api.modules.core.app.dao.ResourceTreeMapper;
 import com.hbcy.authcenter.api.modules.core.app.dto.GrantAppDTO;
@@ -217,16 +219,23 @@ public class PermUnitUserService extends ServiceImpl<PermUnitUserMapper, PermUni
         List<ResourcePerm> resourcePerms = resourcePermMapper.selectList(new QueryWrapper<ResourcePerm>()
                 .eq(ResourcePerm.COL_APP_ID, appId)
                 .in(ResourcePerm.COL_PERM_CODE, permCodes));
+        //同一个APP下permCode是唯一的
         Map<String, Boolean> defaultResp = new HashMap<>();
+        BiMap<String, String> permCodeIdMap = HashBiMap.create();
         for (String permCode : permCodes) {
             defaultResp.put(permCode, false);
         }
         if (resourcePerms.isEmpty()) {
             return defaultResp;
         }
-        Set<String> permIds = resourcePerms.stream().map(ResourcePerm::getId).collect(Collectors.toSet());
-        Map<String, Boolean> checked = innerService.checkPerms(userId, orgId, permIds);
+        for (ResourcePerm rp : resourcePerms) {
+            permCodeIdMap.put(rp.getPermCode(), rp.getId());
+        }
+        Map<String, Boolean> checked = innerService.checkPerms(userId, orgId, permCodeIdMap.values());
         if (checked != null) {
+            for (String permCode : permCodes) {
+                defaultResp.put(permCode, checked.getOrDefault(permCodeIdMap.get(permCode), false));
+            }
             return checked;
         }
         //没缓存了，直接从数据库计算
@@ -242,18 +251,19 @@ public class PermUnitUserService extends ServiceImpl<PermUnitUserMapper, PermUni
                 }
                 return defaultResp;
             }
-            List<TenantAppResource> tenantAppResources = tenantAppResourceMapper.selectList(new QueryWrapper<TenantAppResource>()
-                    .eq(TenantAppResource.COL_APP_ID, appId)
-                    .eq(TenantAppResource.COL_TENANT_ID, tenantId)
-                    .in(TenantAppResource.COL_PERM_ID, permIds));
+            List<TenantAppResource> tenantAppResources = tenantAppResourceMapper.selectList(
+                    new QueryWrapper<TenantAppResource>()
+                            .eq(TenantAppResource.COL_APP_ID, appId)
+                            .eq(TenantAppResource.COL_TENANT_ID, tenantId)
+                            .in(TenantAppResource.COL_PERM_ID, permCodeIdMap.values()));
             for (TenantAppResource tenantAppResource : tenantAppResources) {
-                defaultResp.put(tenantAppResource.getPermId(), true);
+                defaultResp.put(permCodeIdMap.inverse().get(tenantAppResource.getPermId()), true);
             }
             return defaultResp;
         }
-        Set<String> hasPerms = baseMapper.checkPerms(userId, orgId, permIds);
-        for (String hasPerm : hasPerms) {
-            defaultResp.put(hasPerm, true);
+        Set<String> hasPermIds = baseMapper.checkPerms(userId, orgId, permCodeIdMap.values());
+        for (String hasPerm : hasPermIds) {
+            defaultResp.put(permCodeIdMap.inverse().get(hasPerm), true);
         }
         return defaultResp;
     }

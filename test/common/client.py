@@ -46,6 +46,7 @@ class AuthCenterClient:
         self.base_url = HOST.rstrip("/")
         self.http = requests.Session()
         self.http.headers.update({"Accept": "application/json"})
+        self.last_exchange: dict[str, Any] | None = None
 
     def build_account(self, name: str) -> AccountConfig:
         raw = ACCOUNTS[name]
@@ -81,6 +82,14 @@ class AuthCenterClient:
             self.url("/api/portal/v1/auth/login"),
             json=payload,
             timeout=REQUEST_TIMEOUT,
+        )
+        self.record_exchange(
+            method="POST",
+            url=self.url("/api/portal/v1/auth/login"),
+            params=None,
+            json_body=payload,
+            headers={},
+            response=response,
         )
         body = self.read_json(
             response,
@@ -125,6 +134,14 @@ class AuthCenterClient:
 
     def get_captcha(self, account_name: str) -> dict[str, str]:
         response = self.http.get(self.url("/api/portal/v1/auth/captcha"), timeout=REQUEST_TIMEOUT)
+        self.record_exchange(
+            method="GET",
+            url=self.url("/api/portal/v1/auth/captcha"),
+            params=None,
+            json_body=None,
+            headers={},
+            response=response,
+        )
         body = self.read_json(response, context=f"{account_name} 获取验证码响应不是合法 JSON")
         if response.status_code != 200 or body.get("status") != 0:
             raise RuntimeError(f"获取验证码失败: {self.describe_response(response, body_override=body)}")
@@ -177,7 +194,7 @@ class AuthCenterClient:
 
         url = self.url(path)
         try:
-            return self.http.request(
+            response = self.http.request(
                 method=method,
                 url=url,
                 params=params,
@@ -185,7 +202,24 @@ class AuthCenterClient:
                 headers=final_headers,
                 timeout=REQUEST_TIMEOUT,
             )
+            self.record_exchange(
+                method=method,
+                url=url,
+                params=params,
+                json_body=json_body,
+                headers=final_headers,
+                response=response,
+            )
+            return response
         except requests.RequestException as exc:
+            self.record_exchange(
+                method=method,
+                url=url,
+                params=params,
+                json_body=json_body,
+                headers=final_headers,
+                error=repr(exc),
+            )
             raise RuntimeError(
                 "HTTP 请求失败: "
                 f"method={method}, url={url}, params={params}, json={json_body}, "
@@ -211,6 +245,32 @@ class AuthCenterClient:
             image_path.unlink(missing_ok=True)
         except OSError:
             pass
+
+    def record_exchange(
+        self,
+        *,
+        method: str,
+        url: str,
+        params: dict[str, Any] | None,
+        json_body: dict[str, Any] | None,
+        headers: dict[str, str],
+        response: Response | None = None,
+        error: str | None = None,
+    ) -> None:
+        entry: dict[str, Any] = {
+            "method": method,
+            "url": url,
+            "params": params,
+            "json": self.mask_payload(json_body),
+            "headers": self.mask_headers(headers),
+        }
+        if response is not None:
+            entry["http_status"] = response.status_code
+            entry["content_type"] = response.headers.get("Content-Type", "")
+            entry["response"] = self.extract_response_body(response)
+        if error is not None:
+            entry["error"] = error
+        self.last_exchange = entry
 
     def read_json(self, response: Response, *, context: str) -> dict[str, Any]:
         try:
@@ -238,8 +298,33 @@ class AuthCenterClient:
             f"body={text}"
         )
 
+    def extract_response_body(self, response: Response) -> str:
+        try:
+            body = response.json()
+        except ValueError:
+            body = response.text
+        text = body if isinstance(body, str) else repr(body)
+        text = text.strip()
+        if len(text) > 1000:
+            text = text[:1000] + "...<truncated>"
+        return text
+
+    def format_last_exchange(self) -> str:
+        if self.last_exchange is None:
+            return "last_exchange=<empty>"
+        return repr(self.last_exchange)
+
     def mask_headers(self, headers: dict[str, str]) -> dict[str, str]:
         masked = dict(headers)
         if "X-AUTH-TOKEN" in masked:
             masked["X-AUTH-TOKEN"] = "<masked>"
+        return masked
+
+    def mask_payload(self, payload: dict[str, Any] | None) -> dict[str, Any] | None:
+        if payload is None:
+            return None
+        masked = dict(payload)
+        for key in ("password", "captchaCode"):
+            if key in masked:
+                masked[key] = "<masked>"
         return masked

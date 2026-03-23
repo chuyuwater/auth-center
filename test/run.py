@@ -20,6 +20,12 @@ class VerboseTextTestResult(unittest.TextTestResult):
         self.stream.writeln("")
         self.stream.writeln(f"[auth-center-test] {label}: {test.id()}")
         self.stream.writeln(detail)
+        ctx = getattr(test.__class__, "ctx", None)
+        client = getattr(ctx, "client", None)
+        formatter = getattr(client, "format_last_exchange", None)
+        if callable(formatter):
+            self.stream.writeln("[auth-center-test] last_exchange:")
+            self.stream.writeln(formatter())
         self.stream.flush()
 
 
