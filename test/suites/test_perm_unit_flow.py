@@ -43,7 +43,7 @@ class PermUnitFlowTestCase(BaseFlowTestCase):
             ensure_http_status(create_group_response, 200)
             created_group = ensure_api_status(create_group_response.json())
             group_id = created_group["id"]
-            self.assertEqual(created_group["policyModel"], 0)
+            self.assertEqual(created_group["nodeName"], f"自动化权限分组{suffix[-6:]}")
 
             group_tree_response = self.ctx.client.request(
                 "GET",

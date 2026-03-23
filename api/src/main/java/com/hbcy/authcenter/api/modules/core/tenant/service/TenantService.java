@@ -19,7 +19,9 @@ import com.hbcy.authcenter.api.modules.core.tenant.vo.TenantForbiddenVO;
 import com.hbcy.authcenter.api.modules.core.tenant.vo.TenantInsertVO;
 import com.hbcy.authcenter.api.modules.core.tenant.vo.TenantQueryVO;
 import com.hbcy.authcenter.api.modules.core.tenant.vo.TenantUpdateVO;
+import com.hbcy.authcenter.api.modules.core.user.dao.UserOrgMapper;
 import com.hbcy.authcenter.api.modules.core.user.model.User;
+import com.hbcy.authcenter.api.modules.core.user.model.UserOrg;
 import com.hbcy.authcenter.api.modules.core.user.service.UserService;
 import com.hbcy.authcenter.global.constants.EventConstants;
 import com.hbcy.authcenter.sdk.utils.UserContextUtils;
@@ -54,6 +56,8 @@ public class TenantService extends ServiceImpl<TenantMapper, Tenant> {
     private UserService userService;
     @Resource
     private EventDispatcher eventDispatcher;
+    @Resource
+    private UserOrgMapper userOrgMapper;
 
     private void checkExist(String nameCn) {
         Tenant one = this.getOne(new QueryWrapper<Tenant>().eq(Tenant.COL_NAME_CN, nameCn), false);
@@ -191,12 +195,17 @@ public class TenantService extends ServiceImpl<TenantMapper, Tenant> {
         var anyApp = tenantAppMapper.exists(new QueryWrapper<TenantApp>()
                 .eq(TenantApp.COL_TENANT_ID, tenant.getId()));
         if (anyApp) {
-            throw new ParamError("请先删除该租户下的所有应用");
+            throw new ParamError("请先取消该租户的所有应用授权");
         }
-        Long cnt = orgTreeMapper.selectCount(new QueryWrapper<OrgTree>()
+        Long cnt = userOrgMapper.selectCount(new QueryWrapper<UserOrg>()
+                .eq(UserOrg.COL_TENANT_ID, tenant.getId()));
+        if (cnt > 1) {
+            throw new ParamError("请先删除该租户下除默认管理员之外的所有用户");
+        }
+        cnt = orgTreeMapper.selectCount(new QueryWrapper<OrgTree>()
                 .eq(OrgTree.COL_TENANT_ID, tenant.getId()));
-        if (cnt > 1) { //不含虚拟根节点
-            throw new ParamError("请先删除该租户下的所有组织");
+        if (cnt > 2) { //虚拟根节点+租户名称节点
+            throw new ParamError("请先删除该租户下除根组织外所有组织");
         }
         tenant.setUpdateUser(UserContextUtils.getUserId());
         //逻辑删除

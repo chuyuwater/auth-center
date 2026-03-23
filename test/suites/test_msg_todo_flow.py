@@ -3,6 +3,7 @@ from __future__ import annotations
 import time
 
 from common.assertions import ensure_api_status, ensure_http_status
+from common.cleanup import delete_user_safely
 from suites.base import BaseFlowTestCase
 
 
@@ -10,9 +11,11 @@ class MsgTodoFlowTestCase(BaseFlowTestCase):
     def test_msg_and_todo_query_scope_flow(self) -> None:
         admin_session = self.ctx.session("super_admin")
         granted_session = self.ctx.session("granted_user")
-        self.assertEqual(admin_session.tenant_id, granted_session.tenant_id, "该用例要求 super_admin 与 granted_user 在同一租户")
+        self.assertEqual(admin_session.tenant_id, granted_session.tenant_id,
+                         "该用例要求 super_admin 与 granted_user 在同一租户")
         org_ids = granted_session.account.org_ids
-        self.assertGreaterEqual(len(org_ids), 2, "granted_user 至少需要配置两个组织用于切组织验权")
+        self.assertGreaterEqual(
+            len(org_ids), 2, "granted_user 至少需要配置两个组织用于切组织验权")
 
         granted_org_id = org_ids[0]
         forbidden_org_id = org_ids[1]
@@ -102,9 +105,20 @@ class MsgTodoFlowTestCase(BaseFlowTestCase):
                 granted_session,
                 keyword=f"自动化本人消息{suffix[-6:]}",
             )
-            my_msg = self._pick_one(my_msg_page["list"], "msgTitle", f"自动化本人消息{suffix[-6:]}")
+            my_msg = self._pick_one(
+                my_msg_page["list"], "msgTitle", f"自动化本人消息{suffix[-6:]}")
             personal_msg_id = my_msg["id"]
             self.assertEqual(my_msg["viewStatus"], 0)
+
+            my_msg_page_other_org = self._query_my_msgs(
+                granted_session,
+                keyword=f"自动化本人消息{suffix[-6:]}",
+                org_id=forbidden_org_id,
+            )
+            my_msg_other_org = self._pick_one(
+                my_msg_page_other_org["list"], "msgTitle", f"自动化本人消息{suffix[-6:]}"
+            )
+            self.assertEqual(my_msg_other_org["id"], personal_msg_id, "本人消息不应受切换组织影响")
 
             mark_msg_read_response = self.ctx.client.request(
                 "POST",
@@ -128,10 +142,21 @@ class MsgTodoFlowTestCase(BaseFlowTestCase):
                 granted_session,
                 keyword=f"自动化本人待办{suffix[-6:]}",
             )
-            my_todo = self._pick_one(my_todo_page["list"], "todoTitle", f"自动化本人待办{suffix[-6:]}")
+            my_todo = self._pick_one(
+                my_todo_page["list"], "todoTitle", f"自动化本人待办{suffix[-6:]}")
             personal_todo_id = my_todo["id"]
             self.assertEqual(my_todo["processState"], 0)
             self.assertEqual(my_todo["viewState"], 0)
+
+            my_todo_page_other_org = self._query_my_todos(
+                granted_session,
+                keyword=f"自动化本人待办{suffix[-6:]}",
+                org_id=forbidden_org_id,
+            )
+            my_todo_other_org = self._pick_one(
+                my_todo_page_other_org["list"], "todoTitle", f"自动化本人待办{suffix[-6:]}"
+            )
+            self.assertEqual(my_todo_other_org["id"], personal_todo_id, "本人待办不应受切换组织影响")
 
             update_todo_response = self.ctx.client.request(
                 "PUT",
@@ -171,32 +196,36 @@ class MsgTodoFlowTestCase(BaseFlowTestCase):
             msg_page_granted_org = self._query_op_msgs(
                 granted_session,
                 org_id=granted_org_id,
-                keyword=f"自动化消息-{suffix[-6:]}",
+                keyword=f"自动化消息",
             )
-            msg_titles_granted_org = {item["msgTitle"] for item in msg_page_granted_org["list"]}
+            msg_titles_granted_org = {item["msgTitle"]
+                                      for item in msg_page_granted_org["list"]}
             self.assertIn(f"自动化消息-授权组织-{suffix[-6:]}", msg_titles_granted_org)
-            self.assertNotIn(f"自动化消息-无权组织-{suffix[-6:]}", msg_titles_granted_org)
+            self.assertNotIn(
+                f"自动化消息-无权组织-{suffix[-6:]}", msg_titles_granted_org)
 
             msg_page_forbidden_org = self._query_op_msgs(
                 granted_session,
                 org_id=forbidden_org_id,
-                keyword=f"自动化消息-{suffix[-6:]}",
+                keyword=f"自动化消息",
             )
             self.assertEqual(msg_page_forbidden_org["total"], 0)
 
             todo_page_granted_org = self._query_op_todos(
                 granted_session,
                 org_id=granted_org_id,
-                keyword=f"自动化待办-{suffix[-6:]}",
+                keyword=f"自动化待办",
             )
-            todo_titles_granted_org = {item["todoTitle"] for item in todo_page_granted_org["list"]}
+            todo_titles_granted_org = {item["todoTitle"]
+                                       for item in todo_page_granted_org["list"]}
             self.assertIn(f"自动化待办-授权组织-{suffix[-6:]}", todo_titles_granted_org)
-            self.assertNotIn(f"自动化待办-无权组织-{suffix[-6:]}", todo_titles_granted_org)
+            self.assertNotIn(
+                f"自动化待办-无权组织-{suffix[-6:]}", todo_titles_granted_org)
 
             todo_page_forbidden_org = self._query_op_todos(
                 granted_session,
                 org_id=forbidden_org_id,
-                keyword=f"自动化待办-{suffix[-6:]}",
+                keyword=f"自动化待办",
             )
             self.assertEqual(todo_page_forbidden_org["total"], 0)
         finally:
@@ -239,43 +268,44 @@ class MsgTodoFlowTestCase(BaseFlowTestCase):
     def _create_temp_user(
         self, admin_session, node_id: str, suffix: str, label: str, account_tag: str
     ) -> str:
-        create_response = self.ctx.client.request(
-            "POST",
-            "/api/portal/v1/user",
-            session_state=admin_session,
-            json_body={
+        phone_prefixes = ["179", "199", "191"]
+        for index, prefix in enumerate(phone_prefixes):
+            payload = {
                 "nodeId": node_id,
-                "account": f"auto_{account_tag}_{suffix[-6:]}",
-                "phone": self._build_phone("137", suffix + label),
+                "account": f"auto_{account_tag}_{suffix[-6:]}" if index == 0 else f"auto_{account_tag}_{suffix[-6:]}_{index}",
+                "phone": self._build_phone(prefix, suffix + label + str(index)),
                 "realName": f"{label}用户{suffix[-4:]}",
-                "email": f"auto_{account_tag}_{suffix[-6:]}@example.com",
+                "email": (
+                    f"auto_{account_tag}_{suffix[-6:]}@example.com"
+                    if index == 0
+                    else f"auto_{account_tag}_{suffix[-6:]}_{index}@example.com"
+                ),
                 "avatar": "",
                 "employeeType": 1,
-            },
-        )
-        ensure_http_status(create_response, 200)
-        user_id = ensure_api_status(create_response.json())
-        self.assertTrue(user_id, f"{label}临时用户创建失败")
-        return user_id
+            }
+            create_response = self.ctx.client.request(
+                "POST",
+                "/api/portal/v1/user",
+                session_state=admin_session,
+                json_body=payload,
+            )
+            if create_response.status_code == 200:
+                user_id = ensure_api_status(create_response.json())
+                self.assertTrue(user_id, f"{label}临时用户创建失败")
+                return user_id
+
+            try:
+                body = create_response.json()
+            except ValueError:
+                body = {"msg": create_response.text}
+            if create_response.status_code == 400 and "手机号已存在" in str(body.get("msg", "")):
+                continue
+            ensure_http_status(create_response, 200)
+
+        self.fail(f"{label}临时用户创建失败: 手机号重试后仍冲突")
 
     def _delete_temp_user(self, admin_session, user_id: str) -> None:
-        forbid_response = self.ctx.client.request(
-            "POST",
-            "/api/portal/v1/user/forbidden",
-            session_state=admin_session,
-            json_body={"userId": user_id, "forbidden": 1},
-        )
-        ensure_http_status(forbid_response, 200)
-        ensure_api_status(forbid_response.json())
-
-        delete_response = self.ctx.client.request(
-            "POST",
-            "/api/portal/v1/user/delete",
-            session_state=admin_session,
-            params={"id": user_id},
-        )
-        ensure_http_status(delete_response, 200)
-        ensure_api_status(delete_response.json())
+        delete_user_safely(self.ctx, admin_session, user_id)
 
     def _create_msg(self, admin_session, *, src_id: str, title: str, target_users: list[str]) -> None:
         response = self.ctx.client.request(
@@ -326,22 +356,25 @@ class MsgTodoFlowTestCase(BaseFlowTestCase):
         ensure_http_status(response, 200)
         ensure_api_status(response.json())
 
-    def _query_my_msgs(self, session_state, *, keyword: str) -> dict:
+    def _query_my_msgs(self, session_state, *, keyword: str, org_id: str | None = None) -> dict:
         response = self.ctx.client.request(
             "GET",
             "/api/portal/v1/user/inbox",
             session_state=session_state,
+            org_id=org_id,
             params={"page": 1, "size": 20, "keyword": keyword},
         )
         ensure_http_status(response, 200)
         return ensure_api_status(response.json())
 
-    def _query_my_todos(self, session_state, *, keyword: str) -> dict:
+    def _query_my_todos(self, session_state, *, keyword: str, org_id: str | None = None) -> dict:
         response = self.ctx.client.request(
             "GET",
             "/api/portal/v1/user/todo",
             session_state=session_state,
-            params={"page": 1, "size": 20, "keyword": keyword, "scope": "TARGET_ME"},
+            org_id=org_id,
+            params={"page": 1, "size": 20,
+                    "keyword": keyword, "scope": "TARGET_ME"},
         )
         ensure_http_status(response, 200)
         return ensure_api_status(response.json())
@@ -370,7 +403,8 @@ class MsgTodoFlowTestCase(BaseFlowTestCase):
 
     def _pick_one(self, items: list[dict], key: str, expected_value: str) -> dict:
         matched = [item for item in items if item.get(key) == expected_value]
-        self.assertEqual(len(matched), 1, f"未唯一命中 {expected_value}, 实际结果: {items}")
+        self.assertEqual(
+            len(matched), 1, f"未唯一命中 {expected_value}, 实际结果: {items}")
         return matched[0]
 
     @staticmethod

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import base64
+from collections import deque
 import mimetypes
 import os
 import shutil
@@ -47,6 +48,7 @@ class AuthCenterClient:
         self.http = requests.Session()
         self.http.headers.update({"Accept": "application/json"})
         self.last_exchange: dict[str, Any] | None = None
+        self.exchange_history: deque[dict[str, Any]] = deque(maxlen=20)
 
     def build_account(self, name: str) -> AccountConfig:
         raw = ACCOUNTS[name]
@@ -89,6 +91,11 @@ class AuthCenterClient:
             params=None,
             json_body=payload,
             headers={},
+            session_context={
+                "account_name": account.name,
+                "principal": account.principal,
+                "tenant_id": account.tenant_id,
+            },
             response=response,
         )
         body = self.read_json(
@@ -140,6 +147,7 @@ class AuthCenterClient:
             params=None,
             json_body=None,
             headers={},
+            session_context={"account_name": account_name},
             response=response,
         )
         body = self.read_json(response, context=f"{account_name} 获取验证码响应不是合法 JSON")
@@ -180,8 +188,9 @@ class AuthCenterClient:
         params: dict[str, Any] | None = None,
         json_body: dict[str, Any] | None = None,
         headers: dict[str, str] | None = None,
-    ):
+        ):
         final_headers: dict[str, str] = {}
+        session_context: dict[str, Any] | None = None
         if session_state is not None:
             final_headers["X-AUTH-TOKEN"] = session_state.token
             final_headers["X-APP-ID"] = APP_ID
@@ -189,6 +198,13 @@ class AuthCenterClient:
             if chosen_org_id:
                 final_headers["X-ORG-ID"] = chosen_org_id
             final_headers.update(session_state.account.extra_headers)
+            session_context = {
+                "account_name": session_state.account.name,
+                "principal": session_state.account.principal,
+                "user_id": session_state.user_id,
+                "tenant_id": session_state.tenant_id,
+                "org_id": chosen_org_id,
+            }
         if headers:
             final_headers.update(headers)
 
@@ -208,6 +224,7 @@ class AuthCenterClient:
                 params=params,
                 json_body=json_body,
                 headers=final_headers,
+                session_context=session_context,
                 response=response,
             )
             return response
@@ -218,6 +235,7 @@ class AuthCenterClient:
                 params=params,
                 json_body=json_body,
                 headers=final_headers,
+                session_context=session_context,
                 error=repr(exc),
             )
             raise RuntimeError(
@@ -254,6 +272,7 @@ class AuthCenterClient:
         params: dict[str, Any] | None,
         json_body: dict[str, Any] | None,
         headers: dict[str, str],
+        session_context: dict[str, Any] | None = None,
         response: Response | None = None,
         error: str | None = None,
     ) -> None:
@@ -264,6 +283,8 @@ class AuthCenterClient:
             "json": self.mask_payload(json_body),
             "headers": self.mask_headers(headers),
         }
+        if session_context is not None:
+            entry["session"] = session_context
         if response is not None:
             entry["http_status"] = response.status_code
             entry["content_type"] = response.headers.get("Content-Type", "")
@@ -271,6 +292,7 @@ class AuthCenterClient:
         if error is not None:
             entry["error"] = error
         self.last_exchange = entry
+        self.exchange_history.append(entry)
 
     def read_json(self, response: Response, *, context: str) -> dict[str, Any]:
         try:
@@ -313,6 +335,15 @@ class AuthCenterClient:
         if self.last_exchange is None:
             return "last_exchange=<empty>"
         return repr(self.last_exchange)
+
+    def format_recent_exchanges(self, limit: int = 8) -> str:
+        if not self.exchange_history:
+            return "recent_exchanges=<empty>"
+        items = list(self.exchange_history)[-limit:]
+        lines = []
+        for index, item in enumerate(items, start=1):
+            lines.append(f"[{index}] {repr(item)}")
+        return "\n".join(lines)
 
     def mask_headers(self, headers: dict[str, str]) -> dict[str, str]:
         masked = dict(headers)

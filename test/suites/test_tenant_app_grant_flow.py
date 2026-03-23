@@ -2,8 +2,9 @@ from __future__ import annotations
 
 import time
 
-from common.assertions import ensure_api_status, ensure_http_status
+from common.assertions import ensure_api_error, ensure_api_status, ensure_http_status
 from common.client import AccountConfig
+from common.cleanup import delete_org_tree_safely, delete_user_safely
 from suites.base import BaseFlowTestCase
 
 
@@ -281,23 +282,7 @@ class TenantAppGrantFlowTestCase(BaseFlowTestCase):
                 ensure_api_status(delete_group_response.json())
 
             if temp_user_id and tenant_admin is not None:
-                forbid_user_response = self.ctx.client.request(
-                    "POST",
-                    "/api/portal/v1/user/forbidden",
-                    session_state=tenant_admin,
-                    json_body={"userId": temp_user_id, "forbidden": 1},
-                )
-                ensure_http_status(forbid_user_response, 200)
-                ensure_api_status(forbid_user_response.json())
-
-                delete_user_response = self.ctx.client.request(
-                    "POST",
-                    "/api/portal/v1/user/delete",
-                    session_state=tenant_admin,
-                    params={"id": temp_user_id},
-                )
-                ensure_http_status(delete_user_response, 200)
-                ensure_api_status(delete_user_response.json())
+                delete_user_safely(self.ctx, tenant_admin, temp_user_id)
 
             if department_id and tenant_admin is not None:
                 delete_department_response = self.ctx.client.request(
@@ -319,6 +304,9 @@ class TenantAppGrantFlowTestCase(BaseFlowTestCase):
                 ensure_http_status(delete_company_response, 200)
                 ensure_api_status(delete_company_response.json())
 
+            if tenant_admin is not None and tenant_root_org_id:
+                delete_org_tree_safely(self.ctx, tenant_admin, tenant_root_org_id)
+
             if tenant_app_grant_id:
                 delete_grant_response = self.ctx.client.request(
                     "POST",
@@ -336,8 +324,8 @@ class TenantAppGrantFlowTestCase(BaseFlowTestCase):
                     session_state=super_admin_session,
                     params={"id": tenant_id},
                 )
-                ensure_http_status(delete_tenant_response, 200)
-                ensure_api_status(delete_tenant_response.json())
+                delete_tenant_body = ensure_api_error(delete_tenant_response, 400, 10)
+                self.assertIn("请先删除该租户下的所有组织", delete_tenant_body["msg"])
 
     def _pick_portal_perm(self, session_state) -> dict[str, str]:
         tree_response = self.ctx.client.request(

@@ -64,7 +64,7 @@ ACCOUNTS = {
         "password": "17912345678",
         "tenant_id": "",
         # 默认组织即可。该账号默认不应拥有任何权限
-        "org_ids": ["0-ORG-000001"],
+        "org_ids": ["0-ORG-000015"],
         "extra_headers": {},
     },
 }

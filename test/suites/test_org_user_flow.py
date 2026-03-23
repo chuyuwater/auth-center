@@ -4,6 +4,7 @@ import time
 
 from common.assertions import ensure_api_error, ensure_api_status, ensure_http_status
 from common.client import AccountConfig
+from common.cleanup import delete_org_tree_safely, delete_user_safely
 from suites.base import BaseFlowTestCase
 
 
@@ -31,6 +32,32 @@ class OrgUserFlowTestCase(BaseFlowTestCase):
         tenant = ensure_api_status(create_tenant_response.json())
         tenant_id = tenant["id"]
         tenant_root_org_id = f"{tenant_id}-ORG-000001"
+        tenant_app_grant_id = ""
+
+        grant_app_response = self.ctx.client.request(
+            "POST",
+            "/api/portal/v1/grant/app",
+            session_state=super_admin_session,
+            json_body={
+                "tenantId": tenant_id,
+                "appId": "portal",
+                "grantAll": True,
+                "permIds": [],
+            },
+        )
+        ensure_http_status(grant_app_response, 200)
+        ensure_api_status(grant_app_response.json())
+
+        list_grant_apps_response = self.ctx.client.request(
+            "GET",
+            f"/api/portal/v1/grant/app/{tenant_id}",
+            session_state=super_admin_session,
+        )
+        ensure_http_status(list_grant_apps_response, 200)
+        grant_apps = ensure_api_status(list_grant_apps_response.json())
+        portal_grant = next((item for item in grant_apps if item["appId"] == "portal"), None)
+        self.assertIsNotNone(portal_grant, "租户应用授权列表中未找到 portal")
+        tenant_app_grant_id = portal_grant["grantId"]
 
         tenant_admin = self.ctx.login_custom(
             AccountConfig(
@@ -199,23 +226,7 @@ class OrgUserFlowTestCase(BaseFlowTestCase):
         blocked_body = ensure_api_error(org_delete_blocked_response, 403, 11)
         self.assertIn("已关联用户", blocked_body["msg"])
 
-        forbid_user_response = self.ctx.client.request(
-            "POST",
-            "/api/portal/v1/user/forbidden",
-            session_state=tenant_admin,
-            json_body={"userId": user_id, "forbidden": 1},
-        )
-        ensure_http_status(forbid_user_response, 200)
-        ensure_api_status(forbid_user_response.json())
-
-        delete_user_response = self.ctx.client.request(
-            "POST",
-            "/api/portal/v1/user/delete",
-            session_state=tenant_admin,
-            params={"id": user_id},
-        )
-        ensure_http_status(delete_user_response, 200)
-        ensure_api_status(delete_user_response.json())
+        delete_user_safely(self.ctx, tenant_admin, user_id)
 
         delete_department_response = self.ctx.client.request(
             "POST",
@@ -234,6 +245,17 @@ class OrgUserFlowTestCase(BaseFlowTestCase):
         )
         ensure_http_status(delete_company_response, 200)
         ensure_api_status(delete_company_response.json())
+
+        delete_org_tree_safely(self.ctx, tenant_admin, tenant_root_org_id)
+
+        delete_grant_response = self.ctx.client.request(
+            "POST",
+            "/api/portal/v1/grant/app/delete",
+            session_state=super_admin_session,
+            params={"id": tenant_app_grant_id},
+        )
+        ensure_http_status(delete_grant_response, 200)
+        ensure_api_status(delete_grant_response.json())
 
         delete_tenant_response = self.ctx.client.request(
             "POST",
