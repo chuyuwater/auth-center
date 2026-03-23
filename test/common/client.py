@@ -96,6 +96,18 @@ class AuthCenterClient:
             raw_login_data=data,
         )
 
+    def logout(self, session_state: SessionState) -> None:
+        response = self.request(
+            "POST",
+            "/api/portal/v1/auth/logout",
+            session_state=session_state,
+        )
+        body = response.json()
+        if response.status_code != 200 or body.get("status") != 0:
+            raise RuntimeError(
+                f"{session_state.account.name} 登出失败: http={response.status_code}, body={body}"
+            )
+
     def get_captcha(self, account_name: str) -> dict[str, str]:
         response = self.http.get(self.url("/api/portal/v1/auth/captcha"), timeout=REQUEST_TIMEOUT)
         body = response.json()

@@ -5,7 +5,6 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.f4b6a3.ulid.UlidCreator;
 import com.google.common.base.Preconditions;
-import com.hbcy.authcenter.api.common.enums.TodoQueryScopeEnum;
 import com.hbcy.authcenter.api.common.bean.NameCacheService;
 import com.hbcy.authcenter.api.common.constants.G;
 import com.hbcy.authcenter.api.modules.core.app.model.App;
@@ -17,7 +16,6 @@ import com.hbcy.authcenter.api.modules.core.user.dao.UserMapper;
 import com.hbcy.authcenter.api.modules.core.user.dao.UserOrgMapper;
 import com.hbcy.authcenter.api.modules.core.user.model.User;
 import com.hbcy.authcenter.api.modules.minor.msg.dto.SourceAppDTO;
-import com.hbcy.authcenter.api.modules.minor.msg.dto.UserMsgDTO;
 import com.hbcy.authcenter.api.modules.minor.todo.dao.UserTodoMapper;
 import com.hbcy.authcenter.api.modules.minor.todo.dto.TodoDTO;
 import com.hbcy.authcenter.api.modules.minor.todo.dto.UserTodoDTO;
@@ -51,6 +49,11 @@ import java.util.stream.Collectors;
 public class UserTodoService extends ServiceImpl<UserTodoMapper, UserTodo> {
     public static final String PERM_VIEW_TODO = "todo:query";
     public static final String PROCESS_STATE = "TODO_PROCESS_STATE";
+    /** 待办列表允许的排序字段（与 PageVO orderBy 规则一致：以 "-" 开头为倒序，多列用逗号分隔） */
+    private static final Set<String> TODO_ORDER_ALLOWED = Set.of(
+            "create_time", "-create_time", "send_time", "-send_time", "urge_flag", "-urge_flag",
+            "-urge_flag,create_time"
+    );
     @Resource
     private UserMapper userMapper;
     @Resource
@@ -103,12 +106,6 @@ public class UserTodoService extends ServiceImpl<UserTodoMapper, UserTodo> {
         }
         baseMapper.insertIgnore(todos);
     }
-
-    /** 待办列表允许的排序字段（与 PageVO orderBy 规则一致：以 "-" 开头为倒序，多列用逗号分隔） */
-    private static final Set<String> TODO_ORDER_ALLOWED = Set.of(
-            "create_time", "-create_time", "send_time", "-send_time", "urge_flag", "-urge_flag",
-            "-urge_flag,create_time"
-    );
 
     public PageResp<UserTodoDTO> queryTodo(UserTodoQueryByMeVO vo) {
         Preconditions.checkNotNull(vo.getScope(), "查询范围不能为空");
@@ -171,6 +168,9 @@ public class UserTodoService extends ServiceImpl<UserTodoMapper, UserTodo> {
                     PERM_VIEW_TODO,
                     UserContextUtils.getUserOrg()
             );
+            if (CollectionUtils.isEmpty(childOrgIds)) {
+                return new PageResp<>(new ArrayList<>(), 0, dbPage.getCurrent());
+            }
             vo.setSearchOrgIds(childOrgIds);
         }
         vo.setTenantId(UserContextUtils.getTenantId());

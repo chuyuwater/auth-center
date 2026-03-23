@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from common.client import AuthCenterClient, SessionState
+from common.client import AccountConfig, AuthCenterClient, SessionState
 from settings import ACCOUNTS
 
 
@@ -18,3 +18,17 @@ class TestContext:
 
     def session(self, account_name: str) -> SessionState:
         return self.sessions[account_name]
+
+    def login_custom(self, account: AccountConfig, alias: str | None = None) -> SessionState:
+        session = self.client.login(account)
+        self.sessions[alias or account.name] = session
+        return session
+
+    def logout(self, account_name: str) -> None:
+        self.client.logout(self.sessions[account_name])
+
+    def relogin(self, account_name: str) -> SessionState:
+        account = self.sessions[account_name].account
+        session = self.client.login(account)
+        self.sessions[account_name] = session
+        return session
