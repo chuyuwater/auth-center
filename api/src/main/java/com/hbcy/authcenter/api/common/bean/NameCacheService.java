@@ -67,11 +67,17 @@ public class NameCacheService implements INameFillService {
     }
 
     public Map<String, String> getUserNameMap(Set<String> userIds) {
+        if (userIds == null || userIds.isEmpty()) {
+            return new HashMap<>();
+        }
         return doQuery(userIds, G.USER_NAME_CACHE_KEY,
                 k -> userMapper.selectNameByIds(k));
     }
 
     public String getUserName(String userId) {
+        if (StringUtils.isBlank(userId)) {
+            return null;
+        }
         return getUserNameMap(Set.of(userId)).get(userId);
     }
 
