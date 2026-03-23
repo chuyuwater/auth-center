@@ -28,15 +28,16 @@ import com.hbcy.authcenter.api.modules.core.perm.vo.PermUserUnitQueryVO;
 import com.hbcy.authcenter.api.modules.core.tenant.dao.TenantAppMapper;
 import com.hbcy.authcenter.api.modules.core.tenant.dao.TenantAppResourceMapper;
 import com.hbcy.authcenter.api.modules.core.tenant.model.TenantApp;
-import com.hbcy.authcenter.api.modules.core.tenant.model.TenantAppResource;
 import com.hbcy.authcenter.api.modules.core.user.dao.UserOrgMapper;
 import com.hbcy.authcenter.api.modules.core.user.model.UserOrg;
+import com.hbcy.authcenter.gateway.vo.RefreshUserPermVO;
 import com.hbcy.authcenter.sdk.utils.UserContextUtils;
 import com.hbcy.common.base.error.ParamError;
 import com.hbcy.common.base.pojo.PageResp;
 import com.hbcy.common.db.model.PageRespEx;
 import jakarta.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
+import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -215,6 +216,7 @@ public class PermUnitUserService extends ServiceImpl<PermUnitUserMapper, PermUni
         return baseMapper.listGrantApps(userId, orgId, withForbidden);
     }
 
+
     public Map<String, Boolean> checkPerm(String userId, String orgId, String appId, Collection<String> permCodes) {
         List<ResourcePerm> resourcePerms = resourcePermMapper.selectList(new QueryWrapper<ResourcePerm>()
                 .eq(ResourcePerm.COL_APP_ID, appId)
@@ -231,6 +233,24 @@ public class PermUnitUserService extends ServiceImpl<PermUnitUserMapper, PermUni
         for (ResourcePerm rp : resourcePerms) {
             permCodeIdMap.put(rp.getPermCode(), rp.getId());
         }
+        Map<String, Boolean> checked = checkFromCache(userId, orgId, permCodes, permCodeIdMap, defaultResp);
+        if (checked != null) return checked;
+        //刷新缓存
+        innerService.refreshUserPerms(new RefreshUserPermVO()
+                .setUserId(userId)
+                .setOrgId(orgId)
+                .setTenantId(UserContextUtils.getTenantId()));
+        checked = checkFromCache(userId, orgId, permCodes, permCodeIdMap, defaultResp);
+        if (checked != null) {
+            return checked;
+        }
+        return defaultResp;
+    }
+
+    private @Nullable Map<String, Boolean> checkFromCache(String userId, String orgId,
+                                                          Collection<String> permCodes,
+                                                          BiMap<String, String> permCodeIdMap,
+                                                          Map<String, Boolean> defaultResp) {
         Map<String, Boolean> checked = innerService.checkPerms(userId, orgId, permCodeIdMap.values());
         if (checked != null) {
             for (String permCode : permCodes) {
@@ -238,34 +258,7 @@ public class PermUnitUserService extends ServiceImpl<PermUnitUserMapper, PermUni
             }
             return checked;
         }
-        //没缓存了，直接从数据库计算
-        String tenantId = UserContextUtils.getTenantId();
-        if (UserContextUtils.isTenantAdmin()) {
-            TenantApp grant = tenantAppMapper.selectOne(new QueryWrapper<TenantApp>()
-                    .eq(TenantApp.COL_APP_ID, appId)
-                    .eq(TenantApp.COL_TENANT_ID, tenantId));
-            if (grant == null) return defaultResp;
-            if (grant.getGrantAll().equals(1)) {
-                for (String permCode : permCodes) {
-                    defaultResp.put(permCode, true);
-                }
-                return defaultResp;
-            }
-            List<TenantAppResource> tenantAppResources = tenantAppResourceMapper.selectList(
-                    new QueryWrapper<TenantAppResource>()
-                            .eq(TenantAppResource.COL_APP_ID, appId)
-                            .eq(TenantAppResource.COL_TENANT_ID, tenantId)
-                            .in(TenantAppResource.COL_PERM_ID, permCodeIdMap.values()));
-            for (TenantAppResource tenantAppResource : tenantAppResources) {
-                defaultResp.put(permCodeIdMap.inverse().get(tenantAppResource.getPermId()), true);
-            }
-            return defaultResp;
-        }
-        Set<String> hasPermIds = baseMapper.checkPerms(userId, orgId, permCodeIdMap.values());
-        for (String hasPerm : hasPermIds) {
-            defaultResp.put(permCodeIdMap.inverse().get(hasPerm), true);
-        }
-        return defaultResp;
+        return null;
     }
 
     public boolean checkPerm(String permCode) {
