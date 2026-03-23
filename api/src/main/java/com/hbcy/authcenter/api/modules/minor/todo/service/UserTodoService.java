@@ -120,9 +120,13 @@ public class UserTodoService extends ServiceImpl<UserTodoMapper, UserTodo> {
         dbPage = baseMapper.query4user(dbPage, vo);
         Set<String> appIds = dbPage.getRecords().stream().map(
                 UserTodoDTO::getSrcApp).collect(Collectors.toSet());
+        Set<String> userIds = dbPage.getRecords().stream().map(
+                UserTodoDTO::getInitiatorId).collect(Collectors.toSet());
         Map<String, String> nameMap = appService.getNameMap(appIds);
+        Map<String, String> userNameMap = nameCacheService.getUserNameMap(userIds);
         for (UserTodoDTO r : dbPage.getRecords()) {
             r.setSrcAppName(nameMap.getOrDefault(r.getSrcApp(), r.getSrcApp()));
+            r.setInitiatorName(userNameMap.get(r.getInitiatorId()));
         }
         return new PageRespEx<>(dbPage);
     }

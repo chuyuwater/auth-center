@@ -43,6 +43,7 @@
         src_app,
         todo_title,
         todo_content,
+        initiator_id,
         send_time,
         create_time,
         view_state,

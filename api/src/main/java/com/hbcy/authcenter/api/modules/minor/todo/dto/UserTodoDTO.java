@@ -37,6 +37,16 @@ public class UserTodoDTO {
     private String todoContent;
 
     /**
+     * 发起人
+     */
+    private String initiatorId;
+
+    /**
+     * 发起人名称
+     */
+    private String initiatorName;
+
+    /**
      * 发送时间
      */
     private LocalDateTime sendTime;
