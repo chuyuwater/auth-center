@@ -115,16 +115,13 @@ public class InnerService {
         if (!Boolean.TRUE.equals(stringRedisTemplate.hasKey(key))) {
             return null;
         }
-        Set<String> intersect = stringRedisTemplate.opsForSet().intersect(key, permIds);
-        Map<String, Boolean> resp = new HashMap<>();
-        if (CollectionUtils.isEmpty(intersect)) {
-            for (String permId : permIds) {
-                resp.put(permId, false);
-            }
-            return resp;
+        Set<String> gotPerms = stringRedisTemplate.opsForSet().members(key);
+        if (gotPerms == null) {
+            gotPerms = new HashSet<>();
         }
+        Map<String, Boolean> resp = new HashMap<>();
         for (String permId : permIds) {
-            resp.put(permId, intersect.contains(permId));
+            resp.put(permId, gotPerms.contains(permId));
         }
         return resp;
     }
