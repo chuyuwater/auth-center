@@ -70,62 +70,66 @@ class AuthCenterClient:
         )
 
     def login(self, account: AccountConfig) -> SessionState:
-        captcha = self.get_captcha(account.name)
-        payload = {
-            account.login_field: account.principal,
-            "password": account.password,
-            "captchaId": captcha["id"],
-            "captchaCode": captcha["code"],
-        }
-        if account.tenant_id:
-            payload["tenantId"] = account.tenant_id
+        last_error: RuntimeError | None = None
+        for attempt in range(2):
+            captcha = self.get_captcha(account.name)
+            payload = {
+                account.login_field: account.principal,
+                "password": account.password,
+                "captchaId": captcha["id"],
+                "captchaCode": captcha["code"],
+            }
+            if account.tenant_id:
+                payload["tenantId"] = account.tenant_id
 
-        response = self.http.post(
-            self.url("/api/portal/v1/auth/login"),
-            json=payload,
-            timeout=REQUEST_TIMEOUT,
-        )
-        self.record_exchange(
-            method="POST",
-            url=self.url("/api/portal/v1/auth/login"),
-            params=None,
-            json_body=payload,
-            headers={},
-            session_context={
-                "account_name": account.name,
-                "principal": account.principal,
-                "tenant_id": account.tenant_id,
-            },
-            response=response,
-        )
-        body = self.read_json(
-            response,
-            context=(
-                f"{account.name} 登录响应不是合法 JSON; "
-                f"login_field={account.login_field}, principal={account.principal}, tenant_id={account.tenant_id or '<empty>'}"
-            ),
-        )
-        if response.status_code == 400 and body.get("status") == 100:
-            raise RuntimeError(
-                f"{account.name} 登录命中了多租户选择，请在 settings.py 里补 tenant_id，候选租户: {body.get('data')}"
+            response = self.http.post(
+                self.url("/api/portal/v1/auth/login"),
+                json=payload,
+                timeout=REQUEST_TIMEOUT,
             )
-        if response.status_code != 200:
-            raise RuntimeError(
+            self.record_exchange(
+                method="POST",
+                url=self.url("/api/portal/v1/auth/login"),
+                params=None,
+                json_body=payload,
+                headers={},
+                session_context={
+                    "account_name": account.name,
+                    "principal": account.principal,
+                    "tenant_id": account.tenant_id,
+                    "login_attempt": attempt + 1,
+                },
+                response=response,
+            )
+            body = self.read_json(
+                response,
+                context=(
+                    f"{account.name} 登录响应不是合法 JSON; "
+                    f"login_field={account.login_field}, principal={account.principal}, tenant_id={account.tenant_id or '<empty>'}"
+                ),
+            )
+            if response.status_code == 400 and body.get("status") == 100:
+                raise RuntimeError(
+                    f"{account.name} 登录命中了多租户选择，请在 settings.py 里补 tenant_id，候选租户: {body.get('data')}"
+                )
+            if response.status_code == 200 and body.get("status") == 0:
+                data = body["data"]
+                return SessionState(
+                    account=account,
+                    token=data["token"],
+                    user_id=data["userId"],
+                    tenant_id=data["tenantId"],
+                    raw_login_data=data,
+                )
+
+            last_error = RuntimeError(
                 f"{account.name} 登录失败: {self.describe_response(response, body_override=body)}"
             )
-        if body.get("status") != 0:
-            raise RuntimeError(
-                f"{account.name} 登录失败: {self.describe_response(response, body_override=body)}"
-            )
+            if attempt == 0 and self.is_captcha_error(body):
+                continue
+            raise last_error
 
-        data = body["data"]
-        return SessionState(
-            account=account,
-            token=data["token"],
-            user_id=data["userId"],
-            tenant_id=data["tenantId"],
-            raw_login_data=data,
-        )
+        raise last_error or RuntimeError(f"{account.name} 登录失败")
 
     def logout(self, session_state: SessionState) -> None:
         response = self.request(
@@ -138,6 +142,12 @@ class AuthCenterClient:
             raise RuntimeError(
                 f"{session_state.account.name} 登出失败: {self.describe_response(response, body_override=body)}"
             )
+
+    def logout_quietly(self, session_state: SessionState) -> None:
+        try:
+            self.logout(session_state)
+        except Exception:
+            pass
 
     def get_captcha(self, account_name: str) -> dict[str, str]:
         response = self.http.get(self.url("/api/portal/v1/auth/captcha"), timeout=REQUEST_TIMEOUT)
@@ -319,6 +329,10 @@ class AuthCenterClient:
             f"http={response.status_code}, content_type={response.headers.get('Content-Type', '')}, "
             f"body={text}"
         )
+
+    def is_captcha_error(self, body: dict[str, Any]) -> bool:
+        message = str(body.get("msg") or "")
+        return "验证码" in message
 
     def extract_response_body(self, response: Response) -> str:
         try:

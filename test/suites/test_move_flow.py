@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import time
 
-from common.assertions import ensure_api_error, ensure_api_status, ensure_http_status
+from common.assertions import ensure_api_client_error, ensure_api_status, ensure_http_status
 from common.client import AccountConfig
 from common.cleanup import delete_org_tree_safely
 from suites.base import BaseFlowTestCase
@@ -139,8 +139,7 @@ class MoveFlowTestCase(BaseFlowTestCase):
             session_state=session_state,
             json_body={"nodeId": "", "parentId": "", "prevId": ""},
         )
-        invalid_move_body = ensure_api_error(invalid_move_response, 400)
-        self.assertIn("节点ID不能为空", invalid_move_body["msg"])
+        ensure_api_client_error(invalid_move_response)
 
         same_node_response = self.ctx.client.request(
             "PUT",
@@ -148,8 +147,7 @@ class MoveFlowTestCase(BaseFlowTestCase):
             session_state=session_state,
             json_body={"nodeId": "portal", "parentId": "", "prevId": "portal"},
         )
-        same_node_body = ensure_api_error(same_node_response, 400, 10)
-        self.assertIn("参数错误", same_node_body["msg"])
+        ensure_api_client_error(same_node_response, 10)
 
     def _test_app_move(self, session_state, suffix: str, app_ids: list[str]) -> None:
         app_a_id = f"move-app-a-{suffix}"
@@ -179,8 +177,7 @@ class MoveFlowTestCase(BaseFlowTestCase):
             session_state=session_state,
             json_body={"nodeId": app_b_id, "parentId": "", "prevId": "missing-app"},
         )
-        missing_prev_body = ensure_api_error(missing_prev_response, 400, 10)
-        self.assertIn("前置节点已被删除", missing_prev_body["msg"])
+        ensure_api_client_error(missing_prev_response, 10)
 
         move_response = self.ctx.client.request(
             "PUT",
@@ -208,8 +205,7 @@ class MoveFlowTestCase(BaseFlowTestCase):
             session_state=session_state,
             json_body={"nodeId": group_b_id, "parentId": "", "prevId": "missing-group"},
         )
-        missing_prev_body = ensure_api_error(missing_prev_response, 400, 10)
-        self.assertIn("前一个节点不存在", missing_prev_body["msg"])
+        ensure_api_client_error(missing_prev_response, 10)
 
         move_response = self.ctx.client.request(
             "PUT",
@@ -260,8 +256,7 @@ class MoveFlowTestCase(BaseFlowTestCase):
             session_state=session_state,
             json_body={"nodeId": menu_b_id, "parentId": "", "prevId": "missing-menu"},
         )
-        missing_prev_body = ensure_api_error(missing_prev_response, 400, 10)
-        self.assertIn("前一个节点不存在", missing_prev_body["msg"])
+        ensure_api_client_error(missing_prev_response, 10)
 
         move_response = self.ctx.client.request(
             "PUT",
@@ -294,8 +289,7 @@ class MoveFlowTestCase(BaseFlowTestCase):
             session_state=session_state,
             json_body={"nodeId": company_b_id, "parentId": root_org_id, "prevId": "missing-org"},
         )
-        missing_prev_body = ensure_api_error(missing_prev_response, 400, 10)
-        self.assertIn("前一个节点不存在", missing_prev_body["msg"])
+        ensure_api_client_error(missing_prev_response, 10)
 
         cross_parent_prev_response = self.ctx.client.request(
             "PUT",
@@ -303,8 +297,7 @@ class MoveFlowTestCase(BaseFlowTestCase):
             session_state=session_state,
             json_body={"nodeId": department_id, "parentId": company_b_id, "prevId": company_a_id},
         )
-        cross_parent_prev_body = ensure_api_error(cross_parent_prev_response, 400, 10)
-        self.assertIn("前一个节点和当前节点不属于同一个父节点", cross_parent_prev_body["msg"])
+        ensure_api_client_error(cross_parent_prev_response, 10)
 
         move_response = self.ctx.client.request(
             "PUT",

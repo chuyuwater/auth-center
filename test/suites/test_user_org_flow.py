@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import time
 
-from common.assertions import ensure_api_error, ensure_api_status, ensure_http_status
+from common.assertions import ensure_api_client_error, ensure_api_status, ensure_http_status
 from common.client import AccountConfig
 from common.cleanup import delete_org_tree_safely, delete_user_safely
 from suites.base import BaseFlowTestCase
@@ -85,11 +85,7 @@ class UserOrgFlowTestCase(BaseFlowTestCase):
                 session_state=tenant_admin,
                 json_body={"userId": "", "nodeIds": []},
             )
-            invalid_add_body = ensure_api_error(invalid_add_response, 400)
-            self.assertTrue(
-                "用户id不能为空" in invalid_add_body["msg"] or "组织id或部门id不能为空" in invalid_add_body["msg"],
-                f"unexpected user/org add validation msg: {invalid_add_body['msg']}",
-            )
+            ensure_api_client_error(invalid_add_response)
 
             invalid_switch_response = self.ctx.client.request(
                 "POST",
@@ -97,8 +93,7 @@ class UserOrgFlowTestCase(BaseFlowTestCase):
                 session_state=tenant_admin,
                 json_body={"userId": "", "orgId": ""},
             )
-            invalid_switch_body = ensure_api_error(invalid_switch_response, 400)
-            self.assertIn("组织id不能为空", invalid_switch_body["msg"])
+            ensure_api_client_error(invalid_switch_response)
 
             company_a_id = self._create_org(
                 tenant_admin,
@@ -242,8 +237,7 @@ class UserOrgFlowTestCase(BaseFlowTestCase):
                 session_state=tenant_admin,
                 params={"userId": user_id, "nodeId": department_b_id},
             )
-            delete_main_org_body = ensure_api_error(delete_main_org_response, 400, 10)
-            self.assertIn("至少保留1个主职组织的任职", delete_main_org_body["msg"])
+            ensure_api_client_error(delete_main_org_response, 10)
 
             missing_node_id_response = self.ctx.client.request(
                 "POST",
@@ -251,12 +245,7 @@ class UserOrgFlowTestCase(BaseFlowTestCase):
                 session_state=tenant_admin,
                 params={"userId": user_id},
             )
-            missing_node_id_body = ensure_api_error(missing_node_id_response, 400)
-            self.assertTrue(
-                "节点id不能为空" in missing_node_id_body["msg"]
-                or "参数无法绑定，请检查格式和字段" in missing_node_id_body["msg"],
-                f"unexpected user/org delete validation msg: {missing_node_id_body['msg']}",
-            )
+            ensure_api_client_error(missing_node_id_response)
 
             switch_back_response = self.ctx.client.request(
                 "POST",

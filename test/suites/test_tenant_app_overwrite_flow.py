@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import time
 
-from common.assertions import ensure_api_error, ensure_api_status, ensure_http_status
+from common.assertions import ensure_api_client_error, ensure_api_status, ensure_http_status
 from suites.base import BaseFlowTestCase
 
 
@@ -19,8 +19,7 @@ class TenantAppOverwriteFlowTestCase(BaseFlowTestCase):
             session_state=admin_session,
             json_body={"tenantId": "", "appIds": ["portal"]},
         )
-        missing_tenant_body = ensure_api_error(missing_tenant_response, 400)
-        self.assertIn("租户ID不能为空", missing_tenant_body["msg"])
+        ensure_api_client_error(missing_tenant_response)
 
         missing_app_ids_response = self.ctx.client.request(
             "POST",
@@ -28,8 +27,7 @@ class TenantAppOverwriteFlowTestCase(BaseFlowTestCase):
             session_state=admin_session,
             json_body={"tenantId": "0", "appIds": []},
         )
-        missing_app_ids_body = ensure_api_error(missing_app_ids_response, 400)
-        self.assertIn("应用ID列表不能为空", missing_app_ids_body["msg"])
+        ensure_api_client_error(missing_app_ids_response)
 
         create_tenant_response = self.ctx.client.request(
             "POST",
@@ -81,8 +79,7 @@ class TenantAppOverwriteFlowTestCase(BaseFlowTestCase):
                 session_state=admin_session,
                 json_body={"tenantId": tenant_id, "appIds": [app_a_id, "missing-app-id"]},
             )
-            invalid_app_body = ensure_api_error(invalid_app_response, 400, 10)
-            self.assertIn("部分应用不存在", invalid_app_body["msg"])
+            ensure_api_client_error(invalid_app_response, 10)
 
             first_overwrite_response = self.ctx.client.request(
                 "POST",

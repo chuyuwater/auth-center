@@ -13,6 +13,7 @@ class TestContext:
     client: AuthCenterClient = field(default_factory=AuthCenterClient)
     sessions: dict[str, SessionState] = field(default_factory=dict)
     initialized: bool = False
+    closed: bool = False
 
     def login_all(self) -> None:
         if self.initialized:
@@ -47,6 +48,22 @@ class TestContext:
             raise RuntimeError(f"重新登录失败，账号={account_name}: {exc}") from exc
         self.sessions[account_name] = session
         return session
+
+    def shutdown(self) -> None:
+        if self.closed:
+            return
+        for account_name in reversed(list(self.sessions.keys())):
+            session = self.sessions.get(account_name)
+            if session is None:
+                continue
+            self.client.logout_quietly(session)
+        self.closed = True
+
+
+def shutdown_shared_context() -> None:
+    global _SHARED_CONTEXT
+    if _SHARED_CONTEXT is not None:
+        _SHARED_CONTEXT.shutdown()
 
 
 def get_shared_context() -> TestContext:

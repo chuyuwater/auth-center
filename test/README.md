@@ -45,7 +45,7 @@
 - 租户授权应用
 - 租户撤销应用授权
 
-当前已提供两组首批流程：
+当前已提供如下测试流程：
 
 - `test_auth_flow.py`
   - 登录所有已配置账号
@@ -97,6 +97,24 @@
 - `test_move_flow.py`
   - `app`、`org`、`perm/group`、`resource/tree` 的拖动排序
   - 缺少 `nodeId`、自引用、非法前置节点、跨父节点前置节点的校验
+- `test_perm_user_unit_flow.py`
+  - `perm/user/units` 的查询、授权、单删、批删
+  - 缺少 `userId`、空 `unitIdList/userList`、缺少删除 `id` 的 400 校验
+  - 重复授权幂等校验
+- `test_user_extra_flow.py`
+  - `user/for-select` 选人查询
+  - `user/delete-batch` 批量删除
+  - `user/admin-reset-passwd` 管理员重置密码
+  - 查询缺参、弱密码、批量删除前未禁用等异常校验
+- `test_granted_org_scope_flow.py`
+  - 同一用户切换不同 `X-ORG-ID` 时，`granted/app` 与 `granted/app/res-tree` 的差异
+  - 使用临时租户和精确接口权限构造“组织 A 有权限、组织 B 无权限”的场景
+- `test_cross_tenant_permission_flow.py`
+  - 跨租户查用户、切主职、增加任职、封装用户到权限单元
+  - 验证服务端对“其他租户资源/组织/用户”的拦截
+- `test_cross_org_permission_flow.py`
+  - 同租户错组织上下文下的用户查询越权
+  - 同租户内 `userId` 与 `orgId` 组合不匹配时，角色授权接口应拦截
 - `test_validation_flow.py`
   - 租户、应用、组织、用户、权限分组、权限单元的参数校验
   - 重复数据插入校验
@@ -143,6 +161,11 @@ python3 portal/auth-center/test/run.py
 - 已覆盖租户授权后的授权树查询和用户侧已授权资源查询
 - 已覆盖租户应用批量覆盖授权的增删切换和基础异常参数
 - 已覆盖主要 `move` 接口的成功拖动与基础异常参数
+- 已覆盖用户维度权限单元授权的增删查和基础异常参数
+- 已覆盖选人窗口、批量删除、管理员重置密码的主流程和基础异常
+- 已覆盖 `granted/*` 在不同组织下的真实权限差异
+- 已覆盖一批跨租户/跨组织的典型越权场景
+- 已覆盖同租户错组织上下文和错组织授权的典型越权场景
 
 ## 当前主要缺口
 
@@ -151,36 +174,19 @@ python3 portal/auth-center/test/run.py
 - `api/portal/v1/user/org`
   - 仍缺“切到不存在的组织”“跨租户组织”“传部门id切主职”等更细的异常覆盖
 - `api/portal/v1/perm/user/units`
-  - 用户维度权限单元授权的增删查
+  - 已覆盖成功流与基础异常，仍缺跨组织/跨租户的错误场景
 - `api/portal/v1/grant/app/overwrite`
   - 已覆盖成功流和基础 400，仍缺并发锁占用等边界验证
 - `api/portal/v1/grant/app/tree`
   - 已覆盖成功查询和缺参校验，仍缺部分授权场景下的树裁剪细测
 - `api/portal/v1/granted/*`
-  - 已覆盖应用列表、资源树和缺参校验，仍缺组织切换下的差异验证
+  - 已覆盖应用列表、资源树、缺参校验和组织切换差异
 - `api/portal/v1/client/*`
   - 还需要更多真实 GET 接口验权，逐步替代仅靠 `perm-check`
 - `api/portal/v1/user`
-  - `for-select`、`delete-batch`、`admin-reset-passwd` 还没有单独覆盖
+  - `for-select`、`delete-batch`、`admin-reset-passwd` 已覆盖，仍缺导入/导出场景
 - `api/portal/v1/app`、`api/portal/v1/org`、`api/portal/v1/resource/tree`、`api/portal/v1/perm/group`
   - `move` 基础流已覆盖，仍缺更复杂的跨层级移动和非法父节点场景
-
-## 待补的真实 GET 授权验证清单
-
-下面这些能力已经有基础测试，但仍建议进一步补充“真实受控 GET 接口”验证，而不是只依赖 `perm-check`：
-
-- 权限单元授权后，对应 portal 真实页面资源或查询接口的访问结果
-- 租户授权应用后，`/api/portal/v1/client/app`
-  - 验证用户重新登录后是否能看到 `portal`
-- 租户撤销应用授权后，`/api/portal/v1/client/app`
-  - 验证用户重新登录后应用入口是否消失
-- 租户授权应用后，`/api/portal/v1/client/res`
-  - 验证用户在当前组织、当前应用下是否能拿到菜单树
-- 租户撤销应用授权后，`/api/portal/v1/client/res`
-  - 验证菜单树是否清空
-- 更多真实受控查询接口
-  - 例如消息管理、待办管理、用户查询、组织查询等已经受权限影响的 GET 接口
-  - 原则上都应该逐步从“只看 `perm-check`”升级到“直接验证接口返回结果”
 
 ## 验证码
 

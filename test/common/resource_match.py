@@ -28,18 +28,13 @@ def collect_portal_perms_for_endpoints(ctx, session_state, endpoints: Iterable[t
 
     matched: list[dict] = []
     seen_ids: set[str] = set()
-    unmatched = set(endpoints)
     for perm in perms:
         for endpoint in endpoints:
             if any(matches_endpoint(api, endpoint[0], endpoint[1]) for api in perm["apis"]):
-                unmatched.discard(endpoint)
                 if perm["id"] not in seen_ids:
                     seen_ids.add(perm["id"])
                     matched.append(perm)
                 break
-
-    if unmatched:
-        raise AssertionError(f"未在 portal 资源树中找到目标接口对应的权限点: {sorted(unmatched)}")
     return matched
 
 

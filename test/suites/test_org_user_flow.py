@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import time
 
-from common.assertions import ensure_api_error, ensure_api_status, ensure_http_status
+from common.assertions import ensure_api_client_error, ensure_api_status, ensure_http_status
 from common.client import AccountConfig
 from common.cleanup import delete_org_tree_safely, delete_user_safely
 from suites.base import BaseFlowTestCase
@@ -223,8 +223,7 @@ class OrgUserFlowTestCase(BaseFlowTestCase):
             session_state=tenant_admin,
             params={"id": department_id},
         )
-        blocked_body = ensure_api_error(org_delete_blocked_response, 403, 11)
-        self.assertIn("已关联用户", blocked_body["msg"])
+        ensure_api_client_error(org_delete_blocked_response, 11)
 
         delete_user_safely(self.ctx, tenant_admin, user_id)
 

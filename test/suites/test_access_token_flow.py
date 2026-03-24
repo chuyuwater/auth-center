@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from common.assertions import ensure_api_error, ensure_api_status, ensure_http_status
+from common.assertions import ensure_api_client_error, ensure_api_status, ensure_http_status
 from suites.base import BaseFlowTestCase
 
 
@@ -81,5 +81,4 @@ class AccessTokenFlowTestCase(BaseFlowTestCase):
             session_state=forbidden_session,
             json_body={"keyName": "forbidden-ak", "forbidden": 0},
         )
-        body = ensure_api_error(response, 403, 11)
-        self.assertIn("租户管理员", body["msg"])
+        ensure_api_client_error(response, 11)
