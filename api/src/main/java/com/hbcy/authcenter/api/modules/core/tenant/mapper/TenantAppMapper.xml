@@ -37,6 +37,8 @@
         app.icon,
         app.name_cn,
         app.memo,
+        app.app_type,
+        app.app_url,
         tenant_app.forbidden,
         tenant_app.create_user,
         tenant_app.create_time

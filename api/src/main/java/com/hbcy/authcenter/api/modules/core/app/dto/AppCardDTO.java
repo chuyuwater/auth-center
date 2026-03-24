@@ -28,4 +28,12 @@ public class AppCardDTO {
      * 应用描述
      */
     private String memo;
+    /**
+     * 应用类型：1-平台应用，2-外部应用
+     */
+    private Integer appType;
+    /**
+     * 外部应用时的应用URL，用于三方认证等
+     */
+    private String appUrl;
 }
