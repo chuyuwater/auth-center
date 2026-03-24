@@ -1,5 +1,7 @@
 package com.hbcy.authcenter.api.modules.core.perm.vo;
 
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
@@ -18,5 +20,6 @@ public class PermUnitForbidVO {
     /**
      * 禁用状态
      */
+    @JsonSetter(nulls = Nulls.SKIP)
     private Integer forbidden = 0;
 }

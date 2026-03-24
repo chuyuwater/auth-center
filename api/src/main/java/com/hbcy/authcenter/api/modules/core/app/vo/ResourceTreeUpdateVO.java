@@ -1,5 +1,7 @@
 package com.hbcy.authcenter.api.modules.core.app.vo;
 
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 import com.hbcy.common.db.dictvalue.DictValid;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -20,6 +22,7 @@ public class ResourceTreeUpdateVO {
     /**
      * 父节点，创建时或更新后，节点固定在同级末尾。
      */
+    @JsonSetter(nulls = Nulls.SKIP)
     private String parentId = "";
     /**
      * 中文名称
@@ -31,6 +34,7 @@ public class ResourceTreeUpdateVO {
     /**
      * 资源类型：0-页面，1-按钮
      */
+    @JsonSetter(nulls = Nulls.SKIP)
     @Range(min = 0, max = 1, message = "资源类型只能为0或1")
     private Integer resType = 0;
     /**
@@ -42,6 +46,7 @@ public class ResourceTreeUpdateVO {
     /**
      * 客户端类型。字典项，key:CLIENT_TYPE
      */
+    @JsonSetter(nulls = Nulls.SKIP)
     @DictValid(dictKey = "CLIENT_TYPE")
     private Integer clientType = 0;
     /**
@@ -57,16 +62,19 @@ public class ResourceTreeUpdateVO {
     /**
      * 是否隐藏，0-否，1-是
      */
+    @JsonSetter(nulls = Nulls.SKIP)
     @Range(min = 0, max = 1, message = "是否隐藏只能为0或1")
     private Integer hidden = 0;
     /**
      * 显示级别，字典项MENU_LEVEL
      */
+    @JsonSetter(nulls = Nulls.SKIP)
     @DictValid(dictKey = "MENU_LEVEL")
     private Integer showLevel = 0;
     /**
      * 是否禁用，0-否，1-是
      */
+    @JsonSetter(nulls = Nulls.SKIP)
     @Range(min = 0, max = 1, message = "是否禁用只能为0或1")
     private Integer forbidden = 0;
     /**

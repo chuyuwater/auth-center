@@ -1,5 +1,7 @@
 package com.hbcy.authcenter.api.modules.core.org.vo;
 
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 import com.hbcy.authcenter.api.common.enums.OrgNodeCategoryEnum;
 import com.hbcy.common.db.dictvalue.DictValid;
 import jakarta.validation.constraints.NotBlank;
@@ -32,11 +34,13 @@ public class OrgTreeUpdateVO {
      * 父节点
      * 创建或更新父节点时，节点固定在同级末尾。
      */
+    @JsonSetter(nulls = Nulls.SKIP)
     private String parentId = "";
 
     /**
      * 组织类别，字典ORG_CATEGORY
      */
+    @JsonSetter(nulls = Nulls.SKIP)
     @DictValid(dictKey = "ORG_CATEGORY")
     private Integer nodeCategory = OrgNodeCategoryEnum.COMPANY.getValue();
 

@@ -1,5 +1,7 @@
 package com.hbcy.authcenter.api.modules.core.tenant.vo;
 
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 import lombok.Data;
 
 import java.util.Set;
@@ -19,5 +21,6 @@ public class TenantAppGrantUpdateVO {
     /**
      * 是否授权全部权限
      */
+    @JsonSetter(nulls = Nulls.SKIP)
     private Boolean grantAll = false;
 }

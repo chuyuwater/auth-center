@@ -1,6 +1,8 @@
 package com.hbcy.authcenter.api.modules.core.perm.vo;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 import com.hbcy.authcenter.api.common.enums.TreeQueryLevelEnum;
 import com.hbcy.common.db.dictvalue.DictValid;
 import lombok.Data;
@@ -16,6 +18,7 @@ public class ClientResQueryVO {
     /**
      * 是否返回菜单关联的权限点
      */
+    @JsonSetter(nulls = Nulls.SKIP)
     private Boolean withPerm = false;
     /**
      * 1-pc，2-移动端
@@ -34,6 +37,7 @@ public class ClientResQueryVO {
      * 父级菜单查询方式
      * 1-下级，2-本下，默认1
      */
+    @JsonSetter(nulls = Nulls.SKIP)
     private Integer parentLevel = TreeQueryLevelEnum.CHILD.getCode();
     /**
      * 资源类型，0-页面，1-按钮

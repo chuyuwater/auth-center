@@ -1,6 +1,8 @@
 package com.hbcy.authcenter.api.modules.core.app.vo;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 import com.hbcy.authcenter.api.common.enums.TreeQueryLevelEnum;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
@@ -33,15 +35,18 @@ public class ResourceTreeQueryVO {
      * 父节点ID工作类型
      * 1-下级，2-本下
      */
+    @JsonSetter(nulls = Nulls.SKIP)
     @Range(min = 1, max = 2, message = "父节点ID工作类型错误")
     private Integer parentLevel = TreeQueryLevelEnum.CHILD.getCode();
     /**
      * 是否附带权限点信息，默认true
      */
+    @JsonSetter(nulls = Nulls.SKIP)
     private Boolean withPerm = true;
     /**
      * 是否附带权限点对应的api信息，默认true
      */
+    @JsonSetter(nulls = Nulls.SKIP)
     private Boolean withApi = true;
     /**
      * 0-全端，1-pc端，2-移动端
@@ -65,6 +70,7 @@ public class ResourceTreeQueryVO {
      *
      */
     @JsonIgnore
+    @JsonSetter(nulls = Nulls.SKIP)
     private Boolean withCreator = false;
     /**
      * 父节点idPath,后端填充

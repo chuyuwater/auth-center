@@ -1,5 +1,7 @@
 package com.hbcy.authcenter.api.modules.minor.msg.vo;
 
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
@@ -40,6 +42,7 @@ public class UserMsgCreateVO {
     /**
      * 消息类型：0-普通消息，1-预警消息
      */
+    @JsonSetter(nulls = Nulls.SKIP)
     private Integer type = 0;
     /**
      * 消息产生时间

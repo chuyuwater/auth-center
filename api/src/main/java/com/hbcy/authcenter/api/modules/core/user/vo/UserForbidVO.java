@@ -1,5 +1,7 @@
 package com.hbcy.authcenter.api.modules.core.user.vo;
 
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
@@ -19,5 +21,6 @@ public class UserForbidVO {
     /**
      * 封禁或者解封
      */
+    @JsonSetter(nulls = Nulls.SKIP)
     private Integer forbidden = 0;
 }

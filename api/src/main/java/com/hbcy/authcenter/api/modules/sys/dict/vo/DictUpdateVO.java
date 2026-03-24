@@ -1,5 +1,7 @@
 package com.hbcy.authcenter.api.modules.sys.dict.vo;
 
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
@@ -27,5 +29,6 @@ public class DictUpdateVO {
     /**
      * 禁用状态，0-正常，1-禁用
      */
+    @JsonSetter(nulls = Nulls.SKIP)
     private Integer forbidden = 0;
 }

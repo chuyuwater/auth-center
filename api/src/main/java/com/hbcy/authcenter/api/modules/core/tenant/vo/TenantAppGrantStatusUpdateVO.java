@@ -1,5 +1,7 @@
 package com.hbcy.authcenter.api.modules.core.tenant.vo;
 
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import org.hibernate.validator.constraints.Range;
@@ -20,6 +22,7 @@ public class TenantAppGrantStatusUpdateVO {
     /**
      * 是否禁用，0-未禁用，1-已禁用
      */
+    @JsonSetter(nulls = Nulls.SKIP)
     @Range(min = 0, max = 1, message = "禁用状态只能为0或1")
     private Integer forbidden = 0;
 }

@@ -1,5 +1,7 @@
 package com.hbcy.authcenter.api.modules.core.org.vo;
 
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
@@ -17,5 +19,6 @@ public class OrgSwitchStatusVO {
     /**
      * 状态,0-启用，1-禁用
      */
+    @JsonSetter(nulls = Nulls.SKIP)
     private Integer forbidden = 0;
 }

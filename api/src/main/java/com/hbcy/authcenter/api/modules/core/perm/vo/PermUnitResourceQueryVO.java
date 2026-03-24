@@ -1,5 +1,7 @@
 package com.hbcy.authcenter.api.modules.core.perm.vo;
 
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
@@ -26,5 +28,6 @@ public class PermUnitResourceQueryVO {
      * 为false时，构建全部的资源树，并标记是否已勾选
      * 为true时，仅返回已封装的权限，未被封装的节点会被移除
      */
+    @JsonSetter(nulls = Nulls.SKIP)
     private Boolean onlyPacked = false;
 }

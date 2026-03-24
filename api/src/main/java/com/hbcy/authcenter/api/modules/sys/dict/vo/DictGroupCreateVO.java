@@ -1,5 +1,7 @@
 package com.hbcy.authcenter.api.modules.sys.dict.vo;
 
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -22,6 +24,7 @@ public class DictGroupCreateVO extends DictGroupUpdateVO {
     /**
      * 字典类型, 0-列表，1-树状
      */
+    @JsonSetter(nulls = Nulls.SKIP)
     @Range(min = 0, max = 1, message = "字典类型只能为0或1")
     private Integer dictType = 0;
 }

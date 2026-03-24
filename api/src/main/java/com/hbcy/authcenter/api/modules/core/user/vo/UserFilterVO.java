@@ -1,6 +1,8 @@
 package com.hbcy.authcenter.api.modules.core.user.vo;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -26,5 +28,6 @@ public class UserFilterVO extends UserBasicQueryVO {
      * 任职是否具体到部门
      */
     @JsonIgnore
+    @JsonSetter(nulls = Nulls.SKIP)
     private Boolean deptJob = false;
 }

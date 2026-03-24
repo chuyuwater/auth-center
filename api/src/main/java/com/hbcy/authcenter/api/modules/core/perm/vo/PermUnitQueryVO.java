@@ -1,6 +1,8 @@
 package com.hbcy.authcenter.api.modules.core.perm.vo;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 import com.hbcy.common.db.model.PageVO;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -32,6 +34,7 @@ public class PermUnitQueryVO extends PageVO {
     /**
      * 查询级别，0-本级，1-下级，2-本下
      */
+    @JsonSetter(nulls = Nulls.SKIP)
     @Range(min = 0, max = 2, message = "查询级别错误")
     private Integer level = 2;
 

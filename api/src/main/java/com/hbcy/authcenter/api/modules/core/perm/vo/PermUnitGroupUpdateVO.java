@@ -1,5 +1,7 @@
 package com.hbcy.authcenter.api.modules.core.perm.vo;
 
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import org.hibernate.validator.constraints.Length;
@@ -22,11 +24,13 @@ public class PermUnitGroupUpdateVO {
     /**
      * 备注
      */
+    @JsonSetter(nulls = Nulls.SKIP)
     @Length(max = 200, message = "说明长度不能超过200")
     private String memo = "";
     /**
      * 父节点。
      * 创建时，节点固定在同级末尾。
      */
+    @JsonSetter(nulls = Nulls.SKIP)
     private String parentId = "";
 }

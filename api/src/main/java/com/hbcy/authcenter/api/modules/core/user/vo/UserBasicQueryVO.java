@@ -1,6 +1,8 @@
 package com.hbcy.authcenter.api.modules.core.user.vo;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 import com.hbcy.common.db.model.PageVO;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
@@ -39,6 +41,7 @@ public class UserBasicQueryVO extends PageVO {
     /**
      * 查询级别，0-本级，1-下级，2-本下
      */
+    @JsonSetter(nulls = Nulls.SKIP)
     @Range(min = 0, max = 2, message = "查询级别错误")
     private Integer level = 2;
     /**
@@ -56,6 +59,7 @@ public class UserBasicQueryVO extends PageVO {
      * 组织架构用简称还是全称
      * 默认简称
      */
+    @JsonSetter(nulls = Nulls.SKIP)
     private Boolean useFullName = false;
     /**
      * 用工形式，字典EMPLOYEE_TYPE

@@ -1,5 +1,7 @@
 package com.hbcy.authcenter.api.modules.core.app.vo;
 
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -24,6 +26,7 @@ public class AppCreateVO extends AppUpdateVO {
     /**
      * 是否多租户
      */
+    @JsonSetter(nulls = Nulls.SKIP)
     private Boolean multiTenancy = false;
 
     /**

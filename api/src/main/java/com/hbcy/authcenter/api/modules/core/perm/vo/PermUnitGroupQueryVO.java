@@ -1,5 +1,7 @@
 package com.hbcy.authcenter.api.modules.core.perm.vo;
 
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 import lombok.Data;
 
 /**
@@ -13,6 +15,7 @@ public class PermUnitGroupQueryVO {
     /**
      * 父节点ID，若为空则查询整个树
      */
+    @JsonSetter(nulls = Nulls.SKIP)
     private String parentId = "";
 
     /**

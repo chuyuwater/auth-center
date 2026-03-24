@@ -1,5 +1,7 @@
 package com.hbcy.authcenter.api.common.bean;
 
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 import com.hbcy.common.base.error.ParamError;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
@@ -20,10 +22,12 @@ public class NodeMoveVO {
     /**
      * 移动之后的父节点，为空标识根节点
      */
+    @JsonSetter(nulls = Nulls.SKIP)
     private String parentId = "";
     /**
      * 移动之后的前一个节点，为空标识置顶
      */
+    @JsonSetter(nulls = Nulls.SKIP)
     private String prevId = "";
 
     public void check() {
