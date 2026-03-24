@@ -104,7 +104,7 @@ create table if not exists perm_unit
     create_user  char(26)     default '0'               not null,
     update_user  char(26)     default '0'               not null,
     create_time  datetime     default CURRENT_TIMESTAMP not null,
-    update_time  datetime     default CURRENT_TIMESTAMP null,
+    update_time  datetime     default CURRENT_TIMESTAMP null on update current_timestamp,
     delete_time  bigint       default 0                 not null,
     constraint ux_perm_unit_parent_name
         unique (belong_to, name_cn, delete_time)
@@ -130,18 +130,17 @@ create table if not exists perm_unit_group
     create_user  char(26)     default '0'               not null,
     update_user  char(26)     default '0'               not null,
     create_time  datetime     default CURRENT_TIMESTAMP not null,
-    update_time  datetime     default CURRENT_TIMESTAMP not null,
-    delete_time  bigint       default 0                 not null
-) comment '授权分组';
+    update_time  datetime     default CURRENT_TIMESTAMP not null on update current_timestamp,
+    delete_time  bigint       default 0                 not null,
+    constraint ux_perm_unit_group_tenant_node_name
+        unique (node_name, parent_id, tenant_id)
+) comment '权限单元分组';
 
 create index ix_perm_tree_id_path
     on perm_unit_group (id_path);
 
 create index ix_perm_tree_tenant_name
     on perm_unit_group (tenant_id, show_order, node_name);
-
-create index ux_perm_tree_level_name
-    on perm_unit_group (parent_id, node_name);
 
 create table if not exists perm_unit_resource
 (
@@ -211,14 +210,14 @@ create index ux_resource_perm_app_perm_code
 
 create table if not exists resource_perm_api
 (
-    id          char(26)          not null
+    id          char(26)                           not null
         primary key,
-    perm_id     char(26)          not null,
-    api_method  tinyint           not null comment '0-GET,1-POST,2-PUT,3-DELETE',
-    api_path    varchar(255)      not null,
-    show_order  tinyint default 0 not null,
-    create_time datetime          not null,
-    create_user char(26)          not null,
+    perm_id     char(26)                           not null,
+    api_method  tinyint                            not null comment '0-GET,1-POST,2-PUT,3-DELETE',
+    api_path    varchar(255)                       not null,
+    show_order  tinyint  default 0                 not null,
+    create_time datetime default CURRENT_TIMESTAMP not null,
+    create_user char(26)                           not null,
     constraint ux_resource_perm_api
         unique (api_method, api_path)
 ) comment '权限对应api';
@@ -272,7 +271,7 @@ create table if not exists sys_dict
     create_user char(26)     default '0'               not null,
     update_user char(26)     default '0'               not null,
     create_time datetime     default CURRENT_TIMESTAMP not null,
-    update_time datetime     default CURRENT_TIMESTAMP not null,
+    update_time datetime     default CURRENT_TIMESTAMP not null on update current_timestamp,
     delete_time bigint       default 0                 not null,
     constraint ux_sys_dict_kv
         unique (feat_code, value_str, delete_time),
