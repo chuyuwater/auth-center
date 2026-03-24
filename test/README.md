@@ -81,6 +81,22 @@
   - 通过 `perm-check` 验证授权生效
   - 撤销租户应用授权后重新登录，再验证权限失效
   - 最后按角色、人员、组织、租户顺序清理
+- `test_user_org_flow.py`
+  - 用户兼职任职新增、重复任职拦截、主职切换
+  - 删除最后一个主职受限
+  - `user/org` 三个接口的必填参数校验
+- `test_granted_resource_flow.py`
+  - `grant/app/tree` 授权树查询
+  - `granted/app`、`granted/app/res-tree` 的真实查询链路
+  - 授权前不可见、授权后可见、撤销租户应用授权后重新登录不可见
+  - 查询接口缺参 400 校验
+- `test_tenant_app_overwrite_flow.py`
+  - `grant/app/overwrite` 批量覆盖授权
+  - 缺少 `tenantId`、空 `appIds`、部分应用不存在的 400 校验
+  - 覆盖后旧授权被移除、新授权生效
+- `test_move_flow.py`
+  - `app`、`org`、`perm/group`、`resource/tree` 的拖动排序
+  - 缺少 `nodeId`、自引用、非法前置节点、跨父节点前置节点的校验
 - `test_validation_flow.py`
   - 租户、应用、组织、用户、权限分组、权限单元的参数校验
   - 重复数据插入校验
@@ -123,28 +139,31 @@ python3 portal/auth-center/test/run.py
 - 消息与待办查询、本人查询、组织切换数据权限
 - 租户授权应用、角色授权、撤销应用授权后权限失效
 - 已覆盖主链路接口的部分 400 参数校验与重复数据校验
+- 用户任职新增、切主职、移除兼职及其异常分支
+- 已覆盖租户授权后的授权树查询和用户侧已授权资源查询
+- 已覆盖租户应用批量覆盖授权的增删切换和基础异常参数
+- 已覆盖主要 `move` 接口的成功拖动与基础异常参数
 
 ## 当前主要缺口
 
 按 controller 粗看，当前仍有这些接口族尚未系统覆盖，或只覆盖了成功分支：
 
 - `api/portal/v1/user/org`
-  - 用户兼职任职新增、移除、主职切换
-  - 缺少“重复任职”“移除最后一个主职”“缺少必填参数”的异常覆盖
+  - 仍缺“切到不存在的组织”“跨租户组织”“传部门id切主职”等更细的异常覆盖
 - `api/portal/v1/perm/user/units`
   - 用户维度权限单元授权的增删查
 - `api/portal/v1/grant/app/overwrite`
-  - 租户应用批量覆盖授权
+  - 已覆盖成功流和基础 400，仍缺并发锁占用等边界验证
 - `api/portal/v1/grant/app/tree`
-  - 租户应用授权树查询
+  - 已覆盖成功查询和缺参校验，仍缺部分授权场景下的树裁剪细测
 - `api/portal/v1/granted/*`
-  - 当前用户已获授权应用和资源树查询
+  - 已覆盖应用列表、资源树和缺参校验，仍缺组织切换下的差异验证
 - `api/portal/v1/client/*`
   - 还需要更多真实 GET 接口验权，逐步替代仅靠 `perm-check`
 - `api/portal/v1/user`
   - `for-select`、`delete-batch`、`admin-reset-passwd` 还没有单独覆盖
 - `api/portal/v1/app`、`api/portal/v1/org`、`api/portal/v1/resource/tree`、`api/portal/v1/perm/group`
-  - `move` 类接口还没有单独覆盖
+  - `move` 基础流已覆盖，仍缺更复杂的跨层级移动和非法父节点场景
 
 ## 待补的真实 GET 授权验证清单
 
