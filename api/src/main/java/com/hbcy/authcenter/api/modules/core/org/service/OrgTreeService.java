@@ -410,6 +410,10 @@ public class OrgTreeService extends ServiceImpl<OrgTreeMapper, OrgTree> {
         if (vo.getNodeId().equals(rootId)) {
             throw new ParamError("禁止移动根节点");
         }
+        if ("".equals(vo.getParentId())) {
+            //移动到空节点，意味着和默认组织平级，即放在虚拟根节点下面
+            vo.setParentId(rootId);
+        }
         OrgTree node = getById(vo.getNodeId());
         if (node == null) {
             throw new ParamError("节点不存在");
@@ -426,9 +430,6 @@ public class OrgTreeService extends ServiceImpl<OrgTreeMapper, OrgTree> {
             if (!prevNode.getParentId().equals(vo.getParentId())) {
                 throw new ParamError("前一个节点和当前节点不属于同一个父节点");
             }
-        }
-        if (StringUtils.isBlank(vo.getParentId())) {
-            vo.setParentId(rootId);
         }
         if (!vo.getParentId().equals(node.getParentId())) {
             updateParent(node, vo.getParentId());

@@ -197,7 +197,8 @@ class MoveFlowTestCase(BaseFlowTestCase):
     def _test_perm_group_move(self, session_state, suffix: str, group_ids: list[str]) -> None:
         group_a_id = self._create_perm_group(session_state, f"拖动权限组A{suffix[-4:]}")
         group_b_id = self._create_perm_group(session_state, f"拖动权限组B{suffix[-4:]}")
-        group_ids.extend([group_a_id, group_b_id])
+        child_group_id = self._create_perm_group(session_state, f"拖动权限子组{suffix[-4:]}", parent_id=group_a_id)
+        group_ids.extend([group_a_id, group_b_id, child_group_id])
 
         missing_prev_response = self.ctx.client.request(
             "PUT",
@@ -206,6 +207,14 @@ class MoveFlowTestCase(BaseFlowTestCase):
             json_body={"nodeId": group_b_id, "parentId": "", "prevId": "missing-group"},
         )
         ensure_api_client_error(missing_prev_response, 10)
+
+        child_cycle_response = self.ctx.client.request(
+            "PUT",
+            "/api/portal/v1/perm/group/move",
+            session_state=session_state,
+            json_body={"nodeId": group_a_id, "parentId": child_group_id, "prevId": ""},
+        )
+        ensure_api_client_error(child_cycle_response, 10)
 
         move_response = self.ctx.client.request(
             "PUT",
@@ -228,27 +237,47 @@ class MoveFlowTestCase(BaseFlowTestCase):
 
     def _test_resource_move(self, session_state, suffix: str, app_ids: list[str], menu_ids: list[tuple[str, str]]) -> None:
         app_id = f"move-res-app-{suffix}"
-        create_app_response = self.ctx.client.request(
-            "POST",
-            "/api/portal/v1/app",
-            session_state=session_state,
-            json_body={
-                "id": app_id,
-                "nameCn": f"拖动菜单应用{suffix[-4:]}",
-                "memo": "move flow resource app",
-                "icon": "icon-app",
-                "multiTenancy": True,
-                "appType": 1,
-                "appUrl": "",
-            },
-        )
-        ensure_http_status(create_app_response, 200)
-        ensure_api_status(create_app_response.json())
-        app_ids.append(app_id)
+        other_app_id = f"move-res-app-other-{suffix}"
+        for current_app_id, current_app_name in (
+            (app_id, f"拖动菜单应用{suffix[-4:]}"),
+            (other_app_id, f"拖动菜单他应用{suffix[-4:]}"),
+        ):
+            create_app_response = self.ctx.client.request(
+                "POST",
+                "/api/portal/v1/app",
+                session_state=session_state,
+                json_body={
+                    "id": current_app_id,
+                    "nameCn": current_app_name,
+                    "memo": "move flow resource app",
+                    "icon": "icon-app",
+                    "multiTenancy": True,
+                    "appType": 1,
+                    "appUrl": "",
+                },
+            )
+            ensure_http_status(create_app_response, 200)
+            ensure_api_status(create_app_response.json())
+            app_ids.append(current_app_id)
 
         menu_a_id = self._create_menu(session_state, app_id, f"菜单A{suffix[-4:]}", f"move-menu-a-{suffix}")
         menu_b_id = self._create_menu(session_state, app_id, f"菜单B{suffix[-4:]}", f"move-menu-b-{suffix}")
-        menu_ids.extend([(menu_a_id, app_id), (menu_b_id, app_id)])
+        child_menu_id = self._create_menu(
+            session_state,
+            app_id,
+            f"菜单子节点{suffix[-4:]}",
+            f"move-menu-child-{suffix}",
+            parent_id=menu_a_id,
+        )
+        other_app_menu_id = self._create_menu(
+            session_state,
+            other_app_id,
+            f"他应用菜单{suffix[-4:]}",
+            f"move-menu-other-{suffix}",
+        )
+        menu_ids.extend(
+            [(menu_a_id, app_id), (menu_b_id, app_id), (child_menu_id, app_id), (other_app_menu_id, other_app_id)]
+        )
 
         missing_prev_response = self.ctx.client.request(
             "PUT",
@@ -257,6 +286,22 @@ class MoveFlowTestCase(BaseFlowTestCase):
             json_body={"nodeId": menu_b_id, "parentId": "", "prevId": "missing-menu"},
         )
         ensure_api_client_error(missing_prev_response, 10)
+
+        child_cycle_response = self.ctx.client.request(
+            "PUT",
+            "/api/portal/v1/resource/tree/move",
+            session_state=session_state,
+            json_body={"nodeId": menu_a_id, "parentId": child_menu_id, "prevId": ""},
+        )
+        ensure_api_client_error(child_cycle_response, 10)
+
+        cross_app_parent_response = self.ctx.client.request(
+            "PUT",
+            "/api/portal/v1/resource/tree/move",
+            session_state=session_state,
+            json_body={"nodeId": menu_a_id, "parentId": other_app_menu_id, "prevId": ""},
+        )
+        ensure_api_client_error(cross_app_parent_response, 10)
 
         move_response = self.ctx.client.request(
             "PUT",
@@ -283,6 +328,28 @@ class MoveFlowTestCase(BaseFlowTestCase):
         company_b_id = self._create_org(session_state, root_org_id, f"拖动公司B{suffix[-4:]}", f"拖B{suffix[-4:]}", 0)
         department_id = self._create_org(session_state, company_a_id, f"拖动部门{suffix[-4:]}", f"拖部{suffix[-4:]}", 1)
 
+        move_root_response = self.ctx.client.request(
+            "PUT",
+            "/api/portal/v1/org/node/move",
+            session_state=session_state,
+            json_body={"nodeId": root_org_id, "parentId": "", "prevId": ""},
+        )
+        ensure_http_status(move_root_response, 200)
+        ensure_api_status(move_root_response.json())
+
+        root_detail_response = self.ctx.client.request(
+            "GET",
+            f"/api/portal/v1/org/node/{root_org_id}",
+            session_state=session_state,
+        )
+        ensure_http_status(root_detail_response, 200)
+        root_detail = ensure_api_status(root_detail_response.json())
+        self.assertEqual(
+            root_detail["id"],
+            root_org_id,
+            "默认根组织执行 move 后应仍保持可查询",
+        )
+
         missing_prev_response = self.ctx.client.request(
             "PUT",
             "/api/portal/v1/org/node/move",
@@ -299,11 +366,19 @@ class MoveFlowTestCase(BaseFlowTestCase):
         )
         ensure_api_client_error(cross_parent_prev_response, 10)
 
+        cross_org_dept_response = self.ctx.client.request(
+            "PUT",
+            "/api/portal/v1/org/node/move",
+            session_state=session_state,
+            json_body={"nodeId": department_id, "parentId": company_b_id, "prevId": ""},
+        )
+        ensure_api_client_error(cross_org_dept_response)
+
         move_response = self.ctx.client.request(
             "PUT",
             "/api/portal/v1/org/node/move",
             session_state=session_state,
-            json_body={"nodeId": company_b_id, "parentId": root_org_id, "prevId": company_a_id},
+            json_body={"nodeId": company_b_id, "parentId": "", "prevId": company_a_id},
         )
         ensure_http_status(move_response, 200)
         ensure_api_status(move_response.json())
@@ -323,24 +398,37 @@ class MoveFlowTestCase(BaseFlowTestCase):
         filtered_ids = [node["data"]["id"] for node in top_level if node["data"]["id"] in {company_a_id, company_b_id}]
         self.assertEqual(filtered_ids, [company_a_id, company_b_id])
 
-    def _create_perm_group(self, session_state, node_name: str) -> str:
+        company_b_detail_response = self.ctx.client.request(
+            "GET",
+            f"/api/portal/v1/org/node/{company_b_id}",
+            session_state=session_state,
+        )
+        ensure_http_status(company_b_detail_response, 200)
+        company_b_detail = ensure_api_status(company_b_detail_response.json())
+        self.assertEqual(
+            company_b_detail["parentId"],
+            root_org_id,
+            "parentId 传空时，服务端应将节点挂到租户默认根组织下",
+        )
+
+    def _create_perm_group(self, session_state, node_name: str, parent_id: str = "") -> str:
         response = self.ctx.client.request(
             "POST",
             "/api/portal/v1/perm/group",
             session_state=session_state,
-            json_body={"nodeName": node_name, "memo": "move flow perm group", "parentId": "", "policyModel": 0},
+            json_body={"nodeName": node_name, "memo": "move flow perm group", "parentId": parent_id, "policyModel": 0},
         )
         ensure_http_status(response, 200)
         return ensure_api_status(response.json())["id"]
 
-    def _create_menu(self, session_state, app_id: str, name_cn: str, custom_id: str) -> str:
+    def _create_menu(self, session_state, app_id: str, name_cn: str, custom_id: str, parent_id: str = "") -> str:
         response = self.ctx.client.request(
             "POST",
             "/api/portal/v1/resource/tree",
             session_state=session_state,
             json_body={
                 "appId": app_id,
-                "parentId": "",
+                "parentId": parent_id,
                 "nameCn": name_cn,
                 "resType": 0,
                 "customId": custom_id,
