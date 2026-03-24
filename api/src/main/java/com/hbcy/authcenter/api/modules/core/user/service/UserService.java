@@ -380,6 +380,13 @@ public class UserService extends ServiceImpl<UserMapper, User> {
             if (!org.getTenantId().equals(UserContextUtils.getTenantId())) {
                 throw new PermissionError();
             }
+            OrgTree userOrg = orgTreeService.getById(UserContextUtils.getUserOrg());
+            if (userOrg == null || userOrg.getForbidden() > 0) {
+                throw new ParamError("组织上下文参数错误");
+            }
+            if (!org.getIdPath().startsWith(userOrg.getIdPath())) {
+                throw new PermissionError("组织上下文参数错误");
+            }
             if (vo.getLevel() == UserBasicQueryVO.LEVEL_ALL) {
                 vo.setIdPathPrefix(org.getIdPath());
                 vo.setNodeId(null);
