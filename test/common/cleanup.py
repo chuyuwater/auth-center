@@ -43,6 +43,26 @@ def delete_org_tree_safely(ctx, session_state, root_org_id: str) -> None:
         ensure_api_status(delete_response.json())
 
 
+def delete_perm_unit_safely(ctx, session_state, unit_id: str) -> None:
+    forbid_response = ctx.client.request(
+        "POST",
+        "/api/portal/v1/perm/unit/forbidden",
+        session_state=session_state,
+        json_body={"unitId": unit_id, "forbidden": 1},
+    )
+    ensure_http_status(forbid_response, 200)
+    ensure_api_status(forbid_response.json())
+
+    delete_response = ctx.client.request(
+        "POST",
+        "/api/portal/v1/perm/unit/delete",
+        session_state=session_state,
+        params={"id": unit_id},
+    )
+    ensure_http_status(delete_response, 200)
+    ensure_api_status(delete_response.json())
+
+
 def _collect_org_ids_for_delete(nodes: list[dict], root_org_id: str) -> list[str]:
     ids: list[str] = []
     for node in nodes:

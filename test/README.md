@@ -81,6 +81,10 @@
   - 通过 `perm-check` 验证授权生效
   - 撤销租户应用授权后重新登录，再验证权限失效
   - 最后按角色、人员、组织、租户顺序清理
+- `test_validation_flow.py`
+  - 租户、应用、组织、用户、权限分组、权限单元的参数校验
+  - 重复数据插入校验
+  - 缺少必要参数、格式不合法参数的 400 返回校验
 
 ## 目录
 
@@ -118,6 +122,29 @@ python3 portal/auth-center/test/run.py
 - 权限单元管理、封装权限、封装用户、撤权恢复
 - 消息与待办查询、本人查询、组织切换数据权限
 - 租户授权应用、角色授权、撤销应用授权后权限失效
+- 已覆盖主链路接口的部分 400 参数校验与重复数据校验
+
+## 当前主要缺口
+
+按 controller 粗看，当前仍有这些接口族尚未系统覆盖，或只覆盖了成功分支：
+
+- `api/portal/v1/user/org`
+  - 用户兼职任职新增、移除、主职切换
+  - 缺少“重复任职”“移除最后一个主职”“缺少必填参数”的异常覆盖
+- `api/portal/v1/perm/user/units`
+  - 用户维度权限单元授权的增删查
+- `api/portal/v1/grant/app/overwrite`
+  - 租户应用批量覆盖授权
+- `api/portal/v1/grant/app/tree`
+  - 租户应用授权树查询
+- `api/portal/v1/granted/*`
+  - 当前用户已获授权应用和资源树查询
+- `api/portal/v1/client/*`
+  - 还需要更多真实 GET 接口验权，逐步替代仅靠 `perm-check`
+- `api/portal/v1/user`
+  - `for-select`、`delete-batch`、`admin-reset-passwd` 还没有单独覆盖
+- `api/portal/v1/app`、`api/portal/v1/org`、`api/portal/v1/resource/tree`、`api/portal/v1/perm/group`
+  - `move` 类接口还没有单独覆盖
 
 ## 待补的真实 GET 授权验证清单
 

@@ -4,7 +4,7 @@ import time
 
 from common.assertions import ensure_api_status, ensure_http_status
 from common.client import AccountConfig
-from common.cleanup import delete_org_tree_safely, delete_user_safely
+from common.cleanup import delete_org_tree_safely, delete_perm_unit_safely, delete_user_safely
 from suites.base import BaseFlowTestCase
 
 
@@ -262,23 +262,7 @@ class TenantAppGrantFlowTestCase(BaseFlowTestCase):
                 ensure_api_status(revoke_user_response.json())
 
             if perm_unit_id and tenant_admin is not None:
-                disable_unit_response = self.ctx.client.request(
-                    "POST",
-                    "/api/portal/v1/perm/unit/forbidden",
-                    session_state=tenant_admin,
-                    json_body={"unitId": perm_unit_id, "forbidden": 1},
-                )
-                ensure_http_status(disable_unit_response, 200)
-                ensure_api_status(disable_unit_response.json())
-
-                delete_unit_response = self.ctx.client.request(
-                    "POST",
-                    "/api/portal/v1/perm/unit/delete",
-                    session_state=tenant_admin,
-                    params={"id": perm_unit_id},
-                )
-                ensure_http_status(delete_unit_response, 200)
-                ensure_api_status(delete_unit_response.json())
+                delete_perm_unit_safely(self.ctx, tenant_admin, perm_unit_id)
 
             if perm_group_id and tenant_admin is not None:
                 delete_group_response = self.ctx.client.request(

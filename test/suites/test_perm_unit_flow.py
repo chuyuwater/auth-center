@@ -3,6 +3,7 @@ from __future__ import annotations
 import time
 
 from common.assertions import ensure_api_status, ensure_http_status
+from common.cleanup import delete_perm_unit_safely
 from suites.base import BaseFlowTestCase
 
 
@@ -261,23 +262,7 @@ class PermUnitFlowTestCase(BaseFlowTestCase):
                 )
 
             if unit_id:
-                disable_unit_response = self.ctx.client.request(
-                    "POST",
-                    "/api/portal/v1/perm/unit/forbidden",
-                    session_state=admin_session,
-                    json_body={"unitId": unit_id, "forbidden": 1},
-                )
-                ensure_http_status(disable_unit_response, 200)
-                ensure_api_status(disable_unit_response.json())
-
-                delete_unit_response = self.ctx.client.request(
-                    "POST",
-                    "/api/portal/v1/perm/unit/delete",
-                    session_state=admin_session,
-                    params={"id": unit_id},
-                )
-                ensure_http_status(delete_unit_response, 200)
-                ensure_api_status(delete_unit_response.json())
+                delete_perm_unit_safely(self.ctx, admin_session, unit_id)
 
             if group_id:
                 delete_group_response = self.ctx.client.request(
