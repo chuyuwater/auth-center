@@ -16,6 +16,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -54,8 +55,11 @@ public class OrgTreeController {
     @GetMapping("/tree")
     public List<TreeNode<OrgTree>> getTree(@Valid OrgNodeQueryVO vo) {
         TreeNode<OrgTree> root = orgTreeService.listOrgTreeRecursively(vo);
-        //不必返回根节点
-        return root.getChildren();
+        if (vo.isReturnParent()) {
+            return Collections.singletonList(root);
+        } else {
+            return root.getChildren();
+        }
     }
 
     /**

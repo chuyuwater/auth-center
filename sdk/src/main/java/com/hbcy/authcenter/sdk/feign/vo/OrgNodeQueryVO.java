@@ -36,4 +36,9 @@ public class OrgNodeQueryVO {
      * 关键字
      */
     private String keyword;
+
+    /**
+     * 是否返回parentId本级
+     */
+    private boolean returnParent;
 }
