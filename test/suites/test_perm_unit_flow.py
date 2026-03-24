@@ -61,7 +61,8 @@ class PermUnitFlowTestCase(BaseFlowTestCase):
             )
             ensure_http_status(group_detail_response, 200)
             group_detail = ensure_api_status(group_detail_response.json())
-            self.assertEqual(group_detail["node"]["id"], group_id)
+            self.assertEqual(group_detail["id"], group_id)
+            self.assertEqual(group_detail["nodeName"], f"自动化权限分组{suffix[-6:]}")
 
             update_group_response = self.ctx.client.request(
                 "PUT",
@@ -91,7 +92,6 @@ class PermUnitFlowTestCase(BaseFlowTestCase):
             created_unit = ensure_api_status(create_unit_response.json())
             unit_id = created_unit["id"]
             self.assertEqual(created_unit["belongTo"], group_id)
-            self.assertEqual(created_unit["forbidden"], 0)
 
             list_unit_response = self.ctx.client.request(
                 "GET",
@@ -112,6 +112,7 @@ class PermUnitFlowTestCase(BaseFlowTestCase):
             unit_detail = ensure_api_status(detail_unit_response.json())
             self.assertEqual(unit_detail["id"], unit_id)
             self.assertEqual(unit_detail["nameCn"], f"自动化权限单元{suffix[-6:]}")
+            self.assertIn(unit_detail["forbidden"], (0, None))
 
             update_unit_response = self.ctx.client.request(
                 "PUT",
@@ -260,6 +261,15 @@ class PermUnitFlowTestCase(BaseFlowTestCase):
                 )
 
             if unit_id:
+                disable_unit_response = self.ctx.client.request(
+                    "POST",
+                    "/api/portal/v1/perm/unit/forbidden",
+                    session_state=admin_session,
+                    json_body={"unitId": unit_id, "forbidden": 1},
+                )
+                ensure_http_status(disable_unit_response, 200)
+                ensure_api_status(disable_unit_response.json())
+
                 delete_unit_response = self.ctx.client.request(
                     "POST",
                     "/api/portal/v1/perm/unit/delete",

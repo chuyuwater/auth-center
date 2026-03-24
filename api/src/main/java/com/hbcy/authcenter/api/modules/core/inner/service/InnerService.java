@@ -112,8 +112,18 @@ public class InnerService {
     @Nullable
     public Map<String, Boolean> checkPerms(String userId, String orgId, Set<String> permIds) {
         String key = GatewayConstants.USER_PERM_CACHE_PREFIX.formatted(userId, orgId);
+        //缓存已过期
         if (!Boolean.TRUE.equals(stringRedisTemplate.hasKey(key))) {
             return null;
+        }
+        //数量较少时，避免取出大量数据做计算
+        if (permIds.size() <= 3) {
+            Map<String, Boolean> resp = new HashMap<>();
+            for (String permId : permIds) {
+                resp.put(permId, Boolean.TRUE.equals(
+                        stringRedisTemplate.opsForSet().isMember(key, permId)));
+            }
+            return resp;
         }
         Set<String> gotPerms = stringRedisTemplate.opsForSet().members(key);
         if (gotPerms == null) {

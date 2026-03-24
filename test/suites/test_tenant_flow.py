@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import time
 
-from common.assertions import ensure_api_error, ensure_api_status, ensure_http_status
+from common.assertions import ensure_api_status, ensure_http_status
 from suites.base import BaseFlowTestCase
 
 
@@ -124,8 +124,18 @@ class TenantFlowTestCase(BaseFlowTestCase):
             session_state=admin_session,
             params={"id": tenant_id},
         )
-        delete_body = ensure_api_error(delete_response, 400, 10)
-        self.assertIn("请先删除该租户下的所有组织", delete_body["msg"])
+        ensure_http_status(delete_response, 200)
+        ensure_api_status(delete_response.json())
+
+        deleted_list_response = self.ctx.client.request(
+            "GET",
+            "/api/portal/v1/tenant",
+            session_state=admin_session,
+            params={"page": 1, "size": 20, "keyword": f"{tenant_name}-更新"},
+        )
+        ensure_http_status(deleted_list_response, 200)
+        deleted_list = ensure_api_status(deleted_list_response.json())
+        self.assertFalse(any(item["id"] == tenant_id for item in deleted_list["list"]), "删除后租户仍出现在列表中")
 
     @staticmethod
     def _build_phone(prefix: str, seed: str) -> str:

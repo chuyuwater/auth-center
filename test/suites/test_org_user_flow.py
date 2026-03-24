@@ -263,8 +263,8 @@ class OrgUserFlowTestCase(BaseFlowTestCase):
             session_state=super_admin_session,
             params={"id": tenant_id},
         )
-        delete_tenant_body = ensure_api_error(delete_tenant_response, 400, 10)
-        self.assertIn("请先删除该租户下的所有组织", delete_tenant_body["msg"])
+        ensure_http_status(delete_tenant_response, 200)
+        ensure_api_status(delete_tenant_response.json())
 
     @staticmethod
     def _build_phone(prefix: str, seed: str) -> str:

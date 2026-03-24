@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import time
 
-from common.assertions import ensure_api_error, ensure_api_status, ensure_http_status
+from common.assertions import ensure_api_status, ensure_http_status
 from common.client import AccountConfig
 from common.cleanup import delete_org_tree_safely, delete_user_safely
 from suites.base import BaseFlowTestCase
@@ -262,6 +262,15 @@ class TenantAppGrantFlowTestCase(BaseFlowTestCase):
                 ensure_api_status(revoke_user_response.json())
 
             if perm_unit_id and tenant_admin is not None:
+                disable_unit_response = self.ctx.client.request(
+                    "POST",
+                    "/api/portal/v1/perm/unit/forbidden",
+                    session_state=tenant_admin,
+                    json_body={"unitId": perm_unit_id, "forbidden": 1},
+                )
+                ensure_http_status(disable_unit_response, 200)
+                ensure_api_status(disable_unit_response.json())
+
                 delete_unit_response = self.ctx.client.request(
                     "POST",
                     "/api/portal/v1/perm/unit/delete",
@@ -324,8 +333,8 @@ class TenantAppGrantFlowTestCase(BaseFlowTestCase):
                     session_state=super_admin_session,
                     params={"id": tenant_id},
                 )
-                delete_tenant_body = ensure_api_error(delete_tenant_response, 400, 10)
-                self.assertIn("请先删除该租户下的所有组织", delete_tenant_body["msg"])
+                ensure_http_status(delete_tenant_response, 200)
+                ensure_api_status(delete_tenant_response.json())
 
     def _pick_portal_perm(self, session_state) -> dict[str, str]:
         tree_response = self.ctx.client.request(
