@@ -168,6 +168,7 @@ public class SysDictService extends ServiceImpl<SysDictMapper, SysDict> {
      */
     @Transactional(rollbackFor = Exception.class)
     public void move(NodeMoveVO vo) {
+        vo.check();
         SysDict node = baseMapper.selectById(vo.getNodeId());
         if (node == null) {
             throw new ParamError("指定字典项不存在");

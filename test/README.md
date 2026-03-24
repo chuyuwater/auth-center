@@ -115,6 +115,11 @@
 - `test_cross_org_permission_flow.py`
   - 同租户错组织上下文下的用户查询越权
   - 同租户内 `userId` 与 `orgId` 组合不匹配时，角色授权接口应拦截
+- `test_sys_dict_flow.py`
+  - 系统字典的列表、详情、更新、删除
+  - 基于真实初始化分组的新增、重复数据校验
+  - `children` 树查询和 `move` 同级排序
+  - `featCode`、`parentId` 缺参和非法 move 参数校验
 - `test_validation_flow.py`
   - 租户、应用、组织、用户、权限分组、权限单元的参数校验
   - 重复数据插入校验
@@ -166,6 +171,7 @@ python3 portal/auth-center/test/run.py
 - 已覆盖 `granted/*` 在不同组织下的真实权限差异
 - 已覆盖一批跨租户/跨组织的典型越权场景
 - 已覆盖同租户错组织上下文和错组织授权的典型越权场景
+- 已覆盖系统字典的主流程 CRUD、树查询和 move
 
 ## 当前主要缺口
 
