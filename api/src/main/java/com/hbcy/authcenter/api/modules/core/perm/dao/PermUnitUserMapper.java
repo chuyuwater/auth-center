@@ -33,7 +33,8 @@ public interface PermUnitUserMapper extends BaseMapper<PermUnitUser> {
     void insertIgnore(@Param("list") List<PermUnitUser> list);
 
     //获取角色授权人员信息
-    Page<UnitUserDTO> listGrantUsers(Page<?> dbPage, @Param("vo") PermUnitUserQueryVO vo);
+    Page<UnitUserDTO> listGrantUsers(Page<?> dbPage, @Param("vo") PermUnitUserQueryVO vo,
+                                     @Param("orgIdPath") String orgIdPath);
 
     //获取当前用户授权的应用
     List<GrantAppDTO> listGrantApps(@Param("userId") String userId,

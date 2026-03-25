@@ -185,7 +185,15 @@ public class PermUnitUserService extends ServiceImpl<PermUnitUserMapper, PermUni
     //获取角色关联的人
     public PageResp<UnitUserDTO> listGrantUsers(PermUnitUserQueryVO vo) {
         Page<Object> dbPage = vo.getDbPage();
-        Page<UnitUserDTO> page = baseMapper.listGrantUsers(dbPage, vo);
+        String orgIdPath = null;
+        String currentOrgId = UserContextUtils.getUserOrg();
+        if (StringUtils.isNotBlank(currentOrgId)) {
+            OrgTree currentOrg = orgTreeService.getById(currentOrgId);
+            if (currentOrg != null) {
+                orgIdPath = currentOrg.getIdPath();
+            }
+        }
+        Page<UnitUserDTO> page = baseMapper.listGrantUsers(dbPage, vo, orgIdPath);
         return new PageRespEx<>(page);
     }
 
