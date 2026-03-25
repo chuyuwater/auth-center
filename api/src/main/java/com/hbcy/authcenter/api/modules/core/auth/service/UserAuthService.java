@@ -14,6 +14,7 @@ import com.hbcy.authcenter.api.modules.core.tenant.dao.TenantMapper;
 import com.hbcy.authcenter.api.modules.core.tenant.model.Tenant;
 import com.hbcy.authcenter.api.modules.core.user.dao.UserMapper;
 import com.hbcy.authcenter.api.modules.core.user.dao.UserOrgMapper;
+import com.hbcy.authcenter.api.modules.core.user.dto.UserOrgDTO;
 import com.hbcy.authcenter.api.modules.core.user.model.User;
 import com.hbcy.authcenter.gateway.constants.GatewayConstants;
 import com.hbcy.authcenter.gateway.vo.RefreshUserPermVO;
@@ -151,10 +152,24 @@ public class UserAuthService {
             throw new AuthError("账号已被禁用，请联系管理员");
         }
         cleanLoginFail(chosen.getId());
-        //主职组织
-        String orgId = userOrgMapper.queryMainOrg(chosen.getId());
-        if (StringUtils.isBlank(orgId)) {
+        Tenant tenant = tenantMapper.selectById(chosen.getTenantId());
+        if (tenant.getForbidden() > 0) {
+            throw new AuthError("租户已被禁用，请联系管理员");
+        }
+        List<UserOrgDTO> userOrgs = userOrgMapper.listUserOrgs(
+                List.of(chosen.getId()), false, 0);
+        if (CollectionUtils.isEmpty(userOrgs)) {
             throw new AuthError("您所在的组织已被禁用，请联系管理员！");
+        }
+        //优先使用主职组织
+        String orgId = userOrgs.get(0).getOrgId();
+        if (userOrgs.size() > 1) {
+            for (UserOrgDTO userOrg : userOrgs) {
+                if (userOrg.getMainJob() > 0) {
+                    orgId = userOrg.getOrgId();
+                    break;
+                }
+            }
         }
         //刷新权限
         RefreshUserPermVO refreshUserPermVO = new RefreshUserPermVO()
@@ -170,7 +185,6 @@ public class UserAuthService {
                 .set(GatewayConstants.SESSION_USER_NAME, chosen.getRealName());
 
         SaTokenInfo tokenInfo = StpUtil.getTokenInfo();
-        Tenant tenant = tenantMapper.selectById(chosen.getTenantId());
         LoginRespDTO resp = new LoginRespDTO()
                 .setToken(tokenInfo.tokenValue)
                 .setLastLoginTime(chosen.getLastLogin())
