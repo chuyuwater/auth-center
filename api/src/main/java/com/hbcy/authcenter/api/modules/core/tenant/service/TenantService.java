@@ -1,6 +1,7 @@
 package com.hbcy.authcenter.api.modules.core.tenant.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.f4b6a3.ulid.UlidCreator;
@@ -210,7 +211,7 @@ public class TenantService extends ServiceImpl<TenantMapper, Tenant> {
         long deleteTime = System.currentTimeMillis();
         String updateUser = UserContextUtils.getUserId();
         userService.deleteUser(tenant.getAdminId(), true);
-        orgTreeMapper.update(new OrgTree(), new QueryWrapper<OrgTree>()
+        orgTreeMapper.update(new UpdateWrapper<OrgTree>()
                 .eq(OrgTree.COL_TENANT_ID, tenant.getId())
                 .set(OrgTree.COL_DELETE_TIME, deleteTime)
                 .set(OrgTree.COL_UPDATE_USER, updateUser));
