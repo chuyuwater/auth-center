@@ -27,7 +27,7 @@ import java.util.List;
  * @date 2025-12-25
  */
 @RestController
-@RequestMapping("api/portal/v1/org")
+@RequestMapping("/api/portal/v1/org")
 @Validated
 public class OrgTreeController {
 

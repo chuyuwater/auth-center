@@ -4,10 +4,7 @@ import com.hbcy.authcenter.sdk.config.PortalFeignConfig;
 import com.hbcy.authcenter.sdk.feign.dto.OrgNodeDTO;
 import com.hbcy.authcenter.sdk.feign.dto.SysDictDTO;
 import com.hbcy.authcenter.sdk.feign.dto.UserDetailDTO;
-import com.hbcy.authcenter.sdk.feign.vo.MsgCreateVO;
-import com.hbcy.authcenter.sdk.feign.vo.OrgNodeQueryVO;
-import com.hbcy.authcenter.sdk.feign.vo.TodoCreateVO;
-import com.hbcy.authcenter.sdk.feign.vo.TodoUpdateVO;
+import com.hbcy.authcenter.sdk.feign.vo.*;
 import com.hbcy.common.base.pojo.ApiResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
@@ -43,7 +40,7 @@ public interface AuthCenterClient {
      */
     @GetMapping("/api/portal/v1/client/perm-code")
     ApiResponse<Set<String>> listPermCode();
-    
+
     /**
      * 检查当前用户在当前组织、当前app下是否有指定权限码
      * 该结果会使用与网关侧一致的缓存，因此判断结果与网关放行一致
@@ -172,4 +169,17 @@ public interface AuthCenterClient {
      */
     @PutMapping("/api/portal/v1/sdk/todo/update-state")
     ApiResponse<Object> updateTodoState(@RequestBody TodoUpdateVO vo);
+
+    /**
+     * 创建组织节点
+     * 会返回id信息
+     */
+    @PostMapping("/api/portal/v1/org/node")
+    ApiResponse<OrgNodeDTO> createOrgNode(@RequestBody OrgNodeUpsertVO vo);
+
+    /**
+     * 更新组织节点
+     */
+    @PutMapping("/api/portal/v1/org/node/{id}")
+    ApiResponse<OrgNodeDTO> updateOrgNode(@PathVariable String id, @RequestBody OrgNodeUpsertVO vo);
 }
