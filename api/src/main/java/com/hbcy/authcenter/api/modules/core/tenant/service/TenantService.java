@@ -207,11 +207,15 @@ public class TenantService extends ServiceImpl<TenantMapper, Tenant> {
         if (cnt > 2) { //虚拟根节点+租户名称节点
             throw new ParamError("请先删除该租户下除根组织外所有组织");
         }
+        long deleteTime = System.currentTimeMillis();
+        String updateUser = UserContextUtils.getUserId();
         userService.deleteUser(tenant.getAdminId(), true);
-        orgTreeMapper.delete(new QueryWrapper<OrgTree>()
-                .eq(OrgTree.COL_TENANT_ID, tenant.getId()));
-        tenant.setUpdateUser(UserContextUtils.getUserId());
-        //逻辑删除
-        this.removeById(tenant);
+        orgTreeMapper.update(new OrgTree(), new QueryWrapper<OrgTree>()
+                .eq(OrgTree.COL_TENANT_ID, tenant.getId())
+                .set(OrgTree.COL_DELETE_TIME, deleteTime)
+                .set(OrgTree.COL_UPDATE_USER, updateUser));
+        tenant.setUpdateUser(updateUser);
+        tenant.setDeleteTime(deleteTime);
+        this.updateById(tenant);
     }
 }
