@@ -1,6 +1,6 @@
 package com.hbcy.authcenter.api.modules.minor.user.controller;
 
-import com.hbcy.authcenter.api.modules.minor.user.model.UserQuickLink;
+import com.hbcy.authcenter.api.modules.minor.user.dto.UserQuickLinkDTO;
 import com.hbcy.authcenter.api.modules.minor.user.service.UserQuickLinkService;
 import com.hbcy.authcenter.api.modules.minor.user.vo.UserQuickLinkUpsertVO;
 import jakarta.annotation.Resource;
@@ -39,7 +39,7 @@ public class UserQuickLinkController {
      * @return 快捷入口列表
      */
     @GetMapping
-    public List<UserQuickLink> listQuickLink(@NotNull(message = "clientType必须指定") Integer clientType) {
+    public List<UserQuickLinkDTO> listQuickLink(@NotNull(message = "clientType必须指定") Integer clientType) {
         return userQuickLinkService.list(clientType);
     }
 }
