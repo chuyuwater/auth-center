@@ -215,8 +215,9 @@ public class TenantService extends ServiceImpl<TenantMapper, Tenant> {
                 .eq(OrgTree.COL_TENANT_ID, tenant.getId())
                 .set(OrgTree.COL_DELETE_TIME, deleteTime)
                 .set(OrgTree.COL_UPDATE_USER, updateUser));
-        tenant.setUpdateUser(updateUser);
-        tenant.setDeleteTime(deleteTime);
-        this.updateById(tenant);
+        baseMapper.update(new UpdateWrapper<Tenant>()
+                .eq(Tenant.COL_ID, tenant.getId())
+                .set(Tenant.COL_DELETE_TIME, deleteTime)
+                .set(Tenant.COL_UPDATE_USER, updateUser));
     }
 }
