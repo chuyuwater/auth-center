@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.hbcy</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>1.0.0-SNAPSHOT</version>
+        <version>1.0.0</version>
         <relativePath/>
     </parent>
     <packaging>pom</packaging>
@@ -19,7 +19,7 @@
 
     <groupId>com.hbcy.authcenter</groupId>
     <artifactId>authcenter</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>1.0.0</version>
     <name>auth-center</name>
     <description>认证中心</description>
 

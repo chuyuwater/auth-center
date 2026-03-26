@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.hbcy.authcenter</groupId>
         <artifactId>authcenter</artifactId>
-        <version>0.0.1-SNAPSHOT</version>
+        <version>1.0.0</version>
     </parent>
 
     <artifactId>api</artifactId>
@@ -24,42 +24,42 @@
         <dependency>
             <groupId>com.hbcy.common</groupId>
             <artifactId>webdb</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
+            <version>1.0.0</version>
         </dependency>
         <dependency>
             <groupId>com.hbcy.common</groupId>
             <artifactId>redis</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
+            <version>1.0.0</version>
         </dependency>
         <dependency>
             <groupId>com.hbcy.common</groupId>
             <artifactId>feign</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
+            <version>1.0.0</version>
         </dependency>
         <dependency>
             <groupId>com.hbcy.common</groupId>
             <artifactId>kafka</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
+            <version>1.0.0</version>
         </dependency>
         <dependency>
             <groupId>com.hbcy.common</groupId>
             <artifactId>lock</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
+            <version>1.0.0</version>
         </dependency>
         <dependency>
             <groupId>com.hbcy.common</groupId>
             <artifactId>oss</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
+            <version>1.0.0</version>
         </dependency>
         <dependency>
             <groupId>com.hbcy.authcenter</groupId>
             <artifactId>sdk</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>1.0.0</version>
         </dependency>
         <dependency>
             <groupId>com.hbcy.authcenter</groupId>
             <artifactId>gateway</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>1.0.0</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
