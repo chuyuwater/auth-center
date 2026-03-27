@@ -102,6 +102,7 @@
         app.icon,
         app.app_type,
         app.app_url,
+        app.show_order,
         tenant_app.forbidden,
         tenant_app.id as grant_id,
         tenant_app.create_user,
