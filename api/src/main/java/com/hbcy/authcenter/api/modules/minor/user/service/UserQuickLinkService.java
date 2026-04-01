@@ -13,10 +13,12 @@ import com.hbcy.authcenter.api.modules.minor.user.vo.UserQuickLinkUpsertVO;
 import com.hbcy.authcenter.sdk.utils.UserContextUtils;
 import com.hbcy.common.base.error.PermissionError;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -30,6 +32,7 @@ import java.util.stream.Collectors;
  * @date 2026-02-25 15:49
  */
 @Service
+@Slf4j
 public class UserQuickLinkService extends ServiceImpl<UserQuickLinkMapper, UserQuickLink> {
     @Resource
     private OrgTreeMapper orgTreeMapper;
@@ -52,7 +55,17 @@ public class UserQuickLinkService extends ServiceImpl<UserQuickLinkMapper, UserQ
             throw new PermissionError();
         }
         Set<String> grantIds = clientRenderService.grantResIds(userId, org, 0);
+        List<String> originResIds = vo.getResIds() == null ? List.of() : new ArrayList<>(vo.getResIds());
         vo.getResIds().removeIf(id -> !grantIds.contains(id));
+        if (!originResIds.isEmpty()) {
+            List<String> removedResIds = originResIds.stream()
+                    .filter(id -> id != null && !vo.getResIds().contains(id))
+                    .toList();
+            if (!removedResIds.isEmpty()) {
+                log.warn("快捷入口保存：部分resId无权限已过滤，userId={}, orgId={}, clientType={}, removedResIds={}",
+                        userId, orgId, vo.getClientType(), removedResIds);
+            }
+        }
         if (vo.getResIds().isEmpty()) {
             return;
         }
