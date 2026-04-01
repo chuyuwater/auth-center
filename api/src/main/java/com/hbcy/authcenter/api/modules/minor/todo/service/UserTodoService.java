@@ -123,7 +123,7 @@ public class UserTodoService extends ServiceImpl<UserTodoMapper, UserTodo> {
         //通知定制服务刷新待办
         if (Objects.equals(vo.getProcessState(), TodoProcessStateEnum.TODO.getValue())) {
             eventDispatcher.dispatch(EventConstants.USER_READ_TODO,
-                    new EventUserDTO().setUserId(vo.getUserId())
+                    new EventUserDTO().setUserId(UserContextUtils.getUserId())
                             .setTenantId(UserContextUtils.getTenantId()));
         }
         dbPage = baseMapper.query4user(dbPage, vo);
