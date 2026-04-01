@@ -164,11 +164,9 @@ class GrantedResourceFlowTestCase(BaseFlowTestCase):
                 "/api/portal/v1/granted/app",
                 session_state=temp_user,
             )
-            if target_perms:
-                ensure_api_client_error(before_granted_app_response, 11)
-            else:
-                ensure_http_status(before_granted_app_response, 200)
-                ensure_api_status(before_granted_app_response.json())
+            ensure_http_status(before_granted_app_response, 200)
+            before_granted_apps = ensure_api_status(before_granted_app_response.json())
+            self.assertEqual(before_granted_apps, [], "授权前普通用户不应看到任何已授权应用")
 
             if target_perms:
                 create_group_response = self.ctx.client.request(
@@ -287,15 +285,12 @@ class GrantedResourceFlowTestCase(BaseFlowTestCase):
                 "/api/portal/v1/granted/app",
                 session_state=temp_user,
             )
-            if target_perms:
-                ensure_api_client_error(granted_app_after_revoke_response, 11)
-            else:
-                ensure_http_status(granted_app_after_revoke_response, 200)
-                granted_apps_after_revoke = ensure_api_status(granted_app_after_revoke_response.json())
-                self.assertFalse(
-                    any(item["appId"] == "portal" for item in granted_apps_after_revoke),
-                    "开放接口下撤销租户应用授权后，portal 不应继续出现在应用列表中",
-                )
+            ensure_http_status(granted_app_after_revoke_response, 200)
+            granted_apps_after_revoke = ensure_api_status(granted_app_after_revoke_response.json())
+            self.assertFalse(
+                any(item["appId"] == "portal" for item in granted_apps_after_revoke),
+                "撤销租户应用授权后，portal 不应继续出现在应用列表中",
+            )
         finally:
             if perm_grant_ids and tenant_admin is not None:
                 revoke_user_response = self.ctx.client.request(

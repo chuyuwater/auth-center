@@ -141,11 +141,9 @@ class GrantedOrgScopeFlowTestCase(BaseFlowTestCase):
                 session_state=scoped_user,
                 org_id=company_a_id,
             )
-            if endpoint_perms:
-                ensure_api_client_error(before_granted_a_response, 11)
-            else:
-                ensure_http_status(before_granted_a_response, 200)
-                ensure_api_status(before_granted_a_response.json())
+            ensure_http_status(before_granted_a_response, 200)
+            before_granted_a = ensure_api_status(before_granted_a_response.json())
+            self.assertEqual(before_granted_a, [], "授权前当前组织下不应返回任何应用")
 
             if endpoint_perms:
                 create_group_response = self.ctx.client.request(
@@ -232,11 +230,9 @@ class GrantedOrgScopeFlowTestCase(BaseFlowTestCase):
                 session_state=scoped_user,
                 org_id=company_b_id,
             )
-            if endpoint_perms:
-                ensure_api_client_error(granted_b_response, 11)
-            else:
-                ensure_http_status(granted_b_response, 200)
-                ensure_api_status(granted_b_response.json())
+            ensure_http_status(granted_b_response, 200)
+            granted_b = ensure_api_status(granted_b_response.json())
+            self.assertEqual(granted_b, [], "未授权组织下不应返回任何应用")
 
             res_tree_a_response = self.ctx.client.request(
                 "GET",
