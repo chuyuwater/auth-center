@@ -65,5 +65,6 @@
                 and pu.forbidden = #{vo.forbidden}
             </if>
         </where>
+        order by pu.id asc
     </select>
 </mapper>
