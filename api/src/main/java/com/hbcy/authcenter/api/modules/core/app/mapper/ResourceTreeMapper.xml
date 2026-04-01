@@ -83,10 +83,10 @@
                 name_cn like concat('%', #{vo.keyword}, '%')
                 or custom_id like concat('%', #{vo.keyword}, '%')
                 or id in (
-                    select res_id from resource_perm
-                    where app_id = #{vo.appId}
-                    and (perm_name like concat('%', #{vo.keyword}, '%') or perm_code like concat('%', #{vo.keyword}, '%'))
-                    )
+                select res_id from resource_perm
+                where app_id = #{vo.appId}
+                and (perm_name like concat('%', #{vo.keyword}, '%') or perm_code like concat('%', #{vo.keyword}, '%'))
+                )
                 )
             </if>
         </where>
@@ -137,17 +137,20 @@
         from resource_tree
         <where>
             <if test="resIds != null and resIds.size() != 0">
-                id in
+                (id in
                 <foreach item="resId" collection="resIds" separator="," open="(" close=")" index="">
                     #{resId}
                 </foreach>
+                )
             </if>
             <if test="appIds != null and appIds.size() != 0">
-                or app_id in
+                or (app_id in
                 <foreach item="appId" collection="appIds" separator="," open="(" close=")" index="">
                     #{appId}
                 </foreach>
+                )
             </if>
+            and hidden = 0 and res_type = 0
         </where>
     </select>
 
