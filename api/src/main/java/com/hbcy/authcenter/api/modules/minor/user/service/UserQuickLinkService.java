@@ -57,7 +57,7 @@ public class UserQuickLinkService extends ServiceImpl<UserQuickLinkMapper, UserQ
         Set<String> grantIds = clientRenderService.grantResIds(userId, org, 0);
         List<String> originResIds = vo.getResIds() == null ? List.of() : new ArrayList<>(vo.getResIds());
         vo.getResIds().removeIf(id -> !grantIds.contains(id));
-        if (!originResIds.isEmpty()) {
+        if (originResIds.size() > vo.getResIds().size()) {
             List<String> removedResIds = originResIds.stream()
                     .filter(id -> id != null && !vo.getResIds().contains(id))
                     .toList();
