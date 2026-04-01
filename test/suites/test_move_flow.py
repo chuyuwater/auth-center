@@ -378,7 +378,7 @@ class MoveFlowTestCase(BaseFlowTestCase):
             "PUT",
             "/api/portal/v1/org/node/move",
             session_state=session_state,
-            json_body={"nodeId": company_b_id, "parentId": "", "prevId": company_a_id},
+            json_body={"nodeId": company_b_id, "parentId": root_org_id, "prevId": company_a_id},
         )
         ensure_http_status(move_response, 200)
         ensure_api_status(move_response.json())

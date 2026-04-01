@@ -5,6 +5,7 @@ import com.hbcy.authcenter.api.modules.sys.dict.model.SysDict;
 import com.hbcy.authcenter.api.modules.sys.dict.service.SysDictService;
 import com.hbcy.authcenter.api.modules.sys.dict.vo.DictCreateVO;
 import com.hbcy.authcenter.api.modules.sys.dict.vo.DictQueryVO;
+import com.hbcy.authcenter.api.modules.sys.dict.vo.DictUpdateVO;
 import com.hbcy.common.base.tree.TreeNode;
 import com.hbcy.common.web.bean.NameFill;
 import jakarta.annotation.Resource;
@@ -50,7 +51,7 @@ public class SysDictController {
      */
     @PutMapping("/{id}")
     public SysDict updateSysDict(@NotBlank(message = "ID不能为空") @PathVariable String id,
-                                 @Valid @RequestBody DictCreateVO vo) {
+                                 @Valid @RequestBody DictUpdateVO vo) {
         return sysDictService.updateSysDict(id, vo);
     }
 
