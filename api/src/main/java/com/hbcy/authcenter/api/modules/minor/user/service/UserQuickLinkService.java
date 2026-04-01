@@ -45,15 +45,15 @@ public class UserQuickLinkService extends ServiceImpl<UserQuickLinkMapper, UserQ
     public void overwrite(UserQuickLinkUpsertVO vo) {
         String userId = UserContextUtils.getUserId();
         String orgId = UserContextUtils.getUserOrg();
+        OrgTree org = orgTreeMapper.selectById(orgId);
+        if (org == null) {
+            throw new PermissionError();
+        }
         //清空已有的
         baseMapper.delete(new QueryWrapper<UserQuickLink>()
                 .eq(UserQuickLink.COL_USER_ID, userId)
                 .eq(UserQuickLink.COL_CLIENT_TYPE, vo.getClientType())
                 .eq(UserQuickLink.COL_ORG_ID, orgId));
-        OrgTree org = orgTreeMapper.selectById(orgId);
-        if (org == null) {
-            throw new PermissionError();
-        }
         Set<String> grantIds = clientRenderService.grantResIds(userId, org, 0);
         List<String> originResIds = vo.getResIds() == null ? List.of() : new ArrayList<>(vo.getResIds());
         vo.getResIds().removeIf(id -> !grantIds.contains(id));

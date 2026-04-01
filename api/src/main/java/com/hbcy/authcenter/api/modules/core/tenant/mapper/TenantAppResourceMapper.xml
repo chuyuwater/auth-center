@@ -39,7 +39,8 @@
     <select id="getGrantedResIds" resultType="java.lang.String">
         select distinct rp.res_id
         from tenant_app_resource tar
-        join tenant_app ta on tar.app_id = ta.id
+        join tenant_app ta on
+            (tar.app_id = ta.app_id and tar.tenant_id = ta.tenant_id)
         join resource_perm rp on tar.perm_id = rp.id
         where tar.tenant_id = #{tenantId}
         and ta.forbidden = 0
