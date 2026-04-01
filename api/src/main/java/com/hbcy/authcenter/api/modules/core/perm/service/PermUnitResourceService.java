@@ -206,6 +206,9 @@ public class PermUnitResourceService extends ServiceImpl<PermUnitResourceMapper,
 
     /**
      * 获取上下文的资源树
+     * <p>
+     * 不按 {@code hidden} 过滤菜单：隐藏菜单仍参与查询并返回其下权限点，菜单显隐由前端根据 {@code res.hidden} 控制。
+     * 若此处强制 {@code hidden=0}，则隐藏父菜单不会进入 listResTree 结果集，导致挂在该菜单上的权限点无法查出。
      *
      * @return 移除了未授权资源
      */
@@ -231,7 +234,7 @@ public class PermUnitResourceService extends ServiceImpl<PermUnitResourceMapper,
         queryVO.setWithPerm(vo.getWithPerm());
         //这里是给前端用的，不需要api
         queryVO.setWithApi(false);
-        queryVO.setHidden(0);
+        // 不设置 hidden：包含隐藏菜单，权限点与菜单一并返回；显隐由前端处理
         queryVO.setResType(vo.getResType());
         if (parent != null) {
             queryVO.setParentId(parent.getId());
