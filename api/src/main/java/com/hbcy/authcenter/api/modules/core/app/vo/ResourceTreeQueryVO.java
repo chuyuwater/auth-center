@@ -61,7 +61,7 @@ public class ResourceTreeQueryVO {
      */
     private Integer showLevel;
     /**
-     * 是否隐藏菜单，0-显示，1-隐藏
+     * 是否过滤隐藏菜单，null-不过滤，0-显示，1-隐藏
      */
     private Integer hidden;
     /**

@@ -5,10 +5,11 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.f4b6a3.ulid.UlidCreator;
 import com.google.common.base.Preconditions;
+import com.hbcy.authcenter.api.common.bean.EventDispatcher;
 import com.hbcy.authcenter.api.common.bean.NameCacheService;
 import com.hbcy.authcenter.api.common.constants.G;
-import com.hbcy.authcenter.api.modules.core.app.model.App;
 import com.hbcy.authcenter.api.modules.core.app.dto.GrantAppDTO;
+import com.hbcy.authcenter.api.modules.core.app.model.App;
 import com.hbcy.authcenter.api.modules.core.app.service.AppService;
 import com.hbcy.authcenter.api.modules.core.inner.service.SDKService;
 import com.hbcy.authcenter.api.modules.core.perm.service.PermUnitUserService;
@@ -24,6 +25,8 @@ import com.hbcy.authcenter.api.modules.minor.todo.vo.UserTodoBatchOpVO;
 import com.hbcy.authcenter.api.modules.minor.todo.vo.UserTodoQueryByMeVO;
 import com.hbcy.authcenter.api.modules.minor.todo.vo.UserTodoQueryByOpVO;
 import com.hbcy.authcenter.api.modules.sys.dict.service.DictEnumAdapter;
+import com.hbcy.authcenter.global.constants.EventConstants;
+import com.hbcy.authcenter.global.dto.EventUserDTO;
 import com.hbcy.authcenter.sdk.feign.vo.TodoCreateVO;
 import com.hbcy.authcenter.sdk.feign.vo.TodoUpdateVO;
 import com.hbcy.authcenter.sdk.utils.UserContextUtils;
@@ -68,6 +71,8 @@ public class UserTodoService extends ServiceImpl<UserTodoMapper, UserTodo> {
     private PermUnitUserService permUnitUserService;
     @Resource
     private UserOrgMapper userOrgMapper;
+    @Resource
+    private EventDispatcher eventDispatcher;
 
     @Transactional(rollbackFor = Exception.class)
     public void batchCreateTodo(TodoCreateVO vo) {
@@ -161,9 +166,12 @@ public class UserTodoService extends ServiceImpl<UserTodoMapper, UserTodo> {
      */
     public PageResp<TodoDTO> listTodo(UserTodoQueryByOpVO vo) {
         Page<TodoDTO> dbPage = vo.getDbPage();
+        String userId = UserContextUtils.getUserId();
+        eventDispatcher.dispatch(EventConstants.USER_READ_TODO,
+                new EventUserDTO().setUserId(userId).setTenantId(UserContextUtils.getTenantId()));
         if (!UserContextUtils.isTenantAdmin()) {
             List<String> childOrgIds = sdkService.listGrantOrgs(
-                    UserContextUtils.getUserId(),
+                    userId,
                     G.APP_NAME,
                     PERM_VIEW_TODO,
                     UserContextUtils.getUserOrg()
@@ -199,6 +207,9 @@ public class UserTodoService extends ServiceImpl<UserTodoMapper, UserTodo> {
         UserTodo userTodo = baseMapper.selectById(id);
         if (userTodo == null) {
             return null;
+        }
+        if (!UserContextUtils.getTenantId().equals(userTodo.getTenantId())) {
+            throw new PermissionError();
         }
         String userId = UserContextUtils.getUserId();
         if (!UserContextUtils.isTenantAdmin() && !userTodo.getTargetUser().equals(userId)) {
@@ -236,7 +247,6 @@ public class UserTodoService extends ServiceImpl<UserTodoMapper, UserTodo> {
                     item.setSrcApp(app.getAppId());
                     item.setSrcAppName(app.getNameCn());
                     return item;
-                })
-                .collect(Collectors.toList());
+                }).toList();
     }
 }

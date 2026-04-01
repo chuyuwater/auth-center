@@ -204,7 +204,7 @@ public class ResourcePermService extends ServiceImpl<ResourcePermMapper, Resourc
         // 权限资源变更
         eventDispatcher.dispatch(
                 appId,
-                EventConstants.KAFKA_RESOURCE_PERM_CHANGED,
+                EventConstants.RESOURCE_PERM_CHANGED,
                 new EventResPermChanged().setAppId(appId).setResId(resId));
     }
 
@@ -271,7 +271,7 @@ public class ResourcePermService extends ServiceImpl<ResourcePermMapper, Resourc
             // 权限资源变更
             eventDispatcher.dispatch(
                     appId,
-                    EventConstants.KAFKA_RESOURCE_PERM_CHANGED,
+                    EventConstants.RESOURCE_PERM_CHANGED,
                     new EventResPermChanged().setAppId(appId).setResId(resId));
         }
     }

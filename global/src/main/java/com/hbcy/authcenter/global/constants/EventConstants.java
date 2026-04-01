@@ -24,5 +24,13 @@ public class EventConstants {
     /**
      * app的权限资源发生变更，网关需要重建缓存
      */
-    public static final String KAFKA_RESOURCE_PERM_CHANGED = "RESOURCE_PERM_CHANGED";
+    public static final String RESOURCE_PERM_CHANGED = "RESOURCE_PERM_CHANGED";
+    /**
+     * 用户查看待办
+     */
+    public static final String USER_READ_TODO = "USER_READ_TODO";
+    /**
+     * 用户登录
+     */
+    public static final String USER_LOGIN = "USER_LOGIN";
 }

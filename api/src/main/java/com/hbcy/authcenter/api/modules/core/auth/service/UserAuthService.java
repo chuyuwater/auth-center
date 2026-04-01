@@ -5,6 +5,7 @@ import cn.dev33.satoken.stp.StpUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.github.f4b6a3.ulid.UlidCreator;
+import com.hbcy.authcenter.api.common.bean.EventDispatcher;
 import com.hbcy.authcenter.api.config.UserAuthConfig;
 import com.hbcy.authcenter.api.modules.core.auth.dto.CaptchaDTO;
 import com.hbcy.authcenter.api.modules.core.auth.dto.LoginRespDTO;
@@ -18,6 +19,8 @@ import com.hbcy.authcenter.api.modules.core.user.dto.UserOrgDTO;
 import com.hbcy.authcenter.api.modules.core.user.model.User;
 import com.hbcy.authcenter.gateway.constants.GatewayConstants;
 import com.hbcy.authcenter.gateway.vo.RefreshUserPermVO;
+import com.hbcy.authcenter.global.constants.EventConstants;
+import com.hbcy.authcenter.global.dto.EventUserDTO;
 import com.hbcy.authcenter.sdk.utils.UserContextUtils;
 import com.hbcy.common.base.error.AuthError;
 import com.hbcy.common.base.error.ClientError;
@@ -60,6 +63,8 @@ public class UserAuthService {
     private TenantMapper tenantMapper;
     @Resource
     private InnerService innerService;
+    @Resource
+    private EventDispatcher eventDispatcher;
 
     private long checkLockTime(String userId) {
         Long expire = stringRedisTemplate.getExpire(USER_LOCK_KEY_PREFIX + userId, TimeUnit.SECONDS);
@@ -199,6 +204,9 @@ public class UserAuthService {
         userMapper.update(new UpdateWrapper<User>()
                 .eq(User.COL_ID, chosen.getId())
                 .set(User.COL_LAST_LOGIN, LocalDateTime.now()));
+        //用户登录事件
+        eventDispatcher.dispatch(EventConstants.USER_LOGIN, new EventUserDTO().setUserId(chosen.getId())
+                .setTenantId(chosen.getTenantId()));
         return resp;
     }
 
