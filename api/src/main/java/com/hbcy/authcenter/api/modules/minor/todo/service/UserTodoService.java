@@ -116,7 +116,13 @@ public class UserTodoService extends ServiceImpl<UserTodoMapper, UserTodo> {
         Preconditions.checkNotNull(vo.getScope(), "查询范围不能为空");
         Page<UserTodoDTO> dbPage = vo.getOrderedDbPage(Map.of("", TODO_ORDER_ALLOWED));
         switch (vo.getScope()) {
-            case TARGET_ME -> vo.setUserId(UserContextUtils.getUserId());
+            case TARGET_ME -> {
+                vo.setUserId(UserContextUtils.getUserId());
+                //通知定制服务刷新待办
+                eventDispatcher.dispatch(EventConstants.USER_READ_TODO,
+                        new EventUserDTO().setUserId(vo.getUserId())
+                                .setTenantId(UserContextUtils.getTenantId()));
+            }
             case INITIATOR_ME -> vo.setInitiatorId(UserContextUtils.getUserId());
         }
         dbPage = baseMapper.query4user(dbPage, vo);
@@ -167,8 +173,6 @@ public class UserTodoService extends ServiceImpl<UserTodoMapper, UserTodo> {
     public PageResp<TodoDTO> listTodo(UserTodoQueryByOpVO vo) {
         Page<TodoDTO> dbPage = vo.getDbPage();
         String userId = UserContextUtils.getUserId();
-        eventDispatcher.dispatch(EventConstants.USER_READ_TODO,
-                new EventUserDTO().setUserId(userId).setTenantId(UserContextUtils.getTenantId()));
         if (!UserContextUtils.isTenantAdmin()) {
             List<String> childOrgIds = sdkService.listGrantOrgs(
                     userId,
