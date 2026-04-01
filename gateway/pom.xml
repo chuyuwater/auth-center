@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.hbcy.authcenter</groupId>
         <artifactId>authcenter</artifactId>
-        <version>1.0.1-SNAPSHOT</version>
+        <version>1.0.1</version>
     </parent>
 
     <artifactId>gateway</artifactId>
@@ -22,7 +22,7 @@
         <dependency>
             <groupId>com.hbcy.authcenter</groupId>
             <artifactId>global</artifactId>
-            <version>1.0.1-SNAPSHOT</version>
+            <version>1.0.1</version>
         </dependency>
         <dependency>
             <groupId>com.hbcy.common</groupId>

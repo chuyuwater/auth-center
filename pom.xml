@@ -19,7 +19,7 @@
 
     <groupId>com.hbcy.authcenter</groupId>
     <artifactId>authcenter</artifactId>
-    <version>1.0.1-SNAPSHOT</version>
+    <version>1.0.1</version>
     <name>auth-center</name>
     <description>认证中心</description>
 
