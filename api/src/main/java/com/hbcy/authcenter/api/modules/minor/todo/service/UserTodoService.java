@@ -8,6 +8,7 @@ import com.google.common.base.Preconditions;
 import com.hbcy.authcenter.api.common.bean.EventDispatcher;
 import com.hbcy.authcenter.api.common.bean.NameCacheService;
 import com.hbcy.authcenter.api.common.constants.G;
+import com.hbcy.authcenter.api.common.enums.TodoProcessStateEnum;
 import com.hbcy.authcenter.api.modules.core.app.dto.GrantAppDTO;
 import com.hbcy.authcenter.api.modules.core.app.model.App;
 import com.hbcy.authcenter.api.modules.core.app.service.AppService;
@@ -116,14 +117,14 @@ public class UserTodoService extends ServiceImpl<UserTodoMapper, UserTodo> {
         Preconditions.checkNotNull(vo.getScope(), "查询范围不能为空");
         Page<UserTodoDTO> dbPage = vo.getOrderedDbPage(Map.of("", TODO_ORDER_ALLOWED));
         switch (vo.getScope()) {
-            case TARGET_ME -> {
-                vo.setUserId(UserContextUtils.getUserId());
-                //通知定制服务刷新待办
-                eventDispatcher.dispatch(EventConstants.USER_READ_TODO,
-                        new EventUserDTO().setUserId(vo.getUserId())
-                                .setTenantId(UserContextUtils.getTenantId()));
-            }
+            case TARGET_ME -> vo.setUserId(UserContextUtils.getUserId());
             case INITIATOR_ME -> vo.setInitiatorId(UserContextUtils.getUserId());
+        }
+        //通知定制服务刷新待办
+        if (Objects.equals(vo.getProcessState(), TodoProcessStateEnum.TODO.getValue())) {
+            eventDispatcher.dispatch(EventConstants.USER_READ_TODO,
+                    new EventUserDTO().setUserId(vo.getUserId())
+                            .setTenantId(UserContextUtils.getTenantId()));
         }
         dbPage = baseMapper.query4user(dbPage, vo);
         Set<String> appIds = dbPage.getRecords().stream().map(
