@@ -90,13 +90,13 @@
                 and(
                 <trim prefixOverrides="or">
                     <if test="vo.keywordType.contains('PHONE')">
-                        or u.phone like concat(#{vo.keyword}, '%')
+                        or u.phone like concat('%', #{vo.keyword}, '%')
                     </if>
                     <if test="vo.keywordType.contains('ACCOUNT')">
-                        or u.account like concat(#{vo.keyword}, '%')
+                        or u.account like concat('%', #{vo.keyword}, '%')
                     </if>
                     <if test="vo.keywordType.contains('NAME')">
-                        or u.real_name like concat(#{vo.keyword}, '%')
+                        or u.real_name like concat('%', #{vo.keyword}, '%')
                     </if>
                 </trim>
                 )
