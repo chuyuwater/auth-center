@@ -1,7 +1,6 @@
 package com.hbcy.authcenter.api.modules.core.perm.vo;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
 
 import java.util.Set;
@@ -27,6 +26,5 @@ public class PermUnitResourceSaveVO {
     /**
      * 权限id
      */
-    @NotEmpty(message = "权限id不能为空")
     private Set<String> permIds;
 }

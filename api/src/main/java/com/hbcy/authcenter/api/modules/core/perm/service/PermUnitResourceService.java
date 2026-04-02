@@ -39,6 +39,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -75,19 +76,22 @@ public class PermUnitResourceService extends ServiceImpl<PermUnitResourceMapper,
         if (!permUnit.getTenantId().equals(tenantId)) {
             throw new PermissionError();
         }
-        //仅保留权限点
-        Set<String> pointIds = resourcePermService.filterAppPermIds(vo.getAppId(), vo.getPermIds());
-        if (CollectionUtils.isEmpty(pointIds)) {
-            throw new ParamError("无有效权限");
+        Set<String> grantedIds = new HashSet<>();
+        Set<String> pointIds = new HashSet<>();
+        if (!CollectionUtils.isEmpty(vo.getPermIds())) {
+            //仅保留权限点
+            pointIds = resourcePermService.filterAppPermIds(vo.getAppId(), vo.getPermIds());
+            if (CollectionUtils.isEmpty(pointIds)) {
+                throw new ParamError("无有效权限");
+            }
+            //用户只能授权自己拥有的权限
+            List<ResPermDTO> granted = permUnitUserService.listPerms(vo.getAppId());
+            if (CollectionUtils.isEmpty(granted)) {
+                throw new ParamError("无有效权限");
+            }
+            grantedIds = granted.stream().map(ResPermDTO::getId).collect(
+                    Collectors.toSet());
         }
-        //用户只能授权自己拥有的权限
-        List<ResPermDTO> granted = permUnitUserService.listPerms(vo.getAppId());
-        if (CollectionUtils.isEmpty(granted)) {
-            throw new ParamError("无有效权限");
-        }
-        var grantedIds = granted.stream().map(ResPermDTO::getId).collect(
-                Collectors.toSet());
-
         List<PermUnitResource> resources = new ArrayList<>();
         for (String pointId : pointIds) {
             if (!grantedIds.contains(pointId)) {
@@ -107,7 +111,9 @@ public class PermUnitResourceService extends ServiceImpl<PermUnitResourceMapper,
         baseMapper.delete(new QueryWrapper<PermUnitResource>()
                 .eq(PermUnitResource.COL_APP_ID, vo.getAppId())
                 .eq(PermUnitResource.COL_UNIT_ID, vo.getUnitId()));
-        baseMapper.insert(resources);
+        if (!resources.isEmpty()) {
+            baseMapper.insert(resources);
+        }
     }
 
     public List<PermUnitAppDTO> listApps(String unitId) {
