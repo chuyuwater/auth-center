@@ -11,6 +11,7 @@
 
     <artifactId>sdk</artifactId>
     <description>认证中心sdk部分，发布到nexus，其他服务可以直接使用</description>
+    <version>1.0.2</version>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>

@@ -27,7 +27,7 @@ import java.util.Set;
  */
 @Validated
 @RestController
-@RequestMapping("api/portal/v1/sdk")
+@RequestMapping("/api/portal/v1/sdk")
 public class SDKController {
 
     @Resource

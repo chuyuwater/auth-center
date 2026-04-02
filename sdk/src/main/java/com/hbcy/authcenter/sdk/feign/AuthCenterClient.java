@@ -155,7 +155,7 @@ public interface AuthCenterClient {
     /**
      * 创建消息
      */
-    @PostMapping("/api/portal/v1/sdk/inbox")
+    @PostMapping("/api/portal/v1/sdk/msg")
     ApiResponse<Object> createMsg(@RequestBody MsgCreateVO vo);
 
     /**
