@@ -106,6 +106,9 @@
   - `user/delete-batch` 批量删除
   - `user/admin-reset-passwd` 管理员重置密码
   - 查询缺参、弱密码、批量删除前未禁用等异常校验
+- `test_user_custom_style_flow.py`
+  - `user/custom-style` 列表、详情、创建更新、删除
+  - 覆盖当前用户页面风格配置的字典值校验与增删改查闭环
 - `test_granted_org_scope_flow.py`
   - 同一用户切换不同 `X-ORG-ID` 时，`granted/app` 与 `granted/app/res-tree` 的差异
   - 使用临时租户和精确接口权限构造“组织 A 有权限、组织 B 无权限”的场景
@@ -168,6 +171,7 @@ python3 portal/auth-center/test/run.py
 - 已覆盖主要 `move` 接口的成功拖动与基础异常参数
 - 已覆盖用户维度权限单元授权的增删查和基础异常参数
 - 已覆盖选人窗口、批量删除、管理员重置密码的主流程和基础异常
+- 已覆盖用户自定义页面风格接口的列表、详情、创建更新、删除和字典约束校验
 - 已覆盖 `granted/*` 在不同组织下的真实权限差异
 - 已覆盖一批跨租户/跨组织的典型越权场景
 - 已覆盖同租户错组织上下文和错组织授权的典型越权场景
