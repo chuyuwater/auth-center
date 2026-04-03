@@ -28,7 +28,9 @@ import com.hbcy.common.base.error.ParamError;
 import com.pig4cloud.captcha.ArithmeticCaptcha;
 import com.pig4cloud.captcha.base.Captcha;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -43,6 +45,7 @@ import java.util.concurrent.TimeUnit;
  * @author 姚泰然
  * @date 2025-12-30 17:08
  */
+@Slf4j
 @Service
 public class UserAuthService {
 
@@ -65,6 +68,12 @@ public class UserAuthService {
     private InnerService innerService;
     @Resource
     private EventDispatcher eventDispatcher;
+
+    /**
+     * 如果配置了特殊验证码（用于自动化测试），可以视为万能验证码
+     */
+    @Value("${app.special-captcha:}")
+    private String specialCaptcha;
 
     private long checkLockTime(String userId) {
         Long expire = stringRedisTemplate.getExpire(USER_LOCK_KEY_PREFIX + userId, TimeUnit.SECONDS);
@@ -94,13 +103,17 @@ public class UserAuthService {
         if (StringUtils.isAllBlank(vo.getAccount(), vo.getPhone(), vo.getEmail())) {
             throw new ParamError("请输入账号/手机号/邮箱");
         }
-        String captchaCode = getCaptchaCode(vo.getCaptchaId());
-        if (StringUtils.isBlank(captchaCode)) {
-            throw new ParamError("验证码已过期");
-        }
-        if (!captchaCode.equalsIgnoreCase(vo.getCaptchaCode())) {
-            deleteCaptcha(vo.getCaptchaId());
-            throw new ParamError("验证码错误");
+        if (StringUtils.isNotBlank(specialCaptcha) && specialCaptcha.equals(vo.getCaptchaCode())) {
+            log.debug("user login with special captcha");
+        } else {
+            String captchaCode = getCaptchaCode(vo.getCaptchaId());
+            if (StringUtils.isBlank(captchaCode)) {
+                throw new ParamError("验证码已过期");
+            }
+            if (!captchaCode.equalsIgnoreCase(vo.getCaptchaCode())) {
+                deleteCaptcha(vo.getCaptchaId());
+                throw new ParamError("验证码错误");
+            }
         }
         if (StringUtils.isNotBlank(vo.getTenantId())) {
             Tenant tenant = tenantMapper.selectById(vo.getTenantId());
