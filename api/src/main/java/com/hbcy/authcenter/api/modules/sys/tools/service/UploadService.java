@@ -31,7 +31,8 @@ public class UploadService {
      * 小文件上报
      */
     public UploadResultDTO upload(MultipartFile file) {
-        String[] allowSuffix = {"jpg", "jpeg", "png", "pdf", "doc", "md", "docx", "ppt", "pptx", "xls", "xlsx", "sql"};
+        String[] allowSuffix = {"jpg", "jpeg", "svg", "png", "pdf", "doc", "md",
+                "docx", "ppt", "pptx", "xls", "xlsx", "sql", "txt"};
         String name = file.getOriginalFilename();
         String suffix = FileNameUtil.getSuffix(name);
         if (!Strings.CS.endsWithAny(suffix, allowSuffix)) {
