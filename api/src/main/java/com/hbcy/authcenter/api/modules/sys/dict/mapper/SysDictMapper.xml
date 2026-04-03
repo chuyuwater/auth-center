@@ -48,45 +48,46 @@
         UNION ALL
         SELECT sd.*
         FROM sys_dict sd
-        INNER JOIN recursive_dict rd ON sd.parent_id = rd.id
+                 INNER JOIN recursive_dict rd ON sd.parent_id = rd.id
         )
         SELECT
         <include refid="Base_Column_List"/>
         FROM recursive_dict
         where forbidden = 0
-        and delete_time = 0
+          and delete_time = 0
     </select>
 
     <insert id="append">
         insert into sys_dict (id, app_id, feat_code, value_str, value_cn, dict_type, parent_id, id_path,
-        forbidden, create_user, show_order)
+                              forbidden, create_user, update_user, show_order)
         select #{dict.id},
-        #{dict.appId},
-        #{dict.featCode},
-        #{dict.valueStr},
-        #{dict.valueCn},
-        #{dict.dictType},
-        #{dict.parentId},
-        #{dict.idPath},
-        #{dict.forbidden},
-        #{dict.createUser},
-        (SELECT COALESCE(MAX(show_order), 0) + 1
-        from sys_dict
-        where parent_id = #{dict.parentId})
+               #{dict.appId},
+               #{dict.featCode},
+               #{dict.valueStr},
+               #{dict.valueCn},
+               #{dict.dictType},
+               #{dict.parentId},
+               #{dict.idPath},
+               #{dict.forbidden},
+               #{dict.createUser},
+               #{dict.createUser},
+               (SELECT COALESCE(MAX(show_order), 0) + 1
+                from sys_dict
+                where parent_id = #{dict.parentId})
     </insert>
 
     <update id="updateIdPath">
         update sys_dict
         set id_path = replace(id_path, #{oldPath}, #{newPath})
         where id_path like concat(#{oldPath}, '%')
-        and delete_time = 0
+          and delete_time = 0
     </update>
 
     <update id="updateShowOrder">
         update sys_dict
         set show_order = show_order + 1
         where parent_id = #{parentId}
-        and show_order >= #{targetIdx}
-        and delete_time = 0
+          and show_order >= #{targetIdx}
+          and delete_time = 0
     </update>
 </mapper>
