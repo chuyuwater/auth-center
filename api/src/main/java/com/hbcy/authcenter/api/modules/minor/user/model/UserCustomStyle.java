@@ -21,7 +21,7 @@ public class UserCustomStyle {
     public static final String COL_SETTING = "setting";
     public static final String COL_USER_ID = "user_id";
     public static final String COL_CREATE_TIME = "create_time";
-    public static final String COL_UPTIME_TIME = "uptime_time";
+    public static final String COL_UPTIME_TIME = "update_time";
     /**
      * ulid
      */
@@ -45,6 +45,6 @@ public class UserCustomStyle {
     private String userId;
     @TableField(value = "create_time", fill = FieldFill.INSERT)
     private LocalDateTime createTime;
-    @TableField(value = "uptime_time", fill = FieldFill.INSERT_UPDATE)
+    @TableField(value = "update_time", fill = FieldFill.INSERT_UPDATE)
     private LocalDateTime updateTime;
 }

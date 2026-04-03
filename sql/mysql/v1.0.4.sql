@@ -6,7 +6,7 @@ create table if not exists user_custom_style
     setting     varchar(255)                       not null comment '用户设置',
     user_id     char(26)                           not null comment '用户',
     create_time datetime default CURRENT_TIMESTAMP not null,
-    uptime_time datetime default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP,
+    update_time datetime default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP,
     constraint ux_user_custom_style
         unique (user_id, item)
 ) comment '用户自定义页面风格';
