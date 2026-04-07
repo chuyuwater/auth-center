@@ -93,6 +93,7 @@
         <if test="vo.keyword != null and vo.keyword != ''">
             and u.real_name like concat('%', #{vo.keyword}, '%')
         </if>
+        order by puu.unit_id, puu.id
     </select>
 
     <select id="listGrantApps" resultType="com.hbcy.authcenter.api.modules.core.app.dto.GrantAppDTO">
