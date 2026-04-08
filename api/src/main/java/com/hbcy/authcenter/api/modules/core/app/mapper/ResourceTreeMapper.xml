@@ -80,56 +80,56 @@
             </if>
             <if test="vo.keyword != null and vo.keyword != ''">
                 and (
-                    name_cn like concat('%', #{vo.keyword}, '%')
-                        or custom_id like concat('%', #{vo.keyword}, '%')
-                        or id in (select res_id
-                                  from resource_perm
-                                  where app_id = #{vo.appId}
-                                    and (perm_name like concat('%', #{vo.keyword}, '%') or
-                                         perm_code like concat('%', #{vo.keyword}, '%')))
-                    )
+                name_cn like concat('%', #{vo.keyword}, '%')
+                or custom_id like concat('%', #{vo.keyword}, '%')
+                or id in (select res_id
+                from resource_perm
+                where app_id = #{vo.appId}
+                and (perm_name like concat('%', #{vo.keyword}, '%') or
+                perm_code like concat('%', #{vo.keyword}, '%')))
+                )
             </if>
         </where>
     </select>
 
     <insert id="append">
         insert into resource_tree (id, name_cn, app_id, custom_id, parent_id, id_path, res_type, client_type, icon,
-                                   route_link,
-                                   hidden, show_level, create_user, update_user,
-                                   show_order)
+        route_link,
+        hidden, show_level, create_user, update_user,
+        show_order)
         select #{entity.id},
-               #{entity.nameCn},
-               #{entity.appId},
-               #{entity.customId},
-               #{entity.parentId},
-               #{entity.idPath},
-               #{entity.resType},
-               #{entity.clientType},
-               #{entity.icon},
-               #{entity.routeLink},
-               #{entity.hidden},
-               #{entity.showLevel},
-               #{entity.createUser},
-               #{entity.updateUser},
-               (SELECT COALESCE(MAX(show_order), 0) + 1
-                from resource_tree
-                where parent_id = #{entity.parentId}
-                  and app_id = #{entity.appId})
+        #{entity.nameCn},
+        #{entity.appId},
+        #{entity.customId},
+        #{entity.parentId},
+        #{entity.idPath},
+        #{entity.resType},
+        #{entity.clientType},
+        #{entity.icon},
+        #{entity.routeLink},
+        #{entity.hidden},
+        #{entity.showLevel},
+        #{entity.createUser},
+        #{entity.updateUser},
+        (SELECT COALESCE(MAX(show_order), 0) + 1
+        from resource_tree
+        where parent_id = #{entity.parentId}
+        and app_id = #{entity.appId})
     </insert>
 
     <update id="updateIdPath">
         update resource_tree
         set id_path = replace(id_path, #{oldPath}, #{newPath})
         where app_id = #{appId}
-          and id_path like concat(#{oldPath}, '%')
+        and id_path like concat(#{oldPath}, '%')
     </update>
 
     <update id="updateShowOrder">
         update resource_tree
         set show_order = show_order + 1
         where app_id = #{appId}
-          and parent_id = #{parentId}
-          and show_order >= #{targetIdx}
+        and parent_id = #{parentId}
+        and show_order >= #{targetIdx}
     </update>
 
     <select id="listIdPath" resultType="java.lang.String">
@@ -156,24 +156,27 @@
 
     <select id="listOrderdMenu" resultMap="BaseResultMap">
         select rt.id,
-               rt.name_cn,
-               rt.app_id,
-               rt.custom_id,
-               rt.parent_id,
-               rt.id_path,
-               rt.client_type,
-               rt.res_type,
-               rt.icon,
-               rt.route_link,
-               rt.show_order
+        rt.name_cn,
+        rt.app_id,
+        rt.custom_id,
+        rt.parent_id,
+        rt.id_path,
+        rt.client_type,
+        rt.res_type,
+        rt.icon,
+        rt.route_link,
+        rt.show_order
         from resource_tree rt
-                 join app on rt.app_id = app.id
+        join app on rt.app_id = app.id
         <where>
             app.forbidden = 0
-              and app.delete_time = 0
-              and rt.hidden = 0
-            <if test="resType != null">
-                and rt.res_type = #{resType}
+            and app.delete_time = 0
+            and rt.hidden = 0
+            <if test="resTypes != null and resTypes.size() > 0">
+                and rt.res_type in
+                <foreach item="resType" collection="resTypes" separator="," open="(" close=")">
+                    #{resType}
+                </foreach>
             </if>
             and rt.id in
             <foreach collection="resIds" open="(" close=")" separator="," item="item">
@@ -195,27 +198,27 @@
         select COALESCE(MAX(show_order), 0)
         from resource_tree
         where parent_id = #{parentId}
-          and app_id = #{appId}
+        and app_id = #{appId}
     </select>
 
     <!--    todo: mysql only-->
     <insert id="autoUpsertMenu">
         insert into resource_tree (id, name_cn, app_id, custom_id, id_path, res_type, icon,
-                                   route_link, create_user, update_user)
+        route_link, create_user, update_user)
         values (#{menu.id},
-                #{menu.nameCn},
-                #{menu.appId},
-                #{menu.customId},
-                #{menu.idPath},
-                #{menu.resType},
-                #{menu.icon},
-                #{menu.routeLink},
-                #{menu.createUser},
-                #{menu.updateUser})
-        on duplicate key update name_cn    = #{menu.nameCn},
-                                icon=#{menu.icon},
-                                route_link=#{menu.routeLink},
-                                update_user=#{menu.updateUser},
-                                update_time=now()
+        #{menu.nameCn},
+        #{menu.appId},
+        #{menu.customId},
+        #{menu.idPath},
+        #{menu.resType},
+        #{menu.icon},
+        #{menu.routeLink},
+        #{menu.createUser},
+        #{menu.updateUser})
+        on duplicate key update name_cn = #{menu.nameCn},
+        icon=#{menu.icon},
+        route_link=#{menu.routeLink},
+        update_user=#{menu.updateUser},
+        update_time=now()
     </insert>
 </mapper>
