@@ -75,4 +75,10 @@ public interface ResourceTreeMapper extends BaseMapper<ResourceTree> {
      * @return 子节点最大show_order
      */
     Integer getMaxChildShowOrder(@Param("appId") String appId, @Param("parentId") String parentId);
+
+    /**
+     * 插入或更新菜单
+     * @param menu 菜单
+     */
+    void autoUpsertMenu(@Param("menu") ResourceTree menu);
 }

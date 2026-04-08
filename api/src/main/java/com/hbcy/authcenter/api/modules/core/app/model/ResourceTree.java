@@ -38,6 +38,7 @@ public class ResourceTree extends BaseEntity {
 
     public static final int RES_TYPE_MENU = 0;
     public static final int RES_TYPE_BUTTON = 1;
+    public static final int RES_TYPE_LINK = 2;
 
     @TableId(value = "id", type = IdType.ASSIGN_UUID)
     private String id;

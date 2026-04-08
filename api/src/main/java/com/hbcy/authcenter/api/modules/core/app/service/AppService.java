@@ -3,9 +3,12 @@ package com.hbcy.authcenter.api.modules.core.app.service;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.github.f4b6a3.ulid.UlidCreator;
 import com.hbcy.authcenter.api.common.bean.NodeMoveVO;
 import com.hbcy.authcenter.api.modules.core.app.dao.AppMapper;
+import com.hbcy.authcenter.api.modules.core.app.dao.ResourceTreeMapper;
 import com.hbcy.authcenter.api.modules.core.app.model.App;
+import com.hbcy.authcenter.api.modules.core.app.model.ResourceTree;
 import com.hbcy.authcenter.api.modules.core.app.vo.AppCreateVO;
 import com.hbcy.authcenter.api.modules.core.app.vo.AppForbiddenVO;
 import com.hbcy.authcenter.api.modules.core.app.vo.AppQueryVO;
@@ -40,6 +43,8 @@ import java.util.stream.Collectors;
 public class AppService extends ServiceImpl<AppMapper, App> {
     @Resource
     private TenantAppMapper tenantAppMapper;
+    @Resource
+    private ResourceTreeMapper resourceTreeMapper;
 
     private void checkNameExist(String nameCn) {
         App one = this.getOne(new QueryWrapper<App>().eq(App.COL_NAME_CN, nameCn), false);
@@ -48,6 +53,24 @@ public class AppService extends ServiceImpl<AppMapper, App> {
         }
     }
 
+    //当创建外部应用时，自动创建或更新一级菜单
+    private void autoUpsertMenu(App app) {
+        ResourceTree menu = new ResourceTree();
+        menu.setId(UlidCreator.getUlid().toString());
+        menu.setIdPath(menu.getId());
+        menu.setAppId(app.getId());
+        menu.setIcon(app.getIcon());
+        menu.setNameCn(app.getNameCn());
+        menu.setResType(ResourceTree.RES_TYPE_LINK);
+        menu.setCustomId(app.getId());
+        menu.setRouteLink(app.getAppUrl());
+        menu.setShowOrder(0);
+        menu.setCreateUser(UserContextUtils.getUserId());
+        menu.setUpdateUser(UserContextUtils.getUserId());
+        resourceTreeMapper.autoUpsertMenu(menu);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
     public App create(AppCreateVO vo) {
         if (getById(vo.getId()) != null) {
             throw new ParamError("应用编号已存在");
@@ -75,12 +98,16 @@ public class AppService extends ServiceImpl<AppMapper, App> {
         app.setUpdateUser(UserContextUtils.getUserId());
         try {
             baseMapper.append(app);
+            if (app.getAppType().equals(App.APP_TYPE_EXTERNAL)) {
+                autoUpsertMenu(app);
+            }
         } catch (DuplicateKeyException e) {
             throw new ParamError("应用id不能重复（含被删除的应用）");
         }
         return app;
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public App update(AppUpdateVO vo, String id) {
         App app = getById(id);
         if (app == null) {
@@ -95,7 +122,10 @@ public class AppService extends ServiceImpl<AppMapper, App> {
         app.setUpdateTime(LocalDateTime.now());
         app.setUpdateUser(UserContextUtils.getUserId());
         try {
-            this.updateById(app);
+            baseMapper.updateById(app);
+            if (app.getAppType().equals(App.APP_TYPE_EXTERNAL)) {
+                autoUpsertMenu(app);
+            }
         } catch (DuplicateKeyException e) {
             throw new ParamError("应用名称重复");
         }
@@ -167,6 +197,7 @@ public class AppService extends ServiceImpl<AppMapper, App> {
                 .eq(App.COL_ID, id)
                 .set(App.COL_UPDATE_USER, UserContextUtils.getUserId())
                 .set(App.COL_DELETE_TIME, System.currentTimeMillis())
+                .set(App.COL_FORBIDDEN, 1)
                 .set(App.COL_UPDATE_TIME, LocalDateTime.now()));
     }
 
