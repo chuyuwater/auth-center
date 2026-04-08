@@ -32,10 +32,10 @@ public class ResourceTreeUpdateVO {
     private String nameCn;
 
     /**
-     * 资源类型：0-页面，1-按钮
+     * 资源类型：0-页面，1-按钮, 2-外链
      */
     @JsonSetter(nulls = Nulls.SKIP)
-    @Range(min = 0, max = 1, message = "资源类型只能为0或1")
+    @Range(min = 0, max = 2, message = "资源类型只能为0/1/2")
     private Integer resType = 0;
     /**
      * 自定义菜单ID

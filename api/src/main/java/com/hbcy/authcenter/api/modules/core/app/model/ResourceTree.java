@@ -74,7 +74,7 @@ public class ResourceTree extends BaseEntity {
     private Integer clientType;
     /**
      * 资源类型
-     * 0-页面，1-按钮
+     * 0-页面，1-按钮，2-外链
      */
     @TableField(value = "res_type")
     private Integer resType;
