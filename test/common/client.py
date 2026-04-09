@@ -15,7 +15,7 @@ from typing import Any
 import requests
 from requests import Response
 
-from settings import ACCOUNTS, APP_ID, CAPTCHA_DIR, HOST, REQUEST_TIMEOUT
+from settings import ACCOUNTS, APP_ID, CAPTCHA_DIR, HOST, REQUEST_TIMEOUT, SPECIAL_CAPTCHA
 
 
 @dataclass(frozen=True)
@@ -72,7 +72,7 @@ class AuthCenterClient:
     def login(self, account: AccountConfig) -> SessionState:
         last_error: RuntimeError | None = None
         for attempt in range(2):
-            captcha = self.get_captcha(account.name)
+            captcha = self.resolve_captcha(account.name)
             payload = {
                 account.login_field: account.principal,
                 "password": account.password,
@@ -130,6 +130,11 @@ class AuthCenterClient:
             raise last_error
 
         raise last_error or RuntimeError(f"{account.name} 登录失败")
+
+    def resolve_captcha(self, account_name: str) -> dict[str, str]:
+        if SPECIAL_CAPTCHA:
+            return {"id": "SPECIAL_CAPTCHA", "code": SPECIAL_CAPTCHA}
+        return self.get_captcha(account_name)
 
     def logout(self, session_state: SessionState) -> None:
         response = self.request(

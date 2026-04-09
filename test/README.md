@@ -200,8 +200,10 @@ python3 portal/auth-center/test/run.py
 
 ## 验证码
 
-登录前会调用 `/api/portal/v1/auth/captcha` 获取验证码图片，并保存到：
+默认优先读取 [settings.py](/Users/tryao/hbcy/portal/auth-center/test/settings.py) 里的 `SPECIAL_CAPTCHA`。
 
+- 如果配置了 `SPECIAL_CAPTCHA`，测试会直接用这个固定验证码登录，不再调用 `/api/portal/v1/auth/captcha`。
+- 如果未配置 `SPECIAL_CAPTCHA`，才会调用 `/api/portal/v1/auth/captcha` 获取验证码图片，并保存到：
 - `portal/auth-center/test/.artifacts/captcha/`
 
-脚本会提示你手动输入验证码内容，再继续登录。
+此时脚本会提示你手动输入验证码内容，再继续登录。

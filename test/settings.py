@@ -8,6 +8,7 @@ CAPTCHA_DIR = ARTIFACT_DIR / "captcha"
 HOST = "https://portal-dev.chuyuwater.cn"
 APP_ID = "portal"
 REQUEST_TIMEOUT = 15
+SPECIAL_CAPTCHA = "SKIP"
 
 # 账号、组织和额外请求头集中放在这里维护。
 # 本项目当前存在两条测试线：
