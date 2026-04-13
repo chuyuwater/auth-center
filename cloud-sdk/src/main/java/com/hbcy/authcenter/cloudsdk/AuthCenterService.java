@@ -6,6 +6,7 @@ import com.hbcy.common.base.error.ClientError;
 import com.hbcy.common.base.error.ParamError;
 import com.hbcy.common.base.error.ServerError;
 import com.hbcy.common.base.pojo.ApiResponse;
+import com.hbcy.common.base.util.SpringUtils;
 import jakarta.annotation.Resource;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
@@ -21,8 +22,6 @@ import java.util.Map;
 public class AuthCenterService {
     @Resource
     private AuthCenterClient authCenterClient;
-    @Resource
-    private AuthCenterService authCenterService;
 
     @Cacheable(value = "@1m")
     public List<String> listGrantOrgs(String appId, String userId, String orgId, String permCode) {
@@ -54,7 +53,11 @@ public class AuthCenterService {
         String userId = UserContextUtils.getUserId();
         //检查用户是否有对应组织的设备操作权限
         try {
-            boolean ok = authCenterService.checkPerm(appId, userId, orgId, permCode);
+            AuthCenterService bean = SpringUtils.getBean(AuthCenterService.class);
+            if (bean == null) {
+                throw new ServerError("权限服务异常");
+            }
+            boolean ok = bean.checkPerm(appId, userId, orgId, permCode);
             if (!ok) {
                 throw new ParamError("无指定组织的设备权限");
             }
