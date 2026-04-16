@@ -10,6 +10,7 @@ COPY api ./api
 COPY gateway ./gateway
 COPY global ./global
 COPY sdk ./sdk
+COPY cloud-sdk ./cloud-sdk
 
 # 编译打包
 RUN mvn package -DskipTests
