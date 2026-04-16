@@ -61,4 +61,13 @@ public class DictService implements IDictService {
         }
         return fetchDict(dictCode);
     }
+
+    public List<SysDictDTO> getDictByFeatCode(String dictCode) {
+        ApiResponse<List<SysDictDTO>> resp = authCenterClient.listDictByFeatCode(dictCode, "");
+        if (resp.getStatus() != 0) {
+            log.error("fail to request portal-auth-center:{}", resp.getMsg());
+            throw new ServerError("字典服务错误:%s", resp.getMsg());
+        }
+        return resp.getData();
+    }
 }
