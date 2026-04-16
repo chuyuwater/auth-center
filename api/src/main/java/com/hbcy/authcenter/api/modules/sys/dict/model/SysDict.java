@@ -29,6 +29,7 @@ public class SysDict extends BaseEntity {
     public static final String COL_PARENT_ID = "parent_id";
     public static final String COL_ID_PATH = "id_path";
     public static final String COL_SHOW_ORDER = "show_order";
+    public static final String COL_MEMO = "memo";
     public static final String COL_FORBIDDEN = "forbidden";
     public static final String COL_CREATE_USER = "create_user";
     public static final String COL_UPDATE_USER = "update_user";
@@ -77,6 +78,8 @@ public class SysDict extends BaseEntity {
      */
     @TableField(value = "show_order")
     private Integer showOrder;
+    @TableField(value = "memo")
+    private String memo;
     @TableField(value = "forbidden")
     private Integer forbidden;
     @TableField(value = "create_user")
