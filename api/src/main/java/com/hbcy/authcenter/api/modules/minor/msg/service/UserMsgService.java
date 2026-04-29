@@ -173,6 +173,9 @@ public class UserMsgService extends ServiceImpl<UserMsgMapper, UserMsg> {
         if (userMsg == null) {
             return null;
         }
+        if (!userMsg.getTenantId().equals(UserContextUtils.getTenantId())) {
+            throw new PermissionError();
+        }
         String userId = UserContextUtils.getUserId();
         if (!UserContextUtils.isTenantAdmin() && !userMsg.getTargetUser().equals(userId)) {
             //确认用户确实有该消息的访问权限
