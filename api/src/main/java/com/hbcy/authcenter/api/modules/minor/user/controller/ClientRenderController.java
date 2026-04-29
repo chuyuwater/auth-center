@@ -19,6 +19,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
@@ -54,12 +55,22 @@ public class ClientRenderController {
     /**
      * 获取当前用户有权访问的app列表
      *
+     * @param clientType 1:PC端 2:移动端，默认PC端
      * @return app列表
      */
     @GetMapping("/app")
-    public List<AppCardDTO> listApp() {
+    public List<AppCardDTO> listApp(@RequestParam(defaultValue = "1") Integer clientType) {
         List<GrantAppDTO> apps = permUnitUserService.listApp(null, false);
-        return new ArrayList<>(apps);
+        Set<String> grantedAppIds = clientRenderService.listUserGrantedAppIds(
+                UserContextUtils.getUserId(), UserContextUtils.getUserOrg(), clientType
+        );
+        List<AppCardDTO> resp = new ArrayList<>();
+        for (GrantAppDTO app : apps) {
+            if (grantedAppIds.contains(app.getAppId())) {
+                resp.add(app);
+            }
+        }
+        return resp;
     }
 
     /**

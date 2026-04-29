@@ -96,6 +96,43 @@ public class ClientRenderService {
      * @return 菜单树
      */
     public List<TreeNode<ResourceTree>> listUserMenu(String userId, String orgId, int clientType, int maxDepth) {
+        List<ResourceTree> nodes = listUserGrantedMenus(userId, orgId, clientType, maxDepth);
+        if (CollectionUtils.isEmpty(nodes)) {
+            return List.of();
+        }
+        //虚拟根节点
+        TreeNode<ResourceTree> root = new TreeNode<>(new ResourceTree());
+        Map<String, List<ResourceTree>> children = new HashMap<>();
+        for (ResourceTree node : nodes) {
+            if (StringUtils.isBlank(node.getParentId())) {
+                //一级菜单
+                root.addChild(new TreeNode<>(node));
+            } else {
+                //其他菜单
+                children.computeIfAbsent(node.getParentId(), k -> new ArrayList<>()).add(node);
+            }
+        }
+        for (TreeNode<ResourceTree> node : root.getChildren()) {
+            buildResTree(node, children);
+        }
+        return root.getChildren();
+    }
+
+    public Set<String> listUserGrantedAppIds(String userId, String orgId, int clientType) {
+        List<ResourceTree> nodes = listUserGrantedMenus(userId, orgId, clientType, 0);
+        if (CollectionUtils.isEmpty(nodes)) {
+            return Set.of();
+        }
+        Set<String> appIds = new HashSet<>();
+        for (ResourceTree node : nodes) {
+            if (StringUtils.isNotBlank(node.getAppId())) {
+                appIds.add(node.getAppId());
+            }
+        }
+        return appIds;
+    }
+
+    private List<ResourceTree> listUserGrantedMenus(String userId, String orgId, int clientType, int maxDepth) {
         OrgTree org = orgTreeMapper.selectById(orgId);
         if (org == null) {
             return List.of();
@@ -118,25 +155,7 @@ public class ClientRenderService {
         vo.setClientTypes(clientTypes);
         vo.setShowLevels(showLevels);
         vo.setResIds(filteredResIds);
-        //应用之间的一级菜单按appId的show_order排序
-        //应用之内的菜单按resId的show_order排序
-        List<ResourceTree> nodes = resourceTreeMapper.listOrderdMenu(vo);
-        //虚拟根节点
-        TreeNode<ResourceTree> root = new TreeNode<>(new ResourceTree());
-        Map<String, List<ResourceTree>> children = new HashMap<>();
-        for (ResourceTree node : nodes) {
-            if (StringUtils.isBlank(node.getParentId())) {
-                //一级菜单
-                root.addChild(new TreeNode<>(node));
-            } else {
-                //其他菜单
-                children.computeIfAbsent(node.getParentId(), k -> new ArrayList<>()).add(node);
-            }
-        }
-        for (TreeNode<ResourceTree> node : root.getChildren()) {
-            buildResTree(node, children);
-        }
-        return root.getChildren();
+        return resourceTreeMapper.listOrderdMenu(vo);
     }
 
     private void buildResTree(TreeNode<ResourceTree> node, Map<String, List<ResourceTree>> children) {
