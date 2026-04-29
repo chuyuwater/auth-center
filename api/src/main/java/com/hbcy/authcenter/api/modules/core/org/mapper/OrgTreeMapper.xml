@@ -153,6 +153,9 @@
         and node_type = 0
         and forbidden = 0
         and delete_time = 0
+        <if test="parentIdPath != null and parentIdPath != ''">
+            and id_path like concat(#{parentIdPath}, '%')
+        </if>
     </select>
 
     <select id="listGrantOrgs" resultType="java.lang.String">

@@ -88,12 +88,12 @@ public class SDKService {
                 return List.of();
             }
             if (tenantApp.getGrantAll() > 0) {
-                return orgTreeMapper.getAllOrgIds(tenantId);
+                return orgTreeMapper.getAllOrgIds(tenantId, parentIdPath);
             }
             if (tenantAppResourceMapper.exists(new QueryWrapper<TenantAppResource>()
                     .in(TenantAppResource.COL_PERM_ID, permIds)
                     .eq(TenantAppResource.COL_TENANT_ID, tenantId))) {
-                return orgTreeMapper.getAllOrgIds(tenantId);
+                return orgTreeMapper.getAllOrgIds(tenantId, parentIdPath);
             }
             return List.of();
         }

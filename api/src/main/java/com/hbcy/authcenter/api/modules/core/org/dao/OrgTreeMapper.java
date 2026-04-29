@@ -90,9 +90,11 @@ public interface OrgTreeMapper extends BaseMapper<OrgTree> {
      * 获取所有组织id
      *
      * @param tenantId 租户id
+     * @param parentIdPath 父节点idPath，可为空
      * @return 组织id
      */
-    List<String> getAllOrgIds(@Param("tenantId") String tenantId);
+    List<String> getAllOrgIds(@Param("tenantId") String tenantId,
+                              @Param("parentIdPath") String parentIdPath);
 
 
     /**
