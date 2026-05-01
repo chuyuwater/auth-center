@@ -62,7 +62,5 @@
     <!--根日志配置-->
     <root>
         <appender-ref ref="console"/>
-        <appender-ref ref="serviceLog"/>
-        <appender-ref ref="errorLog"/>
     </root>
 </configuration>
