@@ -2,9 +2,13 @@ package com.hbcy.authcenter.api.modules.core.inner.controller;
 
 import com.hbcy.authcenter.api.modules.core.inner.service.SDKService;
 import com.hbcy.authcenter.api.modules.core.perm.service.PermUnitUserService;
+import com.hbcy.authcenter.api.modules.minor.msg.engine.MsgSendEngine;
+import com.hbcy.authcenter.api.modules.minor.msg.model.MsgScheme;
+import com.hbcy.authcenter.api.modules.minor.msg.service.MsgSchemeService;
 import com.hbcy.authcenter.api.modules.minor.msg.service.UserMsgService;
 import com.hbcy.authcenter.api.modules.minor.msg.vo.UserMsgCreateVO;
 import com.hbcy.authcenter.api.modules.minor.todo.service.UserTodoService;
+import com.hbcy.authcenter.sdk.feign.vo.SchemeSendVO;
 import com.hbcy.authcenter.sdk.feign.vo.TodoCreateVO;
 import com.hbcy.authcenter.sdk.feign.vo.TodoUpdateVO;
 import jakarta.annotation.Resource;
@@ -38,6 +42,12 @@ public class SDKController {
 
     @Resource
     private UserMsgService userMsgService;
+
+    @Resource
+    private MsgSchemeService msgSchemeService;
+
+    @Resource
+    private MsgSendEngine msgSendEngine;
 
     @Resource
     private UserTodoService userTodoService;
@@ -116,6 +126,27 @@ public class SDKController {
     @PostMapping("/msg")
     public void batchCreateMsg(@Valid @RequestBody UserMsgCreateVO vo) {
         userMsgService.batchCreateMsg(vo);
+    }
+
+    /**
+     * 通过方案编码发送消息
+     */
+    @PostMapping("/msg/send")
+    public com.hbcy.authcenter.sdk.feign.dto.SchemeSendResultDTO sendByScheme(@Valid @RequestBody SchemeSendVO vo) {
+        MsgScheme scheme = msgSchemeService.getBySchemeNo(vo.getSchemeNo());
+        if (scheme == null) {
+            throw new com.hbcy.common.base.error.ClientError("方案编码不存在");
+        }
+        com.hbcy.authcenter.api.modules.minor.msg.engine.SchemeSendResultDTO result =
+                msgSendEngine.sendByScheme(scheme, vo.getTargetUsers(),
+                        vo.getVariables(), vo.getJumpUrl(), vo.getOriginJson());
+        // 转换为sdk模块的DTO
+        com.hbcy.authcenter.sdk.feign.dto.SchemeSendResultDTO sdkResult =
+                new com.hbcy.authcenter.sdk.feign.dto.SchemeSendResultDTO();
+        sdkResult.setTotalCount(result.getTotalCount());
+        sdkResult.setSuccessCount(result.getSuccessCount());
+        sdkResult.setFailCount(result.getFailCount());
+        return sdkResult;
     }
 
     /**

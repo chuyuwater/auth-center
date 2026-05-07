@@ -2,6 +2,7 @@ package com.hbcy.authcenter.sdk.feign;
 
 import com.hbcy.authcenter.sdk.config.PortalFeignConfig;
 import com.hbcy.authcenter.sdk.feign.dto.OrgNodeDTO;
+import com.hbcy.authcenter.sdk.feign.dto.SchemeSendResultDTO;
 import com.hbcy.authcenter.sdk.feign.dto.SysDictDTO;
 import com.hbcy.authcenter.sdk.feign.dto.UserDetailDTO;
 import com.hbcy.authcenter.sdk.feign.vo.*;
@@ -169,6 +170,12 @@ public interface AuthCenterClient {
      */
     @PutMapping("/api/portal/v1/sdk/todo/update-state")
     ApiResponse<Object> updateTodoState(@RequestBody TodoUpdateVO vo);
+
+    /**
+     * 通过方案编码发送消息
+     */
+    @PostMapping("/api/portal/v1/sdk/msg/send")
+    ApiResponse<SchemeSendResultDTO> sendByScheme(@RequestBody SchemeSendVO vo);
 
     /**
      * 创建组织节点
