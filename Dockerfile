@@ -16,7 +16,7 @@ COPY cloud-sdk ./cloud-sdk
 RUN mvn package -DskipTests
 
 # 第二阶段：运行环境
-FROM dev.chuyuwater.cn:32003/cicd/openjdk:17
+FROM dev.chuyuwater.cn:32003/cicd/openjdk:17-v0.4.4
 
 # 设置工作目录
 WORKDIR /app
