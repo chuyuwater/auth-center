@@ -32,4 +32,4 @@ COPY --from=builder /app/api/target/*.jar app.jar
 EXPOSE 8080
 
 # 运行应用，可以被docker-compose.yaml或k8s中的启动参数覆盖
-ENTRYPOINT ["java", "-javaagent:/app/opentelemetry-javaagent.jar", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-javaagent:/app/opentelemetry-javaagent.jar", "-Dotel.traces.sampler=dynamic", "-Dotel.configuration.service.file=/app/otel-config.yaml", "-jar", "app.jar"]
